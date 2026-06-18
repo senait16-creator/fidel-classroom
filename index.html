@@ -75,7 +75,8 @@
             pointer-events: none;
         }
 
-        .subtitle { font-size: 15px; color: #64748b; margin-bottom: 24px; font-weight: 500; }
+        .main-title { font-size: 32px; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
+        .subtitle { font-size: 16px; color: #64748b; margin-bottom: 24px; font-weight: 500; }
         
         /* Premium Input Fields */
         input { 
@@ -219,8 +220,10 @@
 </head>
 <body>
 
+    <!-- SCREEN 1: AUTH SCREEN -->
     <div id="authScreen" class="app-card tricolor-frame">
-        <p class="subtitle" id="authSubtitle">Join your peers and master the Amharic Alphabet</p>
+        <h1 class="main-title">Fidel Classroom</h1>
+        <p class="subtitle" id="authSubtitle">Learn the Amharic Alphabet</p>
         
         <input type="email" id="email" placeholder="Email Address" autocomplete="email">
         <input type="password" id="password" placeholder="Password (min 6 characters)">
@@ -229,6 +232,7 @@
         <button class="btn-secondary" id="switchAuthBtn" onclick="switchMode()">Already registered? Log In</button>
     </div>
 
+    <!-- SCREEN 2: ONBOARDING SETUP SCREEN -->
     <div id="profileSetupScreen" class="app-card tricolor-frame" style="display: none;">
         <h2 class="welcome-title" style="color: var(--ethio-green); font-size: 26px; margin-bottom: 4px;">Set Up Profile!</h2>
         <p class="subtitle">Pick a student nickname and your badge</p>
@@ -248,6 +252,7 @@
         <button class="btn-primary" style="background: linear-gradient(135deg, var(--ethio-green), #0F7306);" onclick="saveProfileData()">Enter Classroom 🚀</button>
     </div>
 
+    <!-- SCREEN 3: STUDENT CLASSROOM DASHBOARD -->
     <div id="dashboard">
         <header>
             <div class="profile-header-meta">
@@ -304,6 +309,7 @@
         </div>
     </div>
 
+    <!-- POPUP DRAWER MODAL -->
     <div id="fidelModal" class="modal" onclick="closeModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <h3 class="modal-title" id="modalTitle">Letter Family</h3>
@@ -313,6 +319,7 @@
         </div>
     </div>
 
+    <!-- BRAINS / JAVASCRIPT LOGIC BLOCK -->
     <script>
         const SUPABASE_URL = "https://muisfipoyzkhznfdvnes.supabase.co"; 
         const SUPABASE_KEY = "sb_publishable_VBiJZB8TVM2CSl54aDPP0A_4aDXWb5i";
@@ -335,7 +342,7 @@
 
         function switchMode() {
             isSignUpMode = !isSignUpMode;
-            document.getElementById("authSubtitle").innerText = isSignUpMode ? "Join your peers and master the Amharic Alphabet" : "Log into your student profile";
+            document.getElementById("authSubtitle").innerText = isSignUpMode ? "Learn the Amharic Alphabet" : "Log into your student profile";
             document.getElementById("mainAuthBtn").innerText = isSignUpMode ? "Sign Up" : "Log In";
             document.getElementById("switchAuthBtn").innerText = isSignUpMode ? "Already registered? Log In" : "New student? Sign Up";
         }
@@ -439,4 +446,52 @@
             });
             const percent = cards.length > 0 ? Math.round((masteredLetters.length / cards.length) * 100) : 0;
             document.getElementById("progressBar").style.width = `${percent}%`;
-            document.getElementById
+            document.getElementById("progressText").innerText = `${percent}% Mastered`;
+        }
+
+        function openFidel(baseLetter, familyArray) {
+            activeBaseFidel = baseLetter;
+            document.getElementById("modalTitle").innerText = `"${baseLetter}" Family`;
+            const vowelRow = document.getElementById("vowelRow");
+            vowelRow.innerHTML = "";
+            familyArray.forEach((char, index) => {
+                const box = document.createElement('div');
+                box.className = 'vowel-box';
+                box.innerHTML = `${char}<span class="vowel-label">${standardVowels[index]}</span>`;
+                vowelRow.appendChild(box);
+            });
+            const masterBtn = document.getElementById("masterBtn");
+            masterBtn.innerText = masteredLetters.includes(baseLetter) ? "Mark Family as Incomplete" : "Mark Family as Learned";
+            masterBtn.style.background = masteredLetters.includes(baseLetter) ? "#e74c3c" : "#2ecc71";
+            masterBtn.onclick = () => toggleLetterMastery();
+            document.getElementById("fidelModal").style.display = "flex";
+        }
+
+        async function toggleLetterMastery() {
+            if (masteredLetters.includes(activeBaseFidel)) masteredLetters = masteredLetters.filter(item => item !== activeBaseFidel);
+            else masteredLetters.push(activeBaseFidel);
+
+            const { error } = await _supabase.from('user_progress').upsert({ user_id: currentUser.id, mastered_letters: masteredLetters }, { onConflict: 'user_id' });
+            if (error) alert("Sync failed: " + error.message);
+            else { renderUIProgressUpdates(); closeModal(null); }
+        }
+
+        function closeModal(event) {
+            if (!event || event.target === document.getElementById("fidelModal")) {
+                document.getElementById("fidelModal").style.display = "none";
+                activeBaseFidel = null;
+            }
+        }
+
+        async function logout() {
+            await _supabase.auth.signOut();
+            currentUser = null; masteredLetters = [];
+            document.getElementById("dashboard").style.display = "none";
+            document.getElementById("profileSetupScreen").style.display = "none";
+            document.getElementById("authScreen").style.display = "block";
+            document.getElementById("email").value = ""; document.getElementById("password").value = "";
+            document.getElementById("displayName").value = "";
+        }
+    </script>
+</body>
+</html>
