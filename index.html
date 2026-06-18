@@ -44,63 +44,146 @@
             100% { opacity: 1; transform: scale(1); }
         }
 
-        /* 3D Text & Drop Shadow Effect */
         /* New Dark Green Splash Screen Styling */
-.splash-screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #0F7306; /* Rich dark green */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    transition: opacity 0.5s ease-out, visibility 0.5s;
-}
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0F7306; /* Rich dark green */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out, visibility 0.5s;
+        }
 
-/* White animated splash text */
-.splash-title {
-    color: #FFFFFF;
-    font-size: 32px;
-    font-weight: 700;
-    text-align: center;
-    line-height: 1.3;
-    animation: bounceIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
+        /* White animated splash text */
+        .splash-title {
+            color: #FFFFFF;
+            font-size: 32px;
+            font-weight: 700;
+            text-align: center;
+            line-height: 1.3;
+            animation: bounceIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
 
-/* Updated Onboarding Screen: Light Warm Yellow Background */
-#profileSetupScreen.app-card {
-    background-color: #FFFDF0; /* Light yellow page tone */
-    box-shadow: var(--shadow-premium);
-    animation: bounceIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
+        /* Default generic Auth Card / App Card wrapper */
+        .app-card {
+            background: var(--card-neutral);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: var(--shadow-premium);
+            max-width: 420px;
+            margin: 40px auto;
+            text-align: center;
+        }
 
-/* Pigmented Tricolor Border Container for the White Card */
-.tricolor-box {
-    background: #FFFFFF; /* Pure white inner box */
-    border-radius: 24px; /* Soft round corners */
-    padding: 28px 20px;
-    margin-top: 16px;
-    position: relative;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.04);
-}
+        .auth-input-group {
+            margin-bottom: 16px;
+            text-align: left;
+        }
 
-/* Clean, multi-layered pigmented borders */
-.tricolor-box::before {
-    content: '';
-    position: absolute;
-    top: -4px; left: -4px; right: -4px; bottom: -4px;
-    border-radius: 28px;
-    padding: 4px; /* Border thickness */
-    background: linear-gradient(to right, #E8112D 33%, #FCD116 33%, #FCD116 66%, #128807 66%);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-            mask-composite: exclude;
-    pointer-events: none;
-}
+        .auth-input-group input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            margin-top: 6px;
+        }
+
+        /* Updated Onboarding Screen: Light Warm Yellow Background */
+        #profileSetupScreen.app-card {
+            background-color: #FFFDF0; /* Light yellow page tone */
+            box-shadow: var(--shadow-premium);
+            animation: bounceIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Pigmented Tricolor Border Container for the White Card */
+        .tricolor-box {
+            background: #FFFFFF; /* Pure white inner box */
+            border-radius: 24px; /* Soft round corners */
+            padding: 28px 20px;
+            margin-top: 16px;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+        }
+
+        /* Clean, multi-layered pigmented borders */
+        .tricolor-box::before {
+            content: '';
+            position: absolute;
+            top: -4px; left: -4px; right: -4px; bottom: -4px;
+            border-radius: 28px;
+            padding: 4px; /* Border thickness */
+            background: linear-gradient(to right, #E8112D 33%, #FCD116 33%, #FCD116 66%, #128807 66%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+                    mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        #displayName {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+
+        .avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .avatar-option {
+            background: #f8fafc;
+            border: 2px solid transparent;
+            border-radius: 16px;
+            padding: 12px;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .avatar-option.selected {
+            border-color: var(--ethio-green);
+            background: #e8f4fd;
+        }
+
+        .avatar-label {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #64748b;
+            border: none;
+            margin-top: 12px;
+            cursor: pointer;
+            font-size: 14px;
+        }
 
         /* Classroom Dashboard View Style Rules */
         #dashboard { display: none; max-width: 500px; margin: 0 auto; }
@@ -173,186 +256,11 @@
         .vowel-label { font-size: 11px; color: #64748b; margin-top: 4px; font-family: sans-serif !important; }
     </style>
 </head>
-<!-- Add this right at the start of your <body> -->
-<div id="splashScreen" class="splash-screen">
-    <h2 class="splash-title">Welcome to the<br>Fidel Classroom!</h2>
-</div>
+<body>
 
-<!-- Find your #profileSetupScreen div and update its inner structure to look like this -->
-<div id="profileSetupScreen" class="app-card" style="display: none;">
-    <h2 class="welcome-title" style="color: #128807; text-shadow: none;">Set Up Profile!</h2>
-    <p class="subtitle">Pick a student nickname and your badge</p>
-    
-    <!-- The white card wrapped in the tricolor border -->
-    <div class="tricolor-box">
-        <input type="text" id="displayName" placeholder="Enter your name / nickname">
-        
-        <div class="avatar-grid">
-            <div class="avatar-option selected" onclick="selectAvatar('🦁', this)">🦁<span class="avatar-label">አንበሳ</span></div>
-            <div class="avatar-option" onclick="selectAvatar('🐆', this)">🐆<span class="avatar-label">ነብር</span></div>
-            <div class="avatar-option" onclick="selectAvatar('🐘', this)">🐘<span class="avatar-label">ዝሆን</span></div>
-            <div class="avatar-option" onclick="selectAvatar('☕', this)">☕<span class="avatar-label">ቡና</span></div>
-            <div class="avatar-option" onclick="selectAvatar('🫖', this)">🫖<span class="avatar-label">ጀበና</span></div>
-            <div class="avatar-option" onclick="selectAvatar('🌼', this)">🌼<span class="avatar-label">አደይ አበባ</span></div>
-        </div>
-
-        <button class="btn-primary" style="background: linear-gradient(135deg, #128807, #0F7306);" onclick="saveProfileData()">Enter Classroom 🚀</button>
+    <div id="splashScreen" class="splash-screen">
+        <h2 class="splash-title">Welcome to the<br>Fidel Classroom!</h2>
     </div>
-</div>
 
-        function switchMode() {
-            isSignUpMode = !isSignUpMode;
-            document.getElementById("authTitle").innerHTML = isSignUpMode ? "Welcome to the<br>Fidel Classroom!" : "Welcome Back";
-            document.getElementById("authSubtitle").innerText = isSignUpMode ? "Join your peers and master the Amharic Alphabet" : "Log into your profile";
-            document.getElementById("mainAuthBtn").innerText = isSignUpMode ? "Sign Up" : "Log In";
-            document.getElementById("switchAuthBtn").innerText = isSignUpMode ? "Already have a profile? Log In" : "New student? Create a profile";
-        }
-
-        async function handleAuth() {
-            const email = document.getElementById("email").value.trim();
-            const password = document.getElementById("password").value;
-
-            if (!email || !password) return alert("Please enter both fields.");
-
-            if (isSignUpMode) {
-                const { data, error } = await _supabase.auth.signUp({ email, password });
-                if (error) return alert("Sign Up Error: " + error.message);
-                
-                if (data?.user) {
-                    currentUser = data.user;
-                    document.getElementById("studentEmail").innerText = currentUser.email;
-                    
-                    document.getElementById("authScreen").style.display = "none";
-                    document.getElementById("dashboard").style.display = "none";
-                    document.getElementById("profileSetupScreen").style.display = "block";
-                }
-            } else {
-                const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
-                if (error) return alert("Login Error: " + error.message);
-                if (data?.user) checkUserProfileStatus(data.user);
-            }
-        }
-
-        async function checkUserProfileStatus(user) {
-            currentUser = user;
-            document.getElementById("studentEmail").innerText = user.email;
-
-            const { data: profile, error } = await _supabase
-                .from('profiles')
-                .select('display_name, avatar_character')
-                .eq('id', user.id)
-                .maybeSingle();
-
-            if (profile && profile.display_name) {
-                enterClassroomDashboard(profile.display_name, profile.avatar_character);
-            } else {
-                document.getElementById("authScreen").style.display = "none";
-                document.getElementById("dashboard").style.display = "none";
-                document.getElementById("profileSetupScreen").style.display = "block";
-            }
-        }
-
-        function selectAvatar(symbol, element) {
-            selectedAvatarSymbol = symbol;
-            document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
-            element.classList.add('selected');
-        }
-
-        async function saveProfileData() {
-            const nameInput = document.getElementById("displayName").value.trim();
-            if (!nameInput) return alert("Please provide a nickname or display name.");
-
-            const { error } = await _supabase
-                .from('profiles')
-                .upsert({
-                    id: currentUser.id,
-                    display_name: nameInput,
-                    avatar_character: selectedAvatarSymbol
-                });
-
-            if (error) return alert("Error saving profile details: " + error.message);
-
-            enterClassroomDashboard(nameInput, selectedAvatarSymbol);
-        }
-
-        async function enterClassroomDashboard(name, avatar) {
-            document.getElementById("displayUserHeader").innerText = name;
-            document.getElementById("displayAvatarHeader").innerText = avatar;
-
-            document.getElementById("authScreen").style.display = "none";
-            document.getElementById("profileSetupScreen").style.display = "none";
-            document.getElementById("dashboard").style.display = "block";
-            
-            await fetchUserProgress();
-        }
-
-        async function fetchUserProgress() {
-            if (!currentUser) return;
-            const { data, error } = await _supabase
-                .from('user_progress')
-                .select('mastered_letters')
-                .eq('user_id', currentUser.id)
-                .maybeSingle();
-
-            if (data && data.mastered_letters) masteredLetters = data.mastered_letters;
-            renderUIProgressUpdates();
-        }
-
-        function renderUIProgressUpdates() {
-            const cards = document.querySelectorAll('.fidel-card');
-            cards.forEach(card => {
-                const letter = card.getAttribute('data-fidel');
-                if (masteredLetters.includes(letter)) card.classList.add('completed');
-                else card.classList.remove('completed');
-            });
-            const percent = cards.length > 0 ? Math.round((masteredLetters.length / cards.length) * 100) : 0;
-            document.getElementById("progressBar").style.width = `${percent}%`;
-            document.getElementById("progressText").innerText = `${percent}% Mastered`;
-        }
-
-        function openFidel(baseLetter, familyArray) {
-            activeBaseFidel = baseLetter;
-            document.getElementById("modalTitle").innerText = `"${baseLetter}" Family`;
-            const vowelRow = document.getElementById("vowelRow");
-            vowelRow.innerHTML = "";
-            familyArray.forEach((char, index) => {
-                const box = document.createElement('div');
-                box.className = 'vowel-box';
-                box.innerHTML = `${char}<span class="vowel-label">${standardVowels[index]}</span>`;
-                vowelRow.appendChild(box);
-            });
-            const masterBtn = document.getElementById("masterBtn");
-            masterBtn.innerText = masteredLetters.includes(baseLetter) ? "Mark Family as Incomplete" : "Mark Family as Learned";
-            masterBtn.style.background = masteredLetters.includes(baseLetter) ? "#e74c3c" : "#2ecc71";
-            masterBtn.onclick = () => toggleLetterMastery();
-            document.getElementById("fidelModal").style.display = "flex";
-        }
-
-        async function toggleLetterMastery() {
-            if (masteredLetters.includes(activeBaseFidel)) masteredLetters = masteredLetters.filter(item => item !== activeBaseFidel);
-            else masteredLetters.push(activeBaseFidel);
-
-            const { error } = await _supabase.from('user_progress').upsert({ user_id: currentUser.id, mastered_letters: masteredLetters }, { onConflict: 'user_id' });
-            if (error) alert("Sync failed: " + error.message);
-            else { renderUIProgressUpdates(); closeModal(null); }
-        }
-
-        function closeModal(event) {
-            if (!event || event.target === document.getElementById("fidelModal")) {
-                document.getElementById("fidelModal").style.display = "none";
-                activeBaseFidel = null;
-            }
-        }
-
-        async function logout() {
-            await _supabase.auth.signOut();
-            currentUser = null; masteredLetters = [];
-            document.getElementById("dashboard").style.display = "none";
-            document.getElementById("profileSetupScreen").style.display = "none";
-            document.getElementById("authScreen").style.display = "block";
-            document.getElementById("email").value = ""; document.getElementById("password").value = "";
-            document.getElementById("displayName").value = "";
-        }
-    </script>
-</body>
-</html>
+    <div id="authScreen" class="app-card" style="display: none;">
+        <h2 id="authTitle" style="margin-bottom: 8px; color: var(--ethio-green);">
