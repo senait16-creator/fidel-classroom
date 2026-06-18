@@ -150,6 +150,7 @@
         /* Classroom Dashboard View Style Rules */
         #dashboard { display: none; max-width: 500px; margin: 0 auto; width: 100%; }
         
+        /* Updated Top Left Stack Layout for Header */
         header { 
             background: rgba(255, 255, 255, 0.92); 
             backdrop-filter: blur(10px);
@@ -157,16 +158,36 @@
             padding: 16px; 
             border-radius: 16px; 
             box-shadow: 0 4px 12px rgba(0,0,0,0.03); 
-            text-align: center; 
             margin-bottom: 20px; 
             position: sticky; 
             top: env(safe-area-inset-top); 
             z-index: 10; 
         }
         
-        .profile-header-meta { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 6px; }
-        .user-avatar-badge { width: 36px; height: 36px; background: #e8f4fd; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-        header h1 { font-size: 20px; color: #2c3e50; }
+        .profile-header-meta { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: flex-start; /* Aligns content straight to the top left */
+            gap: 4px; 
+            margin-bottom: 12px; 
+        }
+        .user-avatar-badge { 
+            width: 44px; 
+            height: 44px; 
+            background: #f8fafc; 
+            border: 1px solid #e2e8f0;
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 24px; 
+        }
+        header h1 { 
+            font-size: 18px; 
+            color: var(--text-dark); 
+            font-weight: 700;
+        }
+        
         .progress-container { width: 100%; background: #edf2f7; border-radius: 20px; height: 12px; overflow: hidden; margin: 8px 0; }
         .progress-bar { height: 100%; width: 0%; background: #2ecc71; transition: width 0.4s ease; }
         .user-meta { display: flex; justify-content: space-between; font-size: 13px; color: #718096; margin-top: 4px; }
@@ -205,7 +226,19 @@
             box-shadow: 0 8px 24px rgba(0,0,0,0.2); 
             z-index: 100; 
         }
-        .zoom-link { background: #2980b9; color: #fff; text-decoration: none; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: bold; }
+        .zoom-link-header { 
+            align-self: flex-end;
+            margin-top: -48px;
+            background: #2980b9; 
+            color: #fff; 
+            text-decoration: none; 
+            padding: 8px 14px; 
+            border-radius: 8px; 
+            font-size: 13px; 
+            font-weight: bold;
+            float: right;
+        }
+        .header-top-row { width: 100%; display: flex; justify-content: space-between; align-items: flex-start; }
         .logout-btn { background: transparent; color: #e74c3c; border: none; font-size: 14px; font-weight: bold; cursor: pointer; }
 
         /* Drawer Overlay Modals */
@@ -255,10 +288,15 @@
     <!-- SCREEN 3: STUDENT CLASSROOM DASHBOARD -->
     <div id="dashboard">
         <header>
-            <div class="profile-header-meta">
-                <div class="user-avatar-badge" id="displayAvatarHeader">🦁</div>
-                <h1 id="displayUserHeader">የአማርኛ ፊደል መማሪያ</h1>
+            <div class="header-top-row">
+                <div class="profile-header-meta">
+                    <!-- Photo/Avatar is aligned straight above the name/nickname stack -->
+                    <div class="user-avatar-badge" id="displayAvatarHeader">🦁</div>
+                    <h1 id="displayUserHeader">Student Name</h1>
+                </div>
+                <a href="YOUR_ZOOM_LINK_HERE" target="_blank" class="zoom-link-header">📞 Live Zoom</a>
             </div>
+            
             <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
             <div class="user-meta">
                 <span id="studentEmail">student@email.com</span>
@@ -305,7 +343,6 @@
 
         <div class="bottom-banner">
             <button class="logout-btn" onclick="logout()">Log Out</button>
-            <a href="YOUR_ZOOM_LINK_HERE" target="_blank" class="zoom-link">📞 Join Live Zoom</a>
         </div>
     </div>
 
