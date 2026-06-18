@@ -28,9 +28,9 @@
         body { 
             background-color: var(--bg-neutral); 
             color: var(--text-dark); 
-            padding: 24px; 
+            padding: 16px; 
             padding-bottom: calc(80px + env(safe-area-inset-bottom)); 
-            padding-top: calc(24px + env(safe-area-inset-top));
+            padding-top: calc(16px + env(safe-area-inset-top));
             -webkit-user-select: none;
             user-select: none;
             -webkit-overflow-scrolling: touch;
@@ -51,7 +51,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #018701; /* Rich dark green */
+            background-color: #0F7306; /* Rich dark green */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -263,4 +263,266 @@
     </div>
 
     <div id="authScreen" class="app-card" style="display: none;">
-        <h2 id="authTitle" style="margin-bottom: 8px; color: var(--ethio-green);">
+        <h2 id="authTitle" style="margin-bottom: 8px; color: var(--ethio-green);">Welcome to the<br>Fidel Classroom!</h2>
+        <p id="authSubtitle" style="color: #64748b; font-size: 14px; margin-bottom: 24px;">Join your peers and master the Amharic Alphabet</p>
+        
+        <div class="auth-input-group">
+            <label style="font-weight: bold; font-size: 14px;">Email Address</label>
+            <input type="email" id="email" placeholder="student@school.com">
+        </div>
+        <div class="auth-input-group" style="margin-bottom: 24px;">
+            <label style="font-weight: bold; font-size: 14px;">Password</label>
+            <input type="password" id="password" placeholder="••••••••">
+        </div>
+
+        <button id="mainAuthBtn" class="btn-primary" style="background: var(--ethio-green);" onclick="handleAuth()">Sign Up</button>
+        <button id="switchAuthBtn" class="btn-secondary" onclick="switchMode()">Already have a profile? Log In</button>
+    </div>
+
+    <div id="profileSetupScreen" class="app-card" style="display: none;">
+        <h2 style="color: #128807; margin-bottom: 4px;">Set Up Profile!</h2>
+        <p style="color: #64748b; font-size: 14px;">Pick a student nickname and your badge</p>
+        
+        <div class="tricolor-box">
+            <input type="text" id="displayName" placeholder="Enter your name / nickname">
+            
+            <div class="avatar-grid">
+                <div class="avatar-option selected" onclick="selectAvatar('🦁', this)">🦁<span class="avatar-label">አንበሳ</span></div>
+                <div class="avatar-option" onclick="selectAvatar('🐆', this)">🐆<span class="avatar-label">ነብር</span></div>
+                <div class="avatar-option" onclick="selectAvatar('🐘', this)">🐘<span class="avatar-label">ዝሆን</span></div>
+                <div class="avatar-option" onclick="selectAvatar('☕', this)">☕<span class="avatar-label">ቡና</span></div>
+                <div class="avatar-option" onclick="selectAvatar('🫖', this)">🫖<span class="avatar-label">ጀበና</span></div>
+                <div class="avatar-option" onclick="selectAvatar('🌼', this)">🌼<span class="avatar-label">አደይ አበባ</span></div>
+            </div>
+
+            <button class="btn-primary" style="background: linear-gradient(135deg, #128807, #0F7306);" onclick="saveProfileData()">Enter Classroom 🚀</button>
+        </div>
+    </div>
+
+    <div id="dashboard">
+        <header>
+            <div class="profile-header-meta">
+                <div id="displayAvatarHeader" class="user-avatar-badge">🦁</div>
+                <h1 id="displayUserHeader">Student</h1>
+            </div>
+            <div class="progress-container">
+                <div id="progressBar" class="progress-bar"></div>
+            </div>
+            <div class="user-meta">
+                <span id="progressText">0% Mastered</span>
+                <span id="studentEmail">student@email.com</span>
+            </div>
+        </header>
+
+        <div class="fidel-grid">
+            <div class="fidel-card" data-fidel="ሀ" onclick="openFidel('ሀ', ['ሀ','ሁ','ሂ','ሃ','ሄ','ህ','ሆ'])">ሀ</div>
+            <div class="fidel-card" data-fidel="ለ" onclick="openFidel('ለ', ['ለ','ሉ','ሊ','ላ','ሌ','ል','ሎ'])">ለ</div>
+            <div class="fidel-card" data-fidel="ሐ" onclick="openFidel('ሐ', ['ሐ','ሑ','ሒ','ሓ','ሔ','ሕ','ሖ'])">ሐ</div>
+            <div class="fidel-card" data-fidel="መ" onclick="openFidel('መ', ['መ','ሙ','ሚ','ማ','ሜ','ም','ሞ'])">መ</div>
+        </div>
+
+        <div class="bottom-banner">
+            <button class="logout-btn" onclick="logout()">Leave Class</button>
+            <a href="https://zoom.us" target="_blank" class="zoom-link">Join Live Zoom 🎥</a>
+        </div>
+    </div>
+
+    <div id="fidelModal" class="modal" onclick="closeModal(event)">
+        <div class="modal-content">
+            <h3 id="modalTitle" class="modal-title">Family</h3>
+            <div id="vowelRow" class="vowel-row"></div>
+            <button id="masterBtn" class="btn-primary" style="background: #2ecc71;">Mark as Learned</button>
+        </div>
+    </div>
+
+    <script>
+        // Replace these placeholder strings with your actual real Supabase Project Credentials!
+        const _supabaseUrl = "https://your-project-url.supabase.co";
+        const _supabaseKey = "your-anon-key-here";
+        const _supabase = supabase.createClient(_supabaseUrl, _supabaseKey);
+
+        let currentUser = null;
+        let masteredLetters = [];
+        let activeBaseFidel = null;
+        let selectedAvatarSymbol = "🦁";
+        let isSignUpMode = true;
+
+        const standardVowels = ["ä", "u", "i", "a", "e", "ə", "o"];
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            // 1. Splash screen animation delay timer (3 seconds)
+            setTimeout(() => {
+                const splash = document.getElementById("splashScreen");
+                if (splash) {
+                    splash.style.opacity = "0";
+                    setTimeout(() => {
+                        splash.style.visibility = "hidden";
+                    }, 500);
+                }
+            }, 3000);
+
+            // 2. Clear background authorization check
+            const { data: { session }, error } = await _supabase.auth.getSession();
+            if (session?.user) {
+                checkUserProfileStatus(session.user);
+            } else {
+                document.getElementById("authScreen").style.display = "block";
+            }
+        });
+
+        function switchMode() {
+            isSignUpMode = !isSignUpMode;
+            document.getElementById("authTitle").innerHTML = isSignUpMode ? "Welcome to the<br>Fidel Classroom!" : "Welcome Back";
+            document.getElementById("authSubtitle").innerText = isSignUpMode ? "Join your peers and master the Amharic Alphabet" : "Log into your profile";
+            document.getElementById("mainAuthBtn").innerText = isSignUpMode ? "Sign Up" : "Log In";
+            document.getElementById("switchAuthBtn").innerText = isSignUpMode ? "Already have a profile? Log In" : "New student? Create a profile";
+        }
+
+        async function handleAuth() {
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value;
+
+            if (!email || !password) return alert("Please enter both fields.");
+
+            if (isSignUpMode) {
+                const { data, error } = await _supabase.auth.signUp({ email, password });
+                if (error) return alert("Sign Up Error: " + error.message);
+                
+                if (data?.user) {
+                    currentUser = data.user;
+                    document.getElementById("studentEmail").innerText = currentUser.email;
+                    
+                    document.getElementById("authScreen").style.display = "none";
+                    document.getElementById("dashboard").style.display = "none";
+                    document.getElementById("profileSetupScreen").style.display = "block";
+                }
+            } else {
+                const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+                if (error) return alert("Login Error: " + error.message);
+                if (data?.user) checkUserProfileStatus(data.user);
+            }
+        }
+
+        async function checkUserProfileStatus(user) {
+            currentUser = user;
+            document.getElementById("studentEmail").innerText = user.email;
+
+            const { data: profile, error } = await _supabase
+                .from('profiles')
+                .select('display_name, avatar_character')
+                .eq('id', user.id)
+                .maybeSingle();
+
+            if (profile && profile.display_name) {
+                enterClassroomDashboard(profile.display_name, profile.avatar_character);
+            } else {
+                document.getElementById("authScreen").style.display = "none";
+                document.getElementById("dashboard").style.display = "none";
+                document.getElementById("profileSetupScreen").style.display = "block";
+            }
+        }
+
+        function selectAvatar(symbol, element) {
+            selectedAvatarSymbol = symbol;
+            document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+
+        async function saveProfileData() {
+            const nameInput = document.getElementById("displayName").value.trim();
+            if (!nameInput) return alert("Please provide a nickname or display name.");
+
+            const { error } = await _supabase
+                .from('profiles')
+                .upsert({
+                    id: currentUser.id,
+                    display_name: nameInput,
+                    avatar_character: selectedAvatarSymbol
+                });
+
+            if (error) return alert("Error saving profile details: " + error.message);
+
+            enterClassroomDashboard(nameInput, selectedAvatarSymbol);
+        }
+
+        async function enterClassroomDashboard(name, avatar) {
+            document.getElementById("displayUserHeader").innerText = name;
+            document.getElementById("displayAvatarHeader").innerText = avatar;
+
+            document.getElementById("authScreen").style.display = "none";
+            document.getElementById("profileSetupScreen").style.display = "none";
+            document.getElementById("dashboard").style.display = "block";
+            
+            await fetchUserProgress();
+        }
+
+        async function fetchUserProgress() {
+            if (!currentUser) return;
+            const { data, error } = await _supabase
+                .from('user_progress')
+                .select('mastered_letters')
+                .eq('user_id', currentUser.id)
+                .maybeSingle();
+
+            if (data && data.mastered_letters) masteredLetters = data.mastered_letters;
+            renderUIProgressUpdates();
+        }
+
+        function renderUIProgressUpdates() {
+            const cards = document.querySelectorAll('.fidel-card');
+            cards.forEach(card => {
+                const letter = card.getAttribute('data-fidel');
+                if (masteredLetters.includes(letter)) card.classList.add('completed');
+                else card.classList.remove('completed');
+            });
+            const percent = cards.length > 0 ? Math.round((masteredLetters.length / cards.length) * 100) : 0;
+            document.getElementById("progressBar").style.width = `${percent}%`;
+            document.getElementById("progressText").innerText = `${percent}% Mastered`;
+        }
+
+        function openFidel(baseLetter, familyArray) {
+            activeBaseFidel = baseLetter;
+            document.getElementById("modalTitle").innerText = `"${baseLetter}" Family`;
+            const vowelRow = document.getElementById("vowelRow");
+            vowelRow.innerHTML = "";
+            familyArray.forEach((char, index) => {
+                const box = document.createElement('div');
+                box.className = 'vowel-box';
+                box.innerHTML = `${char}<span class="vowel-label">${standardVowels[index]}</span>`;
+                vowelRow.appendChild(box);
+            });
+            const masterBtn = document.getElementById("masterBtn");
+            masterBtn.innerText = masteredLetters.includes(baseLetter) ? "Mark Family as Incomplete" : "Mark Family as Learned";
+            masterBtn.style.background = masteredLetters.includes(baseLetter) ? "#e74c3c" : "#2ecc71";
+            masterBtn.onclick = () => toggleLetterMastery();
+            document.getElementById("fidelModal").style.display = "flex";
+        }
+
+        async function toggleLetterMastery() {
+            if (masteredLetters.includes(activeBaseFidel)) masteredLetters = masteredLetters.filter(item => item !== activeBaseFidel);
+            else masteredLetters.push(activeBaseFidel);
+
+            const { error } = await _supabase.from('user_progress').upsert({ user_id: currentUser.id, mastered_letters: masteredLetters }, { onConflict: 'user_id' });
+            if (error) alert("Sync failed: " + error.message);
+            else { renderUIProgressUpdates(); closeModal(null); }
+        }
+
+        function closeModal(event) {
+            if (!event || event.target === document.getElementById("fidelModal")) {
+                document.getElementById("fidelModal").style.display = "none";
+                activeBaseFidel = null;
+            }
+        }
+
+        async function logout() {
+            await _supabase.auth.signOut();
+            currentUser = null; masteredLetters = [];
+            document.getElementById("dashboard").style.display = "none";
+            document.getElementById("profileSetupScreen").style.display = "none";
+            document.getElementById("authScreen").style.display = "block";
+            document.getElementById("email").value = ""; document.getElementById("password").value = "";
+            document.getElementById("displayName").value = "";
+        }
+    </script>
+</body>
+</html>
