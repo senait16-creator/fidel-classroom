@@ -6,9 +6,10 @@ const SUPABASE_KEY = "sb_publishable_VBiJZB8TVM2CSl54aDPP0A_4aDXWb5i";
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Fidel Classroom</title>
-    <!-- Import web-safe Amharic font and Supabase SDK -->
-    <link href="https://googleapis.com" rel="stylesheet">
-    <script src="https://jsdelivr.net"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { box-sizing: border-box; font-family: 'Noto Sans Ethiopic', sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { background-color: #f5f7fb; color: #1a1a1a; padding: 16px; padding-bottom: 80px; }
@@ -47,13 +48,12 @@ const SUPABASE_KEY = "sb_publishable_VBiJZB8TVM2CSl54aDPP0A_4aDXWb5i";
         .modal-content { background: #fff; padding: 24px; border-radius: 20px; width: 100%; max-width: 360px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         .modal-title { font-size: 22px; color: #2c3e50; margin-bottom: 16px; }
         .vowel-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 20px; }
-        .vowel-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 0; font-size: 16px; font-weight: bold; }
+        .vowel-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 0; font-size: 16px; font-weight: bold; display: flex; flex-direction: column; align-items: center; }
         .vowel-label { font-size: 11px; color: #64748b; margin-top: 4px; font-family: sans-serif; }
     </style>
 </head>
 <body>
 
-    <!-- SECTION 1: AUTHENTICATION MODULE -->
     <div id="authScreen" class="auth-container">
         <h2 id="authTitle">Create Student Profile</h2>
         <p id="authSubtitle">Join the Amharic Fidel classroom</p>
@@ -63,7 +63,6 @@ const SUPABASE_KEY = "sb_publishable_VBiJZB8TVM2CSl54aDPP0A_4aDXWb5i";
         <button class="btn-secondary" id="switchAuthBtn" onclick="switchMode()">Already have a profile? Log In</button>
     </div>
 
-    <!-- SECTION 2: STUDENT CLASSROOM DASHBOARD -->
     <div id="dashboard">
         <header>
             <h1>የአማርኛ ፊደል መማሪያ</h1>
@@ -75,41 +74,40 @@ const SUPABASE_KEY = "sb_publishable_VBiJZB8TVM2CSl54aDPP0A_4aDXWb5i";
         </header>
 
         <main class="fidel-grid" id="fidelGrid">
-            <!-- All 34 Core Base Characters -->
-            <div class="fidel-card" onclick="openFidel('ሀ', ['ሀ','ሁ','ሂ','ሃ','ሄ','ህ','ሆ'])">ሀ</div>
-            <div class="fidel-card" onclick="openFidel('ለ', ['ለ','ሉ','ሊ','ላ','ሌ','ል','ሎ'])">ለ</div>
-            <div class="fidel-card" onclick="openFidel('ሐ', ['ሐ','ሑ','ሒ','ሓ','ሔ','ሕ','ሖ'])">ሐ</div>
-            <div class="fidel-card" onclick="openFidel('መ', ['መ','ሙ','ሚ','ማ','ሜ','ም','ሞ'])">መ</div>
-            <div class="fidel-card" onclick="openFidel('ሠ', ['ሠ','ሡ','ሢ','ሣ','ሤ','ሥ','ሦ'])">ሠ</div>
-            <div class="fidel-card" onclick="openFidel('ረ', ['ረ','ሩ','ሪ','ራ','ሬ','ር','ሮ'])">ረ</div>
-            <div class="fidel-card" onclick="openFidel('ሰ', ['ሰ','ሱ','ሲ','ሳ','ሴ','ስ','ሶ'])">ሰ</div>
-            <div class="fidel-card" onclick="openFidel('ሸ', ['ሸ','ሹ','ሺ','ሻ','ሼ','ሽ','ሾ'])">ሸ</div>
-            <div class="fidel-card" onclick="openFidel('ቀ', ['ቀ','ቁ','ቂ','ቃ','ቄ','ቅ','ቆ'])">ቀ</div>
-            <div class="fidel-card" onclick="openFidel('በ', ['በ','ቡ','ቢ','ባ','ቤ','ብ','ቦ'])">በ</div>
-            <div class="fidel-card" onclick="openFidel('ተ', ['ተ','ቱ','ቲ','ታ','ቴ','ት','ቶ'])">ተ</div>
-            <div class="fidel-card" onclick="openFidel('ቸ', ['ቸ','ቹ','ቺ','ቻ','ቼ','ች','ቾ'])">ቸ</div>
-            <div class="fidel-card" onclick="openFidel('ኀ', ['ኀ','ኁ','ኂ','ኃ','ኄ','ኅ','ኆ'])">ኀ</div>
-            <div class="fidel-card" onclick="openFidel('ነ', ['ነ','ኑ','ኒ','ና','ኔ','ን','ኖ'])">ነ</div>
-            <div class="fidel-card" onclick="openFidel('ኘ', ['ኘ','ኙ','ኚ','ኛ','ኜ','ኝ','ኞ'])">ኘ</div>
-            <div class="fidel-card" onclick="openFidel('አ', ['አ','ኡ','ኢ','ኣ','ኤ','እ','ኦ'])">አ</div>
-            <div class="fidel-card" onclick="openFidel('ከ', ['ከ','ኩ','ኪ','ካ','ኬ','ክ','ኮ'])">ከ</div>
-            <div class="fidel-card" onclick="openFidel('ኸ', ['ኸ','ኹ','ኺ','ኻ','ኼ','ኽ','ኾ'])">ኸ</div>
-            <div class="fidel-card" onclick="openFidel('ወ', ['ወ','ዉ','ዊ','ዋ','ዌ','ው','ዎ'])">ወ</div>
-            <div class="fidel-card" onclick="openFidel('ዐ', ['ዐ','ዑ','ዒ','ዓ','ዔ','ዕ','ዖ'])">ዐ</div>
-            <div class="fidel-card" onclick="openFidel('ዘ', ['ዘ','ዙ','ዚ','ዛ','ዜ','ዝ','ዞ'])">ዘ</div>
-            <div class="fidel-card" onclick="openFidel('ዠ', ['ዠ','ዡ','ዢ','ዣ','ዤ','ዥ','ዦ'])">ዠ</div>
-            <div class="fidel-card" onclick="openFidel('የ', ['የ','ዩ','ዪ','ያ','ዬ','ይ','ዮ'])">የ</div>
-            <div class="fidel-card" onclick="openFidel('ደ', ['ደ','ዱ','ዲ','ዳ','ዴ','ድ','ዶ'])">ደ</div>
-            <div class="fidel-card" onclick="openFidel('ጀ', ['ጀ','ጁ','ጂ','ጃ','ጄ','ጅ','ጆ'])">ጀ</div>
-            <div class="fidel-card" onclick="openFidel('ገ', ['ገ','ጉ','ጊ','ጋ','ጌ','ግ','ጎ'])">ገ</div>
-            <div class="fidel-card" onclick="openFidel('ጠ', ['ጠ','ጡ','ጢ','ጣ','ጤ','ጥ','ጦ'])">ጠ</div>
-            <div class="fidel-card" onclick="openFidel('ጨ', ['ጨ','ጩ','ጪ','ጫ','ጬ','ጭ','ጮ'])">ጨ</div>
-            <div class="fidel-card" onclick="openFidel('ጰ', ['ጰ','ጱ','ጲ','ጳ','ጴ','ጵ','ጶ'])">ጰ</div>
-            <div class="fidel-card" onclick="openFidel('ጸ', ['ጸ','ጹ','ጺ','ጻ','ጼ','ጽ','ጾ'])">ጸ</div>
-            <div class="fidel-card" onclick="openFidel('ፀ', ['ፀ','ፁ','ፂ','ፃ','ኄ','ፅ','ፆ'])">ፀ</div>
-            <div class="fidel-card" onclick="openFidel('ፈ', ['ፈ','ፉ','ፊ','ፋ','ፌ','ፍ','ፎ'])">ፈ</div>
-            <div class="fidel-card" onclick="openFidel('ፐ', ['ፐ','ፑ','ፒ','ፓ','ፔ','ፕ','ፖ'])">ፐ</div>
-            <div class="fidel-card" onclick="openFidel('ቨ', ['ቨ','ዡ','ዢ','ዣ','ዤ','ዥ','ዦ'])">ቨ</div>
+            <div class="fidel-card" data-fidel="ሀ" onclick="openFidel('ሀ', ['ሀ','ሁ','ሂ','ሃ','ሄ','ህ','ሆ'])">ሀ</div>
+            <div class="fidel-card" data-fidel="ለ" onclick="openFidel('ለ', ['ለ','ሉ','ሊ','ላ','ሌ','ል','ሎ'])">ለ</div>
+            <div class="fidel-card" data-fidel="ሐ" onclick="openFidel('ሐ', ['ሐ','ሑ','ሒ','ሓ','ሔ','ሕ','ሖ'])">ሐ</div>
+            <div class="fidel-card" data-fidel="መ" onclick="openFidel('መ', ['መ','ሙ','ሚ','ማ','ሜ','ም','ሞ'])">መ</div>
+            <div class="fidel-card" data-fidel="ሠ" onclick="openFidel('ሠ', ['ሠ','ሡ','ሢ','ሣ','ሤ','ሥ','ሦ'])">ሠ</div>
+            <div class="fidel-card" data-fidel="ረ" onclick="openFidel('ረ', ['ረ','ሩ','ሪ','ራ','ሬ','ር','ሮ'])">ረ</div>
+            <div class="fidel-card" data-fidel="ሰ" onclick="openFidel('ሰ', ['ሰ','ሱ','ሲ','ሳ','ሴ','ስ','ሶ'])">ሰ</div>
+            <div class="fidel-card" data-fidel="ሸ" onclick="openFidel('ሸ', ['ሸ','ሹ','ሺ','ሻ','ሼ','ሽ','ሾ'])">ሸ</div>
+            <div class="fidel-card" data-fidel="ቀ" onclick="openFidel('ቀ', ['ቀ','ቁ','ቂ','ቃ','ቄ','ቅ','ቆ'])">ቀ</div>
+            <div class="fidel-card" data-fidel="በ" onclick="openFidel('በ', ['በ','ቡ','ቢ','ባ','ቤ','ብ','ቦ'])">በ</div>
+            <div class="fidel-card" data-fidel="ተ" onclick="openFidel('ተ', ['ተ','ቱ','ቲ','ታ','ቴ','ት','ቶ'])">ተ</div>
+            <div class="fidel-card" data-fidel="ቸ" onclick="openFidel('ቸ', ['ቸ','ቹ','ቺ','ቻ','ቼ','ች','ቾ'])">ቸ</div>
+            <div class="fidel-card" data-fidel="ኀ" onclick="openFidel('ኀ', ['ኀ','ኁ','ኂ','ኃ','ኄ','ኅ','ኆ'])">ኀ</div>
+            <div class="fidel-card" data-fidel="ነ" onclick="openFidel('ነ', ['ነ','ኑ','ኒ','ና','ኔ','ን','ኖ'])">ነ</div>
+            <div class="fidel-card" data-fidel="ኘ" onclick="openFidel('ኘ', ['ኘ','ኙ','ኚ','ኛ','ኜ','ኝ','ኞ'])">ኘ</div>
+            <div class="fidel-card" data-fidel="አ" onclick="openFidel('አ', ['አ','ኡ','ኢ','ኣ','ኤ','እ','ኦ'])">አ</div>
+            <div class="fidel-card" data-fidel="ከ" onclick="openFidel('ከ', ['ከ','ኩ','ኪ','ካ','ኬ','ክ','ኮ'])">ከ</div>
+            <div class="fidel-card" data-fidel="ኸ" onclick="openFidel('ኸ', ['ኸ','ኹ','ኺ','ኻ','ኼ','ኽ','ኾ'])">ኸ</div>
+            <div class="fidel-card" data-fidel="ወ" onclick="openFidel('ወ', ['ወ','ዉ','ዊ','ዋ','ዌ','ው','ዎ'])">ወ</div>
+            <div class="fidel-card" data-fidel="ዐ" onclick="openFidel('ዐ', ['ዐ','ዑ','ዒ','ዓ','ዔ','ዕ','ዖ'])">ዐ</div>
+            <div class="fidel-card" data-fidel="ዘ" onclick="openFidel('ዘ', ['ዘ','ዙ','ዚ','ዛ','ዜ','ዝ','ዞ'])">ዘ</div>
+            <div class="fidel-card" data-fidel="ዠ" onclick="openFidel('ዠ', ['ዠ','ዡ','ዢ','ዣ','ዤ','ዥ','ዦ'])">ዠ</div>
+            <div class="fidel-card" data-fidel="የ" onclick="openFidel('የ', ['የ','ዩ','ዪ','ያ','ዬ','ይ','ዮ'])">የ</div>
+            <div class="fidel-card" data-fidel="ደ" onclick="openFidel('ደ', ['ደ','ዱ','ዲ','ዳ','ዴ','ድ','ዶ'])">ደ</div>
+            <div class="fidel-card" data-fidel="ጀ" onclick="openFidel('ጀ', ['ጀ','ጁ','ጂ','ጃ','ጄ','ጅ','ጆ'])">ጀ</div>
+            <div class="fidel-card" data-fidel="ገ" onclick="openFidel('ገ', ['ገ','ጉ','ጊ','ጋ','ጌ','ግ','ጎ'])">ገ</div>
+            <div class="fidel-card" data-fidel="ጠ" onclick="openFidel('ጠ', ['ጠ','ጡ','ጢ','ጣ','ጤ','ጥ','ጦ'])">ጠ</div>
+            <div class="fidel-card" data-fidel="ጨ" onclick="openFidel('ጨ', ['ጨ','ጩ','ጪ','ጫ','ጬ','ጭ','ጮ'])">ጨ</div>
+            <div class="fidel-card" data-fidel="ጰ" onclick="openFidel('ጰ', ['ጰ','ጱ','ጲ','ጳ','ጴ','ጵ','ጶ'])">ጰ</div>
+            <div class="fidel-card" data-fidel="ጸ" onclick="openFidel('ጸ', ['ጸ','ጹ','ጺ','ጻ','ጼ','ጽ','ጾ'])">ጸ</div>
+            <div class="fidel-card" data-fidel="ፀ" onclick="openFidel('ፀ', ['ፀ','ፁ','ፂ','ፃ','ኄ','ፅ','ፆ'])">ፀ</div>
+            <div class="fidel-card" data-fidel="ፈ" onclick="openFidel('ፈ', ['ፈ','ፉ','ፊ','ፋ','ፌ','ፍ','ፎ'])">ፈ</div>
+            <div class="fidel-card" data-fidel="ፐ" onclick="openFidel('ፐ', ['ፐ','ፑ','ፒ','ፓ','ፔ','ፕ','ፖ'])">ፐ</div>
+            <div class="fidel-card" data-fidel="ቨ" onclick="openFidel('ቨ', ['ቨ','ዹ','ዺ','ቫ','ቬ','ቭ','ቮ'])">ቨ</div>
         </main>
 
         <div class="bottom-banner">
@@ -118,7 +116,6 @@ const SUPABASE_KEY = "sb_publishable_VBiJZB8TVM2CSl54aDPP0A_4aDXWb5i";
         </div>
     </div>
 
-    <!-- VOWEL DRAWER WINDOW -->
     <div id="fidelModal" class="modal" onclick="closeModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <h3 class="modal-title" id="modalTitle">Letter Family</h3>
@@ -127,3 +124,177 @@ const SUPABASE_KEY = "sb_publishable_VBiJZB8TVM2CSl54aDPP0A_4aDXWb5i";
             <button class="btn-secondary" onclick="closeModal(null)" style="color:#718096;">Close</button>
         </div>
     </div>
+
+    <script>
+        // 1. Initial configuration
+        const SUPABASE_URL = "https://muisfipoyzkhznfdvnes.supabase.co"; 
+        const SUPABASE_KEY = "sb_publishable_VBiJZB8TVM2CSl54aDPP0A_4aDXWb5i"; // Ensure this is your actual public anon key
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let isSignUpMode = true;
+        let currentUser = null;
+        let masteredLetters = []; 
+        let activeBaseFidel = null;
+
+        const standardVowels = ["ä", "u", "i", "a", "e", "ə", "o"];
+
+        // Automatically verify if a student session already exists on page mount
+        window.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session }, error } = await _supabase.auth.getSession();
+            if (session?.user) {
+                setupAuthenticatedUser(session.user);
+            }
+        });
+
+        // Toggle Auth View Screen (Sign Up vs Login)
+        function switchMode() {
+            isSignUpMode = !isSignUpMode;
+            document.getElementById("authTitle").innerText = isSignUpMode ? "Create Student Profile" : "Welcome Back";
+            document.getElementById("authSubtitle").innerText = isSignUpMode ? "Join the Amharic Fidel classroom" : "Log into your profile";
+            document.getElementById("mainAuthBtn").innerText = isSignUpMode ? "Sign Up" : "Log In";
+            document.getElementById("switchAuthBtn").innerText = isSignUpMode ? "Already have a profile? Log In" : "New student? Create a profile";
+        }
+
+        // Handle Signup / Login Submission Form
+        async function handleAuth() {
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value;
+
+            if (!email || !password) return alert("Please enter both fields.");
+
+            if (isSignUpMode) {
+                const { data, error } = await _supabase.auth.signUp({ email, password });
+                if (error) return alert("Sign Up Error: " + error.message);
+                alert("Profile built successfully! Checking login...");
+                if (data?.user) setupAuthenticatedUser(data.user);
+            } else {
+                const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+                if (error) return alert("Login Error: " + error.message);
+                if (data?.user) setupAuthenticatedUser(data.user);
+            }
+        }
+
+        // Transitions app layout view to dashboard, pulls cloud progression data
+        async function setupAuthenticatedUser(user) {
+            currentUser = user;
+            document.getElementById("studentEmail").innerText = user.email;
+            document.getElementById("authScreen").style.display = "none";
+            document.getElementById("dashboard").style.display = "block";
+            
+            await fetchUserProgress();
+        }
+
+        // Fetches learned statuses from Supabase Database
+        async function fetchUserProgress() {
+            if (!currentUser) return;
+
+            const { data, error } = await _supabase
+                .from('user_progress')
+                .select('mastered_letters')
+                .eq('user_id', currentUser.id)
+                .maybeSingle();
+
+            if (error) {
+                console.error("Error reading progress:", error.message);
+            } else if (data && data.mastered_letters) {
+                masteredLetters = data.mastered_letters;
+            } else {
+                masteredLetters = [];
+            }
+            renderUIProgressUpdates();
+        }
+
+        // Re-renders grid badges and tracking percentages based on state array
+        function renderUIProgressUpdates() {
+            const cards = document.querySelectorAll('.fidel-card');
+            cards.forEach(card => {
+                const letter = card.getAttribute('data-fidel');
+                if (masteredLetters.includes(letter)) {
+                    card.classList.add('completed');
+                } else {
+                    card.classList.remove('completed');
+                }
+            });
+
+            const totalRows = cards.length;
+            const learnedCount = masteredLetters.length;
+            const percent = totalRows > 0 ? Math.round((learnedCount / totalRows) * 100) : 0;
+
+            document.getElementById("progressBar").style.width = `${percent}%`;
+            document.getElementById("progressText").innerText = `${percent}% Mastered`;
+        }
+
+        // Displays detailed sub-vowel characters list modal window
+        function openFidel(baseLetter, familyArray) {
+            activeBaseFidel = baseLetter;
+            document.getElementById("modalTitle").innerText = `"${baseLetter}" Family`;
+            
+            const vowelRow = document.getElementById("vowelRow");
+            vowelRow.innerHTML = ""; // reset template
+
+            familyArray.forEach((char, index) => {
+                const box = document.createElement('div');
+                box.className = 'vowel-box';
+                box.innerHTML = `${char}<span class="vowel-label">${standardVowels[index]}</span>`;
+                vowelRow.appendChild(box);
+            });
+
+            const masterBtn = document.getElementById("masterBtn");
+            if (masteredLetters.includes(baseLetter)) {
+                masterBtn.innerText = "Mark Family as Incomplete";
+                masterBtn.style.background = "#e74c3c";
+            } else {
+                masterBtn.innerText = "Mark Family as Learned";
+                masterBtn.style.background = "#2ecc71";
+            }
+
+            masterBtn.onclick = () => toggleLetterMastery();
+            document.getElementById("fidelModal").style.display = "flex";
+        }
+
+        // Save progress updating algorithm to Supabase
+        async function toggleLetterMastery() {
+            if (!currentUser || !activeBaseFidel) return;
+
+            if (masteredLetters.includes(activeBaseFidel)) {
+                masteredLetters = masteredLetters.filter(item => item !== activeBaseFidel);
+            } else {
+                masteredLetters.push(activeBaseFidel);
+            }
+
+            // Save tracking metrics directly down to Cloud Storage 
+            const { error } = await _supabase
+                .from('user_progress')
+                .upsert({ 
+                    user_id: currentUser.id, 
+                    mastered_letters: masteredLetters 
+                }, { onConflict: 'user_id' });
+
+            if (error) {
+                alert("Failed to sync progress changes: " + error.message);
+            } else {
+                renderUIProgressUpdates();
+                closeModal(null);
+            }
+        }
+
+        function closeModal(event) {
+            if (!event || event.target === document.getElementById("fidelModal")) {
+                document.getElementById("fidelModal").style.display = "none";
+                activeBaseFidel = null;
+            }
+        }
+
+        // Terminate authenticated tokens context safely
+        async function logout() {
+            await _supabase.auth.signOut();
+            currentUser = null;
+            masteredLetters = [];
+            document.getElementById("dashboard").style.display = "none";
+            document.getElementById("authScreen").style.display = "block";
+            document.getElementById("email").value = "";
+            document.getElementById("password").value = "";
+        }
+    </script>
+</body>
+</html>
