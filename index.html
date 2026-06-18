@@ -16,10 +16,11 @@
             --ethio-green: #128807;
             --ethio-yellow: #FCD116;
             --ethio-red: #E8112D;
-            --bg-neutral: #FFFFFF; /* Clean white app background */
+            --bg-neutral: #FFFFFF; /* White background for the entire page */
             --card-neutral: #FFFFFF;
             --text-dark: #2B2B24;
             --shadow-premium: 0 12px 30px rgba(43, 43, 36, 0.08);
+            --shadow-inset: inset 0 2px 4px rgba(0,0,0,0.06);
         }
 
         * { box-sizing: border-box; font-family: 'Ubuntu', 'Noto Sans Ethiopic', sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -46,27 +47,27 @@
             100% { opacity: 1; transform: scale(1); }
         }
 
-        /* Styled Auth Container Box */
+        /* Screen Wrapper Layouts */
         .app-card {
-            background: var(--card-neutral);
-            border-radius: 28px;
-            padding: 36px 24px;
-            box-shadow: var(--shadow-premium);
-            max-width: 420px;
+            max-width: 420px; 
             width: 100%;
-            margin: auto; /* Perfectly centers the card dynamically */
+            margin: auto; /* Dynamically centers the box vertically and horizontally */
+            background: var(--card-neutral); 
+            padding: 36px 24px; 
+            border-radius: 28px; 
+            box-shadow: var(--shadow-premium); 
             text-align: center;
             position: relative;
             animation: bounceIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        /* Thick, highly pigmented Red, Yellow, Green framework border */
+        /* Thick, highly pigmented Red, Yellow, Green border framework */
         .tricolor-frame::before {
             content: '';
             position: absolute;
             top: -6px; left: -6px; right: -6px; bottom: -6px;
             border-radius: 34px;
-            padding: 6px; /* Thick border dimension */
+            padding: 6px; /* Thick border dimension width */
             background: linear-gradient(to right, #E8112D 33%, #FCD116 33%, #FCD116 66%, #128807 66%);
             -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor;
@@ -74,105 +75,79 @@
             pointer-events: none;
         }
 
-        .auth-input-group {
-            margin-bottom: 18px;
-            text-align: left;
+        .subtitle { font-size: 15px; color: #64748b; margin-bottom: 24px; font-weight: 500; }
+        
+        /* Premium Input Fields */
+        input { 
+            width: 100%; 
+            padding: 16px; 
+            margin-bottom: 14px; 
+            border: 2px solid #E6E6DE; 
+            border-radius: 14px; 
+            font-size: 16px; 
+            outline: none; 
+            background: #FDFDFB;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input:focus { 
+            border-color: var(--ethio-green); 
+            box-shadow: 0 0 0 4px rgba(18, 136, 7, 0.1);
         }
 
-        .auth-input-group label {
+        /* Lively Buttons */
+        .btn-primary { 
+            background: linear-gradient(135deg, var(--ethio-green), #0F7306); 
+            color: white; 
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
             font-weight: 700;
-            font-size: 13px;
-            color: #55554e;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .auth-input-group input {
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(18, 136, 7, 0.25);
+            transition: transform 0.1s, box-shadow 0.1s;
+            margin-bottom: 14px;
             width: 100%;
-            padding: 14px;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 16px;
-            margin-top: 6px;
-            background-color: #f8fafc;
-            transition: border-color 0.2s;
         }
+        .btn-primary:active { transform: scale(0.97); box-shadow: 0 2px 6px rgba(18, 136, 7, 0.15); }
+        .btn-secondary { background: transparent; color: #64748b; font-size: 14px; font-weight: 500; border: none; cursor: pointer; width: 100%; margin-top: 12px; }
 
-        .auth-input-group input:focus {
-            outline: none;
-            border-color: var(--ethio-green);
+        /* Culturally Inspired Avatar Custom Grid */
+        .avatar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+        .avatar-option { 
+            background: #F6F6F0; 
+            border: 2px solid #E6E6DE; 
+            border-radius: 16px; 
+            padding: 16px 0; 
+            font-size: 28px; 
+            cursor: pointer; 
+            position: relative;
+            transition: transform 0.2s, border-color 0.2s, background-color 0.2s; 
+            box-shadow: var(--shadow-inset);
         }
-
-        #displayName {
-            width: 100%;
-            padding: 14px;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 16px;
-            margin-bottom: 20px;
-            background-color: #f8fafc;
+        .avatar-option:hover { transform: translateY(-2px); }
+        .avatar-option.selected { 
+            border-color: var(--ethio-yellow); 
+            background: #FFFDF0; 
+            transform: scale(1.05); 
+            box-shadow: 0 6px 14px rgba(252, 209, 22, 0.2);
         }
-
-        .avatar-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .avatar-option {
-            background: #f8fafc;
-            border: 2px solid transparent;
+        .avatar-label { font-size: 11px; display: block; color: #55554E; margin-top: 6px; font-weight: bold; }
+        
+        .selfie-placeholder {
+            grid-column: span 3;
+            font-size: 14px;
+            color: #8E8E84;
+            border: 2px dashed #CDCDC5;
+            background: transparent;
+            box-shadow: none;
             border-radius: 16px;
             padding: 12px;
-            font-size: 24px;
             cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: transform 0.1s;
-        }
-
-        .avatar-option:active { transform: scale(0.95); }
-
-        .avatar-option.selected {
-            border-color: var(--ethio-green);
-            background: #e8f4fd;
-        }
-
-        .avatar-label {
-            font-size: 12px;
-            color: #64748b;
-            margin-top: 4px;
-        }
-
-        .btn-primary {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(18, 136, 7, 0.2);
-            transition: opacity 0.2s;
-        }
-
-        .btn-primary:active { opacity: 0.9; }
-
-        .btn-secondary {
-            background: transparent;
-            color: #64748b;
-            border: none;
-            margin-top: 16px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
         }
 
         /* Classroom Dashboard View Style Rules */
-        #dashboard { display: none; max-width: 500px; width: 100%; margin: 0 auto; }
+        #dashboard { display: none; max-width: 500px; margin: 0 auto; width: 100%; }
         
         header { 
             background: rgba(255, 255, 255, 0.92); 
@@ -183,6 +158,9 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.03); 
             text-align: center; 
             margin-bottom: 20px; 
+            position: sticky; 
+            top: env(safe-area-inset-top); 
+            z-index: 10; 
         }
         
         .profile-header-meta { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 6px; }
@@ -241,25 +219,19 @@
 </head>
 <body>
 
-    <div id="authScreen" class="app-card tricolor-frame" style="display: none;">
-        <p id="authSubtitle" style="color: #64748b; font-size: 15px; font-weight: 500; margin-bottom: 28px;">Join your peers and master the Amharic Alphabet</p>
+    <div id="authScreen" class="app-card tricolor-frame">
+        <p class="subtitle" id="authSubtitle">Join your peers and master the Amharic Alphabet</p>
         
-        <div class="auth-input-group">
-            <label>Email Address</label>
-            <input type="email" id="email" placeholder="student@school.com">
-        </div>
-        <div class="auth-input-group" style="margin-bottom: 28px;">
-            <label>Password</label>
-            <input type="password" id="password" placeholder="••••••••">
-        </div>
-
-        <button id="mainAuthBtn" class="btn-primary" style="background: var(--ethio-green);" onclick="handleAuth()">Sign Up</button>
-        <button id="switchAuthBtn" class="btn-secondary" onclick="switchMode()">Already a student? Log In</button>
+        <input type="email" id="email" placeholder="Email Address" autocomplete="email">
+        <input type="password" id="password" placeholder="Password (min 6 characters)">
+        
+        <button class="btn-primary" id="mainAuthBtn" onclick="handleAuth()">Sign Up</button>
+        <button class="btn-secondary" id="switchAuthBtn" onclick="switchMode()">Already registered? Log In</button>
     </div>
 
     <div id="profileSetupScreen" class="app-card tricolor-frame" style="display: none;">
-        <h2 style="color: var(--ethio-green); margin-bottom: 6px; font-size: 28px;">Set Up Profile!</h2>
-        <p style="color: #64748b; font-size: 14px; margin-bottom: 24px;">Pick a student nickname and your badge</p>
+        <h2 class="welcome-title" style="color: var(--ethio-green); font-size: 26px; margin-bottom: 4px;">Set Up Profile!</h2>
+        <p class="subtitle">Pick a student nickname and your badge</p>
         
         <input type="text" id="displayName" placeholder="Enter your name / nickname">
         
@@ -270,58 +242,87 @@
             <div class="avatar-option" onclick="selectAvatar('☕', this)">☕<span class="avatar-label">ቡና</span></div>
             <div class="avatar-option" onclick="selectAvatar('🫖', this)">🫖<span class="avatar-label">ጀበና</span></div>
             <div class="avatar-option" onclick="selectAvatar('🌼', this)">🌼<span class="avatar-label">አደይ አበባ</span></div>
+            <div class="avatar-option selfie-placeholder" onclick="alert('Selfie photo upload features can be configured in a later backend phase!')">📷 Add Student Selfie (Coming Soon)</div>
         </div>
 
-        <button class="btn-primary" style="background: linear-gradient(135deg, #128807, #0F7306);" onclick="saveProfileData()">Enter Classroom 🚀</button>
+        <button class="btn-primary" style="background: linear-gradient(135deg, var(--ethio-green), #0F7306);" onclick="saveProfileData()">Enter Classroom 🚀</button>
     </div>
 
     <div id="dashboard">
         <header>
             <div class="profile-header-meta">
-                <div id="displayAvatarHeader" class="user-avatar-badge">🦁</div>
-                <h1 id="displayUserHeader">Student</h1>
+                <div class="user-avatar-badge" id="displayAvatarHeader">🦁</div>
+                <h1 id="displayUserHeader">የአማርኛ ፊደል መማሪያ</h1>
             </div>
-            <div class="progress-container">
-                <div id="progressBar" class="progress-bar"></div>
-            </div>
+            <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
             <div class="user-meta">
-                <span id="progressText">0% Mastered</span>
                 <span id="studentEmail">student@email.com</span>
+                <span id="progressText">0% Mastered</span>
             </div>
         </header>
 
-        <div class="fidel-grid">
+        <main class="fidel-grid" id="fidelGrid">
             <div class="fidel-card" data-fidel="ሀ" onclick="openFidel('ሀ', ['ሀ','ሁ','ሂ','ሃ','ሄ','ህ','ሆ'])">ሀ</div>
             <div class="fidel-card" data-fidel="ለ" onclick="openFidel('ለ', ['ለ','ሉ','ሊ','ላ','ሌ','ል','ሎ'])">ለ</div>
             <div class="fidel-card" data-fidel="ሐ" onclick="openFidel('ሐ', ['ሐ','ሑ','ሒ','ሓ','ሔ','ሕ','ሖ'])">ሐ</div>
             <div class="fidel-card" data-fidel="መ" onclick="openFidel('መ', ['መ','ሙ','ሚ','ማ','ሜ','ም','ሞ'])">መ</div>
-        </div>
+            <div class="fidel-card" data-fidel="ሠ" onclick="openFidel('ሠ', ['ሠ','ሡ','ሢ','ሣ','ሤ','ሥ','ሦ'])">ሠ</div>
+            <div class="fidel-card" data-fidel="ረ" onclick="openFidel('ረ', ['ረ','ሩ','ሪ','ራ','ሬ','ር','ሮ'])">ረ</div>
+            <div class="fidel-card" data-fidel="ሰ" onclick="openFidel('ሰ', ['ሰ','ሱ','ሲ','ሳ','ሴ','ስ','ሶ'])">ሰ</div>
+            <div class="fidel-card" data-fidel="ሸ" onclick="openFidel('ሸ', ['ሸ','ሹ','ሺ','ሻ','ሼ','ሽ','ሾ'])">ሸ</div>
+            <div class="fidel-card" data-fidel="ቀ" onclick="openFidel('ቀ', ['ቀ','ቁ','ቂ','ቃ','ቄ','ቅ','ቆ'])">ቀ</div>
+            <div class="fidel-card" data-fidel="በ" onclick="openFidel('በ', ['በ','ቡ','ቢ','ባ','ቤ','ብ','ቦ'])">በ</div>
+            <div class="fidel-card" data-fidel="ተ" onclick="openFidel('ተ', ['ተ','ቱ','ቲ','ታ','ቴ','ት','ቶ'])">ተ</div>
+            <div class="fidel-card" data-fidel="ቸ" onclick="openFidel('ቸ', ['ቸ','ቹ','ቺ','ቻ','ቼ','ች','ቾ'])">ቸ</div>
+            <div class="fidel-card" data-fidel="ኀ" onclick="openFidel('ኀ', ['ኀ','ኁ','ኂ','ኃ','ኄ','ኅ','ኆ'])">ኀ</div>
+            <div class="fidel-card" data-fidel="ነ" onclick="openFidel('ነ', ['ነ','ኑ','ኒ','ና','ኔ','ን','ኖ'])">ነ</div>
+            <div class="fidel-card" data-fidel="ኘ" onclick="openFidel('ኘ', ['ኘ','ኙ','ኚ','ኛ','ኜ','ኝ','ኞ'])">ኘ</div>
+            <div class="fidel-card" data-fidel="አ" onclick="openFidel('አ', ['አ','ኡ','ኢ','ኣ','ኤ','እ','ኦ'])">አ</div>
+            <div class="fidel-card" data-fidel="ከ" onclick="openFidel('ከ', ['ከ','ኩ','ኪ','ካ','ኬ','ክ','ኮ'])">ከ</div>
+            <div class="fidel-card" data-fidel="ኸ" onclick="openFidel('ኸ', ['ኸ','ኹ','ኺ','ኻ','ኼ','ኽ','ኾ'])">ኸ</div>
+            <div class="fidel-card" data-fidel="ወ" onclick="openFidel('ወ', ['ወ','ዉ','ዊ','ዋ','ዌ','ው','ዎ'])">ወ</div>
+            <div class="fidel-card" data-fidel="ዐ" onclick="openFidel('ዐ', ['ዐ','ዑ','ዒ','ዓ','ዔ','ዕ','ዖ'])">ዐ</div>
+            <div class="fidel-card" data-fidel="ዘ" onclick="openFidel('ዘ', ['ዘ','ዙ','ዚ','ዛ','ዜ','ዝ','ዞ'])">ዘ</div>
+            <div class="fidel-card" data-fidel="ዠ" onclick="openFidel('ዠ', ['ዠ','ዡ','ዢ','ዣ','ዤ','ዥ','ዦ'])">ዠ</div>
+            <div class="fidel-card" data-fidel="የ" onclick="openFidel('የ', ['የ','ዩ','ዪ','ያ','ዬ','ይ','ዮ'])">የ</div>
+            <div class="fidel-card" data-fidel="ደ" onclick="openFidel('ደ', ['ደ','ዱ','ዲ','ዳ','ዴ','ድ','ዶ'])">ደ</div>
+            <div class="fidel-card" data-fidel="ጀ" onclick="openFidel('ጀ', ['ጀ','ጁ','ጂ','ጃ','ጄ','ጅ','ጆ'])">ጀ</div>
+            <div class="fidel-card" data-fidel="ገ" onclick="openFidel('ገ', ['ገ','ጉ','ጊ','ጋ','ጌ','ግ','ጎ'])">ገ</div>
+            <div class="fidel-card" data-fidel="ጠ" onclick="openFidel('ጠ', ['ጠ','ጡ','ጢ','ጣ','ጤ','ጥ','ጦ'])">ጠ</div>
+            <div class="fidel-card" data-fidel="ጨ" onclick="openFidel('ጨ', ['ጨ','ጩ','ጪ','ጫ','ጬ','ጭ','ጮ'])">ጨ</div>
+            <div class="fidel-card" data-fidel="ጰ" onclick="openFidel('ጰ', ['ጰ','ጱ','ጲ','ጳ','ጴ','ጵ','ጶ'])">ጰ</div>
+            <div class="fidel-card" data-fidel="ጸ" onclick="openFidel('ጸ', ['ጸ','ጹ','ጺ','ጻ','ጼ','ጽ','ጾ'])">ጸ</div>
+            <div class="fidel-card" data-fidel="ፀ" onclick="openFidel('ፀ', ['ፀ','ፁ','ፂ','ፃ','ኄ','ፅ','ፅ'])">ፀ</div>
+            <div class="fidel-card" data-fidel="ፈ" onclick="openFidel('ፈ', ['ፈ','ፉ','ፊ','ፋ','ፌ','ፍ','ፎ'])">ፈ</div>
+            <div class="fidel-card" data-fidel="ፐ" onclick="openFidel('ፐ', ['ፐ','ፑ','ፒ','派','ፔ','ፕ','ፖ'])">ፐ</div>
+            <div class="fidel-card" data-fidel="ቨ" onclick="openFidel('ቨ', ['ቨ','ዹ','ዺ','ቫ','ቬ','ቭ','ቮ'])">ቨ</div>
+        </main>
 
         <div class="bottom-banner">
-            <button class="logout-btn" onclick="logout()">Leave Class</button>
-            <a href="https://zoom.us" target="_blank" class="zoom-link">Join Live Zoom 🎥</a>
+            <button class="logout-btn" onclick="logout()">Log Out</button>
+            <a href="YOUR_ZOOM_LINK_HERE" target="_blank" class="zoom-link">📞 Join Live Zoom</a>
         </div>
     </div>
 
     <div id="fidelModal" class="modal" onclick="closeModal(event)">
-        <div class="modal-content">
-            <h3 id="modalTitle" class="modal-title">Family</h3>
-            <div id="vowelRow" class="vowel-row"></div>
-            <button id="masterBtn" class="btn-primary" style="background: #2ecc71;">Mark as Learned</button>
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h3 class="modal-title" id="modalTitle">Letter Family</h3>
+            <div class="vowel-row" id="vowelRow"></div>
+            <button class="btn-primary" id="masterBtn" style="background:#2ecc71;">Mark Family as Learned</button>
+            <button class="btn-secondary" onclick="closeModal(null)" style="color:#718096;">Close</button>
         </div>
     </div>
 
     <script>
-        // Paste your actual real Supabase Project Credentials inside these quotes!
-        const _supabaseUrl = "https://your-project-url.supabase.co";
-        const _supabaseKey = "your-anon-key-here";
-        const _supabase = supabase.createClient(_supabaseUrl, _supabaseKey);
+        const SUPABASE_URL = "https://muisfipoyzkhznfdvnes.supabase.co"; 
+        const SUPABASE_KEY = "sb_publishable_VBiJZB8TVM2CSl54aDPP0A_4aDXWb5i";
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let currentUser = null;
-        let masteredLetters = [];
-        let activeBaseFidel = null;
-        let selectedAvatarSymbol = "🦁";
         let isSignUpMode = true;
+        let currentUser = null;
+        let masteredLetters = []; 
+        let activeBaseFidel = null;
+        let selectedAvatarSymbol = "🦁"; 
 
         const standardVowels = ["ä", "u", "i", "a", "e", "ə", "o"];
 
@@ -329,8 +330,6 @@
             const { data: { session }, error } = await _supabase.auth.getSession();
             if (session?.user) {
                 checkUserProfileStatus(session.user);
-            } else {
-                document.getElementById("authScreen").style.display = "block";
             }
         });
 
@@ -338,7 +337,7 @@
             isSignUpMode = !isSignUpMode;
             document.getElementById("authSubtitle").innerText = isSignUpMode ? "Join your peers and master the Amharic Alphabet" : "Log into your student profile";
             document.getElementById("mainAuthBtn").innerText = isSignUpMode ? "Sign Up" : "Log In";
-            document.getElementById("switchAuthBtn").innerText = isSignUpMode ? "Already a student? Log In" : "New student? Create a profile";
+            document.getElementById("switchAuthBtn").innerText = isSignUpMode ? "Already registered? Log In" : "New student? Sign Up";
         }
 
         async function handleAuth() {
@@ -440,52 +439,4 @@
             });
             const percent = cards.length > 0 ? Math.round((masteredLetters.length / cards.length) * 100) : 0;
             document.getElementById("progressBar").style.width = `${percent}%`;
-            document.getElementById("progressText").innerText = `${percent}% Mastered`;
-        }
-
-        function openFidel(baseLetter, familyArray) {
-            activeBaseFidel = baseLetter;
-            document.getElementById("modalTitle").innerText = `"${baseLetter}" Family`;
-            const vowelRow = document.getElementById("vowelRow");
-            vowelRow.innerHTML = "";
-            familyArray.forEach((char, index) => {
-                const box = document.createElement('div');
-                box.className = 'vowel-box';
-                box.innerHTML = `${char}<span class="vowel-label">${standardVowels[index]}</span>`;
-                vowelRow.appendChild(box);
-            });
-            const masterBtn = document.getElementById("masterBtn");
-            masterBtn.innerText = masteredLetters.includes(baseLetter) ? "Mark Family as Incomplete" : "Mark Family as Learned";
-            masterBtn.style.background = masteredLetters.includes(baseLetter) ? "#e74c3c" : "#2ecc71";
-            masterBtn.onclick = () => toggleLetterMastery();
-            document.getElementById("fidelModal").style.display = "flex";
-        }
-
-        async function toggleLetterMastery() {
-            if (masteredLetters.includes(activeBaseFidel)) masteredLetters = masteredLetters.filter(item => item !== activeBaseFidel);
-            else masteredLetters.push(activeBaseFidel);
-
-            const { error } = await _supabase.from('user_progress').upsert({ user_id: currentUser.id, mastered_letters: masteredLetters }, { onConflict: 'user_id' });
-            if (error) alert("Sync failed: " + error.message);
-            else { renderUIProgressUpdates(); closeModal(null); }
-        }
-
-        function closeModal(event) {
-            if (!event || event.target === document.getElementById("fidelModal")) {
-                document.getElementById("fidelModal").style.display = "none";
-                activeBaseFidel = null;
-            }
-        }
-
-        async function logout() {
-            await _supabase.auth.signOut();
-            currentUser = null; masteredLetters = [];
-            document.getElementById("dashboard").style.display = "none";
-            document.getElementById("profileSetupScreen").style.display = "none";
-            document.getElementById("authScreen").style.display = "block";
-            document.getElementById("email").value = ""; document.getElementById("password").value = "";
-            document.getElementById("displayName").value = "";
-        }
-    </script>
-</body>
-</html>
+            document.getElementById
