@@ -16,11 +16,10 @@
             --ethio-green: #128807;
             --ethio-yellow: #FCD116;
             --ethio-red: #E8112D;
-            --bg-neutral: #FAFAF7;
+            --bg-neutral: #FFFFFF; /* Clean white app background */
             --card-neutral: #FFFFFF;
             --text-dark: #2B2B24;
-            --shadow-premium: 0 10px 25px rgba(43, 43, 36, 0.08);
-            --shadow-inset: inset 0 2px 4px rgba(0,0,0,0.06);
+            --shadow-premium: 0 12px 30px rgba(43, 43, 36, 0.08);
         }
 
         * { box-sizing: border-box; font-family: 'Ubuntu', 'Noto Sans Ethiopic', sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -34,56 +33,58 @@
             -webkit-user-select: none;
             user-select: none;
             -webkit-overflow-scrolling: touch;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
         /* Fun Bounce In Animation Keyframes */
         @keyframes bounceIn {
             0% { opacity: 0; transform: scale(0.3); }
-            50% { opacity: 0.9; transform: scale(1.1); }
-            70% { transform: scale(0.9); }
+            50% { opacity: 0.9; transform: scale(1.03); }
+            70% { transform: scale(0.98); }
             100% { opacity: 1; transform: scale(1); }
         }
 
-        /* New Dark Green Splash Screen Styling */
-        .splash-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #0F7306; /* Rich dark green */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            transition: opacity 0.5s ease-out, visibility 0.5s;
-        }
-
-        /* White animated splash text */
-        .splash-title {
-            color: #FFFFFF;
-            font-size: 32px;
-            font-weight: 700;
-            text-align: center;
-            line-height: 1.3;
-            animation: bounceIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        /* Default generic Auth Card / App Card wrapper */
+        /* Styled Auth Container Box */
         .app-card {
             background: var(--card-neutral);
-            border-radius: 24px;
-            padding: 24px;
+            border-radius: 28px;
+            padding: 36px 24px;
             box-shadow: var(--shadow-premium);
             max-width: 420px;
-            margin: 40px auto;
+            width: 100%;
+            margin: auto; /* Perfectly centers the card dynamically */
             text-align: center;
+            position: relative;
+            animation: bounceIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Thick, highly pigmented Red, Yellow, Green framework border */
+        .tricolor-frame::before {
+            content: '';
+            position: absolute;
+            top: -6px; left: -6px; right: -6px; bottom: -6px;
+            border-radius: 34px;
+            padding: 6px; /* Thick border dimension */
+            background: linear-gradient(to right, #E8112D 33%, #FCD116 33%, #FCD116 66%, #128807 66%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+                    mask-composite: exclude;
+            pointer-events: none;
         }
 
         .auth-input-group {
-            margin-bottom: 16px;
+            margin-bottom: 18px;
             text-align: left;
+        }
+
+        .auth-input-group label {
+            font-weight: 700;
+            font-size: 13px;
+            color: #55554e;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .auth-input-group input {
@@ -93,37 +94,13 @@
             border-radius: 12px;
             font-size: 16px;
             margin-top: 6px;
+            background-color: #f8fafc;
+            transition: border-color 0.2s;
         }
 
-        /* Updated Onboarding Screen: Light Warm Yellow Background */
-        #profileSetupScreen.app-card {
-            background-color: #FFFDF0; /* Light yellow page tone */
-            box-shadow: var(--shadow-premium);
-            animation: bounceIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        /* Pigmented Tricolor Border Container for the White Card */
-        .tricolor-box {
-            background: #FFFFFF; /* Pure white inner box */
-            border-radius: 24px; /* Soft round corners */
-            padding: 28px 20px;
-            margin-top: 16px;
-            position: relative;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
-        }
-
-        /* Clean, multi-layered pigmented borders */
-        .tricolor-box::before {
-            content: '';
-            position: absolute;
-            top: -4px; left: -4px; right: -4px; bottom: -4px;
-            border-radius: 28px;
-            padding: 4px; /* Border thickness */
-            background: linear-gradient(to right, #E8112D 33%, #FCD116 33%, #FCD116 66%, #128807 66%);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-                    mask-composite: exclude;
-            pointer-events: none;
+        .auth-input-group input:focus {
+            outline: none;
+            border-color: var(--ethio-green);
         }
 
         #displayName {
@@ -132,14 +109,15 @@
             border: 1px solid #e2e8f0;
             border-radius: 12px;
             font-size: 16px;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
+            background-color: #f8fafc;
         }
 
         .avatar-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
 
         .avatar-option {
@@ -152,7 +130,10 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            transition: transform 0.1s;
         }
+
+        .avatar-option:active { transform: scale(0.95); }
 
         .avatar-option.selected {
             border-color: var(--ethio-green);
@@ -167,26 +148,31 @@
 
         .btn-primary {
             width: 100%;
-            padding: 14px;
+            padding: 15px;
             border: none;
             border-radius: 12px;
             color: white;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
+            box-shadow: 0 4px 12px rgba(18, 136, 7, 0.2);
+            transition: opacity 0.2s;
         }
+
+        .btn-primary:active { opacity: 0.9; }
 
         .btn-secondary {
             background: transparent;
             color: #64748b;
             border: none;
-            margin-top: 12px;
+            margin-top: 16px;
             cursor: pointer;
             font-size: 14px;
+            font-weight: 500;
         }
 
         /* Classroom Dashboard View Style Rules */
-        #dashboard { display: none; max-width: 500px; margin: 0 auto; }
+        #dashboard { display: none; max-width: 500px; width: 100%; margin: 0 auto; }
         
         header { 
             background: rgba(255, 255, 255, 0.92); 
@@ -197,9 +183,6 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.03); 
             text-align: center; 
             margin-bottom: 20px; 
-            position: sticky; 
-            top: env(safe-area-inset-top); 
-            z-index: 10; 
         }
         
         .profile-header-meta { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 6px; }
@@ -258,45 +241,38 @@
 </head>
 <body>
 
-    <div id="splashScreen" class="splash-screen">
-        <h2 class="splash-title">Welcome to the<br>Fidel Classroom!</h2>
-    </div>
-
-    <div id="authScreen" class="app-card" style="display: none;">
-        <h2 id="authTitle" style="margin-bottom: 8px; color: var(--ethio-green);">Welcome to the<br>Fidel Classroom!</h2>
-        <p id="authSubtitle" style="color: #64748b; font-size: 14px; margin-bottom: 24px;">Join your peers and master the Amharic Alphabet</p>
+    <div id="authScreen" class="app-card tricolor-frame" style="display: none;">
+        <p id="authSubtitle" style="color: #64748b; font-size: 15px; font-weight: 500; margin-bottom: 28px;">Join your peers and master the Amharic Alphabet</p>
         
         <div class="auth-input-group">
-            <label style="font-weight: bold; font-size: 14px;">Email Address</label>
-            <input type="email" id="email" placeholder="student@email.com">
+            <label>Email Address</label>
+            <input type="email" id="email" placeholder="student@school.com">
         </div>
-        <div class="auth-input-group" style="margin-bottom: 24px;">
-            <label style="font-weight: bold; font-size: 14px;">Password</label>
+        <div class="auth-input-group" style="margin-bottom: 28px;">
+            <label>Password</label>
             <input type="password" id="password" placeholder="••••••••">
         </div>
 
         <button id="mainAuthBtn" class="btn-primary" style="background: var(--ethio-green);" onclick="handleAuth()">Sign Up</button>
-        <button id="switchAuthBtn" class="btn-secondary" onclick="switchMode()">Already have a profile? Log In</button>
+        <button id="switchAuthBtn" class="btn-secondary" onclick="switchMode()">Already a student? Log In</button>
     </div>
 
-    <div id="profileSetupScreen" class="app-card" style="display: none;">
-        <h2 style="color: #128807; margin-bottom: 4px;">Set Up Profile!</h2>
-        <p style="color: #64748b; font-size: 14px;">Pick a student nickname and your badge</p>
+    <div id="profileSetupScreen" class="app-card tricolor-frame" style="display: none;">
+        <h2 style="color: var(--ethio-green); margin-bottom: 6px; font-size: 28px;">Set Up Profile!</h2>
+        <p style="color: #64748b; font-size: 14px; margin-bottom: 24px;">Pick a student nickname and your badge</p>
         
-        <div class="tricolor-box">
-            <input type="text" id="displayName" placeholder="Enter your name / nickname">
-            
-            <div class="avatar-grid">
-                <div class="avatar-option selected" onclick="selectAvatar('🦁', this)">🦁<span class="avatar-label">አንበሳ</span></div>
-                <div class="avatar-option" onclick="selectAvatar('🐆', this)">🐆<span class="avatar-label">ነብር</span></div>
-                <div class="avatar-option" onclick="selectAvatar('🐘', this)">🐘<span class="avatar-label">ዝሆን</span></div>
-                <div class="avatar-option" onclick="selectAvatar('☕', this)">☕<span class="avatar-label">ቡና</span></div>
-                <div class="avatar-option" onclick="selectAvatar('🫖', this)">🫖<span class="avatar-label">ጀበና</span></div>
-                <div class="avatar-option" onclick="selectAvatar('🌼', this)">🌼<span class="avatar-label">አደይ አበባ</span></div>
-            </div>
-
-            <button class="btn-primary" style="background: linear-gradient(135deg, #128807, #0F7306);" onclick="saveProfileData()">Enter Classroom 🚀</button>
+        <input type="text" id="displayName" placeholder="Enter your name / nickname">
+        
+        <div class="avatar-grid">
+            <div class="avatar-option selected" onclick="selectAvatar('🦁', this)">🦁<span class="avatar-label">አንበሳ</span></div>
+            <div class="avatar-option" onclick="selectAvatar('🐆', this)">🐆<span class="avatar-label">ነብር</span></div>
+            <div class="avatar-option" onclick="selectAvatar('🐘', this)">🐘<span class="avatar-label">ዝሆን</span></div>
+            <div class="avatar-option" onclick="selectAvatar('☕', this)">☕<span class="avatar-label">ቡና</span></div>
+            <div class="avatar-option" onclick="selectAvatar('🫖', this)">🫖<span class="avatar-label">ጀበና</span></div>
+            <div class="avatar-option" onclick="selectAvatar('🌼', this)">🌼<span class="avatar-label">አደይ አበባ</span></div>
         </div>
+
+        <button class="btn-primary" style="background: linear-gradient(135deg, #128807, #0F7306);" onclick="saveProfileData()">Enter Classroom 🚀</button>
     </div>
 
     <div id="dashboard">
@@ -336,7 +312,7 @@
     </div>
 
     <script>
-        // Replace these placeholder strings with your actual real Supabase Project Credentials!
+        // Paste your actual real Supabase Project Credentials inside these quotes!
         const _supabaseUrl = "https://your-project-url.supabase.co";
         const _supabaseKey = "your-anon-key-here";
         const _supabase = supabase.createClient(_supabaseUrl, _supabaseKey);
@@ -350,18 +326,6 @@
         const standardVowels = ["ä", "u", "i", "a", "e", "ə", "o"];
 
         window.addEventListener('DOMContentLoaded', async () => {
-            // 1. Splash screen animation delay timer (1 seconds)
-            setTimeout(() => {
-                const splash = document.getElementById("splashScreen");
-                if (splash) {
-                    splash.style.opacity = "0";
-                    setTimeout(() => {
-                        splash.style.visibility = "hidden";
-                    }, 500);
-                }
-            }, 3000);
-
-            // 2. Clear background authorization check
             const { data: { session }, error } = await _supabase.auth.getSession();
             if (session?.user) {
                 checkUserProfileStatus(session.user);
@@ -372,10 +336,9 @@
 
         function switchMode() {
             isSignUpMode = !isSignUpMode;
-            document.getElementById("authTitle").innerHTML = isSignUpMode ? "Welcome to the<br>Fidel Classroom!" : "Welcome Back";
-            document.getElementById("authSubtitle").innerText = isSignUpMode ? "Join your peers and master the Amharic Alphabet" : "Log into your profile";
+            document.getElementById("authSubtitle").innerText = isSignUpMode ? "Join your peers and master the Amharic Alphabet" : "Log into your student profile";
             document.getElementById("mainAuthBtn").innerText = isSignUpMode ? "Sign Up" : "Log In";
-            document.getElementById("switchAuthBtn").innerText = isSignUpMode ? "Already have a profile? Log In" : "New student? Create a profile";
+            document.getElementById("switchAuthBtn").innerText = isSignUpMode ? "Already a student? Log In" : "New student? Create a profile";
         }
 
         async function handleAuth() {
