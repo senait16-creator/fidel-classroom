@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="am">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fidel Classroom - Teacher Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fidel Classroom</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,352 +15,583 @@
             --ethio-green: #128807;
             --ethio-yellow: #FCD116;
             --ethio-red: #E8112D;
-            --bg-neutral: #f8fafc;
+            --bg-neutral: #FFFFFF;
             --card-neutral: #FFFFFF;
-            --text-dark: #1e293b;
-            --shadow-premium: 0 10px 25px rgba(0, 0, 0, 0.05);
+            --text-dark: #2B2B24;
+            --shadow-premium: 0 12px 30px rgba(43, 43, 36, 0.08);
+            --shadow-inset: inset 0 2px 4px rgba(0,0,0,0.06);
         }
 
-        * { box-sizing: border-box; font-family: 'Ubuntu', sans-serif; margin: 0; padding: 0; }
+        * { box-sizing: border-box; font-family: 'Ubuntu', 'Noto Sans Ethiopic', sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         
         body { 
             background-color: var(--bg-neutral); 
             color: var(--text-dark); 
-            padding: 24px;
-        }
-
-        .teacher-container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        /* Top Header Styling */
-        header {
-            background: white;
-            padding: 24px;
-            border-radius: 16px;
-            box-shadow: var(--shadow-premium);
-            margin-bottom: 24px;
+            padding: 16px; 
+            padding-bottom: calc(100px + env(safe-area-inset-bottom)); 
+            padding-top: calc(16px + env(safe-area-inset-top));
+            -webkit-user-select: none;
+            user-select: none;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-left: 6px solid var(--ethio-green);
+            flex-direction: column;
+            min-height: 100vh;
         }
 
-        header h1 { font-size: 28px; color: #0f172a; }
-        header p { color: #64748b; margin-top: 4px; }
-
-        .refresh-btn {
-            background: #2c3e50;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            font-size: 14px;
-            font-weight: bold;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .refresh-btn:hover { background: #1a252f; }
-
-        /* Metrics Overview Row */
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-        .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: var(--shadow-premium);
-            text-align: center;
-        }
-        .stat-card h3 { font-size: 14px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
-        .stat-card p { font-size: 32px; font-weight: bold; color: #0f172a; margin-top: 8px; }
-
-        /* Student List Table Structure */
-        .roster-card {
-            background: white;
-            border-radius: 16px;
-            box-shadow: var(--shadow-premium);
-            padding: 24px;
-            overflow-x: auto;
+        @keyframes bounceIn {
+            0% { opacity: 0; transform: scale(0.3); }
+            50% { opacity: 0.9; transform: scale(1.03); }
+            70% { transform: scale(0.98); }
+            100% { opacity: 1; transform: scale(1); }
         }
 
-        .roster-card h2 { font-size: 20px; margin-bottom: 18px; color: #0f172a; }
-
-        table {
+        .app-card {
+            max-width: 420px; 
             width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-
-        th {
-            background: #f1f5f9;
-            padding: 14px;
-            font-size: 14px;
-            color: #475569;
-            font-weight: 700;
-        }
-
-        td {
-            padding: 16px 14px;
-            border-bottom: 1px solid #e2e8f0;
-            font-size: 15px;
-            vertical-align: middle;
-        }
-
-        .student-profile-cell {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .avatar-circle {
-            width: 40px;
-            height: 40px;
-            background: #f1f5f9;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-        }
-
-        .student-name {
-            font-weight: bold;
-            color: #0f172a;
-        }
-
-        /* Progress Bar Graphics inside Table */
-        .progress-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            min-width: 180px;
-        }
-        .progress-track {
-            flex: 1;
-            background: #e2e8f0;
-            height: 8px;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            background: var(--ethio-green);
-            width: 0%;
-            transition: width 0.5s ease;
-        }
-        .percent-text {
-            font-size: 13px;
-            font-weight: bold;
-            color: #334155;
-            width: 40px;
-        }
-
-        .letters-badge-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            max-width: 300px;
-        }
-
-        .letter-badge {
-            font-family: 'Noto Sans Ethiopic', sans-serif;
-            background: #e0f2fe;
-            color: #0369a1;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 13px;
-            font-weight: bold;
-        }
-
-        .empty-badge {
-            color: #94a3b8;
-            font-size: 13px;
-            font-style: italic;
-        }
-
-        .loading-text {
+            margin: auto; 
+            background: var(--card-neutral); 
+            padding: 36px 24px; 
+            border-radius: 28px; 
+            box-shadow: var(--shadow-premium); 
             text-align: center;
-            padding: 40px;
-            color: #64748b;
-            font-size: 16px;
-            font-weight: bold;
+            position: relative;
+            animation: bounceIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+
+        .tricolor-frame::before {
+            content: '';
+            position: absolute;
+            top: -6px; left: -6px; right: -6px; bottom: -6px;
+            border-radius: 34px;
+            padding: 6px; 
+            background: linear-gradient(to right, #E8112D 33%, #FCD116 33%, #FCD116 66%, #128807 66%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+                    mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .main-title { font-size: 32px; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
+        .subtitle { font-size: 16px; color: #64748b; margin-bottom: 24px; font-weight: 500; }
+        
+        input { 
+            width: 100%; padding: 16px; margin-bottom: 14px; 
+            border: 2px solid #E6E6DE; border-radius: 14px; font-size: 16px; 
+            outline: none; background: #FDFDFB; transition: border-color 0.2s;
+        }
+        input:focus { border-color: var(--ethio-green); box-shadow: 0 0 0 4px rgba(18, 136, 7, 0.1); }
+
+        .choice-container { display: flex; gap: 12px; margin-bottom: 14px; }
+        .vertical-choice { flex-direction: column; gap: 16px; width: 100%; }
+
+        .btn-filled-rectangle {
+            flex: 1; padding: 18px; font-size: 16px; font-weight: 700; 
+            border-radius: 12px; border: none; cursor: pointer; transition: transform 0.1s;
+        }
+        .btn-signup-rect { background: var(--ethio-green); color: white; }
+        .btn-login-rect { background: #2c3e50; color: white; }
+        .btn-filled-rectangle:active { transform: scale(0.96); }
+
+        /* Outlined Rectangles for Task Selection */
+        .btn-outlined-rectangle {
+            width: 100%; padding: 20px; font-size: 18px; font-weight: 700;
+            background: transparent; color: var(--text-dark);
+            border: 3px solid #2c3e50; border-radius: 16px; cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            text-align: center;
+        }
+        .btn-outlined-rectangle:active { transform: scale(0.97); background: #f1f5f9; }
+
+        .btn-primary { 
+            background: linear-gradient(135deg, var(--ethio-green), #0F7306); 
+            color: white; padding: 16px; border: none; border-radius: 14px;
+            font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; margin-bottom: 14px;
+        }
+        .btn-secondary { background: transparent; color: #64748b; font-size: 14px; font-weight: 500; border: none; cursor: pointer; width: 100%; margin-top: 12px; }
+
+        .avatar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+        .avatar-option { 
+            background: #F6F6F0; border: 2px solid #E6E6DE; border-radius: 16px; 
+            padding: 16px 0; font-size: 28px; cursor: pointer; transition: transform 0.2s; 
+        }
+        .avatar-option.selected { border-color: var(--ethio-yellow); background: #FFFDF0; transform: scale(1.05); }
+        .avatar-label { font-size: 11px; display: block; color: #55554E; margin-top: 6px; font-weight: bold; }
+
+        /* Classroom Dashboard Layout rules */
+        #dashboard { display: none; max-width: 500px; margin: 0 auto; width: 100%; }
+        
+        header { 
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            padding: 16px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); 
+            margin-bottom: 20px; position: sticky; top: env(safe-area-inset-top); z-index: 10; 
+        }
+        
+        .profile-header-meta { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+        .user-avatar-badge { width: 44px; height: 44px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        header h1 { font-size: 18px; color: var(--text-dark); font-weight: 700; }
+        
+        .progress-container { width: 100%; background: #edf2f7; border-radius: 20px; height: 12px; overflow: hidden; margin: 8px 0; }
+        .progress-bar { height: 100%; width: 0%; background: #2ecc71; transition: width 0.4s ease; }
+        .user-meta { display: flex; justify-content: space-between; font-size: 13px; color: #718096; margin-top: 4px; }
+        
+        .workspace-title { font-size: 20px; font-weight: 700; margin-bottom: 14px; color: #2c3e50; text-align: left; display: flex; justify-content: space-between; align-items: center;}
+
+        /* Unified Matrix Grid System */
+        .fidel-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+        .fidel-card { 
+            font-family: 'Noto Sans Ethiopic', sans-serif !important;
+            background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; 
+            padding: 18px 0; text-align: center; font-size: 26px; font-weight: 700; 
+            cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.02); transition: transform 0.1s ease; 
+        }
+        .fidel-card:active { transform: scale(0.92); }
+        .fidel-card.completed { background: #e8f8f5; border-color: #2ecc71; color: #2ecc71; }
+        .fidel-card.writing-mode { border-color: #3498db; background: #e8f4f8; }
+
+        /* Blow up Zoom Layout Row for Writing Track */
+        .blowup-row-container { background: #f8fafc; border: 2px dashed #3498db; border-radius: 18px; padding: 24px 12px; margin-bottom: 20px; text-align: center; }
+        .blowup-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 20px; }
+        .blowup-box { background: white; border: 2px solid #cbd5e1; border-radius: 10px; padding: 14px 0; font-size: 28px; font-weight: bold; color: #2c3e50; }
+        .writing-prompt-text { font-size: 16px; color: #475569; font-weight: bold; margin-bottom: 16px; }
+
+        /* Flashcard Reading Arena Engine styles */
+        .flashcard-wrapper { background: #fff; border: 2px solid #e2e8f0; border-radius: 20px; padding: 40px 20px; text-align: center; box-shadow: var(--shadow-premium); margin-bottom: 20px; }
+        .flashcard-foreign { font-family: 'Noto Sans Ethiopic', sans-serif; font-size: 42px; font-weight: bold; color: #2c3e50; margin-bottom: 12px; }
+        .flashcard-hidden-answer { background: #f1f5f9; border-radius: 10px; padding: 12px; font-size: 18px; font-weight: bold; color: var(--ethio-green); cursor: pointer; margin-top: 16px; min-height: 50px; display: flex; align-items: center; justify-content: center; }
+
+        .bottom-banner { 
+            position: fixed; bottom: calc(16px + env(safe-area-inset-bottom)); left: 16px; right: 16px; 
+            background: #2c3e50; padding: 14px 18px; border-radius: 16px; 
+            display: flex; justify-content: space-between; align-items: center; box-shadow: 0 8px 24px rgba(0,0,0,0.2); z-index: 100; 
+        }
+        .zoom-link-header { align-self: flex-end; margin-top: -48px; background: #2980b9; color: #fff; text-decoration: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: bold; float: right; }
+        .header-top-row { width: 100%; display: flex; justify-content: space-between; align-items: flex-start; }
+        .logout-btn { background: transparent; color: #ffffff; border: none; font-size: 14px; font-weight: bold; cursor: pointer; opacity: 0.8; }
+        .nav-back-btn { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 200; padding: 20px; }
+        .modal-content { background: #fff; padding: 24px; border-radius: 20px; width: 100%; max-width: 360px; text-align: center; }
+        .modal-title { font-size: 22px; color: #2c3e50; margin-bottom: 16px; }
+        .vowel-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 20px; }
+        .vowel-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 0; font-size: 16px; font-weight: bold; display: flex; flex-direction: column; align-items: center; }
+        .vowel-label { font-size: 11px; color: #64748b; margin-top: 4px; }
     </style>
 </head>
 <body>
 
-    <div class="teacher-container">
+    <!-- SCREEN 1: ONBOARDING / SECURITY GATEWAY -->
+    <div id="authScreen" class="app-card tricolor-frame">
+        <h1 class="main-title">Fidel Classroom</h1>
+        <p class="subtitle" id="authSubtitle">Learn the Amharic Alphabet</p>
         
-        <header>
-            <div>
-                <h1>Teacher Control Panel</h1>
-                <p>Real-time enrollment tracking and student progress monitoring</p>
-            </div>
-            <button class="refresh-btn" onclick="loadTeacherDashboardData()">🔄 Refresh Live Data</button>
-        </header>
-
-        <div class="stats-row">
-            <div class="stat-card">
-                <h3>Total Registered Students</h3>
-                <p id="statTotalStudents">0</p>
-            </div>
-            <div class="stat-card">
-                <h3>Average Progress</h3>
-                <p id="statAvgProgress">0%</p>
-            </div>
-            <div class="stat-card">
-                <h3>Active Learners</h3>
-                <p id="statActiveStudents">0</p>
-            </div>
+        <div id="onboardingGate" class="choice-container">
+            <button class="btn-filled-rectangle btn-signup-rect" onclick="selectAuthFlow('signup')">Sign Up</button>
+            <button class="btn-filled-rectangle btn-login-rect" onclick="selectAuthFlow('login')">Log In</button>
         </div>
 
-        <div class="roster-card">
-            <h2>Student Enrollment Roster</h2>
-            
-            <div id="loadingIndicator" class="loading-text">Fetching live roster profiles from Supabase database...</div>
-            
-            <div id="tableWrapper" style="display: none;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Student</th>
-                            <th>Mastery Progress</th>
-                            <th>Mastered Fidel Families</th>
-                        </tr>
-                    </thead>
-                    <tbody id="rosterTableBody">
-                        </tbody>
-                </table>
-            </div>
+        <div id="credentialFields" style="display: none;">
+            <input type="email" id="email" placeholder="Email Address" autocomplete="email">
+            <input type="password" id="password" placeholder="Password (min 6 characters)">
+            <button class="btn-primary" id="mainAuthBtn" onclick="handleAuth()">Submit</button>
+            <button class="btn-secondary" onclick="resetToGate()">← Back to Choices</button>
         </div>
-
     </div>
 
+    <!-- SCREEN 2: TASK SELECTION GATES ("What do you want to work on today?") -->
+    <div id="taskSelectionScreen" class="app-card tricolor-frame" style="display: none;">
+        <h2 class="main-title" style="font-size: 24px; margin-bottom: 8px;">Welcome Back!</h2>
+        <p class="subtitle" style="margin-bottom: 28px;">What do you want to work on today?</p>
+        
+        <div class="choice-container vertical-choice">
+            <button class="btn-outlined-rectangle" onclick="launchTaskTrack('fidel')">Fidel</button>
+            <button class="btn-outlined-rectangle" onclick="launchTaskTrack('writing')">Writing</button>
+            <button class="btn-outlined-rectangle" onclick="launchTaskTrack('reading')">Reading</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 3: AVATAR SETUP -->
+    <div id="profileSetupScreen" class="app-card tricolor-frame" style="display: none;">
+        <h2 class="welcome-title" style="color: var(--ethio-green); font-size: 26px; margin-bottom: 4px;">Set Up Profile!</h2>
+        <p class="subtitle">Pick a student nickname and your badge</p>
+        <input type="text" id="displayName" placeholder="Enter your name / nickname">
+        
+        <div class="avatar-grid">
+            <div class="avatar-option selected" onclick="selectAvatar('🦁', this)">🦁<span class="avatar-label">አንበሳ</span></div>
+            <div class="avatar-option" onclick="selectAvatar('🐆', this)">🐆<span class="avatar-label">ነብር</span></div>
+            <div class="avatar-option" onclick="selectAvatar('🐘', this)">🐘<span class="avatar-label">ዝሆን</span></div>
+            <div class="avatar-option" onclick="selectAvatar('☕', this)">☕<span class="avatar-label">ቡና</span></div>
+            <div class="avatar-option" onclick="selectAvatar('🫖', this)">🫖<span class="avatar-label">ጀበና</span></div>
+            <div class="avatar-option" onclick="selectAvatar('🌼', this)">🌼<span class="avatar-label">አደይ አበባ</span></div>
+        </div>
+        <button class="btn-primary" onclick="saveProfileData()">Enter Classroom 🚀</button>
+    </div>
+
+    <!-- SCREEN 4: CLASSROOM WORKSPACE CONSOLE -->
+    <div id="dashboard">
+        <header>
+            <div class="header-top-row">
+                <div class="profile-header-meta">
+                    <div class="user-avatar-badge" id="displayAvatarHeader">🦁</div>
+                    <h1 id="displayUserHeader">Student Name</h1>
+                </div>
+                <a href="YOUR_ZOOM_LINK_HERE" target="_blank" class="zoom-link-header">📞 Live Zoom</a>
+            </div>
+            <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+            <div class="user-meta">
+                <span id="studentEmail">student@email.com</span>
+                <span id="progressText">0% Mastered</span>
+            </div>
+        </header>
+
+        <!-- Dynamic Content Engine Areas -->
+        <div id="workspaceArea">
+            <div class="workspace-title">
+                <span id="trackTitle">Module Space</span>
+                <button class="nav-back-btn" onclick="exitToTaskMenu()">Change Task</button>
+            </div>
+
+            <!-- VIEW A: FIDEL MATRIX RUNTIME -->
+            <div id="viewFidelGrid" class="fidel-grid"></div>
+
+            <!-- VIEW B: WRITING EXPERIENCE BLOWUP RUNTIME -->
+            <div id="viewWritingTrack" style="display: none;">
+                <div id="writingGridSelector" class="fidel-grid"></div>
+                <div id="writingBlowupContainer" class="blowup-row-container" style="display: none;">
+                    <p class="writing-prompt-text">When you have finished writing, click Next:</p>
+                    <div class="blowup-grid" id="blowupGridRow"></div>
+                    <button class="btn-primary" style="background:#3498db; margin-bottom:0;" onclick="closeWritingBlowup()">Next</button>
+                </div>
+            </div>
+
+            <!-- VIEW C: READING GATEWAY & CHALLENGE CORE -->
+            <div id="viewReadingTrack" style="display: none;">
+                <div id="readingMenuGate" class="choice-container vertical-choice">
+                    <button class="btn-outlined-rectangle" onclick="launchReadingSubMode('fidel-based')">Fidel-based</button>
+                    <button class="btn-outlined-rectangle" onclick="launchReadingSubMode('easy')">Easy Words</button>
+                    <button class="btn-outlined-rectangle" onclick="launchReadingSubMode('challenging')">Challenging Sentences</button>
+                </div>
+                
+                <div id="readingFidelGridArea" class="fidel-grid" style="display: none;"></div>
+
+                <div id="readingFlashcardArena" class="flashcard-wrapper" style="display: none;">
+                    <div class="flashcard-foreign" id="flashCardQuestion">ሰላም</div>
+                    <p style="color: #64748b; font-size:14px;">Tap below to reveal translation</p>
+                    <div class="flashcard-hidden-answer" id="flashCardAnswer" onclick="revealFlashcardTranslation()">Click to Reveal Answer</div>
+                    <button class="btn-primary" style="margin-top: 24px; margin-bottom:0;" onclick="generateReadingCard()">Next Phrase ➡️</button>
+                    <button class="btn-secondary" onclick="backToReadingMenu()">Back to Reading Menu</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-banner">
+            <button class="logout-btn" onclick="logout()">Log Out</button>
+        </div>
+    </div>
+
+    <!-- POPUP DETAILS MODAL (Fidel Mode only) -->
+    <div id="fidelModal" class="modal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h3 class="modal-title" id="modalTitle">Letter Family</h3>
+            <div class="vowel-row" id="vowelRow"></div>
+            <button class="btn-primary" id="masterBtn" style="background:#2ecc71;">Mark Family as Learned</button>
+            <button class="btn-secondary" onclick="closeModal(null)" style="color:#718096;">Close</button>
+        </div>
+    </div>
+
+    <!-- DATA ARRAYS & CORE APPLICATION MOTORS -->
     <script>
-        // Use the exact same backend targets
         const SUPABASE_URL = "https://muisfipoyzkhznfdvnes.supabase.co"; 
         const SUPABASE_KEY = "sb_publishable_VBiJZB8TVM2CSl54aDPP0A_4aDXWb5i";
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const totalFidelFamiliesCount = 34; // Total amount of base Amharic families in system
+        let isSignUpMode = true; let currentUser = null; let masteredLetters = []; 
+        let activeBaseFidel = null; let selectedAvatarSymbol = "🦁"; let currentReadingMode = '';
 
-        window.addEventListener('DOMContentLoaded', () => {
-            loadTeacherDashboardData();
-        });
+        const standardVowels = ["ä", "u", "i", "a", "e", "ə", "o"];
+        
+        const alphabetData = [
+            {base:"ሀ", family:['ሀ','ሁ','ሂ','ሃ','ሄ','ህ','ሆ']}, {base:"ለ", family:['ለ','ሉ','ሊ','ላ','ሌ','ል','ሎ']},
+            {base:"ሐ", family:['ሐ','ሑ','ሒ','ሓ','ሔ','ሕ','ሖ']}, {base:"መ", family:['መ','ሙ','ሚ','ማ','ሜ','ም','ሞ']},
+            {base:"ሠ", family:['ሠ','ሡ','ሢ','ሣ','ሤ','ሥ','ሦ']}, {base:"ረ", family:['ረ','ሩ','ሪ','ራ','ሬ','ር','ሮ']},
+            {base:"ሰ", family:['ሰ','ሱ','ሲ','ሳ','ሴ','ስ','ሶ']}, {base:"ሸ", family:['ሸ','ሹ','ሺ','ሻ','ሼ','ሽ','ሾ']},
+            {base:"ቀ", family:['ቀ','ቁ','ቂ','ቃ','ቄ','ቅ','ቆ']}, {base:"በ", family:['በ','ቡ','ቢ','ባ','ቤ','ብ','ቦ']},
+            {base:"ተ", family:['ተ','ቱ','ቲ','ታ','ቴ','ት','ቶ']}, {base:"ቸ", family:['ቸ','ቹ','ቺ','ቻ','ቼ','ች','ቾ']},
+            {base:"ኀ", family:['ኀ','ኁ','ኂ','ኃ','ኄ','ኅ','ኆ']}, {base:"ነ", family:['ነ','ኑ','ኒ','ና','ኔ','ን','ኖ']},
+            {base:"ኘ", family:['ኘ','ኙ','ኚ','ኛ','ኜ','ኝ','ኞ']}, {base:"አ", family:['አ','ኡ','ኢ','ኣ','ኤ','እ','ኦ']},
+            {base:"ከ", family:['ከ','ኩ','ኪ','ካ','ኬ','ክ','ኮ']}, {base:"ኸ", family:['ኸ','ኹ','ኺ','ኻ','ኼ','ኽ','ኾ']},
+            {base:"ወ", family:['ወ','ዉ','ዊ','ዋ','ዌ','ው','ዎ']}, {base:"ዐ", family:['ዐ','ዑ','ዒ','ዓ','ዔ','ዕ','ዖ']},
+            {base:"ዘ", family:['ዘ','ዙ','ዚ','ዛ','ዜ','ዝ','ዞ']}, {base:"ዠ", family:['ዠ','ዡ','ዢ','ዣ','ዤ','ዥ','ዦ']},
+            {base:"የ", family:['የ','ዩ','ዪ','ያ','ዬ','ይ','ዮ']}, {base:"ደ", family:['ደ','ዱ','ዲ','ዳ','ዴ','ድ','ዶ']},
+            {base:"ጀ", family:['ጀ','ጁ','ጂ','ጃ','ጄ','ጅ','ጆ']}, {base:"ገ", family:['ገ','ጉ','ጊ','ጋ','ጌ','ግ','ጎ']},
+            {base:"ጠ", family:['ጠ','ጡ','ጢ','ጣ','ጤ','ጥ','ጦ']}, {base:"ጨ", family:['ጨ','ጩ','ጪ','ጫ','ጬ','ጭ','ጮ']},
+            {base:"ጰ", family:['ጰ','ጱ','ጲ','ጳ','ጴ','ጵ','ጶ']}, {base:"ጸ", family:['ጸ','ጹ','ጺ','ጻ','ጼ','ጽ','ጾ']},
+            {base:"ፀ", family:['ፀ','ፁ','ፂ','ፃ','ኄ','ፅ','ፅ']}, {base:"ፈ", family:['ፈ','ፉ','ፊ','ፋ','ፌ','ፍ','ፎ']},
+            {base:"ፐ", family:['ፐ','ፑ','ፒ','派','ፔ','ፕ','ፖ']}, {base:"ቨ", family:['ቨ','ዹ','ዺ','ቫ','ቬ','ቭ','ቮ']}
+        ];
 
-        async function loadTeacherDashboardData() {
-            document.getElementById("loadingIndicator").style.display = "block";
-            document.getElementById("tableWrapper").style.display = "none";
+        const readingEasyBank = [
+            {q: "ሰላም", a: "Selam (Hello / Peace)"}, {q: "አመሰግናለሁ", a: "Ameseginalehw (Thank you)"},
+            {q: "ውሻ", a: "Wusha (Dog)"}, {q: "ድመት", a: "Dimet (Cat)"},
+            {q: "ውሃ", a: "Wiha (Water)"}, {q: "እንጀራ", a: "Injera (Ethiopian Flatbread)"}
+        ];
 
-            try {
-                // 1. Fetch all student profile setups
-                const { data: profiles, error: profileErr } = await _supabase
-                    .from('profiles')
-                    .select('id, display_name, avatar_character');
+        const readingHardBank = [
+            {q: "እንዴት ነህ?", a: "Indet neh? (How are you? - Masculine)"},
+            {q: "ስሜ ማን ነው?", a: "Sime man new? (What is my name?)"},
+            {q: "መጽሐፍ ማንበብ እወዳለሁ።", a: "Mets'haf manbeb iwedalehw. (I love reading books.)"},
+            {q: "ኢትዮጵያ ውብ ሀገር ናት።", a: "Ityop'ya wub hager nat. (Ethiopia is a beautiful country.)"}
+        ];
 
-                if (profileErr) throw profileErr;
+        window.addEventListener('DOMContentLoaded', () => { resetToGate(); });
 
-                // 2. Fetch all student progress saves
-                const { data: progressRecords, error: progressErr } = await _supabase
-                    .from('user_progress')
-                    .select('user_id, mastered_letters');
+        function resetToGate() {
+            document.getElementById("authScreen").style.display = "block";
+            document.getElementById("onboardingGate").style.display = "flex";
+            document.getElementById("credentialFields").style.display = "none";
+            document.getElementById("taskSelectionScreen").style.display = "none";
+            document.getElementById("dashboard").style.display = "none";
+        }
 
-                if (progressErr) throw progressErr;
+        function selectAuthFlow(flow) {
+            isSignUpMode = (flow === 'signup');
+            document.getElementById("onboardingGate").style.display = "none";
+            document.getElementById("credentialFields").style.display = "block";
+        }
 
-                // Restructuring progress data maps for matching up loops
-                const progressMap = {};
-                progressRecords.forEach(rec => {
-                    progressMap[rec.user_id] = rec.mastered_letters || [];
-                });
+        async function handleAuth() {
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value;
+            if (!email || !password) return alert("Please complete fields.");
 
-                renderRoster(profiles || [], progressMap);
-
-            } catch (err) {
-                alert("Teacher Portal Error: " + err.message);
-                console.error(err);
+            if (isSignUpMode) {
+                const { data, error } = await _supabase.auth.signUp({ email, password });
+                if (error) return alert(error.message);
+                if (data?.user) {
+                    currentUser = data.user;
+                    document.getElementById("studentEmail").innerText = currentUser.email;
+                    document.getElementById("authScreen").style.display = "none";
+                    document.getElementById("profileSetupScreen").style.display = "block";
+                }
+            } else {
+                const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+                if (error) return alert(error.message);
+                if (data?.user) checkUserProfileStatus(data.user);
             }
         }
 
-        function renderRoster(profiles, progressMap) {
-            const tbody = document.getElementById("rosterTableBody");
-            tbody.innerHTML = "";
-
-            if (profiles.length === 0) {
-                document.getElementById("loadingIndicator").innerText = "No student accounts have gone through setup yet.";
-                return;
-            }
-
-            document.getElementById("loadingIndicator").style.display = "none";
-            document.getElementById("tableWrapper").style.display = "block";
-
-            let totalProgressAccumulator = 0;
-            let activeCount = 0;
-
-            profiles.forEach(profile => {
-                const masteredList = progressMap[profile.id] || [];
-                const totalMastered = masteredList.length;
-                
-                // Calculate percentage based on 34 character system families
-                const progressPercent = Math.min(Math.round((totalMastered / totalFidelFamiliesCount) * 100), 100);
-                
-                totalProgressAccumulator += progressPercent;
-                if (totalMastered > 0) activeCount++;
-
-                // Build Table Row Layout Elements
-                const row = document.createElement('tr');
-
-                // Column 1: Profile Badge & Name
-                const profileCell = document.createElement('td');
-                profileCell.className = "student-profile-cell";
-                profileCell.innerHTML = `
-                    <div class="avatar-circle">${profile.avatar_character || '🦁'}</div>
-                    <div>
-                        <div class="student-name">${profile.display_name || 'Anonymous Student'}</div>
-                    </div>
-                `;
-                row.appendChild(profileCell);
-
-                // Column 2: Progress Bars
-                const progressCell = document.createElement('td');
-                progressCell.innerHTML = `
-                    <div class="progress-wrapper">
-                        <div class="progress-track">
-                            <div class="progress-fill" style="width: ${progressPercent}%"></div>
-                        </div>
-                        <div class="percent-text">${progressPercent}%</div>
-                    </div>
-                `;
-                row.appendChild(progressCell);
-
-                // Column 3: Badges for each actual character family mastered
-                const lettersCell = document.createElement('td');
-                if (totalMastered > 0) {
-                    const badgeContainer = document.createElement('div');
-                    badgeContainer.className = "letters-badge-container";
-                    masteredList.forEach(letter => {
-                        badgeContainer.innerHTML += `<span class="letter-badge">${letter}</span>`;
-                    });
-                    lettersCell.appendChild(badgeContainer);
-                } else {
-                    lettersCell.innerHTML = `<span class="empty-badge">No letters completed yet</span>`;
-                }
-                row.appendChild(lettersCell);
-
-                tbody.appendChild(row);
-            });
-
-            // Update Header Stats Layout Modules
-            document.getElementById("statTotalStudents").innerText = profiles.length;
-            document.getElementById("statActiveStudents").innerText = activeCount;
+        async function checkUserProfileStatus(user) {
+            currentUser = user;
+            document.getElementById("studentEmail").innerText = user.email;
+            const { data: profile } = await _supabase.from('profiles').select('display_name, avatar_character').eq('id', user.id).maybeSingle();
             
-            const generalizedAvg = profiles.length > 0 ? Math.round(totalProgressAccumulator / profiles.length) : 0;
-            document.getElementById("statAvgProgress").innerText = `${generalizedAvg}%`;
+            if (profile && profile.display_name) {
+                selectedAvatarSymbol = profile.avatar_character;
+                document.getElementById("displayUserHeader").innerText = profile.display_name;
+                document.getElementById("displayAvatarHeader").innerText = profile.avatar_character;
+                
+                // Show "What do you want to work on today?" onboarding screen on login
+                document.getElementById("authScreen").style.display = "none";
+                document.getElementById("taskSelectionScreen").style.display = "block";
+            } else {
+                document.getElementById("authScreen").style.display = "none";
+                document.getElementById("profileSetupScreen").style.display = "block";
+            }
+        }
+
+        function selectAvatar(symbol, element) {
+            selectedAvatarSymbol = symbol;
+            document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+
+        async function saveProfileData() {
+            const nameInput = document.getElementById("displayName").value.trim();
+            if (!nameInput) return alert("Please enter a nickname.");
+            const { error } = await _supabase.from('profiles').upsert({ id: currentUser.id, display_name: nameInput, avatar_character: selectedAvatarSymbol });
+            if (error) return alert(error.message);
+            
+            document.getElementById("displayUserHeader").innerText = nameInput;
+            document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
+            document.getElementById("profileSetupScreen").style.display = "none";
+            document.getElementById("taskSelectionScreen").style.display = "block";
+        }
+
+        // TRACK NAVIGATION CONTROLLER
+        function launchTaskTrack(track) {
+            document.getElementById("taskSelectionScreen").style.display = "none";
+            document.getElementById("dashboard").style.display = "block";
+            
+            // Toggle view visibility maps
+            document.getElementById("viewFidelGrid").style.display = (track === 'fidel') ? "grid" : "none";
+            document.getElementById("viewWritingTrack").style.display = (track === 'writing') ? "block" : "none";
+            document.getElementById("viewReadingTrack").style.display = (track === 'reading') ? "block" : "none";
+
+            if (track === 'fidel') {
+                document.getElementById("trackTitle").innerText = "Fidel Chart Matrix";
+                buildFidelMatrixContainer();
+            } else if (track === 'writing') {
+                document.getElementById("trackTitle").innerText = "Writing Practice";
+                buildWritingMatrixContainer();
+            } else if (track === 'reading') {
+                document.getElementById("trackTitle").innerText = "Reading Hub";
+                backToReadingMenu();
+            }
+            fetchUserProgress();
+        }
+
+        function exitToTaskMenu() {
+            document.getElementById("dashboard").style.display = "none";
+            document.getElementById("taskSelectionScreen").style.display = "block";
+        }
+
+        // BUILD GENERATORS
+        function buildFidelMatrixContainer() {
+            const area = document.getElementById("viewFidelGrid");
+            area.innerHTML = "";
+            alphabetData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "fidel-card";
+                card.setAttribute('data-fidel', item.base);
+                card.innerText = item.base;
+                card.onclick = () => openFidel(item.base, item.family);
+                area.appendChild(card);
+            });
+        }
+
+        function buildWritingMatrixContainer() {
+            const area = document.getElementById("writingGridSelector");
+            area.innerHTML = "";
+            document.getElementById("writingGridSelector").style.display = "grid";
+            document.getElementById("writingBlowupContainer").style.display = "none";
+
+            alphabetData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "fidel-card writing-mode";
+                card.innerText = item.base;
+                card.onclick = () => explodeRowForWriting(item.base, item.family);
+                area.appendChild(card);
+            });
+        }
+
+        function explodeRowForWriting(baseLetter, familyArray) {
+            document.getElementById("writingGridSelector").style.display = "none";
+            document.getElementById("writingBlowupContainer").style.display = "block";
+            
+            const line = document.getElementById("blowupGridRow");
+            line.innerHTML = "";
+            familyArray.forEach((char, idx) => {
+                const box = document.createElement('div');
+                box.className = "blowup-box";
+                box.innerHTML = `${char}<div style="font-size:12px; color:#64748b; font-family:sans-serif !important;">${standardVowels[idx]}</div>`;
+                line.appendChild(box);
+            });
+        }
+
+        function closeWritingBlowup() {
+            buildWritingMatrixContainer();
+        }
+
+        // READING PIPELINE RUNTIMES
+        function backToReadingMenu() {
+            document.getElementById("readingMenuGate").style.display = "flex";
+            document.getElementById("readingFidelGridArea").style.display = "none";
+            document.getElementById("readingFlashcardArena").style.display = "none";
+        }
+
+        function launchReadingSubMode(subMode) {
+            currentReadingMode = subMode;
+            document.getElementById("readingMenuGate").style.display = "none";
+
+            if (subMode === 'fidel-based') {
+                document.getElementById("readingFidelGridArea").style.display = "grid";
+                const area = document.getElementById("readingFidelGridArea");
+                area.innerHTML = "";
+                alphabetData.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = "fidel-card";
+                    card.innerText = item.base;
+                    card.onclick = () => openFidel(item.base, item.family);
+                    area.appendChild(card);
+                });
+            } else {
+                document.getElementById("readingFlashcardArena").style.display = "block";
+                generateReadingCard();
+            }
+        }
+
+        function generateReadingCard() {
+            const bank = (currentReadingMode === 'easy') ? readingEasyBank : readingHardBank;
+            const randomized = bank[Math.floor(Math.random() * bank.length)];
+            
+            document.getElementById("flashCardQuestion").innerText = randomized.q;
+            const ansField = document.getElementById("flashCardAnswer");
+            ansField.innerText = "Click to Reveal Answer";
+            ansField.style.background = "#f1f5f9";
+            ansField.setAttribute("data-true-answer", randomized.a);
+        }
+
+        function revealFlashcardTranslation() {
+            const ansField = document.getElementById("flashCardAnswer");
+            ansField.innerText = ansField.getAttribute("data-true-answer");
+            ansField.style.background = "#e8f8f5";
+        }
+
+        // DATABASE PROGRESS CORE LOGIC
+        async function fetchUserProgress() {
+            if (!currentUser) return;
+            const { data } = await _supabase.from('user_progress').select('mastered_letters').eq('user_id', currentUser.id).maybeSingle();
+            if (data && data.mastered_letters) masteredLetters = data.mastered_letters;
+            renderUIProgressUpdates();
+        }
+
+        function renderUIProgressUpdates() {
+            document.querySelectorAll('.fidel-card').forEach(card => {
+                const letter = card.getAttribute('data-fidel');
+                if (masteredLetters.includes(letter)) card.classList.add('completed');
+                else card.classList.remove('completed');
+            });
+            const percent = alphabetData.length > 0 ? Math.round((masteredLetters.length / alphabetData.length) * 100) : 0;
+            document.getElementById("progressBar").style.width = `${percent}%`;
+            document.getElementById("progressText").innerText = `${percent}% Mastered`;
+        }
+
+        function openFidel(baseLetter, familyArray) {
+            activeBaseFidel = baseLetter;
+            document.getElementById("modalTitle").innerText = `"${baseLetter}" Family`;
+            const row = document.getElementById("vowelRow");
+            row.innerHTML = "";
+            familyArray.forEach((char, index) => {
+                const box = document.createElement('div');
+                box.className = 'vowel-box';
+                box.innerHTML = `${char}<span class="vowel-label">${standardVowels[index]}</span>`;
+                row.appendChild(box);
+            });
+            const masterBtn = document.getElementById("masterBtn");
+            masterBtn.innerText = masteredLetters.includes(baseLetter) ? "Mark Family as Incomplete" : "Mark Family as Learned";
+            masterBtn.style.background = masteredLetters.includes(baseLetter) ? "#e74c3c" : "#2ecc71";
+            masterBtn.onclick = () => toggleLetterMastery();
+            document.getElementById("fidelModal").style.display = "flex";
+        }
+
+        async function toggleLetterMastery() {
+            if (masteredLetters.includes(activeBaseFidel)) masteredLetters = masteredLetters.filter(item => item !== activeBaseFidel);
+            else masteredLetters.push(activeBaseFidel);
+
+            const { error } = await _supabase.from('user_progress').upsert({ user_id: currentUser.id, mastered_letters: masteredLetters }, { onConflict: 'user_id' });
+            if (error) alert("Sync failed: " + error.message);
+            else { renderUIProgressUpdates(); closeModal(null); }
+        }
+
+        function closeModal(event) {
+            if (!event || event.target === document.getElementById("fidelModal")) {
+                document.getElementById("fidelModal").style.display = "none";
+                activeBaseFidel = null;
+            }
+        }
+
+        async function logout() {
+            await _supabase.auth.signOut();
+            currentUser = null; masteredLetters = [];
+            resetToGate();
         }
     </script>
 </body>
