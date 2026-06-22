@@ -64,56 +64,30 @@
         .choice-container { display: flex; gap: 12px; margin-bottom: 14px; }
         .vertical-choice { flex-direction: column; gap: 16px; width: 100%; }
 
-        /* Filled Selection Rectangles with Hover and Click Effects */
         .track-rect-btn {
-            width: 100%;
-            padding: 22px;
-            font-size: 18px;
-            font-weight: 700;
-            border: none;
-            border-radius: 16px;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.25s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            color: white;
+            width: 100%; padding: 22px; font-size: 18px; font-weight: 700; border: none; border-radius: 16px; cursor: pointer; text-align: center; transition: all 0.25s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.05); color: white;
         }
-
-        .track-fidel { background-color: var(--ethio-green); color: white; }
+        .track-fidel { background-color: var(--ethio-green); }
         .track-fidel:hover { background-color: #0e6b05; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(18, 136, 7, 0.3); }
-
         .track-writing { background-color: var(--ethio-yellow); color: #2B2B24; }
         .track-writing:hover { background-color: #e2ba10; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(252, 209, 22, 0.4); }
-
-        .track-reading { background-color: var(--ethio-red); color: white; }
+        .track-reading { background-color: var(--ethio-red); }
         .track-reading:hover { background-color: #c60f24; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(232, 17, 45, 0.3); }
 
-        /* Click Keyframe Animation */
-        .btn-clicked-animation {
-            animation: buttonPop 0.4s ease-out;
-        }
-
+        .btn-clicked-animation { animation: buttonPop 0.4s ease-out; }
         @keyframes buttonPop {
             0% { transform: scale(1); }
             50% { transform: scale(0.92); opacity: 0.8; }
             100% { transform: scale(1); }
         }
 
-        .btn-filled-rectangle {
-            flex: 1; padding: 18px; font-size: 16px; font-weight: 700; border-radius: 12px; border: none; cursor: pointer; transition: transform 0.1s;
-        }
+        .btn-filled-rectangle { flex: 1; padding: 18px; font-size: 16px; font-weight: 700; border-radius: 12px; border: none; cursor: pointer; transition: transform 0.1s; }
         .btn-signup-rect { background: var(--ethio-green); color: white; }
         .btn-login-rect { background: #2c3e50; color: white; }
-
-        .btn-outlined-rectangle {
-            width: 100%; padding: 20px; font-size: 18px; font-weight: 700; background: transparent; color: var(--text-dark);
-            border: 3px solid #2c3e50; border-radius: 16px; cursor: pointer; text-align: center; transition: transform 0.1s;
-        }
+        .btn-outlined-rectangle { width: 100%; padding: 20px; font-size: 18px; font-weight: 700; background: transparent; color: var(--text-dark); border: 3px solid #2c3e50; border-radius: 16px; cursor: pointer; text-align: center; transition: transform 0.1s; }
         .btn-outlined-rectangle:active, .btn-filled-rectangle:active { transform: scale(0.97); }
 
-        .btn-primary { 
-            background: linear-gradient(135deg, var(--ethio-green), #0F7306); color: white; padding: 16px; border: none; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; margin-bottom: 14px;
-        }
+        .btn-primary { background: linear-gradient(135deg, var(--ethio-green), #0F7306); color: white; padding: 16px; border: none; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; margin-bottom: 14px; }
         .btn-secondary { background: transparent; color: #64748b; font-size: 14px; border: none; cursor: pointer; width: 100%; margin-top: 12px; }
 
         .avatar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
@@ -122,42 +96,41 @@
         .avatar-label { font-size: 11px; display: block; color: #55554E; margin-top: 6px; font-weight: bold; }
 
         #studentDashboard, #teacherDashboardView { display: none; max-width: 600px; margin: 0 auto; width: 100%; }
-        #teacherDashboardView { max-width: 900px; }
+        header { background: white; padding: 16px; border-radius: 16px; box-shadow: var(--shadow-premium); margin-bottom: 20px; }
         
-        header { 
-            background: white; padding: 16px; border-radius: 16px; box-shadow: var(--shadow-premium); margin-bottom: 20px; 
-        }
-        .profile-clickable-trigger {
-            display: flex; flex-direction: column; align-items: flex-start; gap: 4px; cursor: pointer; transition: opacity 0.2s;
-        }
+        .profile-clickable-trigger { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; cursor: pointer; transition: opacity 0.2s; }
         .profile-clickable-trigger:hover { opacity: 0.8; }
         .user-avatar-badge { width: 44px; height: 44px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; }
-        header h1 { font-size: 18px; color: var(--text-dark); font-weight: 700; }
         
         .progress-container { width: 100%; background: #edf2f7; border-radius: 20px; height: 12px; overflow: hidden; margin: 8px 0; }
         .progress-bar { height: 100%; width: 0%; background: #2ecc71; transition: width 0.4s ease; }
         .user-meta { display: flex; justify-content: space-between; font-size: 13px; color: #718096; }
         
-        .game-leaderboard-card {
-            background: white; padding: 20px; border-radius: 18px; box-shadow: var(--shadow-premium); margin-bottom: 24px; border: 2px solid #e2e8f0;
-        }
-        .leaderboard-title { font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-        .leaderboard-list { display: flex; flex-direction: column; gap: 10px; }
+        /* Collapsible Dropdown Leaderboard Component */
+        .game-leaderboard-card { background: white; border-radius: 18px; box-shadow: var(--shadow-premium); margin-bottom: 24px; border: 2px solid #e2e8f0; overflow: hidden; }
+        .leaderboard-header-btn { width: 100%; background: #f8fafc; border: none; padding: 16px 20px; font-size: 16px; font-weight: 700; color: #1e293b; text-align: left; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .leaderboard-list { display: none; flex-direction: column; gap: 10px; padding: 16px; background: white; border-top: 1px solid #e2e8f0; }
         .leaderboard-row { display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #f8fafc; border-radius: 12px; }
         .leaderboard-row.current-user { border: 2px solid var(--ethio-yellow); background: #fffdf5; }
         .player-info { display: flex; align-items: center; gap: 10px; }
-        .player-rank { font-weight: bold; color: #64748b; font-size: 14px; width: 20px; }
         .player-identity { font-weight: 700; font-size: 14px; color: #334155; }
         .player-score-badge { background: var(--ethio-green); color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
 
         .workspace-title { font-size: 20px; font-weight: 700; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;}
 
+        /* Modified 3-Column Grid Layout for Fidel Matrices */
+        .fidel-grid-3col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
         .fidel-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
-        .fidel-card { 
-            background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px 0; text-align: center; font-size: 26px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.02); 
-        }
+        
+        .fidel-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px 0; text-align: center; font-size: 26px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
         .fidel-card.completed { background: #e8f8f5; border-color: #2ecc71; color: #2ecc71; }
         .fidel-card.writing-mode { border-color: #3498db; background: #e8f4f8; }
+
+        /* Row Layout Inside Expanded Modal View */
+        .vowel-header-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; background: #1e293b; color: white; border-radius: 8px; padding: 8px 4px; font-size: 11px; font-weight: bold; margin-bottom: 8px; text-align: center; }
+        .vowel-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 20px; }
+        .vowel-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px 0; font-size: 20px; font-weight: bold; display: flex; flex-direction: column; align-items: center; }
+        .english-subscript { font-size: 11px; color: #64748b; font-weight: normal; margin-top: 4px; }
 
         .blowup-row-container { background: #f8fafc; border: 2px dashed #3498db; border-radius: 18px; padding: 24px 12px; margin-bottom: 20px; text-align: center; }
         .blowup-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 20px; }
@@ -172,21 +145,14 @@
         td { padding: 16px 14px; border-bottom: 1px solid #e2e8f0; }
         .letter-badge { font-family: 'Noto Sans Ethiopic', sans-serif; background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; font-size: 13px; margin: 2px; display: inline-block; }
 
-        .bottom-banner { 
-            position: fixed; bottom: calc(16px + env(safe-area-inset-bottom)); left: 16px; right: 16px; background: #2c3e50; padding: 14px 18px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 100; 
-        }
+        .bottom-banner { position: fixed; bottom: calc(16px + env(safe-area-inset-bottom)); left: 16px; right: 16px; background: #2c3e50; padding: 14px 18px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
         .logout-btn { background: transparent; color: white; border: none; font-size: 14px; font-weight: bold; cursor: pointer; }
         .nav-back-btn { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
         .role-switch-btn { background: #f39c12; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
-        /* General Modal Overlays */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 200; padding: 20px; }
-        .modal-content { background: #fff; padding: 24px; border-radius: 20px; width: 100%; max-width: 360px; text-align: center; }
-        .vowel-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 20px; }
-        .vowel-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 0; font-size: 16px; font-weight: bold; display: flex; flex-direction: column; align-items: center; }
-        .vowel-label { font-size: 11px; color: #64748b; margin-top: 4px; }
-
-        /* Profile Stats Dashboard View Elements */
+        .modal-content { background: #fff; padding: 24px; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; }
+        
         .stat-box-row { display: flex; flex-direction: column; gap: 12px; margin: 18px 0; text-align: left; }
         .stat-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; display: flex; align-items: center; justify-content: space-between; }
         .stat-card h4 { font-size: 14px; color: #64748b; font-weight: bold; text-transform: uppercase; }
@@ -195,7 +161,6 @@
 </head>
 <body>
 
-    <!-- SCREEN 1: ONBOARDING GATE -->
     <div id="authScreen" class="app-card tricolor-frame">
         <h1 class="main-title">Fidel Classroom</h1>
         <p class="subtitle" id="authSubtitle">Learn the Amharic Alphabet</p>
@@ -213,7 +178,6 @@
         </div>
     </div>
 
-    <!-- MASTER GATE: ONLY FOR YOUR EMAIL -->
     <div id="roleSelectionScreen" class="app-card tricolor-frame" style="display: none;">
         <h2 class="main-title" style="font-size: 24px; margin-bottom: 8px;">Welcome, Teacher!</h2>
         <p class="subtitle">How would you like to access the portal today?</p>
@@ -223,7 +187,6 @@
         </div>
     </div>
 
-    <!-- SCREEN 2: STUDENT TASK SELECTION GATES (UPDATED COLOR STYLE RECTANGLES) -->
     <div id="taskSelectionScreen" class="app-card tricolor-frame" style="display: none;">
         <h2 class="main-title" style="font-size: 24px; margin-bottom: 8px;">Welcome Back!</h2>
         <p class="subtitle" style="margin-bottom: 28px;">What do you want to work on today?</p>
@@ -234,7 +197,6 @@
         </div>
     </div>
 
-    <!-- SCREEN 3: AVATAR SETUP -->
     <div id="profileSetupScreen" class="app-card tricolor-frame" style="display: none;">
         <h2 class="welcome-title" style="color: var(--ethio-green); font-size: 26px; margin-bottom: 4px;">Set Up Profile!</h2>
         <p class="subtitle">Pick a student nickname and your badge</p>
@@ -250,12 +212,10 @@
         <button class="btn-primary" onclick="saveProfileData()">Enter Classroom 🚀</button>
     </div>
 
-    <!-- VIEW A: THE COMPLETE STUDENT WORKSPACE DASHBOARD -->
     <div id="studentDashboard">
         <header>
             <div class="header-top-row" style="display:flex; justify-content:space-between; align-items:flex-start;">
-                <!-- CLICKING HERE NOW OPENS THE PROFILE STATS POPUP DRAWER -->
-                <div class="profile-clickable-trigger" onclick="openProfileStatsDashboard()" title="View Stats Profile">
+                <div class="profile-clickable-trigger" onclick="openProfileStatsDashboard()" title="Edit Profile & View Stats">
                     <div class="user-avatar-badge" id="displayAvatarHeader">🦁</div>
                     <h1 id="displayUserHeader" style="text-decoration: underline; text-underline-offset: 4px;">Student Name</h1>
                 </div>
@@ -270,9 +230,11 @@
             </div>
         </header>
 
-        <!-- LIVE INTERACTIVE LEADERBOARD COMPONENT -->
         <div class="game-leaderboard-card">
-            <div class="leaderboard-title">🏆 Classroom Champions (Live Progress)</div>
+            <button class="leaderboard-header-btn" onclick="toggleLeaderboardDropdown()">
+                <span>🏆 Classroom Champions</span>
+                <span id="dropdownIndicatorIcon">▼</span>
+            </button>
             <div class="leaderboard-list" id="liveLeaderboardContent">
                 <p style="color:#64748b; font-size:13px;">Loading class standings...</p>
             </div>
@@ -283,7 +245,7 @@
                 <span id="trackTitle">Module Space</span>
                 <button class="nav-back-btn" onclick="exitToTaskMenu()">Change Task</button>
             </div>
-            <div id="viewFidelGrid" class="fidel-grid"></div>
+            <div id="viewFidelGrid" class="fidel-grid-3col"></div>
             <div id="viewWritingTrack" style="display: none;">
                 <div id="writingGridSelector" class="fidel-grid"></div>
                 <div id="writingBlowupContainer" class="blowup-row-container" style="display: none;">
@@ -310,7 +272,6 @@
         <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
     </div>
 
-    <!-- VIEW B: THE SECURED TEACHER VIEW ROSTER -->
     <div id="teacherDashboardView">
         <header style="border-left: 6px solid var(--ethio-green); display:flex; justify-content:space-between; align-items:center;">
             <div>
@@ -331,22 +292,38 @@
         <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
     </div>
 
-    <!-- DETAILS POPUP DRAWER MODAL -->
     <div id="fidelModal" class="modal" onclick="closeModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <h3 class="modal-title" id="modalTitle" style="margin-bottom:16px; font-size:22px;">Letter Family</h3>
+            
+            <div class="vowel-header-strip">
+                <div>-a/e</div><div>-u</div><div>-ee</div><div>-a</div><div>-ay</div><div>-ih</div><div>-o</div>
+            </div>
+            
             <div class="vowel-row" id="vowelRow"></div>
             <button class="btn-primary" id="masterBtn" style="background:#2ecc71;">Mark Family as Learned</button>
             <button class="btn-secondary" onclick="closeModal(null)">Close</button>
         </div>
     </div>
 
-    <!-- INTERACTIVE PROFILE STATS MODAL BOARD -->
     <div id="profileStatsModal" class="modal" onclick="closeProfileStatsModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 380px;">
-            <div id="statsAvatarRing" style="font-size: 48px; margin-bottom: 4px;">🦁</div>
-            <h3 id="statsNameTitle" style="font-size: 22px; color: var(--text-dark);">Student Profile</h3>
-            <p style="font-size: 13px; color: #64748b; margin-bottom: 16px;">Classroom Performance Dashboard</p>
+            <h3 style="font-size: 20px; color: var(--text-dark); margin-bottom: 12px;">Edit Profile Details</h3>
+            
+            <input type="text" id="editProfileNameInput" placeholder="Update Nickname" style="margin-bottom: 12px;">
+            <div class="avatar-grid" style="grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 16px;">
+                <div class="avatar-option" style="padding: 6px 0; font-size: 18px;" onclick="selectEditAvatar('🦁', this)">🦁</div>
+                <div class="avatar-option" style="padding: 6px 0; font-size: 18px;" onclick="selectEditAvatar('🐆', this)">🐆</div>
+                <div class="avatar-option" style="padding: 6px 0; font-size: 18px;" onclick="selectEditAvatar('🐘', this)">🐘</div>
+                <div class="avatar-option" style="padding: 6px 0; font-size: 18px;" onclick="selectEditAvatar('☕', this)">☕</div>
+                <div class="avatar-option" style="padding: 6px 0; font-size: 18px;" onclick="selectEditAvatar('🫖', this)">🫖</div>
+                <div class="avatar-option" style="padding: 6px 0; font-size: 18px;" onclick="selectEditAvatar('🌼', this)">🌼</div>
+            </div>
+            <button class="btn-primary" style="padding: 10px; margin-bottom: 20px; font-size:14px;" onclick="updateProfileDatabaseChanges()">Save Identity Changes 💾</button>
+            
+            <hr style="border: 0; border-top: 1px solid #e2e8f0; margin-bottom: 16px;">
+            
+            <h3 style="font-size: 18px; color: var(--text-dark);">Your Classroom Progress</h3>
             
             <div class="stat-box-row">
                 <div class="stat-card" style="border-left: 4px solid var(--ethio-green);">
@@ -359,7 +336,7 @@
                 <div class="stat-card" style="border-left: 4px solid var(--ethio-yellow);">
                     <div>
                         <h4>Writing Track</h4>
-                        <p id="statWritingCount">0/34 Rows Completed</p>
+                        <p id="statWritingCount">0 / 34 Complete</p>
                     </div>
                     <span style="font-size: 20px;">✍️</span>
                 </div>
@@ -372,7 +349,7 @@
                 </div>
             </div>
             
-            <button class="btn-primary" onclick="closeProfileStatsModal(null)">Return to Study</button>
+            <button class="btn-primary" style="background: #64748b;" onclick="closeProfileStatsModal(null)">Close Dashboard</button>
         </div>
     </div>
 
@@ -383,8 +360,29 @@
 
         const ADMIN_EMAIL = "senaitrichmond16@gmail.com";
         const totalFidelFamiliesCount = 34;
-        let currentUser = null; let masteredLetters = []; let activeBaseFidel = null; let selectedAvatarSymbol = "🦁"; let currentReadingMode = '';
+        let currentUser = null; let masteredLetters = []; let activeBaseFidel = null; let selectedAvatarSymbol = "🦁"; let tempEditAvatar = "🦁"; let currentReadingMode = '';
         const standardVowels = ["ä", "u", "i", "a", "e", "ə", "o"];
+
+        /* Phonetic English Pronunciation Values Array mapped sequentially to standard vowels */
+        const EnglishPhoneticSubscriptBank = {
+            "ሀ": ["he", "hu", "hi", "ha", "hee", "hih", "ho"], "ለ": ["le", "lu", "li", "la", "lee", "lih", "lo"],
+            "ሐ": ["he", "hu", "hi", "ha", "hee", "hih", "ho"], "መ": ["me", "mu", "mi", "ma", "mee", "mih", "mo"],
+            "ሠ": ["se", "su", "si", "sa", "see", "sih", "so"], "ረ": ["re", "ru", "ri", "ra", "ree", "rih", "ro"],
+            "ሰ": ["se", "su", "si", "sa", "see", "sih", "so"], "ሸ": ["she", "shu", "shi", "sha", "shee", "shih", "sho"],
+            "ቀ": ["k'e", "k'u", "k'i", "k'a", "k'ee", "k'ih", "k'o"], "በ": ["be", "bu", "bi", "ba", "bee", "bih", "bo"],
+            "ተ": ["te", "tu", "ti", "ta", "tee", "tih", "to"], "ቸ": ["che", "chu", "chi", "cha", "chee", "chih", "cho"],
+            "ኀ": ["he", "hu", "hi", "ha", "hee", "hih", "ho"], "ነ": ["ne", "nu", "ni", "na", "nee", "nih", "no"],
+            "ኘ": ["nye", "nyu", "nyi", "nya", "nyee", "nyih", "nyo"], "አ": ["a", "u", "i", "a", "e", "ih", "o"],
+            "ከ": ["ke", "ku", "ki", "ka", "kee", "kih", "ko"], "ኸ": ["he", "hu", "hi", "ha", "hee", "hih", "ho"],
+            "ወ": ["we", "wu", "wi", "wa", "wee", "wih", "wo"], "ዐ": ["a", "u", "i", "a", "e", "ih", "o"],
+            "ዘ": ["ze", "zu", "zi", "za", "zee", "zih", "zo"], "ዠ": ["zhe", "zhu", "zhi", "zha", "zhee", "zhih", "zho"],
+            "የ": ["ye", "yu", "yi", "ya", "yee", "yih", "yo"], "ደ": ["de", "du", "di", "da", "dee", "dih", "do"],
+            "ጀ": ["je", "ju", "ji", "ja", "jee", "jih", "jo"], "ገ": ["ge", "gu", "gi", "ga", "gee", "gih", "go"],
+            "ጠ": ["t'e", "t'u", "t'i", "t'a", "t'ee", "t'ih", "t'o"], "ጨ": ["ch'e", "ch'u", "ch'i", "ch'a", "ch'ee", "ch'ih", "ch'o"],
+            "ጰ": ["p'e", "p'u", "p'i", "p'a", "p'ee", "p'ih", "p'o"], "ጸ": ["ts'e", "ts'u", "ts'i", "ts'a", "ts'ee", "ts'ih", "ts'o"],
+            "ፀ": ["ts'e", "ts'u", "ts'i", "ts'a", "ts'ee", "ts'ih", "ts'o"], "ፈ": ["fe", "fu", "fi", "fa", "fee", "fih", "fo"],
+            "精度": ["pe", "pu", "pi", "pa", "pee", "pih", "po"], "ቨ": ["ve", "vu", "vi", "va", "vee", "vih", "vo"]
+        };
 
         const alphabetData = [
             {base:"ሀ", family:['ሀ','ሁ','ሂ','ሃ','ሄ','ህ','ሆ']}, {base:"ለ", family:['ለ','ሉ','ሊ','ላ','ሌ','ል','ሎ']},
@@ -462,6 +460,7 @@
             
             if (profile && profile.display_name) {
                 selectedAvatarSymbol = profile.avatar_character;
+                tempEditAvatar = profile.avatar_character;
                 document.getElementById("displayUserHeader").innerText = profile.display_name;
                 document.getElementById("displayAvatarHeader").innerText = profile.avatar_character;
                 
@@ -511,7 +510,18 @@
             }
         }
 
-        /* Click Trigger Animation Sequencer */
+        function toggleLeaderboardDropdown() {
+            const list = document.getElementById("liveLeaderboardContent");
+            const indicator = document.getElementById("dropdownIndicatorIcon");
+            if (list.style.display === "flex") {
+                list.style.display = "none";
+                indicator.innerText = "▼";
+            } else {
+                list.style.display = "flex";
+                indicator.innerText = "▲";
+            }
+        }
+
         function animatedTrackTrigger(track, element) {
             element.classList.add('btn-clicked-animation');
             setTimeout(() => {
@@ -528,7 +538,10 @@
             document.getElementById("viewWritingTrack").style.display = (track === 'writing') ? "block" : "none";
             document.getElementById("viewReadingTrack").style.display = (track === 'reading') ? "block" : "none";
 
-            if (track === 'fidel') { document.getElementById("trackTitle").innerText = "Fidel Chart Matrix"; buildFidelMatrixContainer(); }
+            if (track === 'fidel') { 
+                document.getElementById("trackTitle").innerText = "Fidel Families"; 
+                build3ColumnFidelMatrixContainer(); 
+            }
             else if (track === 'writing') { document.getElementById("trackTitle").innerText = "Writing Practice"; buildWritingMatrixContainer(); }
             else if (track === 'reading') { document.getElementById("trackTitle").innerText = "Reading Hub"; backToReadingMenu(); }
             fetchUserProgress();
@@ -540,7 +553,8 @@
             document.getElementById("taskSelectionScreen").style.display = "block";
         }
 
-        function buildFidelMatrixContainer() {
+        /* 3-Column Fidel Grid Matrix Layout Generator */
+        function build3ColumnFidelMatrixContainer() {
             const area = document.getElementById("viewFidelGrid"); area.innerHTML = "";
             alphabetData.forEach(item => {
                 const card = document.createElement('div'); card.className = "fidel-card"; card.setAttribute('data-fidel', item.base); card.innerText = item.base;
@@ -611,18 +625,43 @@
             document.getElementById("progressText").innerText = `${percent}% Mastered`;
         }
 
-        /* PROFILE STATS MODAL BOARD GENERATOR */
+        /* Profile Modal Trigger Injection with Hydrated Live Values */
         function openProfileStatsDashboard() {
             const name = document.getElementById("displayUserHeader").innerText;
             const pct = document.getElementById("progressText").innerText;
             
-            document.getElementById("statsNameTitle").innerText = name;
-            document.getElementById("statsAvatarRing").innerText = selectedAvatarSymbol;
+            document.getElementById("editProfileNameInput").value = name;
             document.getElementById("statFidelPercent").innerText = pct;
             document.getElementById("statWritingCount").innerText = `${masteredLetters.length} / 34 Families Complete`;
             document.getElementById("statReadingStatus").innerText = masteredLetters.length > 5 ? "Level: Active Reader" : "Level: Beginner";
             
+            // Unhighlight all modal avatar selections and highlight current active choice
+            document.querySelectorAll('#profileStatsModal .avatar-option').forEach(opt => {
+                if(opt.innerText === selectedAvatarSymbol) opt.classList.add('selected');
+                else opt.classList.remove('selected');
+            });
+
             document.getElementById("profileStatsModal").style.display = "flex";
+        }
+
+        function selectEditAvatar(symbol, element) {
+            tempEditAvatar = symbol;
+            document.querySelectorAll('#profileStatsModal .avatar-option').forEach(o => o.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+
+        async function updateProfileDatabaseChanges() {
+            const newName = document.getElementById("editProfileNameInput").value.trim();
+            if(!newName) return alert("Nickname cannot be blank.");
+
+            selectedAvatarSymbol = tempEditAvatar;
+            await _supabase.from('profiles').upsert({ id: currentUser.id, display_name: newName, avatar_character: selectedAvatarSymbol });
+            
+            document.getElementById("displayUserHeader").innerText = newName;
+            document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
+            
+            renderLiveLeaderboard();
+            document.getElementById("profileStatsModal").style.display = "none";
         }
 
         function closeProfileStatsModal(e) {
@@ -665,16 +704,26 @@
                     container.appendChild(row);
                 });
             } catch (err) {
-                console.error("Leaderboard update fallback triggered", err);
+                console.error("Leaderboard fallback wrapper structural return", err);
             }
         }
 
+        /* Open Fidel Row Modal mapping custom phonetic transcript targets */
         function openFidel(baseLetter, familyArray) {
-            activeBaseFidel = baseLetter; document.getElementById("modalTitle").innerText = `"${baseLetter}" Family`;
+            activeBaseFidel = baseLetter; 
+            document.getElementById("modalTitle").innerText = `"${baseLetter}" Family Row`;
             const row = document.getElementById("vowelRow"); row.innerHTML = "";
+            
+            const subscripts = EnglishPhoneticSubscriptBank[baseLetter] || ["", "", "", "", "", "", ""];
+
             familyArray.forEach((char, index) => {
-                row.innerHTML += `<div class="vowel-box">${char}<span class="vowel-label">${standardVowels[index]}</span></div>`;
+                row.innerHTML += `
+                    <div class="vowel-box">
+                        ${char}
+                        <span class="english-subscript">${subscripts[index]}</span>
+                    </div>`;
             });
+            
             const masterBtn = document.getElementById("masterBtn");
             masterBtn.innerText = masteredLetters.includes(baseLetter) ? "Mark Family as Incomplete" : "Mark Family as Learned";
             masterBtn.style.background = masteredLetters.includes(baseLetter) ? "#e74c3c" : "#2ecc71";
