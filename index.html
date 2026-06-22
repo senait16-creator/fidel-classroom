@@ -64,6 +64,41 @@
         .choice-container { display: flex; gap: 12px; margin-bottom: 14px; }
         .vertical-choice { flex-direction: column; gap: 16px; width: 100%; }
 
+        /* Filled Selection Rectangles with Hover and Click Effects */
+        .track-rect-btn {
+            width: 100%;
+            padding: 22px;
+            font-size: 18px;
+            font-weight: 700;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            color: white;
+        }
+
+        .track-fidel { background-color: var(--ethio-green); color: white; }
+        .track-fidel:hover { background-color: #0e6b05; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(18, 136, 7, 0.3); }
+
+        .track-writing { background-color: var(--ethio-yellow); color: #2B2B24; }
+        .track-writing:hover { background-color: #e2ba10; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(252, 209, 22, 0.4); }
+
+        .track-reading { background-color: var(--ethio-red); color: white; }
+        .track-reading:hover { background-color: #c60f24; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(232, 17, 45, 0.3); }
+
+        /* Click Keyframe Animation */
+        .btn-clicked-animation {
+            animation: buttonPop 0.4s ease-out;
+        }
+
+        @keyframes buttonPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.92); opacity: 0.8; }
+            100% { transform: scale(1); }
+        }
+
         .btn-filled-rectangle {
             flex: 1; padding: 18px; font-size: 16px; font-weight: 700; border-radius: 12px; border: none; cursor: pointer; transition: transform 0.1s;
         }
@@ -92,7 +127,10 @@
         header { 
             background: white; padding: 16px; border-radius: 16px; box-shadow: var(--shadow-premium); margin-bottom: 20px; 
         }
-        .profile-header-meta { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+        .profile-clickable-trigger {
+            display: flex; flex-direction: column; align-items: flex-start; gap: 4px; cursor: pointer; transition: opacity 0.2s;
+        }
+        .profile-clickable-trigger:hover { opacity: 0.8; }
         .user-avatar-badge { width: 44px; height: 44px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; }
         header h1 { font-size: 18px; color: var(--text-dark); font-weight: 700; }
         
@@ -100,7 +138,6 @@
         .progress-bar { height: 100%; width: 0%; background: #2ecc71; transition: width 0.4s ease; }
         .user-meta { display: flex; justify-content: space-between; font-size: 13px; color: #718096; }
         
-        /* Interactive Leaderboard Styling */
         .game-leaderboard-card {
             background: white; padding: 20px; border-radius: 18px; box-shadow: var(--shadow-premium); margin-bottom: 24px; border: 2px solid #e2e8f0;
         }
@@ -142,11 +179,18 @@
         .nav-back-btn { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
         .role-switch-btn { background: #f39c12; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
+        /* General Modal Overlays */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 200; padding: 20px; }
         .modal-content { background: #fff; padding: 24px; border-radius: 20px; width: 100%; max-width: 360px; text-align: center; }
         .vowel-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 20px; }
         .vowel-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 0; font-size: 16px; font-weight: bold; display: flex; flex-direction: column; align-items: center; }
         .vowel-label { font-size: 11px; color: #64748b; margin-top: 4px; }
+
+        /* Profile Stats Dashboard View Elements */
+        .stat-box-row { display: flex; flex-direction: column; gap: 12px; margin: 18px 0; text-align: left; }
+        .stat-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; display: flex; align-items: center; justify-content: space-between; }
+        .stat-card h4 { font-size: 14px; color: #64748b; font-weight: bold; text-transform: uppercase; }
+        .stat-card p { font-size: 18px; font-weight: 700; color: #1e293b; }
     </style>
 </head>
 <body>
@@ -179,14 +223,14 @@
         </div>
     </div>
 
-    <!-- SCREEN 2: STUDENT TASK SELECTION GATES -->
+    <!-- SCREEN 2: STUDENT TASK SELECTION GATES (UPDATED COLOR STYLE RECTANGLES) -->
     <div id="taskSelectionScreen" class="app-card tricolor-frame" style="display: none;">
         <h2 class="main-title" style="font-size: 24px; margin-bottom: 8px;">Welcome Back!</h2>
         <p class="subtitle" style="margin-bottom: 28px;">What do you want to work on today?</p>
         <div class="choice-container vertical-choice">
-            <button class="btn-outlined-rectangle" onclick="launchTaskTrack('fidel')">Fidel</button>
-            <button class="btn-outlined-rectangle" onclick="launchTaskTrack('writing')">Writing</button>
-            <button class="btn-outlined-rectangle" onclick="launchTaskTrack('reading')">Reading</button>
+            <button id="btnTrackFidel" class="track-rect-btn track-fidel" onclick="animatedTrackTrigger('fidel', this)">learn the Fidel ፊደል</button>
+            <button id="btnTrackWriting" class="track-rect-btn track-writing" onclick="animatedTrackTrigger('writing', this)">writing</button>
+            <button id="btnTrackReading" class="track-rect-btn track-reading" onclick="animatedTrackTrigger('reading', this)">reading</button>
         </div>
     </div>
 
@@ -210,9 +254,10 @@
     <div id="studentDashboard">
         <header>
             <div class="header-top-row" style="display:flex; justify-content:space-between; align-items:flex-start;">
-                <div class="profile-header-meta">
+                <!-- CLICKING HERE NOW OPENS THE PROFILE STATS POPUP DRAWER -->
+                <div class="profile-clickable-trigger" onclick="openProfileStatsDashboard()" title="View Stats Profile">
                     <div class="user-avatar-badge" id="displayAvatarHeader">🦁</div>
-                    <h1 id="displayUserHeader">Student Name</h1>
+                    <h1 id="displayUserHeader" style="text-decoration: underline; text-underline-offset: 4px;">Student Name</h1>
                 </div>
                 <div id="teacherPortalShortcut" style="display:none;">
                     <button class="role-switch-btn" onclick="goToRoleSelectionMenu()">Teacher Menu 🛠️</button>
@@ -225,7 +270,7 @@
             </div>
         </header>
 
-        <!-- NEW LIVE INTERACTIVE LEADERBOARD COMPONENT -->
+        <!-- LIVE INTERACTIVE LEADERBOARD COMPONENT -->
         <div class="game-leaderboard-card">
             <div class="leaderboard-title">🏆 Classroom Champions (Live Progress)</div>
             <div class="leaderboard-list" id="liveLeaderboardContent">
@@ -293,6 +338,41 @@
             <div class="vowel-row" id="vowelRow"></div>
             <button class="btn-primary" id="masterBtn" style="background:#2ecc71;">Mark Family as Learned</button>
             <button class="btn-secondary" onclick="closeModal(null)">Close</button>
+        </div>
+    </div>
+
+    <!-- INTERACTIVE PROFILE STATS MODAL BOARD -->
+    <div id="profileStatsModal" class="modal" onclick="closeProfileStatsModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 380px;">
+            <div id="statsAvatarRing" style="font-size: 48px; margin-bottom: 4px;">🦁</div>
+            <h3 id="statsNameTitle" style="font-size: 22px; color: var(--text-dark);">Student Profile</h3>
+            <p style="font-size: 13px; color: #64748b; margin-bottom: 16px;">Classroom Performance Dashboard</p>
+            
+            <div class="stat-box-row">
+                <div class="stat-card" style="border-left: 4px solid var(--ethio-green);">
+                    <div>
+                        <h4>Fidel Matrix</h4>
+                        <p id="statFidelPercent">0% Mastered</p>
+                    </div>
+                    <span style="font-size: 20px;">📊</span>
+                </div>
+                <div class="stat-card" style="border-left: 4px solid var(--ethio-yellow);">
+                    <div>
+                        <h4>Writing Track</h4>
+                        <p id="statWritingCount">0/34 Rows Completed</p>
+                    </div>
+                    <span style="font-size: 20px;">✍️</span>
+                </div>
+                <div class="stat-card" style="border-left: 4px solid var(--ethio-red);">
+                    <div>
+                        <h4>Reading Milestone</h4>
+                        <p id="statReadingStatus">Module Ready</p>
+                    </div>
+                    <span style="font-size: 20px;">📖</span>
+                </div>
+            </div>
+            
+            <button class="btn-primary" onclick="closeProfileStatsModal(null)">Return to Study</button>
         </div>
     </div>
 
@@ -431,6 +511,15 @@
             }
         }
 
+        /* Click Trigger Animation Sequencer */
+        function animatedTrackTrigger(track, element) {
+            element.classList.add('btn-clicked-animation');
+            setTimeout(() => {
+                element.classList.remove('btn-clicked-animation');
+                launchTaskTrack(track);
+            }, 350);
+        }
+
         function launchTaskTrack(track) {
             document.getElementById("taskSelectionScreen").style.display = "none";
             document.getElementById("studentDashboard").style.display = "block";
@@ -522,7 +611,26 @@
             document.getElementById("progressText").innerText = `${percent}% Mastered`;
         }
 
-        // NEW: LIVE GAME LEADERBOARD RENDERER
+        /* PROFILE STATS MODAL BOARD GENERATOR */
+        function openProfileStatsDashboard() {
+            const name = document.getElementById("displayUserHeader").innerText;
+            const pct = document.getElementById("progressText").innerText;
+            
+            document.getElementById("statsNameTitle").innerText = name;
+            document.getElementById("statsAvatarRing").innerText = selectedAvatarSymbol;
+            document.getElementById("statFidelPercent").innerText = pct;
+            document.getElementById("statWritingCount").innerText = `${masteredLetters.length} / 34 Families Complete`;
+            document.getElementById("statReadingStatus").innerText = masteredLetters.length > 5 ? "Level: Active Reader" : "Level: Beginner";
+            
+            document.getElementById("profileStatsModal").style.display = "flex";
+        }
+
+        function closeProfileStatsModal(e) {
+            if (!e || e.target === document.getElementById("profileStatsModal")) {
+                document.getElementById("profileStatsModal").style.display = "none";
+            }
+        }
+
         async function renderLiveLeaderboard() {
             try {
                 const { data: profiles } = await _supabase.from('profiles').select('id, display_name, avatar_character');
@@ -531,7 +639,6 @@
                 const progressMap = {};
                 progressRecords.forEach(rec => { progressMap[rec.user_id] = rec.mastered_letters || []; });
 
-                // Map scores and sort
                 let leaderList = profiles.map(p => {
                     const mCount = (progressMap[p.id] || []).length;
                     const pct = Math.round((mCount / totalFidelFamiliesCount) * 100);
@@ -580,7 +687,7 @@
             else masteredLetters.push(activeBaseFidel);
             await _supabase.from('user_progress').upsert({ user_id: currentUser.id, mastered_letters: masteredLetters }, { onConflict: 'user_id' });
             renderUIProgressUpdates(); 
-            renderLiveLeaderboard(); // Update leaderboard immediately on change!
+            renderLiveLeaderboard();
             closeModal(null);
         }
         function closeModal(e) { if (!e || e.target === document.getElementById("fidelModal")) document.getElementById("fidelModal").style.display = "none"; }
