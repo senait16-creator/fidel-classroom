@@ -34,6 +34,7 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         .app-card {
@@ -41,122 +42,131 @@
             width: 100%;
             margin: auto; 
             background: var(--card-neutral); 
-            padding: 36px 24px; 
-            border-radius: 28px; 
+            padding: 32px 20px; 
+            border-radius: 24px; 
             box-shadow: var(--shadow-premium); 
             text-align: center;
             position: relative;
         }
 
         .tricolor-frame::before {
-            content: ''; position: absolute; top: -6px; left: -6px; right: -6px; bottom: -6px; border-radius: 34px; padding: 6px; 
+            content: ''; position: absolute; top: -6px; left: -6px; right: -6px; bottom: -6px; border-radius: 30px; padding: 6px; 
             background: linear-gradient(to right, #E8112D 33%, #FCD116 33%, #FCD116 66%, #128807 66%);
             -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
         }
 
-        .main-title { font-size: 32px; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
-        .subtitle { font-size: 16px; color: #64748b; margin-bottom: 24px; font-weight: 500; }
+        .main-title { font-size: 28px; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
+        .subtitle { font-size: 15px; color: #64748b; margin-bottom: 20px; font-weight: 500; padding: 0 8px; }
         
         input { 
-            width: 100%; padding: 16px; margin-bottom: 14px; border: 2px solid #E6E6DE; border-radius: 14px; font-size: 16px; outline: none; background: #FDFDFB;
+            width: 100%; padding: 16px; margin-bottom: 14px; border: 2px solid #E6E6DE; border-radius: 14px; font-size: 16px; outline: none; background: #FDFDFB; -webkit-appearance: none;
         }
 
         .choice-container { display: flex; gap: 12px; margin-bottom: 14px; }
-        .vertical-choice { flex-direction: column; gap: 16px; width: 100%; }
+        .vertical-choice { flex-direction: column; gap: 14px; width: 100%; }
 
         .track-rect-btn {
-            width: 100%; padding: 22px; font-size: 18px; font-weight: 700; border: none; border-radius: 16px; cursor: pointer; text-align: center; transition: all 0.25s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.05); color: white;
+            width: 100%; padding: 20px 16px; border: none; border-radius: 16px; cursor: pointer; text-align: center; transition: all 0.25s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.05); color: white; display: flex; flex-direction: column; align-items: center; gap: 4px;
         }
+        .track-rect-btn .btn-main-txt { font-size: 18px; font-weight: 700; }
+        .track-rect-btn .btn-sub-txt { font-size: 13px; opacity: 0.9; font-weight: 400; }
+
         .track-fidel { background-color: var(--ethio-green); }
-        .track-fidel:hover { background-color: #0e6b05; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(18, 136, 7, 0.3); }
-        .track-writing { background-color: var(--ethio-yellow); color: #2B2B24; }
-        .track-writing:hover { background-color: #e2ba10; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(252, 209, 22, 0.4); }
+        .track-fidel:hover { background-color: #0e6b05; transform: translateY(-2px); }
+        .track-basics { background-color: var(--ethio-yellow); color: #2B2B24; }
+        .track-basics:hover { background-color: #e2ba10; transform: translateY(-2px); }
         .track-reading { background-color: var(--ethio-red); }
-        .track-reading:hover { background-color: #c60f24; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(232, 17, 45, 0.3); }
+        .track-reading:hover { background-color: #c60f24; transform: translateY(-2px); }
 
         .btn-clicked-animation { animation: buttonPop 0.4s ease-out; }
         @keyframes buttonPop {
             0% { transform: scale(1); }
-            50% { transform: scale(0.92); opacity: 0.8; }
+            50% { transform: scale(0.94); opacity: 0.8; }
             100% { transform: scale(1); }
         }
 
-        .btn-filled-rectangle { flex: 1; padding: 18px; font-size: 16px; font-weight: 700; border-radius: 12px; border: none; cursor: pointer; transition: transform 0.1s; }
+        .btn-filled-rectangle { flex: 1; padding: 16px; font-size: 16px; font-weight: 700; border-radius: 12px; border: none; cursor: pointer; min-height: 48px; }
         .btn-signup-rect { background: var(--ethio-green); color: white; }
         .btn-login-rect { background: #2c3e50; color: white; }
-        .btn-outlined-rectangle { width: 100%; padding: 20px; font-size: 18px; font-weight: 700; background: transparent; color: var(--text-dark); border: 3px solid #2c3e50; border-radius: 16px; cursor: pointer; text-align: center; transition: transform 0.1s; }
-        .btn-outlined-rectangle:active, .btn-filled-rectangle:active { transform: scale(0.97); }
+        
+        .btn-outlined-rectangle { width: 100%; padding: 18px 14px; font-size: 16px; font-weight: 700; background: transparent; color: var(--text-dark); border: 3px solid #2c3e50; border-radius: 16px; cursor: pointer; text-align: center; display: flex; flex-direction: column; gap: 4px; }
+        .btn-outlined-rectangle .opt-title { font-size: 16px; font-weight: bold; }
+        .btn-outlined-rectangle .opt-desc { font-size: 12px; color: #64748b; font-weight: normal; }
 
-        .btn-primary { background: linear-gradient(135deg, var(--ethio-green), #0F7306); color: white; padding: 16px; border: none; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; margin-bottom: 14px; }
-        .btn-secondary { background: transparent; color: #64748b; font-size: 14px; border: none; cursor: pointer; width: 100%; margin-top: 12px; }
+        .btn-primary { background: linear-gradient(135deg, var(--ethio-green), #0F7306); color: white; padding: 16px; border: none; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; margin-bottom: 14px; min-height: 48px; }
+        .btn-secondary { background: transparent; color: #64748b; font-size: 14px; border: none; cursor: pointer; width: 100%; margin-top: 12px; padding: 8px; }
 
-        .avatar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
-        .avatar-option { background: #F6F6F0; border: 2px solid #E6E6DE; border-radius: 16px; padding: 16px 0; font-size: 28px; cursor: pointer; }
+        .avatar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        .avatar-option { background: #F6F6F0; border: 2px solid #E6E6DE; border-radius: 14px; padding: 12px 0; font-size: 24px; cursor: pointer; }
         .avatar-option.selected { border-color: var(--ethio-yellow); background: #FFFDF0; }
-        .avatar-label { font-size: 11px; display: block; color: #55554E; margin-top: 6px; font-weight: bold; }
+        .avatar-label { font-size: 11px; display: block; color: #55554E; margin-top: 4px; font-weight: bold; }
 
-        #studentDashboard, #teacherDashboardView { display: none; max-width: 600px; margin: 0 auto; width: 100%; }
-        header { background: white; padding: 16px; border-radius: 16px; box-shadow: var(--shadow-premium); margin-bottom: 20px; }
+        #studentDashboard, #teacherDashboardView { display: none; max-width: 480px; margin: 0 auto; width: 100%; }
+        header { background: white; padding: 16px; border-radius: 16px; box-shadow: var(--shadow-premium); margin-bottom: 16px; }
         
-        .profile-clickable-trigger { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; cursor: pointer; transition: opacity 0.2s; }
-        .profile-clickable-trigger:hover { opacity: 0.8; }
-        .user-avatar-badge { width: 44px; height: 44px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        .profile-clickable-trigger { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; cursor: pointer; }
+        .user-avatar-badge { width: 40px; height: 40px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
         
-        .progress-container { width: 100%; background: #edf2f7; border-radius: 20px; height: 12px; overflow: hidden; margin: 8px 0; }
+        .progress-container { width: 100%; background: #edf2f7; border-radius: 20px; height: 10px; overflow: hidden; margin: 8px 0; }
         .progress-bar { height: 100%; width: 0%; background: #2ecc71; transition: width 0.4s ease; }
-        .user-meta { display: flex; justify-content: space-between; font-size: 13px; color: #718096; }
+        .user-meta { display: flex; justify-content: space-between; font-size: 12px; color: #718096; }
         
-        .game-leaderboard-card { background: white; border-radius: 18px; box-shadow: var(--shadow-premium); margin-bottom: 24px; border: 2px solid #e2e8f0; overflow: hidden; }
-        .leaderboard-header-btn { width: 100%; background: #f8fafc; border: none; padding: 16px 20px; font-size: 16px; font-weight: 700; color: #1e293b; text-align: left; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .leaderboard-list { display: none; flex-direction: column; gap: 10px; padding: 16px; background: white; border-top: 1px solid #e2e8f0; }
-        .leaderboard-row { display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #f8fafc; border-radius: 12px; }
+        .game-leaderboard-card { background: white; border-radius: 16px; box-shadow: var(--shadow-premium); margin-bottom: 16px; border: 2px solid #e2e8f0; overflow: hidden; }
+        .leaderboard-header-btn { width: 100%; background: #f8fafc; border: none; padding: 14px 16px; font-size: 15px; font-weight: 700; color: #1e293b; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .leaderboard-list { display: none; flex-direction: column; gap: 8px; padding: 12px; background: white; border-top: 1px solid #e2e8f0; }
+        .leaderboard-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: #f8fafc; border-radius: 10px; font-size: 14px; }
         .leaderboard-row.current-user { border: 2px solid var(--ethio-yellow); background: #fffdf5; }
-        .player-info { display: flex; align-items: center; gap: 10px; }
-        .player-identity { font-weight: 700; font-size: 14px; color: #334155; }
-        .player-score-badge { background: var(--ethio-green); color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        .player-info { display: flex; align-items: center; gap: 8px; }
+        .player-identity { font-weight: 700; color: #334155; }
+        .player-score-badge { background: var(--ethio-green); color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
 
-        .workspace-title { font-size: 20px; font-weight: 700; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;}
+        .workspace-title { font-size: 18px; font-weight: 700; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; padding: 0 4px; }
 
-        .fidel-grid-3col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-        .fidel-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+        .fidel-grid-3col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        .fidel-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
         
-        .fidel-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px 0; text-align: center; font-size: 26px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.02); position: relative; }
-        .fidel-card.completed { background: #e8f8f5; border-color: #2ecc71; color: #2ecc71; opacity: 1; }
-        .fidel-card.reviewing { border-color: #e67e22; background: #fef5e7; opacity: 0.95; }
+        .fidel-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px 0; text-align: center; font-size: 24px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.01); }
+        .fidel-card.completed { background: #e8f8f5; border-color: #2ecc71; color: #2ecc71; }
+        .fidel-card.reviewing { border-color: #e67e22; background: #fef5e7; }
         .fidel-card.writing-mode { border-color: #3498db; background: #e8f4f8; }
 
         /* Full Page Family Classroom View Workspace */
-        #isolatedFamilyClassroom { display: none; background: white; padding: 24px; border-radius: 24px; box-shadow: var(--shadow-premium); text-align: center; margin-top: 10px; }
-        .classroom-header-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; background: #1e293b; color: white; border-radius: 12px; padding: 12px 6px; font-size: 14px; font-weight: bold; margin-bottom: 12px; }
-        .classroom-row-giant { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-bottom: 32px; }
+        #isolatedFamilyClassroom { display: none; background: white; padding: 16px; border-radius: 20px; box-shadow: var(--shadow-premium); text-align: center; }
+        .classroom-header-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; background: #1e293b; color: white; border-radius: 10px; padding: 10px 4px; font-size: 11px; font-weight: bold; margin-bottom: 12px; }
+        .classroom-row-giant { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
         
-        .giant-char-card { background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 16px; padding: 32px 0; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.2s ease; }
-        .giant-char-card .letter { font-size: 48px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
-        .giant-char-card .sub { font-size: 16px; color: #64748b; font-weight: bold; }
-        .giant-char-card .audio-trigger-btn { margin-top: 10px; background: #e2e8f0; border: none; font-size: 14px; padding: 6px 10px; border-radius: 20px; cursor: pointer; transition: background 0.2s; }
-        .giant-char-card .audio-trigger-btn:active { background: var(--ethio-yellow); }
+        .giant-char-card { background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 16px; padding: 16px; display: flex; flex-direction: row; align-items: center; justify-content: space-between; width: 100%; }
+        .giant-char-card .char-left-info { display: flex; align-items: center; gap: 16px; }
+        .giant-char-card .letter { font-size: 40px; font-weight: 700; color: #0f172a; }
+        .giant-char-card .sub { font-size: 15px; color: #64748b; font-weight: bold; background: #e2e8f0; padding: 2px 8px; border-radius: 6px; }
+        .giant-char-card .audio-trigger-btn { background: #34495e; color: white; border: none; font-size: 14px; padding: 10px 16px; border-radius: 12px; cursor: pointer; font-weight: bold; }
+        .giant-char-card .audio-trigger-btn:active { background: var(--ethio-yellow); color: #2B2B24; }
 
-        .flashcard-wrapper { background: #fff; border: 2px solid #e2e8f0; border-radius: 20px; padding: 40px 20px; text-align: center; box-shadow: var(--shadow-premium); margin-bottom: 20px; }
-        .flashcard-foreign { font-size: 42px; font-weight: bold; color: #2c3e50; margin-bottom: 12px; }
-        .flashcard-hidden-answer { background: #f1f5f9; border-radius: 10px; padding: 12px; font-size: 18px; font-weight: bold; color: var(--ethio-green); cursor: pointer; }
+        .blowup-row-container { background: white; border-radius: 16px; padding: 16px; border: 2px solid #cbd5e1; }
+        .blowup-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
+        .blowup-box { background: #f1f5f9; padding: 12px 4px; text-align: center; font-size: 22px; font-weight: bold; border-radius: 10px; border: 1px solid #cbd5e1; }
 
-        table { width: 100%; border-collapse: collapse; text-align: left; background: white; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-premium); }
-        th { background: #f1f5f9; padding: 14px; font-size: 14px; color: #475569; }
-        td { padding: 16px 14px; border-bottom: 1px solid #e2e8f0; }
-        .letter-badge { font-family: 'Noto Sans Ethiopic', sans-serif; background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; font-size: 13px; margin: 2px; display: inline-block; }
+        .flashcard-wrapper { background: #fff; border: 2px solid #e2e8f0; border-radius: 20px; padding: 32px 16px; text-align: center; box-shadow: var(--shadow-premium); margin-bottom: 16px; }
+        .flashcard-foreign { font-size: 36px; font-weight: bold; color: #2c3e50; margin-bottom: 16px; word-wrap: break-word; }
+        .flashcard-hidden-answer { background: #f1f5f9; border-radius: 12px; padding: 14px; font-size: 16px; font-weight: bold; color: var(--ethio-green); cursor: pointer; min-height: 48px; }
 
-        .bottom-banner { position: fixed; bottom: calc(16px + env(safe-area-inset-bottom)); left: 16px; right: 16px; background: #2c3e50; padding: 14px 18px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
-        .logout-btn { background: transparent; color: white; border: none; font-size: 14px; font-weight: bold; cursor: pointer; }
-        .nav-back-btn { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .role-switch-btn { background: #f39c12; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; text-align: left; background: white; border-radius: 12px; overflow: hidden; }
+        th { background: #f1f5f9; padding: 10px; font-size: 12px; color: #475569; }
+        td { padding: 12px 10px; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
+        .letter-badge { font-family: 'Noto Sans Ethiopic', sans-serif; background: #e0f2fe; color: #0369a1; padding: 2px 4px; border-radius: 4px; font-size: 11px; margin: 1px; display: inline-block; }
 
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 200; padding: 20px; }
-        .modal-content { background: #fff; padding: 24px; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; }
+        .bottom-banner { position: fixed; bottom: calc(12px + env(safe-area-inset-bottom)); left: 16px; right: 16px; background: #2c3e50; padding: 12px 16px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        .logout-btn { background: transparent; color: white; border: none; font-size: 14px; font-weight: bold; cursor: pointer; padding: 6px; }
+        .nav-back-btn { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; }
+        .role-switch-btn { background: #f39c12; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 200; padding: 16px; }
+        .modal-content { background: #fff; padding: 20px; border-radius: 16px; width: 100%; max-width: 360px; text-align: center; }
         
-        .stat-box-row { display: flex; flex-direction: column; gap: 12px; margin: 18px 0; text-align: left; }
-        .stat-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; display: flex; align-items: center; justify-content: space-between; }
-        .stat-card h4 { font-size: 14px; color: #64748b; font-weight: bold; text-transform: uppercase; }
-        .stat-card p { font-size: 18px; font-weight: 700; color: #1e293b; }
+        .stat-box-row { display: flex; flex-direction: column; gap: 10px; margin: 14px 0; text-align: left; }
+        .stat-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; display: flex; align-items: center; justify-content: space-between; }
+        .stat-card h4 { font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase; }
+        .stat-card p { font-size: 16px; font-weight: 700; color: #1e293b; }
     </style>
 </head>
 <body>
@@ -164,7 +174,7 @@
     <!-- SCREEN 1: ONBOARDING GATE -->
     <div id="authScreen" class="app-card tricolor-frame">
         <h1 class="main-title">Fidel Classroom</h1>
-        <p class="subtitle" id="authSubtitle">Learn the Amharic Alphabet</p>
+        <p class="subtitle" id="authSubtitle">Learn the Amharic Language</p>
         
         <div id="onboardingGate" class="choice-container">
             <button class="btn-filled-rectangle btn-signup-rect" onclick="selectAuthFlow('signup')">Sign Up</button>
@@ -175,34 +185,54 @@
             <input type="email" id="email" placeholder="Email Address" autocomplete="email">
             <input type="password" id="password" placeholder="Password (min 6 characters)">
             <button class="btn-primary" id="mainAuthBtn" onclick="handleAuth()">Submit</button>
-            <button class="btn-secondary" onclick="resetToGate()">← Back to Choices</button>
+            <button class="btn-secondary" onclick="resetToGate()">← Back</button>
         </div>
     </div>
 
     <!-- MASTER GATE -->
     <div id="roleSelectionScreen" class="app-card tricolor-frame" style="display: none;">
-        <h2 class="main-title" style="font-size: 24px; margin-bottom: 8px;">Welcome, Teacher!</h2>
-        <p class="subtitle">How would you like to access the portal today?</p>
+        <h2 class="main-title" style="font-size: 22px;">Welcome, Teacher!</h2>
+        <p class="subtitle">Select your entry portal view</p>
         <div class="choice-container vertical-choice">
-            <button class="btn-outlined-rectangle" style="border-color: var(--ethio-green);" onclick="enterAsRole('student')">Enter as Student Mode</button>
-            <button class="btn-outlined-rectangle" style="border-color: #2c3e50;" onclick="enterAsRole('teacher')">Enter as Teacher Panel</button>
+            <button class="btn-outlined-rectangle" style="border-color: var(--ethio-green);" onclick="enterAsRole('student')">
+                <span class="opt-title">Student Mode</span>
+                <span class="opt-desc">Access modules & exercises</span>
+            </button>
+            <button class="btn-outlined-rectangle" style="border-color: #2c3e50;" onclick="enterAsRole('teacher')">
+                <span class="opt-title">Teacher Panel</span>
+                <span class="opt-desc">Review student rosters & progress metrics</span>
+            </button>
         </div>
     </div>
 
     <!-- SCREEN 2: STUDENT TASK SELECTION GATES -->
     <div id="taskSelectionScreen" class="app-card tricolor-frame" style="display: none;">
-        <h2 class="main-title" style="font-size: 24px; margin-bottom: 8px;">Welcome Back!</h2>
-        <p class="subtitle" style="margin-bottom: 28px;">What do you want to work on today?</p>
+        <h2 class="main-title" style="font-size: 22px;">Welcome Back!</h2>
+        <p class="subtitle">Select your target curriculum block</p>
         <div class="choice-container vertical-choice">
-            <button id="btnTrackFidel" class="track-rect-btn track-fidel" onclick="animatedTrackTrigger('fidel', this)">learn the Fidel ፊደል</button>
-            <button id="btnTrackWriting" class="track-rect-btn track-writing" onclick="animatedTrackTrigger('writing', this)">writing</button>
-            <button id="btnTrackReading" class="track-rect-btn track-reading" onclick="animatedTrackTrigger('reading', this)">reading</button>
+            <!-- TRACK 1: GREEN (FIDEL SCRIPT DEVELOPMENT) -->
+            <button id="btnTrackFidel" class="track-rect-btn track-fidel" onclick="animatedTrackTrigger('fidel', this)">
+                <span class="btn-main-txt">Learn the Fidel ፊደል Script</span>
+                <span class="btn-sub-txt">Seeing, Hearing, & Letter Writing</span>
+            </button>
+            
+            <!-- TRACK 2: YELLOW (BASICS & VOCABULARY CORE) -->
+            <button id="btnTrackBasics" class="track-rect-btn track-basics" onclick="animatedTrackTrigger('basics', this)">
+                <span class="btn-main-txt">Learn the Basics</span>
+                <span class="btn-sub-txt">Greetings, Colors, Numbers, & Basic Vocab</span>
+            </button>
+            
+            <!-- TRACK 3: RED (READING STUDIO) -->
+            <button id="btnTrackReading" class="track-rect-btn track-reading" onclick="animatedTrackTrigger('reading', this)">
+                <span class="btn-main-txt">Reading Studio</span>
+                <span class="btn-sub-txt">Sentences & Extensive Word Contexts</span>
+            </button>
         </div>
     </div>
 
     <!-- SCREEN 3: AVATAR SETUP -->
     <div id="profileSetupScreen" class="app-card tricolor-frame" style="display: none;">
-        <h2 class="welcome-title" style="color: var(--ethio-green); font-size: 26px; margin-bottom: 4px;">Set Up Profile!</h2>
+        <h2 class="welcome-title" style="color: var(--ethio-green); font-size: 24px; margin-bottom: 4px;">Set Up Profile!</h2>
         <p class="subtitle">Pick a student nickname and your badge</p>
         <input type="text" id="displayName" placeholder="Enter your name / nickname">
         <div class="avatar-grid">
@@ -220,9 +250,9 @@
     <div id="studentDashboard">
         <header>
             <div class="header-top-row" style="display:flex; justify-content:space-between; align-items:flex-start;">
-                <div class="profile-clickable-trigger" onclick="openProfileStatsDashboard()" title="Edit Profile & View Stats">
+                <div class="profile-clickable-trigger" onclick="openProfileStatsDashboard()">
                     <div class="user-avatar-badge" id="displayAvatarHeader">🦁</div>
-                    <h1 id="displayUserHeader" style="text-decoration: underline; text-underline-offset: 4px;">Student Name</h1>
+                    <h1 id="displayUserHeader" style="font-size:16px; text-decoration: underline; text-underline-offset: 4px;">Student Name</h1>
                 </div>
                 <div id="teacherPortalShortcut" style="display:none;">
                     <button class="role-switch-btn" onclick="goToRoleSelectionMenu()">Teacher Menu 🛠️</button>
@@ -249,50 +279,56 @@
         <div id="workspaceArea">
             <div class="workspace-title">
                 <span id="trackTitle">Module Space</span>
-                <button class="nav-back-btn" id="masterLeaveWorkspaceBtn" onclick="exitToTaskMenu()">Change Task</button>
+                <button class="nav-back-btn" id="masterLeaveWorkspaceBtn" onclick="exitToTaskMenu()">Change Track</button>
             </div>
             
-            <!-- Dynamic 3-Column Grid Layout Selection -->
+            <!-- TRACK 1: Dynamic 3-Column Grid Layout Selection -->
             <div id="viewFidelGrid" class="fidel-grid-3col"></div>
 
-            <!-- Full-Page Family Classroom Workspace Mode -->
+            <!-- TRACK 1 SUB-ELEMENT: Isolated Family Classroom Workspace Mode -->
             <div id="isolatedFamilyClassroom">
-                <h2 id="classroomFamilyTitle" style="font-size:26px; margin-bottom:6px; color:#1e293b;">Family Practice Row</h2>
-                <p style="color:#64748b; margin-bottom:20px; font-size:14px;">Master phonetic values by sight and ear order structures</p>
+                <h2 id="classroomFamilyTitle" style="font-size:22px; margin-bottom:6px; color:#1e293b;">Family Practice Row</h2>
+                <p style="color:#64748b; margin-bottom:16px; font-size:13px;">Review letters in detail. Touch "Listen" to check phonetics.</p>
                 
-                <div class="classroom-header-strip">
-                    <div>-a/e</div><div>-u</div><div>-ee</div><div>-a</div><div>-ay</div><div>-ih</div><div>-o</div>
-                </div>
                 <div class="classroom-row-giant" id="classroomGiantRowMount"></div>
                 
-                <div style="display:flex; gap:12px; margin-top:20px;">
-                    <button class="btn-primary" style="background:#e67e22; flex:1;" onclick="shuffleClassroomRowPhonetics()">Test Me (Shuffle) 🎲</button>
-                    <button class="btn-primary" style="background:#2ecc71; flex:1;" onclick="classroomMarkAsMasteredDirectly()">Mark As Mastered ✅</button>
+                <div style="display:flex; flex-direction:column; gap:10px; margin-top:16px;">
+                    <button class="btn-primary" style="background:#e67e22; margin-bottom:0;" onclick="shuffleClassroomRowPhonetics()">Test Me (Shuffle Letters) 🎲</button>
+                    <button class="btn-primary" style="background:#2ecc71; margin-bottom:0;" onclick="classroomMarkAsMasteredDirectly()">Mark Whole Row As Mastered ✅</button>
                 </div>
                 <button class="btn-secondary" onclick="exitClassroomViewBackToGrid()">← Back to Families Grid</button>
             </div>
 
-            <div id="viewWritingTrack" style="display: none;">
-                <div id="writingGridSelector" class="fidel-grid"></div>
-                <div id="writingBlowupContainer" class="blowup-row-container" style="display: none;">
-                    <p style="font-weight:bold; margin-bottom:16px; color:#475569;">When you have finished writing, click Next:</p>
-                    <div class="blowup-grid" id="blowupGridRow"></div>
-                    <button class="btn-primary" style="background:#3498db; margin-bottom:0;" onclick="closeWritingBlowup()">Next</button>
+            <!-- TRACK 2: Basics & Conversational Vocabulary Module View -->
+            <div id="viewBasicsTrack" style="display: none;">
+                <div id="basicsMenuGate" class="choice-container vertical-choice">
+                    <button class="btn-outlined-rectangle" onclick="launchBasicsSubCategory('greetings')">
+                        <span class="opt-title">👋 Greetings & Phrases</span>
+                        <span class="opt-desc">Everyday polite starter terms</span>
+                    </button>
+                    <button class="btn-outlined-rectangle" onclick="launchBasicsSubCategory('colors')">
+                        <span class="opt-title">🎨 Colors (ቀለማት)</span>
+                        <span class="opt-desc">Primary visual identifiers</span>
+                    </button>
+                    <button class="btn-outlined-rectangle" onclick="launchBasicsSubCategory('numbers')">
+                        <span class="opt-title">🔢 Numbers (ቁጥሮች)</span>
+                        <span class="opt-desc">Basic counting tokens</span>
+                    </button>
+                </div>
+                <div id="basicsFlashcardArena" class="flashcard-wrapper" style="display: none;">
+                    <div class="flashcard-foreign" id="basicsCardQuestion">ሰላም</div>
+                    <div class="flashcard-hidden-answer" id="basicsCardAnswer" onclick="revealBasicsFlashcard()" style="margin-top:16px; margin-bottom:16px;">Click to Reveal Translation</div>
+                    <button class="btn-primary" onclick="generateBasicsCard()">Next Item ➡️</button>
+                    <button class="btn-secondary" onclick="backToBasicsMenu()">Back to Categories</button>
                 </div>
             </div>
 
+            <!-- TRACK 3: Reading Studio View -->
             <div id="viewReadingTrack" style="display: none;">
-                <div id="readingMenuGate" class="choice-container vertical-choice">
-                    <button class="btn-outlined-rectangle" onclick="launchReadingSubMode('fidel-based')">Fidel-based</button>
-                    <button class="btn-outlined-rectangle" onclick="launchReadingSubMode('easy')">Easy Words</button>
-                    <button class="btn-outlined-rectangle" onclick="launchReadingSubMode('challenging')">Challenging Sentences</button>
-                </div>
-                <div id="readingFidelGridArea" class="fidel-grid" style="display: none;"></div>
-                <div id="readingFlashcardArena" class="flashcard-wrapper" style="display: none;">
-                    <div class="flashcard-foreign" id="flashCardQuestion">ሰላም</div>
-                    <div class="flashcard-hidden-answer" id="flashCardAnswer" onclick="revealFlashcardTranslation()" style="margin-top:16px; margin-bottom:16px;">Click to Reveal Answer</div>
-                    <button class="btn-primary" onclick="generateReadingCard()">Next Phrase ➡️</button>
-                    <button class="btn-secondary" onclick="backToReadingMenu()">Back to Reading Menu</button>
+                <div id="readingFlashcardArena" class="flashcard-wrapper">
+                    <div class="flashcard-foreign" id="flashCardQuestion">መጽሐፍ ማንበብ እወዳለሁ።</div>
+                    <div class="flashcard-hidden-answer" id="flashCardAnswer" onclick="revealFlashcardTranslation()" style="margin-top:16px; margin-bottom:16px;">Click to Reveal Translation</div>
+                    <button class="btn-primary" onclick="generateReadingCard()">Next Complex Text ➡️</button>
                 </div>
             </div>
         </div>
@@ -303,16 +339,15 @@
     <div id="teacherDashboardView">
         <header style="border-left: 6px solid var(--ethio-green); display:flex; justify-content:space-between; align-items:center;">
             <div>
-                <h1 style="font-size:24px;">Teacher Control Center</h1>
-                <p>Monitoring active student rosters</p>
-                <button class="role-switch-btn" style="margin-top:8px;" onclick="goToRoleSelectionMenu()">Switch to Student Mode</button>
+                <h1 style="font-size:20px;">Teacher Center</h1>
+                <button class="role-switch-btn" style="margin-top:4px;" onclick="goToRoleSelectionMenu()">Student Mode</button>
             </div>
-            <button class="btn-primary" style="width:auto; padding:12px;" onclick="loadTeacherRosterData()">🔄 Refresh Data</button>
+            <button class="btn-primary" style="width:auto; padding:10px 14px; margin-bottom:0;" onclick="loadTeacherRosterData()">🔄 Refresh</button>
         </header>
-        <div style="background:white; padding:20px; border-radius:16px; overflow-x:auto;">
+        <div style="background:white; padding:12px; border-radius:14px; overflow-x:auto;">
             <table style="width:100%;">
                 <thead>
-                    <tr><th>Student Profile</th><th>Progress Milestone</th><th>Completed Families</th></tr>
+                    <tr><th>Profile</th><th>Milestone</th><th>Mastered</th></tr>
                 </thead>
                 <tbody id="teacherTableBody"></tbody>
             </table>
@@ -323,9 +358,9 @@
     <!-- ROUTING INTERSTITIAL ACTION CHOICE MODAL -->
     <div id="fidelActionChoiceModal" class="modal" onclick="closeActionChoiceModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
-            <h3 id="actionChoiceModalTitle" style="font-size:22px; margin-bottom:8px;">Choose Action</h3>
-            <p style="font-size:14px; color:#64748b; margin-bottom:24px;">Would you like to study this family row in detail or mark it as mastered immediately?</p>
-            <button class="btn-primary" style="background:#3498db;" onclick="triggerStudyClassroomRouting()">Study Row Layout 📖</button>
+            <h3 id="actionChoiceModalTitle" style="font-size:18px; margin-bottom:8px;">Choose Action</h3>
+            <p style="font-size:13px; color:#64748b; margin-bottom:20px;">Study this family row in detail or mark it as mastered immediately?</p>
+            <button class="btn-primary" style="background:#3498db;" onclick="triggerStudyClassroomRouting()">Study Isolated Row Layout 📖</button>
             <button class="btn-primary" style="background:#2ecc71;" onclick="triggerActionMasteredDirectly()">Mark As Mastered ✅</button>
             <button class="btn-secondary" onclick="document.getElementById('fidelActionChoiceModal').style.display='none';">Cancel</button>
         </div>
@@ -333,44 +368,35 @@
 
     <!-- EDITABLE LIVE PROFILE MODAL -->
     <div id="profileStatsModal" class="modal" onclick="closeProfileStatsModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 380px;">
-            <h3 style="font-size: 20px; color: var(--text-dark); margin-bottom: 12px;">Edit Profile Details</h3>
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 340px;">
+            <h3 style="font-size: 18px; color: var(--text-dark); margin-bottom: 12px;">Edit Profile Details</h3>
             
             <input type="text" id="editProfileNameInput" placeholder="Update Nickname" style="margin-bottom: 12px;">
-            <div class="avatar-grid" style="grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 16px;">
-                <div class="avatar-option" style="padding: 6px 0; font-size: 18px;" onclick="selectEditAvatar('🦁', this)">🦁</div>
-                <div class="avatar-option" style="padding: 6px 0; font-size: 18px;" onclick="selectEditAvatar('🐆', this)">🐆</div>
-                <div class="avatar-option" style="padding: 6px 0; font-size: 18px;" onclick="selectEditAvatar('🐘', this)">🐘</div>
-                <div class="avatar-option" style="padding: 6px 0; font-size: 18px;" onclick="selectEditAvatar('☕', this)">☕</div>
-                <div class="avatar-option" style="padding: 6px 0; font-size: 18px;" onclick="selectEditAvatar('🫖', this)">🫖</div>
-                <div class="avatar-option" style="padding: 6px 0; font-size: 18px;" onclick="selectEditAvatar('🌼', this)">🌼</div>
+            <div class="avatar-grid" style="grid-template-columns: repeat(6, 1fr); gap: 4px; margin-bottom: 16px;">
+                <div class="avatar-option" style="padding: 6px 0; font-size: 16px;" onclick="selectEditAvatar('🦁', this)">🦁</div>
+                <div class="avatar-option" style="padding: 6px 0; font-size: 16px;" onclick="selectEditAvatar('🐆', this)">🐆</div>
+                <div class="avatar-option" style="padding: 6px 0; font-size: 16px;" onclick="selectEditAvatar('🐘', this)">🐘</div>
+                <div class="avatar-option" style="padding: 6px 0; font-size: 16px;" onclick="selectEditAvatar('☕', this)">☕</div>
+                <div class="avatar-option" style="padding: 6px 0; font-size: 16px;" onclick="selectEditAvatar('🫖', this)">🫖</div>
+                <div class="avatar-option" style="padding: 6px 0; font-size: 16px;" onclick="selectEditAvatar('🌼', this)">🌼</div>
             </div>
-            <button class="btn-primary" style="padding: 10px; margin-bottom: 20px; font-size:14px;" onclick="updateProfileDatabaseChanges()">Save Identity Changes 💾</button>
+            <button class="btn-primary" style="padding: 10px; margin-bottom: 16px; font-size:14px;" onclick="updateProfileDatabaseChanges()">Save Identity Changes 💾</button>
             
-            <hr style="border: 0; border-top: 1px solid #e2e8f0; margin-bottom: 16px;">
-            <h3 style="font-size: 18px; color: var(--text-dark);">Your Classroom Progress</h3>
+            <hr style="border: 0; border-top: 1px solid #e2e8f0; margin-bottom: 12px;">
+            <h3 style="font-size: 16px; color: var(--text-dark);">Your Progress Status</h3>
             
             <div class="stat-box-row">
-                <div class="stat-card" style="border-left: 4px solid var(--ethio-green);">
+                <div class="stat-card" style="border-left: 4px solid var(--ethio-green); padding: 8px 12px;">
                     <div>
                         <h4>Fidel Matrix</h4>
-                        <p id="statFidelPercent">0% Mastered</p>
+                        <p id="statFidelPercent">0%</p>
                     </div>
-                    <span style="font-size: 20px;">📊</span>
                 </div>
-                <div class="stat-card" style="border-left: 4px solid var(--ethio-yellow);">
+                <div class="stat-card" style="border-left: 4px solid var(--ethio-red); padding: 8px 12px;">
                     <div>
-                        <h4>Writing Track</h4>
-                        <p id="statWritingCount">0 / 33 Complete</p>
+                        <h4>Reading Studio</h4>
+                        <p id="statReadingStatus">Active</p>
                     </div>
-                    <span style="font-size: 20px;">✍️</span>
-                </div>
-                <div class="stat-card" style="border-left: 4px solid var(--ethio-red);">
-                    <div>
-                        <h4>Reading Milestone</h4>
-                        <p id="statReadingStatus">Module Ready</p>
-                    </div>
-                    <span style="font-size: 20px;">📖</span>
                 </div>
             </div>
             <button class="btn-primary" style="background: #64748b;" onclick="closeProfileStatsModal(null)">Close Dashboard</button>
@@ -384,12 +410,12 @@
 
         const ADMIN_EMAIL = "senaitrichmond16@gmail.com";
         const totalFidelFamiliesCount = 33;
-        let currentUser = null; let masteredLetters = []; let reviewingLetters = []; let activeBaseFidel = null; let activeFamilyArrayData = []; let selectedAvatarSymbol = "🦁"; let tempEditAvatar = "🦁"; let currentReadingMode = '';
-        const standardVowels = ["ä", "u", "i", "a", "e", "ə", "o"];
+        let currentUser = null; let masteredLetters = []; let reviewingLetters = []; let activeBaseFidel = null; let activeFamilyArrayData = []; let selectedAvatarSymbol = "🦁"; let tempEditAvatar = "🦁"; let currentBasicsCategory = '';
+        let isSignUpMode = true;
 
         const EnglishPhoneticSubscriptBank = {
             "ሀ": ["he", "hu", "hi", "ha", "hee", "hih", "ho"], "ለ": ["le", "lu", "li", "la", "lee", "lih", "lo"],
-            "ሐ": ["he", "hu", "hi", "ha", "hee", "hih", "ho"], "መ": ["me", "mu", "mi", "ma", "mee", "mih", "mo"],
+            "ሐ": ["he", "hu", "hi", "ha", "hee", "hih", "ho"], "መ": ["me", "mu", "mi", "ma", "mee", "pm", "mo"],
             "ሠ": ["se", "su", "si", "sa", "see", "sih", "so"], "ረ": ["re", "ru", "ri", "ra", "ree", "rih", "ro"],
             "ሰ": ["se", "su", "si", "sa", "see", "sih", "so"], "ሸ": ["she", "shu", "shi", "sha", "shee", "shih", "sho"],
             "ቀ": ["k'e", "k'u", "k'i", "k'a", "k'ee", "k'ih", "k'o"], "በ": ["be", "bu", "bi", "ba", "bee", "bih", "bo"],
@@ -404,7 +430,7 @@
             "ጠ": ["t'e", "t'u", "t'i", "t'a", "t'ee", "t'ih", "t'o"], "ጨ": ["ch'e", "ch'u", "ch'i", "ch'a", "ch'ee", "ch'ih", "ch'o"],
             "ጰ": ["p'e", "p'u", "p'i", "p'a", "p'ee", "p'ih", "p'o"], "ጸ": ["ts'e", "ts'u", "ts'i", "ts'a", "ts'ee", "ts'ih", "ts'o"],
             "ፀ": ["ts'e", "ts'u", "ts'i", "ts'a", "ts'ee", "ts'ih", "ts'o"], "ፈ": ["fe", "fu", "fi", "fa", "fee", "fih", "fo"],
-            "ቨ": ["ve", "vu", "vi", "va", "vee", "vih", "vo"]
+            "ቨ": ["ve", "vu", "vi", "va", "clean", "vih", "vo"]
         };
 
         const alphabetData = [
@@ -427,14 +453,26 @@
             {base:"ቨ", family:['ቨ','ዹ','ዺ','ቫ','ቬ','ቭ','ቮ']}
         ];
 
-        const readingEasyBank = [
-            {q: "ሰላም", a: "Selam (Hello / Peace)"}, {q: "አመሰግናለሁ", a: "Ameseginalehw (Thank you)"},
-            {q: "ውሻ", a: "Wusha (Dog)"}, {q: "ድመት", a: "Dimet (Cat)"}
-        ];
+        // NEW CORE BASICS DICTIONARY DATA
+        const basicsVocabularyBank = {
+            greetings: [
+                {q: "ሰላም", a: "Selam (Hello / Peace)"}, {q: "አመሰግናለሁ", a: "Ameseginalehw (Thank you)"},
+                {q: "እንዴት ነህ?", a: "Indet neh? (How are you? - Male)"}, {q: "እንዴት ነሽ?", a: "Indet nesh? (How are you? - Female)"}
+            ],
+            colors: [
+                {q: "ቀይ", a: "K'ey (Red)"}, {q: "አረንጓዴ", a: "Arengwade (Green)"},
+                {q: "ቢጫ", a: "Bicha (Yellow)"}, {q: "ሰማያዊ", a: "Semayawi (Blue)"}
+            ],
+            numbers: [
+                {q: "አንድ", a: "And (One)"}, {q: "ሁለት", a: "Hulet (Two)"},
+                {q: "ሦስት", a: "Sost (Three)"}, {q: "አራት", a: "Arat (Four)"}
+            ]
+        };
 
-        const readingHardBank = [
-            {q: "እንዴት ነህ?", a: "Indet neh? (How are you?)"},
-            {q: "መጽሐፍ ማንበብ እወዳለሁ።", a: "Mets'haf manbeb iwedalehw. (I love reading books.)"}
+        const readingStudioBank = [
+            {q: "መጽሐፍ ማንበብ እወዳለሁ።", a: "Mets'haf manbeb iwedalehw. (I love reading books.)"},
+            {q: "ኢትዮጵያ ውብ ሀገር ናት።", a: "Ityop'ya wib hager nat. (Ethiopia is a beautiful country.)"},
+            {q: "ዛሬ አየሩ በጣም ደስ ይላል።", a: "Zare ayeru betam des yilal. (Today the weather is very pleasant.)"}
         ];
 
         window.addEventListener('DOMContentLoaded', () => { resetToGate(); });
@@ -559,15 +597,21 @@
             
             document.getElementById("viewFidelGrid").style.display = (track === 'fidel') ? "grid" : "none";
             document.getElementById("isolatedFamilyClassroom").style.display = "none";
-            document.getElementById("viewWritingTrack").style.display = (track === 'writing') ? "block" : "none";
+            document.getElementById("viewBasicsTrack").style.display = (track === 'basics') ? "block" : "none";
             document.getElementById("viewReadingTrack").style.display = (track === 'reading') ? "block" : "none";
 
             if (track === 'fidel') { 
-                document.getElementById("trackTitle").innerText = "Fidel Families"; 
+                document.getElementById("trackTitle").innerText = "Fidel Script (ፊደል)"; 
                 build3ColumnFidelMatrixContainer(); 
             }
-            else if (track === 'writing') { document.getElementById("trackTitle").innerText = "Writing Practice"; buildWritingMatrixContainer(); }
-            else if (track === 'reading') { document.getElementById("trackTitle").innerText = "Reading Hub"; backToReadingMenu(); }
+            else if (track === 'basics') { 
+                document.getElementById("trackTitle").innerText = "Learn the Basics"; 
+                backToBasicsMenu(); 
+            }
+            else if (track === 'reading') { 
+                document.getElementById("trackTitle").innerText = "Reading Studio"; 
+                generateReadingCard(); 
+            }
             fetchUserProgress();
             renderLiveLeaderboard();
         }
@@ -592,7 +636,7 @@
         function interceptFidelActionChoice(baseLetter, familyArray) {
             activeBaseFidel = baseLetter;
             activeFamilyArrayData = familyArray;
-            document.getElementById("actionChoiceModalTitle").innerText = `"${baseLetter}" Family Action`;
+            document.getElementById("actionChoiceModalTitle").innerText = `"${baseLetter}" Family Options`;
             document.getElementById("fidelActionChoiceModal").style.display = "flex";
         }
 
@@ -625,7 +669,7 @@
             document.getElementById("masterLeaveWorkspaceBtn").style.display = "none";
             document.getElementById("isolatedFamilyClassroom").style.display = "block";
             
-            document.getElementById("classroomFamilyTitle").innerText = `"${activeBaseFidel}" Family Row Classroom`;
+            document.getElementById("classroomFamilyTitle").innerText = `"${activeBaseFidel}" Row Practice`;
             renderGiantClassroomRowItems(activeFamilyArrayData);
         }
 
@@ -638,8 +682,10 @@
                 const card = document.createElement('div');
                 card.className = "giant-char-card";
                 card.innerHTML = `
-                    <div class="letter">${char}</div>
-                    <div class="sub">${subscripts[idx]}</div>
+                    <div class="char-left-info">
+                        <div class="letter">${char}</div>
+                        <div class="sub">${subscripts[idx]}</div>
+                    </div>
                     <button class="audio-trigger-btn" onclick="triggerAudioPhoneticsMimicry('${subscripts[idx]}', this)">🔊 Listen</button>
                 `;
                 mount.appendChild(card);
@@ -649,9 +695,11 @@
         function triggerAudioPhoneticsMimicry(phoneticString, btnElement) {
             btnElement.innerText = `✨ ${phoneticString.toUpperCase()}`;
             btnElement.style.background = "var(--ethio-yellow)";
+            btnElement.style.color = "#2B2B24";
             setTimeout(() => {
                 btnElement.innerText = "🔊 Listen";
-                btnElement.style.background = "#e2e8f0";
+                btnElement.style.background = "#34495e";
+                btnElement.style.color = "white";
             }, 900);
         }
 
@@ -668,8 +716,10 @@
                 const card = document.createElement('div');
                 card.className = "giant-char-card";
                 card.innerHTML = `
-                    <div class="letter">${char}</div>
-                    <div class="sub">${subscripts[idx]}</div>
+                    <div class="char-left-info">
+                        <div class="letter">${char}</div>
+                        <div class="sub">${subscripts[idx]}</div>
+                    </div>
                     <button class="audio-trigger-btn" onclick="triggerAudioPhoneticsMimicry('${subscripts[idx]}', this)">🔊 Listen</button>
                 `;
                 mount.appendChild(card);
@@ -702,49 +752,51 @@
             renderLiveLeaderboard();
         }
 
-        function buildWritingMatrixContainer() {
-            const area = document.getElementById("writingGridSelector"); area.innerHTML = "";
-            document.getElementById("writingGridSelector").style.display = "grid";
-            document.getElementById("writingBlowupContainer").style.display = "none";
-            alphabetData.forEach(item => {
-                const card = document.createElement('div'); card.className = "fidel-card writing-mode"; card.innerText = item.base;
-                card.onclick = () => explodeRowForWriting(item.base, item.family); area.appendChild(card);
-            });
+        // TRACK 2 MANAGEMENT LOGIC
+        function backToBasicsMenu() {
+            document.getElementById("basicsMenuGate").style.display = "flex";
+            document.getElementById("basicsFlashcardArena").style.display = "none";
         }
 
-        function explodeRowForWriting(baseLetter, familyArray) {
-            document.getElementById("writingGridSelector").style.display = "none";
-            document.getElementById("writingBlowupContainer").style.display = "block";
-            const line = document.getElementById("blowupGridRow"); line.innerHTML = "";
-            familyArray.forEach((char, idx) => {
-                line.innerHTML += `<div class="blowup-box">${char}<div style="font-size:12px; color:#64748b;">${standardVowels[idx]}</div></div>`;
-            });
+        function launchBasicsSubCategory(category) {
+            currentBasicsCategory = category;
+            document.getElementById("basicsMenuGate").style.display = "none";
+            document.getElementById("basicsFlashcardArena").style.display = "block";
+            generateBasicsCard();
         }
-        function closeWritingBlowup() { buildWritingMatrixContainer(); }
 
-        function backToReadingMenu() {
-            document.getElementById("readingMenuGate").style.display = "flex";
-            document.getElementById("readingFidelGridArea").style.display = "none";
-            document.getElementById("readingFlashcardArena").style.display = "none";
-        }
-        function launchReadingSubMode(subMode) {
-            currentReadingMode = subMode; document.getElementById("readingMenuGate").style.display = "none";
-            if (subMode === 'fidel-based') {
-                document.getElementById("readingFidelGridArea").style.display = "grid";
-                const area = document.getElementById("readingFidelGridArea"); area.innerHTML = "";
-                alphabetData.forEach(item => {
-                    const card = document.createElement('div'); card.className = "fidel-card"; card.innerText = item.base; card.onclick = () => interceptFidelActionChoice(item.base, item.family); area.appendChild(card);
-                });
-            } else { document.getElementById("readingFlashcardArena").style.display = "block"; generateReadingCard(); }
-        }
-        function generateReadingCard() {
-            const bank = (currentReadingMode === 'easy') ? readingEasyBank : readingHardBank;
+        function generateBasicsCard() {
+            const bank = basicsVocabularyBank[currentBasicsCategory];
             const randomized = bank[Math.floor(Math.random() * bank.length)];
-            document.getElementById("flashCardQuestion").innerText = randomized.q;
-            const ansField = document.getElementById("flashCardAnswer"); ansField.innerText = "Click to Reveal Answer"; ansField.style.background = "#f1f5f9"; ansField.setAttribute("data-true-answer", randomized.a);
+            document.getElementById("basicsCardQuestion").innerText = randomized.q;
+            
+            const ansField = document.getElementById("basicsCardAnswer"); 
+            ansField.innerText = "Click to Reveal Translation"; 
+            ansField.style.background = "#f1f5f9"; 
+            ansField.setAttribute("data-true-answer", randomized.a);
         }
+
+        function revealBasicsFlashcard() {
+            const ansField = document.getElementById("basicsCardAnswer"); 
+            ansField.innerText = ansField.getAttribute("data-true-answer"); 
+            ansField.style.background = "#e8f8f5";
+        }
+
+        // TRACK 3 MANAGEMENT LOGIC
+        function generateReadingCard() {
+            const randomized = readingStudioBank[Math.floor(Math.random() * readingStudioBank.length)];
+            document.getElementById("flashCardQuestion").innerText = randomized.q;
+            
+            const ansField = document.getElementById("flashCardAnswer"); 
+            ansField.innerText = "Click to Reveal Translation"; 
+            ansField.style.background = "#f1f5f9"; 
+            ansField.setAttribute("data-true-answer", randomized.a);
+        }
+
         function revealFlashcardTranslation() {
-            const ansField = document.getElementById("flashCardAnswer"); ansField.innerText = ansField.getAttribute("data-true-answer"); ansField.style.background = "#e8f8f5";
+            const ansField = document.getElementById("flashCardAnswer"); 
+            ansField.innerText = ansField.getAttribute("data-true-answer"); 
+            ansField.style.background = "#e8f8f5";
         }
 
         async function fetchUserProgress() {
@@ -778,8 +830,6 @@
             
             document.getElementById("editProfileNameInput").value = name;
             document.getElementById("statFidelPercent").innerText = pct;
-            document.getElementById("statWritingCount").innerText = `${masteredLetters.length} / 33 Families Complete`;
-            document.getElementById("statReadingStatus").innerText = masteredLetters.length > 5 ? "Level: Active Reader" : "Level: Beginner";
             
             document.querySelectorAll('#profileStatsModal .avatar-option').forEach(opt => {
                 if(opt.innerText === selectedAvatarSymbol) opt.classList.add('selected');
@@ -866,8 +916,8 @@
                 tbody.innerHTML += `
                     <tr>
                         <td><strong>${p.avatar_character || '🦁'} ${p.display_name}</strong></td>
-                        <td><div style="font-weight:bold; color:var(--ethio-green);">${pct}% Done</div></td>
-                        <td>${mList.length > 0 ? mList.map(l => `<span class="letter-badge">${l}</span>`).join('') : '<span style="color:#94a3b8; font-size:12px;">None yet</span>'}</td>
+                        <td><div style="font-weight:bold; color:var(--ethio-green);">${pct}%</div></td>
+                        <td>${mList.length > 0 ? mList.map(l => `<span class="letter-badge">${l}</span>`).join('') : '<span style="color:#94a3b8; font-size:11px;">None</span>'}</td>
                     </tr>
                 `;
             });
