@@ -106,7 +106,6 @@
         .progress-bar { height: 100%; width: 0%; background: #2ecc71; transition: width 0.4s ease; }
         .user-meta { display: flex; justify-content: space-between; font-size: 13px; color: #718096; }
         
-        /* Collapsible Dropdown Leaderboard Component */
         .game-leaderboard-card { background: white; border-radius: 18px; box-shadow: var(--shadow-premium); margin-bottom: 24px; border: 2px solid #e2e8f0; overflow: hidden; }
         .leaderboard-header-btn { width: 100%; background: #f8fafc; border: none; padding: 16px 20px; font-size: 16px; font-weight: 700; color: #1e293b; text-align: left; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .leaderboard-list { display: none; flex-direction: column; gap: 10px; padding: 16px; background: white; border-top: 1px solid #e2e8f0; }
@@ -118,23 +117,24 @@
 
         .workspace-title { font-size: 20px; font-weight: 700; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;}
 
-        /* Modified 3-Column Grid Layout for Fidel Matrices */
         .fidel-grid-3col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
         .fidel-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
         
-        .fidel-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px 0; text-align: center; font-size: 26px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
-        .fidel-card.completed { background: #e8f8f5; border-color: #2ecc71; color: #2ecc71; }
+        .fidel-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px 0; text-align: center; font-size: 26px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.02); position: relative; }
+        .fidel-card.completed { background: #e8f8f5; border-color: #2ecc71; color: #2ecc71; opacity: 1; }
+        .fidel-card.reviewing { border-color: #e67e22; background: #fef5e7; opacity: 0.95; }
         .fidel-card.writing-mode { border-color: #3498db; background: #e8f4f8; }
 
-        /* Row Layout Inside Expanded Modal View */
-        .vowel-header-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; background: #1e293b; color: white; border-radius: 8px; padding: 8px 4px; font-size: 11px; font-weight: bold; margin-bottom: 8px; text-align: center; }
-        .vowel-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 20px; }
-        .vowel-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px 0; font-size: 20px; font-weight: bold; display: flex; flex-direction: column; align-items: center; }
-        .english-subscript { font-size: 11px; color: #64748b; font-weight: normal; margin-top: 4px; }
-
-        .blowup-row-container { background: #f8fafc; border: 2px dashed #3498db; border-radius: 18px; padding: 24px 12px; margin-bottom: 20px; text-align: center; }
-        .blowup-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 20px; }
-        .blowup-box { background: white; border: 2px solid #cbd5e1; border-radius: 10px; padding: 14px 0; font-size: 28px; font-weight: bold; }
+        /* Full Page Family Classroom View Workspace */
+        #isolatedFamilyClassroom { display: none; background: white; padding: 24px; border-radius: 24px; box-shadow: var(--shadow-premium); text-align: center; margin-top: 10px; }
+        .classroom-header-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; background: #1e293b; color: white; border-radius: 12px; padding: 12px 6px; font-size: 14px; font-weight: bold; margin-bottom: 12px; }
+        .classroom-row-giant { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-bottom: 32px; }
+        
+        .giant-char-card { background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 16px; padding: 32px 0; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.2s ease; }
+        .giant-char-card .letter { font-size: 48px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
+        .giant-char-card .sub { font-size: 16px; color: #64748b; font-weight: bold; }
+        .giant-char-card .audio-trigger-btn { margin-top: 10px; background: #e2e8f0; border: none; font-size: 14px; padding: 6px 10px; border-radius: 20px; cursor: pointer; transition: background 0.2s; }
+        .giant-char-card .audio-trigger-btn:active { background: var(--ethio-yellow); }
 
         .flashcard-wrapper { background: #fff; border: 2px solid #e2e8f0; border-radius: 20px; padding: 40px 20px; text-align: center; box-shadow: var(--shadow-premium); margin-bottom: 20px; }
         .flashcard-foreign { font-size: 42px; font-weight: bold; color: #2c3e50; margin-bottom: 12px; }
@@ -161,6 +161,7 @@
 </head>
 <body>
 
+    <!-- SCREEN 1: ONBOARDING GATE -->
     <div id="authScreen" class="app-card tricolor-frame">
         <h1 class="main-title">Fidel Classroom</h1>
         <p class="subtitle" id="authSubtitle">Learn the Amharic Alphabet</p>
@@ -178,6 +179,7 @@
         </div>
     </div>
 
+    <!-- MASTER GATE -->
     <div id="roleSelectionScreen" class="app-card tricolor-frame" style="display: none;">
         <h2 class="main-title" style="font-size: 24px; margin-bottom: 8px;">Welcome, Teacher!</h2>
         <p class="subtitle">How would you like to access the portal today?</p>
@@ -187,6 +189,7 @@
         </div>
     </div>
 
+    <!-- SCREEN 2: STUDENT TASK SELECTION GATES -->
     <div id="taskSelectionScreen" class="app-card tricolor-frame" style="display: none;">
         <h2 class="main-title" style="font-size: 24px; margin-bottom: 8px;">Welcome Back!</h2>
         <p class="subtitle" style="margin-bottom: 28px;">What do you want to work on today?</p>
@@ -197,6 +200,7 @@
         </div>
     </div>
 
+    <!-- SCREEN 3: AVATAR SETUP -->
     <div id="profileSetupScreen" class="app-card tricolor-frame" style="display: none;">
         <h2 class="welcome-title" style="color: var(--ethio-green); font-size: 26px; margin-bottom: 4px;">Set Up Profile!</h2>
         <p class="subtitle">Pick a student nickname and your badge</p>
@@ -212,6 +216,7 @@
         <button class="btn-primary" onclick="saveProfileData()">Enter Classroom 🚀</button>
     </div>
 
+    <!-- VIEW A: STUDENT WORKSPACE DASHBOARD -->
     <div id="studentDashboard">
         <header>
             <div class="header-top-row" style="display:flex; justify-content:space-between; align-items:flex-start;">
@@ -230,6 +235,7 @@
             </div>
         </header>
 
+        <!-- LIVE INTERACTIVE DROPDOWN LEADERBOARD -->
         <div class="game-leaderboard-card">
             <button class="leaderboard-header-btn" onclick="toggleLeaderboardDropdown()">
                 <span>🏆 Classroom Champions</span>
@@ -243,9 +249,29 @@
         <div id="workspaceArea">
             <div class="workspace-title">
                 <span id="trackTitle">Module Space</span>
-                <button class="nav-back-btn" onclick="exitToTaskMenu()">Change Task</button>
+                <button class="nav-back-btn" id="masterLeaveWorkspaceBtn" onclick="exitToTaskMenu()">Change Task</button>
             </div>
+            
+            <!-- Dynamic 3-Column Grid Layout Selection -->
             <div id="viewFidelGrid" class="fidel-grid-3col"></div>
+
+            <!-- Full-Page Family Classroom Workspace Mode -->
+            <div id="isolatedFamilyClassroom">
+                <h2 id="classroomFamilyTitle" style="font-size:26px; margin-bottom:6px; color:#1e293b;">Family Practice Row</h2>
+                <p style="color:#64748b; margin-bottom:20px; font-size:14px;">Master phonetic values by sight and ear order structures</p>
+                
+                <div class="classroom-header-strip">
+                    <div>-a/e</div><div>-u</div><div>-ee</div><div>-a</div><div>-ay</div><div>-ih</div><div>-o</div>
+                </div>
+                <div class="classroom-row-giant" id="classroomGiantRowMount"></div>
+                
+                <div style="display:flex; gap:12px; margin-top:20px;">
+                    <button class="btn-primary" style="background:#e67e22; flex:1;" onclick="shuffleClassroomRowPhonetics()">Test Me (Shuffle) 🎲</button>
+                    <button class="btn-primary" style="background:#2ecc71; flex:1;" onclick="classroomMarkAsMasteredDirectly()">Mark As Mastered ✅</button>
+                </div>
+                <button class="btn-secondary" onclick="exitClassroomViewBackToGrid()">← Back to Families Grid</button>
+            </div>
+
             <div id="viewWritingTrack" style="display: none;">
                 <div id="writingGridSelector" class="fidel-grid"></div>
                 <div id="writingBlowupContainer" class="blowup-row-container" style="display: none;">
@@ -254,6 +280,7 @@
                     <button class="btn-primary" style="background:#3498db; margin-bottom:0;" onclick="closeWritingBlowup()">Next</button>
                 </div>
             </div>
+
             <div id="viewReadingTrack" style="display: none;">
                 <div id="readingMenuGate" class="choice-container vertical-choice">
                     <button class="btn-outlined-rectangle" onclick="launchReadingSubMode('fidel-based')">Fidel-based</button>
@@ -272,6 +299,7 @@
         <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
     </div>
 
+    <!-- VIEW B: TEACHER VIEW ROSTER -->
     <div id="teacherDashboardView">
         <header style="border-left: 6px solid var(--ethio-green); display:flex; justify-content:space-between; align-items:center;">
             <div>
@@ -292,20 +320,18 @@
         <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
     </div>
 
-    <div id="fidelModal" class="modal" onclick="closeModal(event)">
+    <!-- ROUTING INTERSTITIAL ACTION CHOICE MODAL -->
+    <div id="fidelActionChoiceModal" class="modal" onclick="closeActionChoiceModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
-            <h3 class="modal-title" id="modalTitle" style="margin-bottom:16px; font-size:22px;">Letter Family</h3>
-            
-            <div class="vowel-header-strip">
-                <div>-a/e</div><div>-u</div><div>-ee</div><div>-a</div><div>-ay</div><div>-ih</div><div>-o</div>
-            </div>
-            
-            <div class="vowel-row" id="vowelRow"></div>
-            <button class="btn-primary" id="masterBtn" style="background:#2ecc71;">Mark Family as Learned</button>
-            <button class="btn-secondary" onclick="closeModal(null)">Close</button>
+            <h3 id="actionChoiceModalTitle" style="font-size:22px; margin-bottom:8px;">Choose Action</h3>
+            <p style="font-size:14px; color:#64748b; margin-bottom:24px;">Would you like to study this family row in detail or mark it as mastered immediately?</p>
+            <button class="btn-primary" style="background:#3498db;" onclick="triggerStudyClassroomRouting()">Study Row Layout 📖</button>
+            <button class="btn-primary" style="background:#2ecc71;" onclick="triggerActionMasteredDirectly()">Mark As Mastered ✅</button>
+            <button class="btn-secondary" onclick="document.getElementById('fidelActionChoiceModal').style.display='none';">Cancel</button>
         </div>
     </div>
 
+    <!-- EDITABLE LIVE PROFILE MODAL -->
     <div id="profileStatsModal" class="modal" onclick="closeProfileStatsModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 380px;">
             <h3 style="font-size: 20px; color: var(--text-dark); margin-bottom: 12px;">Edit Profile Details</h3>
@@ -322,7 +348,6 @@
             <button class="btn-primary" style="padding: 10px; margin-bottom: 20px; font-size:14px;" onclick="updateProfileDatabaseChanges()">Save Identity Changes 💾</button>
             
             <hr style="border: 0; border-top: 1px solid #e2e8f0; margin-bottom: 16px;">
-            
             <h3 style="font-size: 18px; color: var(--text-dark);">Your Classroom Progress</h3>
             
             <div class="stat-box-row">
@@ -336,7 +361,7 @@
                 <div class="stat-card" style="border-left: 4px solid var(--ethio-yellow);">
                     <div>
                         <h4>Writing Track</h4>
-                        <p id="statWritingCount">0 / 34 Complete</p>
+                        <p id="statWritingCount">0 / 33 Complete</p>
                     </div>
                     <span style="font-size: 20px;">✍️</span>
                 </div>
@@ -348,7 +373,6 @@
                     <span style="font-size: 20px;">📖</span>
                 </div>
             </div>
-            
             <button class="btn-primary" style="background: #64748b;" onclick="closeProfileStatsModal(null)">Close Dashboard</button>
         </div>
     </div>
@@ -359,11 +383,10 @@
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const ADMIN_EMAIL = "senaitrichmond16@gmail.com";
-        const totalFidelFamiliesCount = 34;
-        let currentUser = null; let masteredLetters = []; let activeBaseFidel = null; let selectedAvatarSymbol = "🦁"; let tempEditAvatar = "🦁"; let currentReadingMode = '';
+        const totalFidelFamiliesCount = 33;
+        let currentUser = null; let masteredLetters = []; let reviewingLetters = []; let activeBaseFidel = null; let activeFamilyArrayData = []; let selectedAvatarSymbol = "🦁"; let tempEditAvatar = "🦁"; let currentReadingMode = '';
         const standardVowels = ["ä", "u", "i", "a", "e", "ə", "o"];
 
-        /* Phonetic English Pronunciation Values Array mapped sequentially to standard vowels */
         const EnglishPhoneticSubscriptBank = {
             "ሀ": ["he", "hu", "hi", "ha", "hee", "hih", "ho"], "ለ": ["le", "lu", "li", "la", "lee", "lih", "lo"],
             "ሐ": ["he", "hu", "hi", "ha", "hee", "hih", "ho"], "መ": ["me", "mu", "mi", "ma", "mee", "mih", "mo"],
@@ -381,7 +404,7 @@
             "ጠ": ["t'e", "t'u", "t'i", "t'a", "t'ee", "t'ih", "t'o"], "ጨ": ["ch'e", "ch'u", "ch'i", "ch'a", "ch'ee", "ch'ih", "ch'o"],
             "ጰ": ["p'e", "p'u", "p'i", "p'a", "p'ee", "p'ih", "p'o"], "ጸ": ["ts'e", "ts'u", "ts'i", "ts'a", "ts'ee", "ts'ih", "ts'o"],
             "ፀ": ["ts'e", "ts'u", "ts'i", "ts'a", "ts'ee", "ts'ih", "ts'o"], "ፈ": ["fe", "fu", "fi", "fa", "fee", "fih", "fo"],
-            "精度": ["pe", "pu", "pi", "pa", "pee", "pih", "po"], "ቨ": ["ve", "vu", "vi", "va", "vee", "vih", "vo"]
+            "ቨ": ["ve", "vu", "vi", "va", "vee", "vih", "vo"]
         };
 
         const alphabetData = [
@@ -401,7 +424,7 @@
             {base:"ጠ", family:['ጠ','ጡ','ጢ','ጣ','ጤ','ጥ','ጦ']}, {base:"ጨ", family:['ጨ','ጩ','ጪ','ጫ','ጬ','ጭ','ጮ']},
             {base:"ጰ", family:['ጰ','ጱ','ጲ','ጳ','ጴ','ጵ','ጶ']}, {base:"ጸ", family:['ጸ','ጹ','ጺ','ጻ','ጼ','ጽ','ጾ']},
             {base:"ፀ", family:['ፀ','ፁ','ፂ','ፃ','ኄ','ፅ','ፅ']}, {base:"ፈ", family:['ፈ','ፉ','ፊ','ፋ','ፌ','ፍ','ፎ']},
-            {base:"精度", family:['ፐ','ፑ','ፒ','派','ፔ','ፕ','ፖ']}, {base:"ቨ", family:['ቨ','ዹ','ዺ','ቫ','ቬ','ቭ','ቮ']}
+            {base:"ቨ", family:['ቨ','ዹ','ዺ','ቫ','ቬ','ቭ','ቮ']}
         ];
 
         const readingEasyBank = [
@@ -535,6 +558,7 @@
             document.getElementById("studentDashboard").style.display = "block";
             
             document.getElementById("viewFidelGrid").style.display = (track === 'fidel') ? "grid" : "none";
+            document.getElementById("isolatedFamilyClassroom").style.display = "none";
             document.getElementById("viewWritingTrack").style.display = (track === 'writing') ? "block" : "none";
             document.getElementById("viewReadingTrack").style.display = (track === 'reading') ? "block" : "none";
 
@@ -553,13 +577,129 @@
             document.getElementById("taskSelectionScreen").style.display = "block";
         }
 
-        /* 3-Column Fidel Grid Matrix Layout Generator */
         function build3ColumnFidelMatrixContainer() {
             const area = document.getElementById("viewFidelGrid"); area.innerHTML = "";
             alphabetData.forEach(item => {
-                const card = document.createElement('div'); card.className = "fidel-card"; card.setAttribute('data-fidel', item.base); card.innerText = item.base;
-                card.onclick = () => openFidel(item.base, item.family); area.appendChild(card);
+                const card = document.createElement('div'); 
+                card.className = "fidel-card"; 
+                card.setAttribute('data-fidel', item.base); 
+                card.innerText = item.base;
+                card.onclick = () => interceptFidelActionChoice(item.base, item.family); 
+                area.appendChild(card);
             });
+        }
+
+        function interceptFidelActionChoice(baseLetter, familyArray) {
+            activeBaseFidel = baseLetter;
+            activeFamilyArrayData = familyArray;
+            document.getElementById("actionChoiceModalTitle").innerText = `"${baseLetter}" Family Action`;
+            document.getElementById("fidelActionChoiceModal").style.display = "flex";
+        }
+
+        function closeActionChoiceModal(e) {
+            if (!e || e.target === document.getElementById("fidelActionChoiceModal")) {
+                document.getElementById("fidelActionChoiceModal").style.display = "none";
+            }
+        }
+
+        async function triggerActionMasteredDirectly() {
+            document.getElementById("fidelActionChoiceModal").style.display = "none";
+            if (!masteredLetters.includes(activeBaseFidel)) {
+                masteredLetters.push(activeBaseFidel);
+            }
+            reviewingLetters = reviewingLetters.filter(l => l !== activeBaseFidel);
+            await saveFidelProgressToSupabase();
+        }
+
+        function triggerStudyClassroomRouting() {
+            document.getElementById("fidelActionChoiceModal").style.display = "none";
+            if (!reviewingLetters.includes(activeBaseFidel) && !masteredLetters.includes(activeBaseFidel)) {
+                reviewingLetters.push(activeBaseFidel);
+                saveFidelProgressToSupabase();
+            }
+            launchIsolatedClassroomWorkspace();
+        }
+
+        function launchIsolatedClassroomWorkspace() {
+            document.getElementById("viewFidelGrid").style.display = "none";
+            document.getElementById("masterLeaveWorkspaceBtn").style.display = "none";
+            document.getElementById("isolatedFamilyClassroom").style.display = "block";
+            
+            document.getElementById("classroomFamilyTitle").innerText = `"${activeBaseFidel}" Family Row Classroom`;
+            renderGiantClassroomRowItems(activeFamilyArrayData);
+        }
+
+        function renderGiantClassroomRowItems(familyArray) {
+            const mount = document.getElementById("classroomGiantRowMount");
+            mount.innerHTML = "";
+            const subscripts = EnglishPhoneticSubscriptBank[activeBaseFidel] || ["", "", "", "", "", "", ""];
+
+            familyArray.forEach((char, idx) => {
+                const card = document.createElement('div');
+                card.className = "giant-char-card";
+                card.innerHTML = `
+                    <div class="letter">${char}</div>
+                    <div class="sub">${subscripts[idx]}</div>
+                    <button class="audio-trigger-btn" onclick="triggerAudioPhoneticsMimicry('${subscripts[idx]}', this)">🔊 Listen</button>
+                `;
+                mount.appendChild(card);
+            });
+        }
+
+        function triggerAudioPhoneticsMimicry(phoneticString, btnElement) {
+            btnElement.innerText = `✨ ${phoneticString.toUpperCase()}`;
+            btnElement.style.background = "var(--ethio-yellow)";
+            setTimeout(() => {
+                btnElement.innerText = "🔊 Listen";
+                btnElement.style.background = "#e2e8f0";
+            }, 900);
+        }
+
+        function shuffleClassroomRowPhonetics() {
+            const indices = [0, 1, 2, 3, 4, 5, 6];
+            indices.sort(() => Math.random() - 0.5);
+            
+            const mount = document.getElementById("classroomGiantRowMount");
+            mount.innerHTML = "";
+            const subscripts = EnglishPhoneticSubscriptBank[activeBaseFidel] || ["", "", "", "", "", "", ""];
+
+            indices.forEach(idx => {
+                const char = activeFamilyArrayData[idx];
+                const card = document.createElement('div');
+                card.className = "giant-char-card";
+                card.innerHTML = `
+                    <div class="letter">${char}</div>
+                    <div class="sub">${subscripts[idx]}</div>
+                    <button class="audio-trigger-btn" onclick="triggerAudioPhoneticsMimicry('${subscripts[idx]}', this)">🔊 Listen</button>
+                `;
+                mount.appendChild(card);
+            });
+        }
+
+        async function classroomMarkAsMasteredDirectly() {
+            if (!masteredLetters.includes(activeBaseFidel)) {
+                masteredLetters.push(activeBaseFidel);
+            }
+            reviewingLetters = reviewingLetters.filter(l => l !== activeBaseFidel);
+            await saveFidelProgressToSupabase();
+            exitClassroomViewBackToGrid();
+        }
+
+        function exitClassroomViewBackToGrid() {
+            document.getElementById("isolatedFamilyClassroom").style.display = "none";
+            document.getElementById("viewFidelGrid").style.display = "grid";
+            document.getElementById("masterLeaveWorkspaceBtn").style.display = "inline-block";
+            build3ColumnFidelMatrixContainer();
+            renderUIProgressUpdates();
+        }
+
+        async function saveFidelProgressToSupabase() {
+            await _supabase.from('user_progress').upsert({ 
+                user_id: currentUser.id, 
+                mastered_letters: masteredLetters 
+            }, { onConflict: 'user_id' });
+            renderUIProgressUpdates();
+            renderLiveLeaderboard();
         }
 
         function buildWritingMatrixContainer() {
@@ -593,7 +733,7 @@
                 document.getElementById("readingFidelGridArea").style.display = "grid";
                 const area = document.getElementById("readingFidelGridArea"); area.innerHTML = "";
                 alphabetData.forEach(item => {
-                    const card = document.createElement('div'); card.className = "fidel-card"; card.innerText = item.base; card.onclick = () => openFidel(item.base, item.family); area.appendChild(card);
+                    const card = document.createElement('div'); card.className = "fidel-card"; card.innerText = item.base; card.onclick = () => interceptFidelActionChoice(item.base, item.family); area.appendChild(card);
                 });
             } else { document.getElementById("readingFlashcardArena").style.display = "block"; generateReadingCard(); }
         }
@@ -617,25 +757,30 @@
         function renderUIProgressUpdates() {
             document.querySelectorAll('.fidel-card').forEach(card => {
                 const letter = card.getAttribute('data-fidel');
-                if (masteredLetters.includes(letter)) card.classList.add('completed');
-                else card.classList.remove('completed');
+                if (masteredLetters.includes(letter)) {
+                    card.classList.remove('reviewing');
+                    card.classList.add('completed');
+                } else if (reviewingLetters.includes(letter)) {
+                    card.classList.remove('completed');
+                    card.classList.add('reviewing');
+                } else {
+                    card.classList.remove('completed', 'reviewing');
+                }
             });
             const percent = alphabetData.length > 0 ? Math.round((masteredLetters.length / alphabetData.length) * 100) : 0;
             document.getElementById("progressBar").style.width = `${percent}%`;
             document.getElementById("progressText").innerText = `${percent}% Mastered`;
         }
 
-        /* Profile Modal Trigger Injection with Hydrated Live Values */
         function openProfileStatsDashboard() {
             const name = document.getElementById("displayUserHeader").innerText;
             const pct = document.getElementById("progressText").innerText;
             
             document.getElementById("editProfileNameInput").value = name;
             document.getElementById("statFidelPercent").innerText = pct;
-            document.getElementById("statWritingCount").innerText = `${masteredLetters.length} / 34 Families Complete`;
+            document.getElementById("statWritingCount").innerText = `${masteredLetters.length} / 33 Families Complete`;
             document.getElementById("statReadingStatus").innerText = masteredLetters.length > 5 ? "Level: Active Reader" : "Level: Beginner";
             
-            // Unhighlight all modal avatar selections and highlight current active choice
             document.querySelectorAll('#profileStatsModal .avatar-option').forEach(opt => {
                 if(opt.innerText === selectedAvatarSymbol) opt.classList.add('selected');
                 else opt.classList.remove('selected');
@@ -685,7 +830,6 @@
                 });
 
                 leaderList.sort((a, b) => b.percentage - a.percentage);
-
                 const container = document.getElementById("liveLeaderboardContent");
                 container.innerHTML = "";
 
@@ -704,42 +848,9 @@
                     container.appendChild(row);
                 });
             } catch (err) {
-                console.error("Leaderboard fallback wrapper structural return", err);
+                console.error(err);
             }
         }
-
-        /* Open Fidel Row Modal mapping custom phonetic transcript targets */
-        function openFidel(baseLetter, familyArray) {
-            activeBaseFidel = baseLetter; 
-            document.getElementById("modalTitle").innerText = `"${baseLetter}" Family Row`;
-            const row = document.getElementById("vowelRow"); row.innerHTML = "";
-            
-            const subscripts = EnglishPhoneticSubscriptBank[baseLetter] || ["", "", "", "", "", "", ""];
-
-            familyArray.forEach((char, index) => {
-                row.innerHTML += `
-                    <div class="vowel-box">
-                        ${char}
-                        <span class="english-subscript">${subscripts[index]}</span>
-                    </div>`;
-            });
-            
-            const masterBtn = document.getElementById("masterBtn");
-            masterBtn.innerText = masteredLetters.includes(baseLetter) ? "Mark Family as Incomplete" : "Mark Family as Learned";
-            masterBtn.style.background = masteredLetters.includes(baseLetter) ? "#e74c3c" : "#2ecc71";
-            masterBtn.onclick = () => toggleLetterMastery();
-            document.getElementById("fidelModal").style.display = "flex";
-        }
-
-        async function toggleLetterMastery() {
-            if (masteredLetters.includes(activeBaseFidel)) masteredLetters = masteredLetters.filter(item => item !== activeBaseFidel);
-            else masteredLetters.push(activeBaseFidel);
-            await _supabase.from('user_progress').upsert({ user_id: currentUser.id, mastered_letters: masteredLetters }, { onConflict: 'user_id' });
-            renderUIProgressUpdates(); 
-            renderLiveLeaderboard();
-            closeModal(null);
-        }
-        function closeModal(e) { if (!e || e.target === document.getElementById("fidelModal")) document.getElementById("fidelModal").style.display = "none"; }
 
         async function loadTeacherRosterData() {
             const { data: profiles } = await _supabase.from('profiles').select('id, display_name, avatar_character');
