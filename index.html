@@ -7,7 +7,8 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&family=Noto+Sans+Ethiopic:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Replaced uniform sans font with Abyssinica SIL for calligraphic script modeling -->
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&family=Abyssinica+SIL&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
@@ -21,7 +22,7 @@
             --shadow-premium: 0 12px 30px rgba(43, 43, 36, 0.06);
         }
 
-        * { box-sizing: border-box; font-family: 'Ubuntu', 'Noto Sans Ethiopic', sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; font-family: 'Ubuntu', 'Abyssinica SIL', serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         
         body { 
             background-color: var(--bg-neutral); 
@@ -50,8 +51,8 @@
             -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
         }
 
-        .main-title { font-size: 32px; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
-        .subtitle { font-size: 16px; color: #64748b; margin-bottom: 24px; font-weight: 500; }
+        .main-title { font-size: 32px; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; font-family: 'Ubuntu', sans-serif; }
+        .subtitle { font-size: 16px; color: #64748b; margin-bottom: 24px; font-weight: 500; font-family: 'Ubuntu', sans-serif; }
         
         input { 
             width: 100%; padding: 18px; margin-bottom: 14px; border: 2px solid #E6E6DE; border-radius: 16px; font-size: 16px; outline: none; background: #FDFDFB;
@@ -63,32 +64,19 @@
         .track-rect-btn {
             width: 100%; padding: 24px 20px; font-size: 18px; font-weight: 700; border: none; border-radius: 20px; cursor: pointer; text-align: left; transition: all 0.25s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.03); color: white; display: flex; flex-direction: column; gap: 4px;
         }
-        .track-rect-btn span.btn-desc { font-size: 13px; font-weight: 400; opacity: 0.9; }
+        .track-rect-btn span.btn-desc { font-size: 13px; font-weight: 400; opacity: 0.9; font-family: 'Ubuntu', sans-serif; }
         .track-fidel { background-color: var(--ethio-green); }
-        .track-basics { background-color: var(--ethio-yellow); color: #2B2B24; }
-        .track-reading { background-color: var(--ethio-red); }
 
-        .btn-filled-rectangle { flex: 1; padding: 18px; font-size: 16px; font-weight: 700; border-radius: 14px; border: none; cursor: pointer; }
+        .btn-filled-rectangle { flex: 1; padding: 18px; font-size: 16px; font-weight: 700; border-radius: 14px; border: none; cursor: pointer; font-family: 'Ubuntu', sans-serif; }
         .btn-signup-rect { background: var(--ethio-green); color: white; }
         .btn-login-rect { background: #2c3e50; color: white; }
-        .btn-outlined-rectangle { width: 100%; padding: 20px; font-size: 17px; font-weight: 700; background: transparent; color: var(--text-dark); border: 3px solid #2c3e50; border-radius: 18px; cursor: pointer; text-align: center; }
+        .btn-outlined-rectangle { width: 100%; padding: 20px; font-size: 17px; font-weight: 700; background: transparent; color: var(--text-dark); border: 3px solid #2c3e50; border-radius: 18px; cursor: pointer; text-align: center; font-family: 'Ubuntu', sans-serif; }
 
-        .btn-primary { background: linear-gradient(135deg, var(--ethio-green), #0F7306); color: white; padding: 18px; border: none; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; margin-bottom: 14px; }
-        .btn-secondary { background: transparent; color: #64748b; font-size: 14px; border: none; cursor: pointer; width: 100%; margin-top: 12px; padding: 8px; }
+        .btn-primary { background: linear-gradient(135deg, var(--ethio-green), #0F7306); color: white; padding: 18px; border: none; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; margin-bottom: 14px; font-family: 'Ubuntu', sans-serif; }
+        .btn-secondary { background: transparent; color: #64748b; font-size: 14px; border: none; cursor: pointer; width: 100%; margin-top: 12px; padding: 8px; font-family: 'Ubuntu', sans-serif; }
 
-        .avatar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
-        .avatar-option { background: #F6F6F0; border: 2px solid #E6E6DE; border-radius: 16px; padding: 16px 0; font-size: 28px; cursor: pointer; }
-        .avatar-option.selected { border-color: var(--ethio-yellow); background: #FFFDF0; }
-
-        /* SPLIT DASHBOARD LAYOUT CONFIG */
         #studentDashboard { display: none; max-width: 1440px; margin: 0 auto; width: 100%; }
-        
-        .dashboard-split-layout {
-            display: grid;
-            grid-template-columns: 1fr 380px;
-            gap: 28px;
-            align-items: start;
-        }
+        .dashboard-split-layout { display: grid; grid-template-columns: 1fr 380px; gap: 28px; align-items: start; }
 
         @media (max-width: 1024px) {
             .dashboard-split-layout { grid-template-columns: 1fr; }
@@ -106,58 +94,53 @@
         .progress-bar { height: 100%; width: 0%; background: #2ecc71; transition: width 0.4s ease; }
         
         .game-leaderboard-card { background: white; border-radius: 24px; box-shadow: var(--shadow-premium); border: 1px solid #e2e8f0; overflow: hidden; }
-        .leaderboard-header-btn { width: 100%; background: #f8fafc; border: none; padding: 18px 20px; font-size: 16px; font-weight: 700; color: #1e293b; display: flex; justify-content: space-between; align-items: center; }
+        .leaderboard-header-btn { width: 100%; background: #f8fafc; border: none; padding: 18px 20px; font-size: 16px; font-weight: 700; color: #1e293b; display: flex; justify-content: space-between; align-items: center; font-family: 'Ubuntu', sans-serif; }
         .leaderboard-list { display: flex; flex-direction: column; gap: 10px; padding: 20px; background: white; }
         .leaderboard-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: #f8fafc; border-radius: 14px; }
         .leaderboard-row.current-user { border: 2px solid var(--ethio-yellow); background: #fffdf5; }
         .player-info { display: flex; align-items: center; gap: 10px; }
-        .player-identity { font-weight: 700; font-size: 14px; color: #334155; }
+        .player-identity { font-weight: 700; font-size: 14px; color: #334155; font-family: 'Ubuntu', sans-serif; }
         .player-score-badge { background: var(--ethio-green); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
 
-        .workspace-title { font-size: 26px; font-weight: 700; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .workspace-title { font-size: 26px; font-weight: 700; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; font-family: 'Ubuntu', sans-serif; }
 
         .fidel-grid-3col { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 14px; margin-bottom: 20px; }
+        .fidel-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 32px 0; text-align: center; font-size: 42px; font-weight: normal; cursor: pointer; box-shadow: var(--shadow-premium); display: flex; align-items: center; justify-content: center; transition: transform 0.2s; font-family: 'Abyssinica SIL', serif; }
         
-        .fidel-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 32px 0; text-align: center; font-size: 36px; font-weight: 700; cursor: pointer; box-shadow: var(--shadow-premium); display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
-        .fidel-card:hover { transform: translateY(-2px); }
-        .fidel-card.completed { background: #e8f8f5; border-color: #2ecc71; color: #2ecc71; }
-
         #isolatedFamilyClassroom { display: none; background: white; padding: 32px 24px; border-radius: 28px; box-shadow: var(--shadow-premium); border: 1px solid #e2e8f0; text-align: center; }
-        .classroom-header-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; background: #1e293b; color: white; border-radius: 14px; padding: 14px 4px; font-size: 14px; font-weight: bold; margin-bottom: 16px; }
+        .classroom-header-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; background: #1e293b; color: white; border-radius: 14px; padding: 14px 4px; font-size: 14px; font-weight: bold; margin-bottom: 16px; font-family: 'Ubuntu', sans-serif; }
         .classroom-row-giant { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; margin-bottom: 32px; }
         
         .giant-char-card { background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 20px; padding: 24px 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .giant-char-card .letter { font-size: 48px; font-weight: 700; color: #0f172a; margin-bottom: 2px; }
-        .giant-char-card .sub { font-size: 14px; color: #64748b; font-weight: bold; margin-bottom: 14px; }
+        .giant-char-card .letter { font-size: 54px; font-weight: normal; color: #0f172a; margin-bottom: 2px; font-family: 'Abyssinica SIL', serif; }
+        .giant-char-card .sub { font-size: 14px; color: #64748b; font-weight: bold; margin-bottom: 14px; font-family: 'Ubuntu', sans-serif; }
         
-        /* AUTHENTIC MULTI-STROKE VECTOR TRACING HOVER ACTION */
-        .stroke-trace-box { width: 72px; height: 72px; background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 12px; margin-bottom: 14px; padding: 6px; cursor: pointer; position: relative; }
+        /* AUTHENTIC VARIABLE-WEIGHT CALIGRAPHIC TRACING OVERLAY */
+        .stroke-trace-box { width: 76px; height: 76px; background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 12px; margin-bottom: 14px; padding: 4px; cursor: pointer; position: relative; }
         .stroke-trace-box svg { width: 100%; height: 100%; overflow: visible; }
         
-        .trace-path { stroke: #1e293b; stroke-width: 5.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+        /* Simulates dynamic wide chisel-nib reed tip brush parameters */
+        .trace-path { stroke: #1e293b; stroke-width: 5; fill: none; stroke-linecap: round; stroke-linejoin: round; opacity: 0.85; }
         
-        /* Sequential Calligraphic Animation Delays */
         .p1 { stroke-dasharray: 120; stroke-dashoffset: 120; }
         .p2 { stroke-dasharray: 120; stroke-dashoffset: 120; }
         .p3 { stroke-dasharray: 60; stroke-dashoffset: 60; }
         .p4 { stroke-dasharray: 40; stroke-dashoffset: 40; }
 
-        .stroke-trace-box:hover .p1 { animation: strokeSeq 0.5s linear forwards; }
-        .stroke-trace-box:hover .p2 { animation: strokeSeq 0.5s linear 0.5s forwards; }
-        .stroke-trace-box:hover .p3 { animation: strokeSeq 0.4s linear 1.0s forwards; }
-        .stroke-trace-box:hover .p4 { animation: strokeSeq 0.3s linear 1.4s forwards; }
+        .stroke-trace-box:hover .p1 { animation: strokeSeq 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .stroke-trace-box:hover .p2 { animation: strokeSeq 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.45s forwards; }
+        .stroke-trace-box:hover .p3 { animation: strokeSeq 0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.9s forwards; }
+        .stroke-trace-box:hover .p4 { animation: strokeSeq 0.25s cubic-bezier(0.4, 0, 0.2, 1) 1.25s forwards; }
         
         @keyframes strokeSeq { to { stroke-dashoffset: 0; } }
 
-        .audio-trigger-btn { background: #e2e8f0; border: none; font-size: 12px; padding: 8px 12px; border-radius: 14px; cursor: pointer; width: 100%; font-weight: bold; }
-
+        .audio-trigger-btn { background: #e2e8f0; border: none; font-size: 12px; padding: 8px 12px; border-radius: 14px; cursor: pointer; width: 100%; font-weight: bold; font-family: 'Ubuntu', sans-serif; }
         .bottom-banner { position: fixed; bottom: 24px; left: 24px; right: 24px; background: #2c3e50; padding: 16px 24px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100; box-shadow: 0 8px 24px rgba(0,0,0,0.15); max-width: 1392px; margin: 0 auto; }
         .logout-btn { background: transparent; color: white; border: none; font-size: 15px; font-weight: bold; cursor: pointer; }
         .nav-back-btn { background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 12px; font-weight: bold; cursor: pointer; }
-        .role-switch-btn { background: #f39c12; color: white; border: none; padding: 10px 16px; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); align-items: center; justify-content: center; z-index: 200; padding: 16px; backdrop-filter: blur(2px); }
-        .modal-content { background: #fff; padding: 32px 24px; border-radius: 24px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .modal-content { background: #fff; padding: 32px 24px; border-radius: 24px; width: 100%; max-width: 380px; text-align: center; }
     </style>
 </head>
 <body>
@@ -174,15 +157,6 @@
             <input type="password" id="password" placeholder="Password (min 6 characters)">
             <button class="btn-primary" id="mainAuthBtn" onclick="handleAuth()">Submit</button>
             <button class="btn-secondary" onclick="resetToGate()">← Back</button>
-        </div>
-    </div>
-
-    <div id="roleSelectionScreen" class="app-card tricolor-frame" style="display: none;">
-        <h2 class="main-title" style="font-size: 24px;">Welcome, Teacher!</h2>
-        <p class="subtitle">Select portal entry context mode:</p>
-        <div class="choice-container vertical-choice">
-            <button class="btn-outlined-rectangle" style="border-color: var(--ethio-green);" onclick="enterAsRole('student')">Student Workspace</button>
-            <button class="btn-outlined-rectangle" style="border-color: #2c3e50;" onclick="enterAsRole('teacher')">Teacher Panel Roster</button>
         </div>
     </div>
 
@@ -209,7 +183,6 @@
 
     <div id="studentDashboard">
         <div class="dashboard-split-layout">
-            
             <div class="main-workspace-panel">
                 <div class="workspace-title">
                     <span id="trackTitle">Fidel Script Matrix</span>
@@ -248,7 +221,6 @@
                     <div class="leaderboard-list" id="liveLeaderboardContent"></div>
                 </div>
             </div>
-
         </div>
         <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
     </div>
@@ -265,28 +237,25 @@
         const SUPABASE_KEY = "sb_publishable_VBiJZB8TVM2CSl54aDPP0A_4aDXWb5i";
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const ADMIN_EMAIL = "senaitrichmond16@gmail.com";
-        let currentUser = null; let masteredLetters = []; let activeBaseFidel = null; let activeFamilyArrayData = []; let selectedAvatarSymbol = "🦁";
+        let currentUser = null; let masteredLetters = []; let activeBaseFidel = null; let activeFamilyArrayData = []; let selectedAvatarSymbol = "🦁"; let isSignUpMode = true;
 
-        // AUTHENTIC ACCURATE MULTI-STROKE PATH SEGMENTS FOR HA (ሀ) AND LA (ለ) FAMILIES
+        // FIXED PATH COORDINATES ALIGNED TO ABYSSINICA MANUSCRIPT PROPORTIONS
         const vectorTracePathsBank = {
-            // HA FAMILY
-            "ሀ": ["M 15,12 L 15,48", "M 15,12 L 45,12 L 45,48", "M 15,28 L 45,28"],
-            "ሁ": ["M 15,12 L 15,48", "M 15,12 L 45,12 L 45,48", "M 15,28 L 45,28", "M 45,28 L 56,34"],
-            "ሂ": ["M 15,12 L 15,48", "M 15,12 L 45,12 L 45,48", "M 15,28 L 45,28", "M 45,48 Q 54,54 48,40"],
-            "ሃ": ["M 15,12 L 15,48", "M 15,12 L 45,12 L 45,48", "M 15,28 L 45,28", "M 15,48 L 5,54"],
-            "ሄ": ["M 15,12 L 15,48", "M 15,12 L 45,12 L 45,48", "M 15,28 L 45,28", "M 45,12 C 54,2 54,22 45,12"],
-            "ህ": ["M 15,22 L 15,48", "M 15,22 L 45,22 L 45,48", "M 15,34 L 45,34"],
-            "ሆ": ["M 15,12 L 15,48", "M 15,12 L 45,12 L 45,48", "M 15,28 L 45,28", "M 30,12 L 30,2"],
+            "ሀ": ["M 22,14 Q 20,32 20,48", "M 22,14 C 32,12 38,12 42,16 Q 40,34 38,48", "M 20,30 L 39,30"],
+            "ሁ": ["M 22,14 Q 20,32 20,48", "M 22,14 C 32,12 38,12 42,16 Q 40,34 38,48", "M 20,30 L 39,30", "M 39,30 Q 48,34 52,38"],
+            "ሂ": ["M 22,14 Q 20,32 20,48", "M 22,14 C 32,12 38,12 42,16 Q 40,34 38,48", "M 20,30 L 39,30", "M 38,44 Q 46,50 44,56"],
+            "ሃ": ["M 22,14 Q 20,32 20,48", "M 22,14 C 32,12 38,12 42,16 Q 40,34 38,48", "M 20,30 L 39,30", "M 20,44 Q 12,50 8,54"],
+            "ሄ": ["M 22,14 Q 20,32 20,48", "M 22,14 C 32,12 38,12 42,16 Q 40,34 38,48", "M 20,30 L 39,30", "M 40,16 C 46,6 54,12 44,18"],
+            "ህ": ["M 22,24 Q 20,36 20,48", "M 22,24 C 32,22 38,22 42,26 Q 40,38 38,48", "M 20,36 L 39,36"],
+            "ሆ": ["M 22,14 Q 20,32 20,48", "M 22,14 C 32,12 38,12 42,16 Q 40,34 38,48", "M 20,30 L 39,30", "M 31,14 Q 31,6 31,2"],
 
-            // LA FAMILY
-            "ለ": ["M 18,12 L 18,44 Q 18,54 32,50", "M 32,50 L 46,14"],
-            "ሉ": ["M 18,12 L 18,44 Q 18,54 32,50", "M 32,50 L 46,14", "M 36,40 L 52,44"],
-            "ሊ": ["M 18,12 L 18,44 Q 18,54 32,50", "M 32,50 L 46,14", "M 46,14 Q 54,8 50,22"],
-            "ላ": ["M 18,12 L 18,44 Q 18,54 32,50", "M 32,50 L 46,14", "M 18,36 L 6,44"],
-            "ሌ": ["M 18,12 L 18,44 Q 18,54 32,50", "M 32,50 L 46,14", "M 18,12 C 24,2 8,2 18,12"],
-            "ል": ["M 22,18 L 22,44 Q 22,54 34,50", "M 34,50 L 46,22"],
-            "ሎ": ["M 18,12 L 18,44 Q 18,54 32,50", "M 32,50 L 46,14", "M 24,24 L 38,24"]
+            "ለ": ["M 42,14 Q 44,36 32,46 Q 22,54 18,44 Q 16,36 20,16", "M 34,44 L 46,52"],
+            "ሉ": ["M 42,14 Q 44,36 32,46 Q 22,54 18,44 Q 16,36 20,16", "M 34,44 L 46,52", "M 38,28 L 52,32"],
+            "ሊ": ["M 42,14 Q 44,36 32,46 Q 22,54 18,44 Q 16,36 20,16", "M 34,44 L 46,52", "M 20,16 Q 26,8 24,2"],
+            "ላ": ["M 42,14 Q 44,36 32,46 Q 22,54 18,44 Q 16,36 20,16", "M 34,44 L 46,52", "M 18,36 Q 10,42 6,46"],
+            "ሌ": ["M 42,14 Q 44,36 32,46 Q 22,54 18,44 Q 16,36 20,16", "M 34,44 L 46,52", "M 42,14 C 48,4 54,12 44,16"],
+            "ል": ["M 38,20 Q 40,38 30,46 Q 22,52 19,44 Q 18,38 21,22", "M 31,44 L 42,50"],
+            "ሎ": ["M 42,14 Q 44,36 32,46 Q 22,54 18,44 Q 16,36 20,16", "M 34,44 L 46,52", "M 24,30 L 34,30"]
         };
 
         const EnglishPhoneticSubscriptBank = {
@@ -303,7 +272,6 @@
             document.getElementById("authScreen").style.display = "block";
             document.getElementById("onboardingGate").style.display = "flex";
             document.getElementById("credentialFields").style.display = "none";
-            document.getElementById("roleSelectionScreen").style.display = "none";
             document.getElementById("taskSelectionScreen").style.display = "none";
             document.getElementById("studentDashboard").style.display = "none";
         }
@@ -413,8 +381,6 @@
             familyArray.forEach((char, idx) => {
                 const card = document.createElement('div');
                 card.className = "giant-char-card";
-                
-                // Fetch discrete multi-path arrays from coordinate configurations bank
                 const pathsArr = vectorTracePathsBank[char] || ["M 15,15 L 45,45"];
                 let generatedSvgPathsStr = "";
                 
@@ -425,7 +391,7 @@
                 card.innerHTML = `
                     <div class="letter">${char}</div>
                     <div class="sub">${subscripts[idx]}</div>
-                    <div class="stroke-trace-box" title="Hover to trigger sequential stroke tracer lines">
+                    <div class="stroke-trace-box" title="Hover to trace">
                         <svg viewBox="0 0 60 60">
                             ${generatedSvgPathsStr}
                         </svg>
