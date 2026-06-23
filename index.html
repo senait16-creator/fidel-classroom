@@ -59,9 +59,7 @@
         .admin-gate-card { display: none; max-width: 450px; width: 100%; margin: 60px auto; background: white; border-radius: var(--radius-standard); padding: 28px; box-shadow: var(--shadow-premium); border: 1px solid var(--border-color); text-align: center; }
         
         .teacher-panel { background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-standard); padding: 24px; box-shadow: var(--shadow-premium); margin-top: 20px; }
-        .teacher-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 16px; margin-bottom: 24px; }
-        @media (max-width: 768px) { .teacher-grid { grid-template-columns: 1fr; } }
-
+        
         .teacher-roster-table { width: 100%; border-collapse: collapse; margin-top: 12px; text-align: left; }
         .teacher-roster-table th, .teacher-roster-table td { padding: 12px; border-bottom: 1px solid var(--border-color); font-size: 14px; }
         .teacher-roster-table th { background: #f8fafc; font-weight: 700; color: #475569; }
@@ -126,6 +124,7 @@
     <canvas id="confettiCanvas"></canvas>
     <div id="toastContainer"></div>
 
+    <!-- Onboarding Panel Matrix -->
     <div id="authScreen" class="app-card">
         <h1 class="main-title">Fidel Classroom</h1>
         <p class="subtitle" id="authSubtitle">Learn the Amharic Alphabet Together!</p>
@@ -141,6 +140,7 @@
         </div>
     </div>
 
+    <!-- Administrative Target Routing Gate -->
     <div id="adminViewSelectorGate" class="admin-gate-card">
         <h2 class="main-title" style="font-size:22px;">Welcome, Teacher!</h2>
         <p class="subtitle">Where would you like to go first?</p>
@@ -150,9 +150,10 @@
         </div>
     </div>
 
+    <!-- Custom Profile Struct Node -->
     <div id="profileSetupScreen" class="app-card" style="display: none;">
         <h2 class="main-title" style="font-size: 22px;">Create Your Profile</h2>
-        <p class="subtitle">Pick a nickname and choose your team!</p>
+        <p class="subtitle">Pick a nickname and choose your color team!</p>
         <input type="text" id="displayName" placeholder="Your Nickname">
         
         <div class="avatar-grid">
@@ -163,25 +164,22 @@
             <div class="avatar-option" onclick="selectAvatar('🐘', this)">🐘</div>
         </div>
 
-        <div style="text-align: left; margin-bottom: 12px;">
-            <label style="font-size: 13px; font-weight: 700; color: var(--neutral-dark);">Join an Existing Team:</label>
-            <select id="profileTeamSelect" onchange="handleTeamSelectionChange()"><option value="">Select a team...</option></select>
-        </div>
-
-        <div id="newTeamNamingBox">
-            <label style="font-size: 13px; font-weight: 700; color: var(--brand-primary); display:block; text-align:left; margin-bottom:4px;">Or start a brand new team:</label>
-            <input type="text" id="customPodNameInput" placeholder="e.g., Team Anbessa">
+        <div style="text-align: left; margin-bottom: 16px;">
+            <label style="font-size: 13px; font-weight: 700; color: var(--neutral-dark);">Pick Your Color Team:</label>
+            <select id="profileTeamSelect"></select>
         </div>
 
         <button class="btn-primary" onclick="saveProfileData()">Join the Classroom</button>
     </div>
 
+    <!-- Teacher Dashboard Module View -->
     <div id="teacherOnlyDashboard">
         <div class="workspace-title" style="margin-top:20px;">
             <span>Teacher Hub</span>
             <button class="btn-primary" style="width:auto; padding:8px 16px; font-size:13px;" onclick="switchAdminPanelsFromDashboard('student')">Switch to Student View →</button>
         </div>
         
+        <!-- Live Roster Progress List -->
         <div class="teacher-panel" style="margin-bottom: 20px;">
             <h2 style="font-size: 18px; color: var(--neutral-dark); margin-bottom: 4px;">Student Roster & Progress</h2>
             <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">See how everyone in your class is moving through the alphabet rows.</p>
@@ -200,25 +198,18 @@
         </div>
 
         <div class="teacher-panel">
-            <h2 style="font-size: 18px; color: var(--neutral-dark); margin-bottom: 4px;">Manage Teams</h2>
-            <p style="font-size: 13px; color: #64748b;">Create new teams or reassign students here.</p>
-            <div class="teacher-grid">
-                <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid var(--border-color);">
-                    <h3 style="font-size: 14px; margin-bottom: 10px;">Create a New Team</h3>
-                    <input type="text" id="teacherNewPodNameInput" placeholder="Team Name">
-                    <button class="btn-primary" onclick="teacherCreatePodDirectly()">Add Team</button>
-                </div>
-                <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid var(--border-color);">
-                    <h3 style="font-size: 14px; margin-bottom: 10px;">Move Student to a Different Team</h3>
-                    <select id="teacherStudentSelect"><option value="">Select Student...</option></select>
-                    <select id="teacherPodSelect"><option value="">Select Team...</option></select>
-                    <button class="btn-primary" onclick="teacherAssignStudentToPod()">Change Team</button>
-                </div>
+            <h2 style="font-size: 18px; color: var(--neutral-dark); margin-bottom: 4px;">Manage Student Color Teams</h2>
+            <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">Reassign students to predecided classroom color tracks.</p>
+            <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); max-width: 500px;">
+                <select id="teacherStudentSelect"><option value="">Select Student...</option></select>
+                <select id="teacherPodSelect"><option value="">Select Color Team...</option></select>
+                <button class="btn-primary" onclick="teacherAssignStudentToPod()">Change Color Team</button>
             </div>
         </div>
         <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
     </div>
 
+    <!-- Student Interface Core Matrix Layout Workspace -->
     <div id="studentDashboard">
         <div id="adminHeaderToggleBar" style="display:none; background:#f0fdfa; border:1px solid #ccfbf1; padding:10px 16px; border-radius:12px; margin-bottom:16px; justify-content:space-between; align-items:center;">
             <span style="font-size:13px; font-weight:700; color:var(--brand-primary);">Teacher Access Mode Active</span>
@@ -238,8 +229,10 @@
                     <button id="gameActivationToggleBtn" class="btn-primary" style="width:auto; padding:8px 16px; font-size:13px;" onclick="openMatchingGameWorkspaceMode('all')">Matching Game Arena</button>
                 </div>
 
+                <!-- Core Grid Selection Array -->
                 <div id="viewFidelGrid" class="fidel-grid-3col"></div>
 
+                <!-- Touch Ergonomic Block Match Arena Module -->
                 <div id="gameWorkspace">
                     <h2 id="gameWorkspaceTitle" style="font-size:22px; margin-bottom:4px;">Practice Arena</h2>
                     <p class="subtitle" style="margin-bottom:12px;">Tap a letter and its matching English sound to clear them!</p>
@@ -252,6 +245,7 @@
                     <button id="gameExitActionBtn" class="btn-secondary" style="margin-top:10px;">← Close Game</button>
                 </div>
 
+                <!-- Micro-Classroom Isolation Node -->
                 <div id="isolatedFamilyClassroom">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
                         <h2 id="classroomFamilyTitle" style="font-size:22px;">Reviewing Row</h2>
@@ -269,6 +263,7 @@
                         <button id="classroomUndoBtn" class="btn-secondary" style="color: #ef4444; font-weight:700; display:none;" onclick="classroomUnmasterLetterRow()">Oops, I didn't mean to master this yet. Keep practicing!</button>
                     </div>
 
+                    <!-- Inline Functional Digital Ink Engine Segment Integration -->
                     <div class="embedded-classroom-sketchpad">
                         <h3 style="font-size:14px; font-weight:700; margin-bottom:4px; color:var(--neutral-dark);">Practice Writing Pad</h3>
                         <p style="font-size:12px; color:#64748b; margin-bottom:10px;">Draw the characters below to share your writing with your team!</p>
@@ -283,6 +278,7 @@
                 </div>
             </div>
 
+            <!-- Dashboard Analytics Sidebar Tracking Cluster -->
             <div class="sidebar-sticky-panel">
                 <header>
                     <div class="profile-clickable-trigger">
@@ -322,6 +318,7 @@
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const ADMIN_EMAIL = "senaitrichmond16@gmail.com";
+        const CLASSROOM_COLORS = ["Red Team 🔴", "Blue Team 🔵", "Green Team 🟢", "Yellow Team 🟡", "Purple Team 🟣"];
 
         let currentUser = null; let masteredLetters = []; let activeBaseFidel = null; 
         let activeFamilyArrayData = []; let activeSubscriptsData = []; let selectedAvatarSymbol = "🦁"; 
@@ -349,7 +346,7 @@
             {base:"ቨ", family:['ቨ','ቩ','ቪ','ቫ','ቬ','ቭ','ቮ'], prefix:"v"},
             {base:"ተ", family:['ተ','ቱ','ቲ','ታ','ቴ','ት','ቶ'], prefix:"t"},
             {base:"ቸ", family:['ቸ','ቹ','ቺ','ቻ','ቼ','ች','ቾ'], prefix:"č"},
-            {base:"ኀ", family:['ኀ','ኁ','ኂ','ኃ','ኄ','ኅ','ኆ'], prefix:"ḫ"},
+            {base:"ኀ", family:['ኀ','ኁ','ኂ','ኃ','ኄ','ኅ','ኆ'], prefix:"n"},
             {base:"ነ", family:['ነ','ኑ','ኒ','ና','ኔ','ን','ኖ'], prefix:"n"},
             {base:"ኘ", family:['ኘ','ኙ','ኚ','ኛ','ኜ','ኝ','ኞ'], prefix:"ñ"},
             {base:"አ", family:['አ','ኡ','ኢ','ኣ','ኤ','እ','ኦ'], prefix:"ʾ"},
@@ -499,7 +496,7 @@
 
         async function proceedFlowMap(user) {
             currentUser = user;
-            const { data: profile } = await _supabase.from('profiles').select('display_name, avatar_character, pod_id, pods(team_name)').eq('id', user.id).maybeSingle();
+            const { data: profile } = await _supabase.from('profiles').select('display_name, avatar_character, pod_id').eq('id', user.id).maybeSingle();
             
             if (currentUser.email === ADMIN_EMAIL) {
                 document.getElementById("authScreen").style.display = "none";
@@ -511,7 +508,7 @@
                 selectedAvatarSymbol = profile.avatar_character;
                 document.getElementById("displayUserHeader").innerText = profile.display_name;
                 document.getElementById("displayAvatarHeader").innerText = profile.avatar_character;
-                document.getElementById("sidebarPodBadge").innerText = profile.pods?.team_name || "No Team Assigned";
+                document.getElementById("sidebarPodBadge").innerText = profile.pod_id || "No Team Assigned";
                 launchDashboard("student");
             } else {
                 document.getElementById("authScreen").style.display = "none";
@@ -520,23 +517,12 @@
             }
         }
 
-        async function populateTeamSetupDropdownOptions() {
-            const { data: teams } = await _supabase.from('pods').select('id, team_name');
+        function populateTeamSetupDropdownOptions() {
             const selectElement = document.getElementById("profileTeamSelect");
-            selectElement.innerHTML = '<option value="">Select a team...</option>';
-            teams?.forEach(team => {
-                selectElement.innerHTML += `<option value="${team.id}">${team.team_name}</option>`;
+            selectElement.innerHTML = '';
+            CLASSROOM_COLORS.forEach(color => {
+                selectElement.innerHTML += `<option value="${color}">${color}</option>`;
             });
-        }
-
-        function handleTeamSelectionChange() {
-            const selection = document.getElementById("profileTeamSelect").value;
-            const customInputBox = document.getElementById("newTeamNamingBox");
-            if (selection !== "") {
-                customInputBox.style.display = "none";
-            } else {
-                customInputBox.style.display = "block";
-            }
         }
 
         function routeAdminTerminalDirectly(targetPanel) {
@@ -573,7 +559,7 @@
             const tbody = document.getElementById("teacherRosterTableBody");
             tbody.innerHTML = '<tr><td colspan="3" style="color:#94a3b8; text-align:center;">Loading class roster...</td></tr>';
             
-            const { data: students } = await _supabase.from('profiles').select('id, display_name, avatar_character, pods(team_name)');
+            const { data: students } = await _supabase.from('profiles').select('id, display_name, avatar_character, pod_id');
             const { data: progress } = await _supabase.from('user_progress').select('user_id, mastered_letters');
             
             const progressMap = {};
@@ -587,7 +573,7 @@
 
             students.forEach(s => {
                 const masteredCount = (progressMap[s.id] || []).length;
-                const teamName = s.pods?.team_name || '<span style="color:#94a3b8; font-style:italic;">None</span>';
+                const teamName = s.pod_id || '<span style="color:#94a3b8; font-style:italic;">None</span>';
                 tbody.innerHTML += `
                     <tr>
                         <td style="font-weight:500;">${s.avatar_character || '🦁'} ${s.display_name}</td>
@@ -720,70 +706,37 @@
             const nameInput = document.getElementById("displayName").value.trim();
             if (!nameInput) return showNotificationToast("Please enter a nickname.");
             
-            let selectedPodId = document.getElementById("profileTeamSelect").value;
-            let displayPodName = "Active Team";
+            let selectedColorTeam = document.getElementById("profileTeamSelect").value;
 
-            if (!selectedPodId) {
-                let proposedName = document.getElementById("customPodNameInput").value.trim();
-                if (!proposedName) proposedName = `Team ${Math.floor(Math.random() * 800) + 100}`;
-                const { data: newPod } = await _supabase.from('pods').insert({ team_name: proposedName }).select().single();
-                if (newPod) { selectedPodId = newPod.id; displayPodName = proposedName; }
-            } else {
-                const { data: existingPod } = await _supabase.from('pods').select('team_name').eq('id', selectedPodId).single();
-                if (existingPod) displayPodName = existingPod.team_name;
-            }
-
-            await _supabase.from('profiles').upsert({ id: currentUser.id, display_name: nameInput, avatar_character: selectedAvatarSymbol, pod_id: selectedPodId });
+            await _supabase.from('profiles').upsert({ id: currentUser.id, display_name: nameInput, avatar_character: selectedAvatarSymbol, pod_id: selectedColorTeam });
             document.getElementById("displayUserHeader").innerText = nameInput;
             document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
-            document.getElementById("sidebarPodBadge").innerText = displayPodName;
+            document.getElementById("sidebarPodBadge").innerText = selectedColorTeam;
             launchDashboard("student");
         }
 
         async function teacherRefreshConfigurationDropdowns() {
             const { data: students } = await _supabase.from('profiles').select('id, display_name');
-            const { data: pods } = await _supabase.from('pods').select('id, team_name');
 
             const sSelect = document.getElementById("teacherStudentSelect");
             sSelect.innerHTML = '<option value="">Select Student...</option>';
             students?.forEach(s => { sSelect.innerHTML += `<option value="${s.id}">${s.display_name}</option>`; });
 
             const pSelect = document.getElementById("teacherPodSelect");
-            pSelect.innerHTML = '<option value="">Select Team...</option>';
-            pods?.forEach(p => { pSelect.innerHTML += `<option value="${p.id}">${p.team_name}</option>`; });
-        }
-
-        async function teacherCreatePodDirectly() {
-            const name = document.getElementById("teacherNewPodNameInput").value.trim();
-            if (!name) return showNotificationToast("Type out a name for the team first.");
-            
-            showNotificationToast("Creating team...");
-            const { data, error } = await _supabase
-                .from('pods')
-                .insert({ team_name: name })
-                .select();
-
-            if (error) {
-                console.error("Error creating team:", error);
-                return showNotificationToast("Failed to create team: " + error.message);
-            }
-            
-            document.getElementById("teacherNewPodNameInput").value = "";
-            showNotificationToast(`Created team "${name}" successfully!`);
-            await loadTeacherRosterData();
-            await teacherRefreshConfigurationDropdowns();
+            pSelect.innerHTML = '<option value="">Select Color Team...</option>';
+            CLASSROOM_COLORS.forEach(color => { pSelect.innerHTML += `<option value="${color}">${color}</option>`; });
         }
 
         async function teacherAssignStudentToPod() {
             const studentId = document.getElementById("teacherStudentSelect").value;
-            const podId = document.getElementById("teacherPodSelect").value;
+            const chosenColor = document.getElementById("teacherPodSelect").value;
             
-            if (!studentId || !podId) return showNotificationToast("Please pick both a student and a team.");
+            if (!studentId || !chosenColor) return showNotificationToast("Please pick both a student and a team color.");
             
-            showNotificationToast("Moving student...");
+            showNotificationToast("Updating team assignment...");
             const { error } = await _supabase
                 .from('profiles')
-                .update({ pod_id: podId })
+                .update({ pod_id: chosenColor })
                 .eq('id', studentId);
 
             if (error) {
@@ -791,7 +744,7 @@
                 return showNotificationToast("Failed to move student: " + error.message);
             }
 
-            showNotificationToast("Student team assignment updated!");
+            showNotificationToast(`Student assigned to ${chosenColor}!`);
             await loadTeacherRosterData();
             await teacherRefreshConfigurationDropdowns();
         }
@@ -880,10 +833,10 @@
         }
 
         async function fetchPodTeammateProgress() {
-            const { data: userProfile } = await _supabase.from('profiles').select('pod_id, pods(team_name)').eq('id', currentUser.id).maybeSingle();
+            const { data: userProfile } = await _supabase.from('profiles').select('pod_id').eq('id', currentUser.id).maybeSingle();
             if (!userProfile || !userProfile.pod_id) { document.getElementById("podTeamNameDisplay").innerText = "No Team Assigned"; return; }
 
-            const currentPodTeamTitle = userProfile.pods?.team_name || "Your Team";
+            const currentPodTeamTitle = userProfile.pod_id || "Your Team";
             document.getElementById("podTeamNameDisplay").innerText = currentPodTeamTitle;
             document.getElementById("sidebarPodBadge").innerText = currentPodTeamTitle;
 
