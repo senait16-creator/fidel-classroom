@@ -7,7 +7,6 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Replaced uniform sans font with Abyssinica SIL for calligraphic script modeling -->
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&family=Abyssinica+SIL&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
@@ -70,7 +69,6 @@
         .btn-filled-rectangle { flex: 1; padding: 18px; font-size: 16px; font-weight: 700; border-radius: 14px; border: none; cursor: pointer; font-family: 'Ubuntu', sans-serif; }
         .btn-signup-rect { background: var(--ethio-green); color: white; }
         .btn-login-rect { background: #2c3e50; color: white; }
-        .btn-outlined-rectangle { width: 100%; padding: 20px; font-size: 17px; font-weight: 700; background: transparent; color: var(--text-dark); border: 3px solid #2c3e50; border-radius: 18px; cursor: pointer; text-align: center; font-family: 'Ubuntu', sans-serif; }
 
         .btn-primary { background: linear-gradient(135deg, var(--ethio-green), #0F7306); color: white; padding: 18px; border: none; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; margin-bottom: 14px; font-family: 'Ubuntu', sans-serif; }
         .btn-secondary { background: transparent; color: #64748b; font-size: 14px; border: none; cursor: pointer; width: 100%; margin-top: 12px; padding: 8px; font-family: 'Ubuntu', sans-serif; }
@@ -104,43 +102,25 @@
 
         .workspace-title { font-size: 26px; font-weight: 700; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; font-family: 'Ubuntu', sans-serif; }
 
-        .fidel-grid-3col { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 14px; margin-bottom: 20px; }
-        .fidel-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 32px 0; text-align: center; font-size: 42px; font-weight: normal; cursor: pointer; box-shadow: var(--shadow-premium); display: flex; align-items: center; justify-content: center; transition: transform 0.2s; font-family: 'Abyssinica SIL', serif; }
+        .fidel-grid-3col { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 14px; margin-bottom: 20px; }
+        .fidel-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 28px 0; text-align: center; font-size: 40px; font-weight: normal; cursor: pointer; box-shadow: var(--shadow-premium); display: flex; align-items: center; justify-content: center; transition: transform 0.2s; font-family: 'Abyssinica SIL', serif; }
+        .fidel-card:hover { transform: translateY(-2px); border-color: var(--ethio-green); }
+        .fidel-card.completed { background: #e8f8f5; border-color: #2ecc71; color: #2ecc71; }
         
         #isolatedFamilyClassroom { display: none; background: white; padding: 32px 24px; border-radius: 28px; box-shadow: var(--shadow-premium); border: 1px solid #e2e8f0; text-align: center; }
         .classroom-header-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; background: #1e293b; color: white; border-radius: 14px; padding: 14px 4px; font-size: 14px; font-weight: bold; margin-bottom: 16px; font-family: 'Ubuntu', sans-serif; }
         .classroom-row-giant { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; margin-bottom: 32px; }
         
-        .giant-char-card { background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 20px; padding: 24px 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .giant-char-card .letter { font-size: 54px; font-weight: normal; color: #0f172a; margin-bottom: 2px; font-family: 'Abyssinica SIL', serif; }
-        .giant-char-card .sub { font-size: 14px; color: #64748b; font-weight: bold; margin-bottom: 14px; font-family: 'Ubuntu', sans-serif; }
+        .giant-char-card { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 20px; padding: 28px 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 180px; }
+        .giant-char-card .letter { font-size: 58px; font-weight: normal; color: #0f172a; margin-bottom: 12px; font-family: 'Abyssinica SIL', serif; }
+        .giant-char-card .sub { font-size: 15px; color: #64748b; font-weight: bold; margin-bottom: 16px; font-family: 'Ubuntu', sans-serif; }
         
-        /* AUTHENTIC VARIABLE-WEIGHT CALIGRAPHIC TRACING OVERLAY */
-        .stroke-trace-box { width: 76px; height: 76px; background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 12px; margin-bottom: 14px; padding: 4px; cursor: pointer; position: relative; }
-        .stroke-trace-box svg { width: 100%; height: 100%; overflow: visible; }
+        .audio-trigger-btn { background: #e2e8f0; border: none; font-size: 13px; padding: 10px 14px; border-radius: 14px; cursor: pointer; width: 90%; font-weight: bold; font-family: 'Ubuntu', sans-serif; transition: background 0.2s; }
+        .audio-trigger-btn:hover { background: #cbd5e1; }
         
-        /* Simulates dynamic wide chisel-nib reed tip brush parameters */
-        .trace-path { stroke: #1e293b; stroke-width: 5; fill: none; stroke-linecap: round; stroke-linejoin: round; opacity: 0.85; }
-        
-        .p1 { stroke-dasharray: 120; stroke-dashoffset: 120; }
-        .p2 { stroke-dasharray: 120; stroke-dashoffset: 120; }
-        .p3 { stroke-dasharray: 60; stroke-dashoffset: 60; }
-        .p4 { stroke-dasharray: 40; stroke-dashoffset: 40; }
-
-        .stroke-trace-box:hover .p1 { animation: strokeSeq 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-        .stroke-trace-box:hover .p2 { animation: strokeSeq 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.45s forwards; }
-        .stroke-trace-box:hover .p3 { animation: strokeSeq 0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.9s forwards; }
-        .stroke-trace-box:hover .p4 { animation: strokeSeq 0.25s cubic-bezier(0.4, 0, 0.2, 1) 1.25s forwards; }
-        
-        @keyframes strokeSeq { to { stroke-dashoffset: 0; } }
-
-        .audio-trigger-btn { background: #e2e8f0; border: none; font-size: 12px; padding: 8px 12px; border-radius: 14px; cursor: pointer; width: 100%; font-weight: bold; font-family: 'Ubuntu', sans-serif; }
         .bottom-banner { position: fixed; bottom: 24px; left: 24px; right: 24px; background: #2c3e50; padding: 16px 24px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100; box-shadow: 0 8px 24px rgba(0,0,0,0.15); max-width: 1392px; margin: 0 auto; }
         .logout-btn { background: transparent; color: white; border: none; font-size: 15px; font-weight: bold; cursor: pointer; }
         .nav-back-btn { background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 12px; font-weight: bold; cursor: pointer; }
-
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); align-items: center; justify-content: center; z-index: 200; padding: 16px; backdrop-filter: blur(2px); }
-        .modal-content { background: #fff; padding: 32px 24px; border-radius: 24px; width: 100%; max-width: 380px; text-align: center; }
     </style>
 </head>
 <body>
@@ -225,13 +205,6 @@
         <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
     </div>
 
-    <div id="fidelActionChoiceModal" class="modal" onclick="closeActionChoiceModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <button class="btn-primary" style="background:#3498db; margin-bottom:14px; padding:20px;" onclick="triggerStudyClassroomRouting()">Study Family Row 📖</button>
-            <button class="btn-primary" style="background:#2ecc71; margin-bottom:0; padding:20px;" onclick="triggerActionMasteredDirectly()">Mark As Mastered ✅</button>
-        </div>
-    </div>
-
     <script>
         const SUPABASE_URL = "https://muisfipoyzkhznfdvnes.supabase.co"; 
         const SUPABASE_KEY = "sb_publishable_VBiJZB8TVM2CSl54aDPP0A_4aDXWb5i";
@@ -239,31 +212,42 @@
 
         let currentUser = null; let masteredLetters = []; let activeBaseFidel = null; let activeFamilyArrayData = []; let selectedAvatarSymbol = "🦁"; let isSignUpMode = true;
 
-        // FIXED PATH COORDINATES ALIGNED TO ABYSSINICA MANUSCRIPT PROPORTIONS
-        const vectorTracePathsBank = {
-            "ሀ": ["M 22,14 Q 20,32 20,48", "M 22,14 C 32,12 38,12 42,16 Q 40,34 38,48", "M 20,30 L 39,30"],
-            "ሁ": ["M 22,14 Q 20,32 20,48", "M 22,14 C 32,12 38,12 42,16 Q 40,34 38,48", "M 20,30 L 39,30", "M 39,30 Q 48,34 52,38"],
-            "ሂ": ["M 22,14 Q 20,32 20,48", "M 22,14 C 32,12 38,12 42,16 Q 40,34 38,48", "M 20,30 L 39,30", "M 38,44 Q 46,50 44,56"],
-            "ሃ": ["M 22,14 Q 20,32 20,48", "M 22,14 C 32,12 38,12 42,16 Q 40,34 38,48", "M 20,30 L 39,30", "M 20,44 Q 12,50 8,54"],
-            "ሄ": ["M 22,14 Q 20,32 20,48", "M 22,14 C 32,12 38,12 42,16 Q 40,34 38,48", "M 20,30 L 39,30", "M 40,16 C 46,6 54,12 44,18"],
-            "ህ": ["M 22,24 Q 20,36 20,48", "M 22,24 C 32,22 38,22 42,26 Q 40,38 38,48", "M 20,36 L 39,36"],
-            "ሆ": ["M 22,14 Q 20,32 20,48", "M 22,14 C 32,12 38,12 42,16 Q 40,34 38,48", "M 20,30 L 39,30", "M 31,14 Q 31,6 31,2"],
-
-            "ለ": ["M 42,14 Q 44,36 32,46 Q 22,54 18,44 Q 16,36 20,16", "M 34,44 L 46,52"],
-            "ሉ": ["M 42,14 Q 44,36 32,46 Q 22,54 18,44 Q 16,36 20,16", "M 34,44 L 46,52", "M 38,28 L 52,32"],
-            "ሊ": ["M 42,14 Q 44,36 32,46 Q 22,54 18,44 Q 16,36 20,16", "M 34,44 L 46,52", "M 20,16 Q 26,8 24,2"],
-            "ላ": ["M 42,14 Q 44,36 32,46 Q 22,54 18,44 Q 16,36 20,16", "M 34,44 L 46,52", "M 18,36 Q 10,42 6,46"],
-            "ሌ": ["M 42,14 Q 44,36 32,46 Q 22,54 18,44 Q 16,36 20,16", "M 34,44 L 46,52", "M 42,14 C 48,4 54,12 44,16"],
-            "ል": ["M 38,20 Q 40,38 30,46 Q 22,52 19,44 Q 18,38 21,22", "M 31,44 L 42,50"],
-            "ሎ": ["M 42,14 Q 44,36 32,46 Q 22,54 18,44 Q 16,36 20,16", "M 34,44 L 46,52", "M 24,30 L 34,30"]
-        };
-
-        const EnglishPhoneticSubscriptBank = {
-            "ሀ": ["he", "hu", "hi", "ha", "hee", "ih", "ho"], "ለ": ["le", "lu", "li", "la", "lee", "lih", "lo"]
-        };
-
+        // COMPLETE 34 CORE FIDEL ALPHASYLLABARY MATRIX DATASET
         const alphabetData = [
-            {base:"ሀ", family:['ሀ','ሁ','ሂ','ሃ','ሄ','ህ','ሆ']}, {base:"ለ", family:['ለ','ሉ','ሊ','ላ','ሌ','ል','ሎ']}
+            {base:"ሀ", family:['ሀ','ሁ','ሂ','ሃ','ሄ','ህ','ሆ'], subs:["hä","hu","hi","ha","he","hə","ho"]},
+            {base:"ለ", family:['ለ','ሉ','ሊ','ላ','ሌ','ል','ሎ'], subs:["lä","lu","li","la","le","lə","lo"]},
+            {base:"ሐ", family:['ሐ','ሑ','ሒ','ሓ','ሔ','ሕ','ሖ'], subs:["ḥä","ḥu","ḥi","ḥa","ḥe","ḥə","ḥo"]},
+            {base:"መ", family:['መ','ሙ','ሚ','ማ','ሜ','ም','ሞ'], subs:["mä","mu","mi","ma","me","mə","mo"]},
+            {base:"ሠ", family:['ሠ','ሡ','ሢ','ሣ','ሤ','ሥ','ሦ'], subs:["śä","śu","śi","śa","śe","śə","śo"]},
+            {base:"ረ", family:['ረ','ሩ','ሪ','ራ','ሬ','ር','ሮ'], subs:["rä","ru","ri","ra","re","rə","ro"]},
+            {base:"ሰ", family:['ሰ','ሱ','ሲ','ሳ','ሴ','ስ','ሶ'], subs:["sä","su","si","sa","se","sə","so"]},
+            {base:"ሸ", family:['ሸ','ሹ','ሺ','ሻ','ሼ','ሽ','ሾ'], subs:["šä","šu","ši","ša","še","šə","šo"]},
+            {base:"ቀ", family:['ቀ','ቁ','ቂ','ቃ','ቄ','ቅ','ቆ'], subs:["qä","qu","qi","qa","qe","qə","qo"]},
+            {base:"በ", family:['በ','ቡ','ቢ','ባ','ቤ','ብ','ቦ'], subs:["bä","bu","bi","ba","be","bə","bo"]},
+            {base:"ቨ", family:['ቨ','ቩ','ቪ','ቫ','ቬ','ቭ','ቮ'], subs:["vä","vu","vi","va","ve","və","vo"]},
+            {base:"ተ", family:['ተ','ቱ','ቲ','ታ','ቴ','ት','ቶ'], subs:["tä","tu","ti","ta","te","tə","to"]},
+            {base:"ቸ", family:['ቸ','ቹ','ቺ','ቻ','ቼ','ች','ቾ'], subs:["čä","ču","či","ča","če","čə","čo"]},
+            {base:"ኀ", family:['ኀ','ኁ','ኂ','ኃ','ኄ','ኅ','ኆ'], subs:["ḫä","ḫu","ḫi","ḫa","ḫe","ḫə","ḫo"]},
+            {base:"ነ", family:['ነ','ኑ','ኒ','ና','ኔ','ን','ኖ'], subs:["nä","nu","ni","na","ne","nə","no"]},
+            {base:"ኘ", family:['ኘ','ኙ','ኚ','ኛ','ኜ','ኝ','ኞ'], subs:["ñä","ñu","ñi","ña","ñe","ñə","ño"]},
+            {base:"አ", family:['አ','ኡ','ኢ','ኣ','ኤ','እ','ኦ'], subs:["ʾä","ʾu","ʾi","ʾa","ʾe","ʾə","ʾo"]},
+            {base:"ከ", family:['ከ','ኩ','ኪ','ካ','ኬ','ክ','ኮ'], subs:["kä","ku","ki","ka","ke","kə","ko"]},
+            {base:"ኸ", family:['ኸ','ኹ','ኺ','ኻ','ኼ','ኽ','ኾ'], subs:["ḫä","ḫu","ḫi","ḫa","ḫe","ḫə","ḫo"]},
+            {base:"ወ", family:['ወ','ዉ','ዊ','ዋ','ዌ','ው','ዎ'], subs:["wä","wu","wi","wa","we","wə","wo"]},
+            {base:"ዐ", family:['ዐ','ዑ','ዒ','ዓ','ዔ','ዕ','ዖ'], subs:["ʿä","ʿu","ʿi","ʿa","ʿe","ʿə","ʿo"]},
+            {base:"ዘ", family:['ዘ','ዙ','ዚ','ዛ','ዜ','ዝ','ዞ'], subs:["zä","zu","zi","za","ze","zə","zo"]},
+            {base:"ዠ", family:['ዠ','','ዢ','ዣ','ዤ','ዥ','ዦ'], subs:["žä","žu","ži","ža","že","žə","žo"]},
+            {base:"የ", family:['የ','ዩ','ዪ','ያ','ዬ','ይ','ዮ'], subs:["yä","yu","yi","ya","ye","yə","yo"]},
+            {base:"ደ", family:['ደ','ዱ','ዲ','ዳ','ዴ','ድ','ዶ'], subs:["dä","du","di","da","de","də","do"]},
+            {base:"ጀ", family:['ጀ','ጁ','ጂ','ጃ','ጄ','ጅ','ጆ'], subs:["jä","ju","ji","ja","je","jə","jo"]},
+            {base:"ገ", family:['ገ','ጉ','ጊ','ጋ','ጌ','ግ','ጎ'], subs:["gä","gu","gi","ga","ge","gə","go"]},
+            {base:"ጠ", family:['ጠ','ጡ','ጢ','ጣ','ጤ','ጥ','ጦ'], subs:["ṭä","ṭu","ṭi","ṭa","ṭe","ṭə","ṭo"]},
+            {base:"ጨ", family:['ጨ','ጩ','ጪ','ጫ','ጬ','ጭ','ጮ'], subs:["č̣ä","č̣u","č̣i","č̣a","č̣e","č̣ə","č̣o"]},
+            {base:"ጰ", family:['ጰ','ጱ','ጲ','ጳ','ጴ','ጵ','ጶ'], subs:["p̣ä","p̣u","p̣i","p̣a","p̣e","p̣ə","p̣o"]},
+            {base:"ጸ", family:['ጸ','ጹ','ጺ','ጻ','ጼ','ጽ','ጾ'], subs:["ṣä","ṣu","ṣi","ṣa","ṣe","ṣə","ṣo"]},
+            {base:"ፀ", family:['ፀ','ፁ','ፂ','ፃ','ፄ','ፅ','ፆ'], subs:["ṣ́ä","ṣ́u","ṣ́i","ṣ́a","ṣ́e","ṣ́ə","ṣ́o"]},
+            {base:"ፈ", family:['ፈ','ፉ','ፊ','ፋ','ፌ','ፍ','ፎ'], subs:["fä","fu","fi","fa","fe","fə","fo"]},
+            {base:"ፐ", family:['ፐ','ፑ','ፒ','ፓ','ፔ','ፕ','ፖ'], subs:["pä","pu","pi","pa","pe","pə","po"]}
         ];
 
         window.addEventListener('DOMContentLoaded', () => { resetToGate(); });
@@ -339,64 +323,33 @@
                 card.className = "fidel-card"; 
                 card.setAttribute('data-fidel', item.base); 
                 card.innerText = item.base;
-                card.onclick = () => interceptFidelActionChoice(item.base, item.family); 
+                // Bypassed confirmation portal overlay completely to enter family classroom instantly
+                card.onclick = () => launchIsolatedClassroomWorkspace(item.base, item.family, item.subs); 
                 area.appendChild(card);
             });
         }
 
-        function interceptFidelActionChoice(baseLetter, familyArray) {
-            activeBaseFidel = baseLetter; activeFamilyArrayData = familyArray;
-            document.getElementById("fidelActionChoiceModal").style.display = "flex";
-        }
+        function launchIsolatedClassroomWorkspace(baseLetter, familyArray, subscriptsArray) {
+            activeBaseFidel = baseLetter; 
+            activeFamilyArrayData = familyArray;
+            activeSubscriptsData = subscriptsArray;
 
-        function closeActionChoiceModal(e) {
-            if (!e || e.target === document.getElementById("fidelActionChoiceModal")) {
-                document.getElementById("fidelActionChoiceModal").style.display = "none";
-            }
-        }
-
-        async function triggerActionMasteredDirectly() {
-            document.getElementById("fidelActionChoiceModal").style.display = "none";
-            if (!masteredLetters.includes(activeBaseFidel)) masteredLetters.push(activeBaseFidel);
-            await saveFidelProgressToSupabase();
-        }
-
-        function triggerStudyClassroomRouting() {
-            document.getElementById("fidelActionChoiceModal").style.display = "none";
-            launchIsolatedClassroomWorkspace();
-        }
-
-        function launchIsolatedClassroomWorkspace() {
             document.getElementById("viewFidelGrid").style.display = "none";
             document.getElementById("masterLeaveWorkspaceBtn").style.display = "none";
             document.getElementById("isolatedFamilyClassroom").style.display = "block";
             document.getElementById("classroomFamilyTitle").innerText = `"${activeBaseFidel}" Family Classroom`;
-            renderGiantClassroomRowItems(activeFamilyArrayData);
+            renderGiantClassroomRowItems(activeFamilyArrayData, activeSubscriptsData);
         }
 
-        function renderGiantClassroomRowItems(familyArray) {
+        function renderGiantClassroomRowItems(familyArray, subscriptsArray) {
             const mount = document.getElementById("classroomGiantRowMount"); mount.innerHTML = "";
-            const subscripts = EnglishPhoneticSubscriptBank[activeBaseFidel] || ["", "", "", "", "", "", ""];
-
             familyArray.forEach((char, idx) => {
                 const card = document.createElement('div');
                 card.className = "giant-char-card";
-                const pathsArr = vectorTracePathsBank[char] || ["M 15,15 L 45,45"];
-                let generatedSvgPathsStr = "";
-                
-                pathsArr.forEach((pathD, pIdx) => {
-                    generatedSvgPathsStr += `<path class="trace-path p${pIdx + 1}" d="${pathD}" />`;
-                });
-                
                 card.innerHTML = `
                     <div class="letter">${char}</div>
-                    <div class="sub">${subscripts[idx]}</div>
-                    <div class="stroke-trace-box" title="Hover to trace">
-                        <svg viewBox="0 0 60 60">
-                            ${generatedSvgPathsStr}
-                        </svg>
-                    </div>
-                    <button class="audio-trigger-btn" onclick="triggerAudioPhoneticsMimicry('${subscripts[idx]}', this)">🔊 Hear</button>
+                    <div class="sub">${subscriptsArray[idx]}</div>
+                    <button class="audio-trigger-btn" onclick="triggerAudioPhoneticsMimicry('${subscriptsArray[idx]}', this)">🔊 Hear</button>
                 `;
                 mount.appendChild(card);
             });
@@ -410,25 +363,15 @@
         function shuffleClassroomRowPhonetics() {
             const indices = [0, 1, 2, 3, 4, 5, 6].sort(() => Math.random() - 0.5);
             const mount = document.getElementById("classroomGiantRowMount"); mount.innerHTML = "";
-            const subscripts = EnglishPhoneticSubscriptBank[activeBaseFidel] || ["", "", "", "", "", "", ""];
 
             indices.forEach(idx => {
                 const char = activeFamilyArrayData[idx];
                 const card = document.createElement('div');
                 card.className = "giant-char-card";
-                const pathsArr = vectorTracePathsBank[char] || ["M 15,15 L 45,45"];
-                let generatedSvgPathsStr = "";
-                pathsArr.forEach((pathD, pIdx) => { generatedSvgPathsStr += `<path class="trace-path p${pIdx + 1}" d="${pathD}" />`; });
-                
                 card.innerHTML = `
                     <div class="letter">${char}</div>
-                    <div class="sub">${subscripts[idx]}</div>
-                    <div class="stroke-trace-box">
-                        <svg viewBox="0 0 60 60">
-                            ${generatedSvgPathsStr}
-                        </svg>
-                    </div>
-                    <button class="audio-trigger-btn" onclick="triggerAudioPhoneticsMimicry('${subscripts[idx]}', this)">🔊 Hear</button>
+                    <div class="sub">${activeSubscriptsData[idx]}</div>
+                    <button class="audio-trigger-btn" onclick="triggerAudioPhoneticsMimicry('${activeSubscriptsData[idx]}', this)">🔊 Hear</button>
                 `;
                 mount.appendChild(card);
             });
@@ -465,7 +408,7 @@
                 const letter = card.getAttribute('data-fidel');
                 if (masteredLetters.includes(letter)) card.classList.add('completed');
             });
-            const percent = Math.round((masteredLetters.length / 33) * 100);
+            const percent = Math.round((masteredLetters.length / 34) * 100);
             document.getElementById("progressBar").style.width = `${percent}%`;
             document.getElementById("progressText").innerText = `${percent}% Mastered`;
         }
@@ -477,7 +420,7 @@
             progressRecords.forEach(rec => { progressMap[rec.user_id] = rec.mastered_letters || []; });
 
             let leaderList = profiles.map(p => ({
-                id: p.id, name: p.display_name, avatar: p.avatar_character || '🦁', percentage: Math.round(((progressMap[p.id] || []).length / 33) * 100)
+                id: p.id, name: p.display_name, avatar: p.avatar_character || '🦁', percentage: Math.round(((progressMap[p.id] || []).length / 34) * 100)
             })).sort((a, b) => b.percentage - a.percentage);
 
             const container = document.getElementById("liveLeaderboardContent"); container.innerHTML = "";
