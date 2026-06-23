@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fidel Classroom - Teacher & Pod Control</title>
+    <title>Fidel Classroom - Premium UX Experience</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,20 +22,22 @@
         }
 
         * { box-sizing: border-box; font-family: 'Ubuntu', 'Abyssinica SIL', serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg-neutral); color: var(--text-dark); padding: 24px; min-height: 100vh; }
+        body { background-color: var(--bg-neutral); color: var(--text-dark); padding: 24px; min-height: 100vh; overflow-x: hidden; }
 
         .app-card { max-width: 420px; width: 100%; margin: 40px auto; background: var(--card-neutral); padding: 36px 24px; border-radius: 28px; box-shadow: var(--shadow-premium); text-align: center; position: relative; }
         .tricolor-frame::before { content: ''; position: absolute; top: -6px; left: -6px; right: -6px; bottom: -6px; border-radius: 34px; padding: 6px; background: linear-gradient(to right, #E8112D 33%, #FCD116 33%, #FCD116 66%, #128807 66%); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
 
         .main-title { font-size: 32px; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
         .subtitle { font-size: 16px; color: #64748b; margin-bottom: 24px; font-weight: 500; }
-        input, select { width: 100%; padding: 16px; margin-bottom: 14px; border: 2px solid #E6E6DE; border-radius: 16px; font-size: 16px; outline: none; background: #FDFDFB; }
+        input, select { width: 100%; padding: 16px; margin-bottom: 14px; border: 2px solid #E6E6DE; border-radius: 16px; font-size: 16px; outline: none; background: #FDFDFB; transition: border-color 0.2s; }
+        input:focus, select:focus { border-color: var(--ethio-green); }
 
         .choice-container { display: flex; gap: 12px; margin-bottom: 14px; }
         .btn-filled-rectangle { flex: 1; padding: 18px; font-size: 16px; font-weight: 700; border-radius: 14px; border: none; cursor: pointer; }
         .btn-signup-rect { background: var(--ethio-green); color: white; }
         .btn-login-rect { background: #2c3e50; color: white; }
-        .btn-primary { background: linear-gradient(135deg, var(--ethio-green), #0F7306); color: white; padding: 18px; border: none; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; }
+        .btn-primary { background: linear-gradient(135deg, var(--ethio-green), #0F7306); color: white; padding: 18px; border: none; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; transition: opacity 0.2s; }
+        .btn-primary:hover { opacity: 0.9; }
         .btn-secondary { background: transparent; color: #64748b; font-size: 14px; border: none; cursor: pointer; padding: 8px; }
 
         #studentDashboard { display: none; max-width: 1400px; margin: 0 auto; width: 100%; }
@@ -46,9 +48,9 @@
         .profile-clickable-trigger { display: flex; align-items: center; gap: 14px; }
         .user-avatar-badge { width: 54px; height: 54px; background: #f1f5f9; border: 2px solid #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; }
         .progress-container { width: 100%; background: #edf2f7; border-radius: 20px; height: 10px; overflow: hidden; margin: 14px 0; }
-        .progress-bar { height: 100%; width: 0%; background: #2ecc71; transition: width 0.4s ease; }
+        .progress-bar { height: 100%; width: 0%; background: #2ecc71; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
 
-        /* Pod & Teacher Panels */
+        /* Pod & Management Interfaces */
         .pod-card { background: white; border: 1px solid #e2e8f0; border-radius: 24px; padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-premium); }
         .pod-header { font-size: 20px; font-weight: 700; color: #1e293b; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
         .teammate-row { margin-bottom: 12px; }
@@ -57,7 +59,7 @@
         .teacher-panel { background: #fffbeb; border: 2px dashed #f59e0b; border-radius: 24px; padding: 24px; margin-bottom: 24px; }
         .teacher-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
 
-        /* Dropdown Components */
+        /* Dropdowns */
         .collapsible-dropdown-container { background: white; border-radius: 24px; box-shadow: var(--shadow-premium); border: 1px solid #e2e8f0; overflow: hidden; margin-bottom: 20px; }
         .dropdown-toggle-header { width: 100%; background: #f8fafc; border: none; padding: 18px 20px; font-size: 16px; font-weight: 700; color: #1e293b; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .dropdown-content-pane { display: none; padding: 20px; background: white; border-top: 1px solid #e2e8f0; flex-direction: column; gap: 10px; }
@@ -68,10 +70,10 @@
         .player-info { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; }
         .player-score-badge { background: var(--ethio-green); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
 
-        /* Workspace Panels */
+        /* Main Workspace Components */
         .workspace-title { font-size: 26px; font-weight: 700; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         .fidel-grid-3col { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 14px; }
-        .fidel-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 28px 0; text-align: center; font-size: 40px; cursor: pointer; box-shadow: var(--shadow-premium); display: flex; align-items: center; justify-content: center; transition: transform 0.2s; font-family: 'Abyssinica SIL', serif; }
+        .fidel-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 28px 0; text-align: center; font-size: 40px; cursor: pointer; box-shadow: var(--shadow-premium); display: flex; align-items: center; justify-content: center; transition: transform 0.2s, background-color 0.3s; font-family: 'Abyssinica SIL', serif; }
         .fidel-card:hover { transform: translateY(-2px); border-color: var(--ethio-green); }
         .fidel-card.completed { background: #e8f8f5; border-color: #2ecc71; color: #2ecc71; }
         
@@ -81,22 +83,38 @@
         .giant-char-card { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 16px; padding: 20px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .giant-char-card .letter { font-size: 44px; color: #0f172a; margin-bottom: 8px; font-family: 'Abyssinica SIL', serif; }
 
+        /* Drawing Sketchpad Engine UX Integration */
+        .sketchpad-box { width: 100%; background: #f1f5f9; padding: 14px; border-radius: 18px; margin-bottom: 12px; }
+        .sketch-canvas-element { background: white; border: 2px dashed #cbd5e1; border-radius: 12px; width: 100%; height: 160px; cursor: crosshair; display: block; touch-action: none; }
+        .sketchpad-actions-row { display: flex; gap: 8px; margin-top: 8px; }
+
         .feed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-top: 14px; }
         .feed-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; position: relative; }
         .feed-item img { width: 100%; height: 130px; object-fit: cover; display: block; }
         .feed-meta { padding: 6px 10px; font-size: 11px; color: #64748b; display: flex; justify-content: space-between; }
         .expiry-tag { background: rgba(231, 76, 60, 0.1); color: #e74c3c; font-weight: bold; padding: 2px 6px; border-radius: 8px; font-size: 10px; }
-        .upload-input-label { display: block; width: 100%; background: #34495e; color: white; padding: 14px; text-align: center; border-radius: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; }
 
         .avatar-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; }
         .avatar-option { font-size: 32px; padding: 10px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 16px; cursor: pointer; }
         .avatar-option.selected { border-color: var(--ethio-green); background: #e8f8f5; }
+
+        /* Elegant Native Toast Notification System UI */
+        #toastContainer { position: fixed; bottom: 100px; right: 24px; display: flex; flex-direction: column; gap: 10px; z-index: 9999; pointer-events: none; }
+        .toast-popup { background: #1e293b; color: white; padding: 14px 20px; border-radius: 12px; font-size: 14px; font-weight: bold; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: slideInToast 0.3s forwards, fadeOutToast 0.3s linear 3s forwards; display: flex; align-items: center; gap: 8px; }
+        @keyframes slideInToast { from { transform: translateX(120%); } to { transform: translateX(0); } }
+        @keyframes fadeOutToast { to { opacity: 0; transform: translateY(-10px); } }
+
+        /* Confetti Canvas FX Node Layer */
+        #confettiCanvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 99999; }
 
         .bottom-banner { position: fixed; bottom: 24px; left: 24px; right: 24px; background: #2c3e50; padding: 16px 24px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100; box-shadow: 0 8px 24px rgba(0,0,0,0.15); max-width: 1352px; margin: 0 auto; }
         .logout-btn { background: transparent; color: white; border: none; font-size: 15px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
+
+    <canvas id="confettiCanvas"></canvas>
+    <div id="toastContainer"></div>
 
     <div id="authScreen" class="app-card tricolor-frame">
         <h1 class="main-title">Fidel Classroom</h1>
@@ -139,14 +157,12 @@
         <div id="teacherControlPanel" class="teacher-panel" style="display: none; max-width: 1400px; margin: 0 auto 24px auto; width: 100%;">
             <h2 style="font-size: 22px; color: #b45309; margin-bottom: 4px;">👑 Teacher Administration Suite</h2>
             <p style="font-size: 14px; color: #78350f; margin-bottom: 16px;">Create manual pods and organize students into cohorts seamlessly.</p>
-            
             <div class="teacher-grid">
                 <div style="background: white; padding: 18px; border-radius: 16px; border: 1px solid #fcd34d;">
                     <h3 style="font-size: 16px; margin-bottom: 10px;">Create a New Pod</h3>
-                    <input type="text" id="teacherNewPodNameInput" placeholder="Enter Pod Team Name (e.g., Team Gila)" style="margin-bottom: 10px;">
+                    <input type="text" id="teacherNewPodNameInput" placeholder="Enter Pod Team Name" style="margin-bottom: 10px;">
                     <button class="btn-primary" style="background: #d97706;" onclick="teacherCreatePodDirectly()">Spawn Pod Row</button>
                 </div>
-                
                 <div style="background: white; padding: 18px; border-radius: 16px; border: 1px solid #fcd34d;">
                     <h3 style="font-size: 16px; margin-bottom: 10px;">Assign Student to Pod</h3>
                     <select id="teacherStudentSelect" style="margin-bottom: 10px;"><option value="">Select Student...</option></select>
@@ -203,14 +219,19 @@
 
                 <div class="collapsible-dropdown-container">
                     <button class="dropdown-toggle-header" onclick="toggleDropdownElement('photoBoardContent')">
-                        <span>📷 Disappearing Daily Artwork</span><span id="photoBoardCaretSymbol">▼</span>
+                        <span>📷 Disappearing Canvas Sketches</span><span id="photoBoardCaretSymbol">▼</span>
                     </button>
                     <div class="dropdown-content-pane" id="photoBoardContent">
-                        <p style="font-size:12px; color:#64748b;">Upload drawings of letters! Images dissolve automatically in 24 hours.</p>
-                        <label class="upload-input-label">
-                            📤 Upload Letter Canvas Art
-                            <input type="file" id="artFileInput" accept="image/*" style="display:none;" onchange="handleDrawingShareUpload(this)">
-                        </label>
+                        <p style="font-size:12px; color:#64748b; margin-bottom: 8px;">Draw your practice row below and publish it instantly to your teammates!</p>
+                        
+                        <div class="sketchpad-box">
+                            <canvas id="sketchpad" class="sketch-canvas-element"></canvas>
+                            <div class="sketchpad-actions-row">
+                                <button class="btn-primary" style="padding: 8px; font-size:12px; background:#475569;" onclick="clearSketchpadCanvas()">Clear 🧼</button>
+                                <button class="btn-primary" style="padding: 8px; font-size:12px;" onclick="uploadSketchpadDrawingCanvasData()">Publish Sketch 🚀</button>
+                            </div>
+                        </div>
+
                         <div class="feed-grid" id="disappearingArtGalleryFeed"></div>
                     </div>
                 </div>
@@ -229,6 +250,9 @@
         let currentUser = null; let masteredLetters = []; let activeBaseFidel = null; 
         let activeFamilyArrayData = []; let activeSubscriptsData = []; let selectedAvatarSymbol = "🦁"; 
         let isSignUpMode = true; let targetPodId = null; let isPodLeader = false;
+
+        // Digital Ink Sketchpad Engine State Space
+        let canvas, ctx, isDrawing = false;
 
         const vowelFrameworkLabels = ["ha", "hu", "hee", "ha", "hay", "hih", "ho"];
         const standardVowelSubscripts = ["-ä/e", "-u/oo", "-ee", "-a", "-ay", "-ih", "-o"];
@@ -270,7 +294,121 @@
             {base:"ፐ", family:['ፐ','ፑ','ፒ','ፓ','ፔ','ፕ','ፖ'], prefix:"p"}
         ];
 
-        window.addEventListener('DOMContentLoaded', () => { resetToGate(); });
+        window.addEventListener('DOMContentLoaded', () => { 
+            resetToGate(); 
+            initSketchpadEngineSystem();
+        });
+
+        // Premium In-App Message System Pipeline Nodes
+        function showNotificationToast(msg) {
+            const container = document.getElementById("toastContainer");
+            const element = document.createElement("div");
+            element.className = "toast-popup";
+            element.innerHTML = `✨ <span>${msg}</span>`;
+            container.appendChild(element);
+            setTimeout(() => element.remove(), 3300);
+        }
+
+        // HTML5 Digital Ink Touch Events Wireframe Mapping
+        function initSketchpadEngineSystem() {
+            canvas = document.getElementById("sketchpad");
+            ctx = canvas.getContext("2d");
+            
+            // Recalibrate display parameters dynamically to fix pixel artifacts
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            ctx.lineWidth = 3;
+            ctx.lineCap = "round";
+            ctx.strokeStyle = "#1e293b";
+
+            function getCoordinates(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: clientX - rect.left, y: clientY - rect.top };
+            }
+
+            function startDraw(e) { isDrawing = true; ctx.beginPath(); const coords = getCoordinates(e); ctx.moveTo(coords.x, coords.y); }
+            function draw(e) { if (!isDrawing) return; const coords = getCoordinates(e); ctx.lineTo(coords.x, coords.y); ctx.stroke(); }
+            function stopDraw() { isDrawing = false; }
+
+            canvas.addEventListener("mousedown", startDraw); canvas.addEventListener("mousemove", draw); window.addEventListener("mouseup", stopDraw);
+            canvas.addEventListener("touchstart", startDraw); canvas.addEventListener("touchmove", draw); window.addEventListener("touchend", stopDraw);
+        }
+
+        function clearSketchpadCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        async function uploadSketchpadDrawingCanvasData() {
+            // Confirm canvas context holds vector traces before allocating payloads
+            const emptyCheck = document.createElement("canvas");
+            emptyCheck.width = canvas.width; emptyCheck.height = canvas.height;
+            if (canvas.toDataURL() === emptyCheck.toDataURL()) return showNotificationToast("Draw something on your pad first!");
+
+            showNotificationToast("Encoding sketch vector frames...");
+            
+            canvas.toBlob(async (blob) => {
+                const storagePath = `canvas-${Date.now()}.png`;
+                const { data: uploadData, error: uploadError } = await _supabase.storage.from('art_shares').upload(storagePath, blob, { contentType: 'image/png' });
+
+                if (uploadError) return showNotificationToast(uploadError.message);
+
+                const { data: urlData } = _supabase.storage.from('art_shares').getPublicUrl(storagePath);
+                const absolutePublicUrl = urlData.publicUrl;
+                const expirationTimestamp = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+                await _supabase.from('photo_shares').insert({
+                    user_id: currentUser.id,
+                    image_url: absolutePublicUrl,
+                    expires_at: expirationTimestamp
+                });
+
+                clearSketchpadCanvas();
+                showNotificationToast("Sketch published to daily gallery!");
+                fetchDisappearingImageCanvasBoard();
+            }, "image/png");
+        }
+
+        // Particle Canvas FX Execution Nodes
+        function executeVictoryConfettiCelebration() {
+            const confCanvas = document.getElementById("confettiCanvas");
+            const confCtx = confCanvas.getContext("2d");
+            confCanvas.width = window.innerWidth; confCanvas.height = window.innerHeight;
+            
+            let particles = [];
+            const colorPalettes = ["#128807", "#FCD116", "#E8112D", "#3498db", "#9b59b6"];
+
+            for (let i = 0; i < 120; i++) {
+                particles.push({
+                    x: window.innerWidth / 2, y: window.innerHeight / 1.5,
+                    vx: (Math.random() - 0.5) * 15, vy: (Math.random() - 0.8) * 18,
+                    size: Math.random() * 8 + 4, color: colorPalettes[Math.floor(Math.random() * colorPalettes.length)],
+                    rotation: Math.random() * 360, rSpeed: Math.random() * 6 - 3
+                });
+            }
+
+            function animateConfettiLoop() {
+                if (particles.length === 0) return confCtx.clearRect(0,0,confCanvas.width,confCanvas.height);
+                confCtx.clearRect(0, 0, confCanvas.width, confCanvas.height);
+                
+                particles.forEach((p, idx) => {
+                    p.x += p.vx; p.y += p.vy; p.vy += 0.3; // Gravity pull map
+                    p.rotation += p.rSpeed;
+
+                    confCtx.save();
+                    confCtx.translate(p.x, p.y);
+                    confCtx.rotate((p.rotation * Math.PI) / 180);
+                    confCtx.fillStyle = p.color;
+                    confCtx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+                    confCtx.restore();
+
+                    if (p.y > confCanvas.height) particles.splice(idx, 1);
+                });
+                requestAnimationFrame(animateConfettiLoop);
+            }
+            animateConfettiLoop();
+        }
 
         function resetToGate() {
             document.getElementById("authScreen").style.display = "block";
@@ -288,20 +426,19 @@
         async function handleAuth() {
             const email = document.getElementById("email").value.trim();
             const password = document.getElementById("password").value;
-            if (!email || !password) return alert("Complete credential fields context.");
+            if (!email || !password) return showNotificationToast("Please fill out all credential spaces.");
 
             const { data, error } = isSignUpMode 
                 ? await _supabase.auth.signUp({ email, password })
                 : await _supabase.auth.signInWithPassword({ email, password });
                 
-            if (error) return alert(error.message);
+            if (error) return showNotificationToast(error.message);
             if (data?.user) proceedFlowMap(data.user);
         }
 
         async function proceedFlowMap(user) {
             currentUser = user;
             
-            // Check if admin email bypass routing is flagged
             if (currentUser.email === ADMIN_EMAIL) {
                 document.getElementById("teacherControlPanel").style.display = "block";
                 teacherRefreshConfigurationDropdowns();
@@ -355,7 +492,7 @@
 
         async function saveProfileData() {
             const nameInput = document.getElementById("displayName").value.trim();
-            if (!nameInput) return alert("Please enter your nickname.");
+            if (!nameInput) return showNotificationToast("Please enter your nickname.");
 
             let finalPodId = targetPodId;
             let displayPodName = "Active Pod";
@@ -388,7 +525,6 @@
             launchDashboard();
         }
 
-        /* ADMIN EXCLUSIVE CORE TEACHER PIPELINES */
         async function teacherRefreshConfigurationDropdowns() {
             const { data: students } = await _supabase.from('profiles').select('id, display_name');
             const { data: pods } = await _supabase.from('pods').select('id, team_name');
@@ -404,11 +540,12 @@
 
         async function teacherCreatePodDirectly() {
             const name = document.getElementById("teacherNewPodNameInput").value.trim();
-            if (!name) return alert("Enter pod name target identifier strings.");
+            if (!name) return showNotificationToast("Enter pod name identifier.");
             
             await _supabase.from('pods').insert({ team_name: name });
             document.getElementById("teacherNewPodNameInput").value = "";
             
+            showNotificationToast(`Created Pod: "${name}" successfully!`);
             teacherRefreshConfigurationDropdowns();
             fetchPodTeammateProgress();
         }
@@ -416,10 +553,10 @@
         async function teacherAssignStudentToPod() {
             const studentId = document.getElementById("teacherStudentSelect").value;
             const podId = document.getElementById("teacherPodSelect").value;
-            if (!studentId || !podId) return alert("Select cross-relational targets.");
+            if (!studentId || !podId) return showNotificationToast("Select student and pod structures.");
 
             await _supabase.from('profiles').update({ pod_id: podId }).eq('id', studentId);
-            alert("Student paired with Pod matrix layout successfully.");
+            showNotificationToast("Student assigned to pod layout view matrix.");
             
             teacherRefreshConfigurationDropdowns();
             fetchPodTeammateProgress();
@@ -430,6 +567,9 @@
             document.getElementById("authScreen").style.display = "none";
             document.getElementById("studentDashboard").style.display = "block";
             
+            // Reinitialize sketch canvas bounds now that container has dimensions
+            setTimeout(initSketchpadEngineSystem, 150);
+
             fetchUserProgress();
             renderLiveLeaderboard();
             fetchDisappearingImageCanvasBoard();
@@ -512,6 +652,9 @@
             if (!masteredLetters.includes(activeBaseFidel)) masteredLetters.push(activeBaseFidel);
             await _supabase.from('user_progress').upsert({ user_id: currentUser.id, mastered_letters: masteredLetters }, { onConflict: 'user_id' });
             
+            showNotificationToast(`Row "${activeBaseFidel}" Added to Mastered Stack! ✅`);
+            executeVictoryConfettiCelebration();
+
             fetchPodTeammateProgress();
             renderLiveLeaderboard();
             exitClassroomViewBackToGrid();
@@ -560,32 +703,6 @@
             });
         }
 
-        async function handleDrawingShareUpload(inputElement) {
-            const file = inputElement.files[0];
-            if (!file) return;
-
-            const fileExtension = file.name.split('.').pop();
-            const storagePath = `canvas-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExtension}`;
-
-            const { data: uploadData, error: uploadError } = await _supabase.storage
-                .from('art_shares')
-                .upload(storagePath, file);
-
-            if (uploadError) return alert(uploadError.message);
-
-            const { data: urlData } = _supabase.storage.from('art_shares').getPublicUrl(storagePath);
-            const absolutePublicUrl = urlData.publicUrl;
-            const expirationTimestamp = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-
-            await _supabase.from('photo_shares').insert({
-                user_id: currentUser.id,
-                image_url: absolutePublicUrl,
-                expires_at: expirationTimestamp
-            });
-
-            fetchDisappearingImageCanvasBoard();
-        }
-
         async function fetchDisappearingImageCanvasBoard() {
             const currentISOTime = new Date().toISOString();
             const { data: activeShares } = await _supabase.from('photo_shares')
@@ -594,7 +711,7 @@
 
             const container = document.getElementById("disappearingArtGalleryFeed"); container.innerHTML = "";
             if (!activeShares || activeShares.length === 0) {
-                container.innerHTML = `<p style="font-size:12px; color:#94a3b8; grid-column:1/-1;">No shared drawings live. Upload yours!</p>`;
+                container.innerHTML = `<p style="font-size:12px; color:#94a3b8; grid-column:1/-1;">No shared drawings live. Sketch yours above!</p>`;
                 return;
             }
 
