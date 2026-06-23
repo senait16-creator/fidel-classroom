@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fidel Classroom - Pod Onboarding</title>
+    <title>Fidel Classroom - Teacher & Pod Control</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,11 +48,14 @@
         .progress-container { width: 100%; background: #edf2f7; border-radius: 20px; height: 10px; overflow: hidden; margin: 14px 0; }
         .progress-bar { height: 100%; width: 0%; background: #2ecc71; transition: width 0.4s ease; }
 
-        /* Pod Progress Module */
+        /* Pod & Teacher Panels */
         .pod-card { background: white; border: 1px solid #e2e8f0; border-radius: 24px; padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-premium); }
         .pod-header { font-size: 20px; font-weight: 700; color: #1e293b; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
         .teammate-row { margin-bottom: 12px; }
         .teammate-info { display: flex; justify-content: space-between; font-size: 14px; font-weight: bold; color: #475569; margin-bottom: 4px; }
+
+        .teacher-panel { background: #fffbeb; border: 2px dashed #f59e0b; border-radius: 24px; padding: 24px; margin-bottom: 24px; }
+        .teacher-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
 
         /* Dropdown Components */
         .collapsible-dropdown-container { background: white; border-radius: 24px; box-shadow: var(--shadow-premium); border: 1px solid #e2e8f0; overflow: hidden; margin-bottom: 20px; }
@@ -77,10 +80,7 @@
         .classroom-row-giant { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 32px; }
         .giant-char-card { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 16px; padding: 20px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .giant-char-card .letter { font-size: 44px; color: #0f172a; margin-bottom: 8px; font-family: 'Abyssinica SIL', serif; }
-        .giant-char-card .sub { font-size: 13px; color: #64748b; font-weight: bold; margin-bottom: 12px; }
-        .audio-trigger-btn { background: #e2e8f0; border: none; font-size: 12px; padding: 8px 10px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: bold; }
 
-        /* Image Sharing Board */
         .feed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-top: 14px; }
         .feed-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; position: relative; }
         .feed-item img { width: 100%; height: 130px; object-fit: cover; display: block; }
@@ -116,9 +116,7 @@
     <div id="profileSetupScreen" class="app-card tricolor-frame" style="display: none;">
         <h2 class="main-title" style="font-size: 26px; margin-bottom: 4px;">Set Up Profile</h2>
         <p class="subtitle">Choose your classroom setup details</p>
-        
         <input type="text" id="displayName" placeholder="Student Nickname">
-        
         <div class="avatar-grid">
             <div class="avatar-option selected" onclick="selectAvatar('🦁', this)">🦁</div>
             <div class="avatar-option" onclick="selectAvatar('🦅', this)">🦅</div>
@@ -126,20 +124,38 @@
             <div class="avatar-option" onclick="selectAvatar('🦊', this)">🦊</div>
             <div class="avatar-option" onclick="selectAvatar('🐘', this)">🐘</div>
         </div>
-
         <div id="podAssignmentNotice" style="background: #f1f5f9; padding: 14px; border-radius: 16px; margin-bottom: 14px; font-size: 14px; font-weight: bold; color: #475569;">
             Calculating Pod Assignment...
         </div>
-
         <div id="leaderPodNamingBox" style="display: none;">
             <p style="font-size: 12px; color: var(--ethio-green); font-weight: bold; margin-bottom: 6px; text-align: left;">👑 You are the Team Leader! Name your new Pod:</p>
             <input type="text" id="customPodNameInput" placeholder="e.g., Team Anbessa">
         </div>
-
         <button class="btn-primary" onclick="saveProfileData()">Enter Classroom 🚀</button>
     </div>
 
     <div id="studentDashboard">
+        
+        <div id="teacherControlPanel" class="teacher-panel" style="display: none; max-width: 1400px; margin: 0 auto 24px auto; width: 100%;">
+            <h2 style="font-size: 22px; color: #b45309; margin-bottom: 4px;">👑 Teacher Administration Suite</h2>
+            <p style="font-size: 14px; color: #78350f; margin-bottom: 16px;">Create manual pods and organize students into cohorts seamlessly.</p>
+            
+            <div class="teacher-grid">
+                <div style="background: white; padding: 18px; border-radius: 16px; border: 1px solid #fcd34d;">
+                    <h3 style="font-size: 16px; margin-bottom: 10px;">Create a New Pod</h3>
+                    <input type="text" id="teacherNewPodNameInput" placeholder="Enter Pod Team Name (e.g., Team Gila)" style="margin-bottom: 10px;">
+                    <button class="btn-primary" style="background: #d97706;" onclick="teacherCreatePodDirectly()">Spawn Pod Row</button>
+                </div>
+                
+                <div style="background: white; padding: 18px; border-radius: 16px; border: 1px solid #fcd34d;">
+                    <h3 style="font-size: 16px; margin-bottom: 10px;">Assign Student to Pod</h3>
+                    <select id="teacherStudentSelect" style="margin-bottom: 10px;"><option value="">Select Student...</option></select>
+                    <select id="teacherPodSelect" style="margin-bottom: 10px;"><option value="">Select Target Pod...</option></select>
+                    <button class="btn-primary" style="background: #2563eb;" onclick="teacherAssignStudentToPod()">Link Student to Pod</button>
+                </div>
+            </div>
+        </div>
+
         <div class="dashboard-split-layout">
             <div class="main-workspace-panel">
                 
@@ -148,10 +164,7 @@
                     <div id="podTeammatesMount"></div>
                 </div>
 
-                <div class="workspace-title">
-                    <span id="workspaceDynamicHeader">Fidel Script Matrix</span>
-                </div>
-                
+                <div class="workspace-title"><span id="workspaceDynamicHeader">Fidel Script Matrix</span></div>
                 <div id="viewFidelGrid" class="fidel-grid-3col"></div>
 
                 <div id="isolatedFamilyClassroom">
@@ -183,16 +196,14 @@
 
                 <div class="collapsible-dropdown-container">
                     <button class="dropdown-toggle-header" onclick="toggleDropdownElement('liveLeaderboardContent')">
-                        <span>🏆 Classroom Champions</span>
-                        <span id="leaderboardCaretSymbol">▼</span>
+                        <span>🏆 Classroom Champions</span><span id="leaderboardCaretSymbol">▼</span>
                     </button>
                     <div class="dropdown-content-pane" id="liveLeaderboardContent"></div>
                 </div>
 
                 <div class="collapsible-dropdown-container">
                     <button class="dropdown-toggle-header" onclick="toggleDropdownElement('photoBoardContent')">
-                        <span>📷 Disappearing Daily Artwork</span>
-                        <span id="photoBoardCaretSymbol">▼</span>
+                        <span>📷 Disappearing Daily Artwork</span><span id="photoBoardCaretSymbol">▼</span>
                     </button>
                     <div class="dropdown-content-pane" id="photoBoardContent">
                         <p style="font-size:12px; color:#64748b;">Upload drawings of letters! Images dissolve automatically in 24 hours.</p>
@@ -212,6 +223,8 @@
         const SUPABASE_URL = "https://muisfipoyzkhznfdvnes.supabase.co"; 
         const SUPABASE_KEY = "sb_publishable_VBiJZB8TVM2CSl54aDPP0A_4aDXWb5i";
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const ADMIN_EMAIL = "senaitrichmond16@gmail.com";
 
         let currentUser = null; let masteredLetters = []; let activeBaseFidel = null; 
         let activeFamilyArrayData = []; let activeSubscriptsData = []; let selectedAvatarSymbol = "🦁"; 
@@ -275,7 +288,7 @@
         async function handleAuth() {
             const email = document.getElementById("email").value.trim();
             const password = document.getElementById("password").value;
-            if (!email || !password) return alert("Please fill out all credentials.");
+            if (!email || !password) return alert("Complete credential fields context.");
 
             const { data, error } = isSignUpMode 
                 ? await _supabase.auth.signUp({ email, password })
@@ -287,13 +300,20 @@
 
         async function proceedFlowMap(user) {
             currentUser = user;
+            
+            // Check if admin email bypass routing is flagged
+            if (currentUser.email === ADMIN_EMAIL) {
+                document.getElementById("teacherControlPanel").style.display = "block";
+                teacherRefreshConfigurationDropdowns();
+            }
+
             const { data: profile } = await _supabase.from('profiles').select('display_name, avatar_character, pod_id, pods(team_name)').eq('id', user.id).maybeSingle();
             
             if (profile && profile.display_name) {
                 selectedAvatarSymbol = profile.avatar_character;
                 document.getElementById("displayUserHeader").innerText = profile.display_name;
                 document.getElementById("displayAvatarHeader").innerText = profile.avatar_character;
-                document.getElementById("sidebarPodBadge").innerText = profile.pods?.team_name || "Active Pod";
+                document.getElementById("sidebarPodBadge").innerText = profile.pods?.team_name || "Unassigned Pod";
                 launchDashboard();
             } else {
                 document.getElementById("authScreen").style.display = "none";
@@ -302,12 +322,10 @@
             }
         }
 
-        // Onboarding Assignment Algorithm Core
         async function calculatePodPlacementAssignment() {
             const { data: allPods } = await _supabase.from('pods').select('id, team_name');
             const { data: profiles } = await _supabase.from('profiles').select('pod_id');
 
-            // Find current occupants count per pod structure context
             const counts = {};
             profiles.forEach(p => { if(p.pod_id) counts[p.pod_id] = (counts[p.pod_id] || 0) + 1; });
 
@@ -346,14 +364,12 @@
                 let proposedName = document.getElementById("customPodNameInput").value.trim();
                 if (!proposedName) proposedName = `Pod #${Math.floor(Math.random() * 900) + 100}`;
                 
-                // Create new row database record map inside pods engine block
                 const { data: newPod } = await _supabase.from('pods').insert({ team_name: proposedName }).select().single();
                 if (newPod) {
                     finalPodId = newPod.id;
                     displayPodName = proposedName;
                 }
             } else {
-                // Fetch the existing name to assign sidebar profile element directly
                 const { data: existingPod } = await _supabase.from('pods').select('team_name').eq('id', targetPodId).single();
                 if (existingPod) displayPodName = existingPod.team_name;
             }
@@ -370,6 +386,43 @@
             document.getElementById("sidebarPodBadge").innerText = displayPodName;
             
             launchDashboard();
+        }
+
+        /* ADMIN EXCLUSIVE CORE TEACHER PIPELINES */
+        async function teacherRefreshConfigurationDropdowns() {
+            const { data: students } = await _supabase.from('profiles').select('id, display_name');
+            const { data: pods } = await _supabase.from('pods').select('id, team_name');
+
+            const sSelect = document.getElementById("teacherStudentSelect");
+            sSelect.innerHTML = '<option value="">Select Student...</option>';
+            students?.forEach(s => { sSelect.innerHTML += `<option value="${s.id}">${s.display_name}</option>`; });
+
+            const pSelect = document.getElementById("teacherPodSelect");
+            pSelect.innerHTML = '<option value="">Select Target Pod...</option>';
+            pods?.forEach(p => { pSelect.innerHTML += `<option value="${p.id}">${p.team_name}</option>`; });
+        }
+
+        async function teacherCreatePodDirectly() {
+            const name = document.getElementById("teacherNewPodNameInput").value.trim();
+            if (!name) return alert("Enter pod name target identifier strings.");
+            
+            await _supabase.from('pods').insert({ team_name: name });
+            document.getElementById("teacherNewPodNameInput").value = "";
+            
+            teacherRefreshConfigurationDropdowns();
+            fetchPodTeammateProgress();
+        }
+
+        async function teacherAssignStudentToPod() {
+            const studentId = document.getElementById("teacherStudentSelect").value;
+            const podId = document.getElementById("teacherPodSelect").value;
+            if (!studentId || !podId) return alert("Select cross-relational targets.");
+
+            await _supabase.from('profiles').update({ pod_id: podId }).eq('id', studentId);
+            alert("Student paired with Pod matrix layout successfully.");
+            
+            teacherRefreshConfigurationDropdowns();
+            fetchPodTeammateProgress();
         }
 
         function launchDashboard() {
