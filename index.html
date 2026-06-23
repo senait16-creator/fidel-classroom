@@ -15,31 +15,27 @@
             --ethio-green: #128807;
             --ethio-yellow: #FCD116;
             --ethio-red: #E8112D;
-            --bg-neutral: #FFFFFF;
+            --bg-neutral: #f8fafc;
             --card-neutral: #FFFFFF;
             --text-dark: #2B2B24;
-            --shadow-premium: 0 12px 30px rgba(43, 43, 36, 0.08);
+            --shadow-premium: 0 12px 30px rgba(43, 43, 36, 0.06);
         }
 
         * { box-sizing: border-box; font-family: 'Ubuntu', 'Noto Sans Ethiopic', sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         
         body { 
-            background-color: #f8fafc; 
+            background-color: var(--bg-neutral); 
             color: var(--text-dark); 
-            padding: 16px; 
+            padding: 24px; 
             padding-bottom: calc(100px + env(safe-area-inset-bottom)); 
-            padding-top: calc(16px + env(safe-area-inset-top));
-            -webkit-user-select: none;
-            user-select: none;
-            display: flex;
-            flex-direction: column;
+            padding-top: calc(24px + env(safe-area-inset-top));
             min-height: 100vh;
         }
 
         .app-card {
             max-width: 420px; 
             width: 100%;
-            margin: auto; 
+            margin: 60px auto; 
             background: var(--card-neutral); 
             padding: 36px 24px; 
             border-radius: 28px; 
@@ -59,106 +55,119 @@
         
         input { 
             width: 100%; padding: 18px; margin-bottom: 14px; border: 2px solid #E6E6DE; border-radius: 16px; font-size: 16px; outline: none; background: #FDFDFB;
-            -webkit-appearance: none;
         }
 
         .choice-container { display: flex; gap: 12px; margin-bottom: 14px; }
         .vertical-choice { flex-direction: column; gap: 16px; width: 100%; }
 
         .track-rect-btn {
-            width: 100%; padding: 24px 20px; font-size: 18px; font-weight: 700; border: none; border-radius: 20px; cursor: pointer; text-align: left; transition: all 0.25s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.05); color: white; display: flex; flex-direction: column; gap: 4px;
+            width: 100%; padding: 24px 20px; font-size: 18px; font-weight: 700; border: none; border-radius: 20px; cursor: pointer; text-align: left; transition: all 0.25s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.03); color: white; display: flex; flex-direction: column; gap: 4px;
         }
         .track-rect-btn span.btn-desc { font-size: 13px; font-weight: 400; opacity: 0.9; }
-        
         .track-fidel { background-color: var(--ethio-green); }
-        .track-fidel:hover { background-color: #0e6b05; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(12, 107, 5, 0.3); }
-        
         .track-basics { background-color: var(--ethio-yellow); color: #2B2B24; }
-        .track-basics:hover { background-color: #e2ba10; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(252, 209, 22, 0.4); }
-        
         .track-reading { background-color: var(--ethio-red); }
-        .track-reading:hover { background-color: #c60f24; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(232, 17, 45, 0.3); }
 
-        .btn-clicked-animation { animation: buttonPop 0.4s ease-out; }
-        @keyframes buttonPop {
-            0% { transform: scale(1); }
-            50% { transform: scale(0.94); opacity: 0.8; }
-            100% { transform: scale(1); }
-        }
-
-        .btn-filled-rectangle { flex: 1; padding: 18px; font-size: 16px; font-weight: 700; border-radius: 14px; border: none; cursor: pointer; transition: transform 0.1s; }
+        .btn-filled-rectangle { flex: 1; padding: 18px; font-size: 16px; font-weight: 700; border-radius: 14px; border: none; cursor: pointer; }
         .btn-signup-rect { background: var(--ethio-green); color: white; }
         .btn-login-rect { background: #2c3e50; color: white; }
-        .btn-outlined-rectangle { width: 100%; padding: 20px; font-size: 17px; font-weight: 700; background: transparent; color: var(--text-dark); border: 3px solid #2c3e50; border-radius: 18px; cursor: pointer; text-align: center; transition: transform 0.1s; }
-        .btn-outlined-rectangle:active, .btn-filled-rectangle:active { transform: scale(0.97); }
+        .btn-outlined-rectangle { width: 100%; padding: 20px; font-size: 17px; font-weight: 700; background: transparent; color: var(--text-dark); border: 3px solid #2c3e50; border-radius: 18px; cursor: pointer; text-align: center; }
 
-        .btn-primary { background: linear-gradient(135deg, var(--ethio-green), #0F7306); color: white; padding: 18px; border: none; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; margin-bottom: 14px; -webkit-appearance: none; }
+        .btn-primary { background: linear-gradient(135deg, var(--ethio-green), #0F7306); color: white; padding: 18px; border: none; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; margin-bottom: 14px; }
         .btn-secondary { background: transparent; color: #64748b; font-size: 14px; border: none; cursor: pointer; width: 100%; margin-top: 12px; padding: 8px; }
 
         .avatar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
         .avatar-option { background: #F6F6F0; border: 2px solid #E6E6DE; border-radius: 16px; padding: 16px 0; font-size: 28px; cursor: pointer; }
         .avatar-option.selected { border-color: var(--ethio-yellow); background: #FFFDF0; }
-        .avatar-label { font-size: 11px; display: block; color: #55554E; margin-top: 6px; font-weight: bold; }
 
-        #studentDashboard, #teacherDashboardView { display: none; max-width: 480px; margin: 0 auto; width: 100%; }
-        header { background: white; padding: 18px; border-radius: 20px; box-shadow: var(--shadow-premium); margin-bottom: 20px; }
+        /* SPLIT SCREEN ENGINE PLATFORM */
+        #studentDashboard { display: none; max-width: 1440px; margin: 0 auto; width: 100%; }
         
-        .profile-clickable-trigger { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; cursor: pointer; }
-        .user-avatar-badge { width: 46px; height: 46px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        .dashboard-split-layout {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 28px;
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-split-layout { grid-template-columns: 1fr; }
+            .sidebar-sticky-panel { order: -1; }
+        }
+
+        .main-workspace-panel {
+            background: transparent;
+        }
+
+        .sidebar-sticky-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: sticky;
+            top: 24px;
+        }
+
+        header { background: white; padding: 24px; border-radius: 24px; box-shadow: var(--shadow-premium); border: 1px solid #e2e8f0; }
+        .profile-clickable-trigger { display: flex; align-items: center; gap: 14px; cursor: pointer; }
+        .user-avatar-badge { width: 54px; height: 54px; background: #f1f5f9; border: 2px solid #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; }
         
-        .progress-container { width: 100%; background: #edf2f7; border-radius: 20px; height: 12px; overflow: hidden; margin: 10px 0; }
+        .progress-container { width: 100%; background: #edf2f7; border-radius: 20px; height: 10px; overflow: hidden; margin: 14px 0; }
         .progress-bar { height: 100%; width: 0%; background: #2ecc71; transition: width 0.4s ease; }
-        .user-meta { display: flex; justify-content: space-between; font-size: 13px; color: #718096; }
         
-        .game-leaderboard-card { background: white; border-radius: 20px; box-shadow: var(--shadow-premium); margin-bottom: 24px; border: 2px solid #e2e8f0; overflow: hidden; }
-        .leaderboard-header-btn { width: 100%; background: #f8fafc; border: none; padding: 18px 20px; font-size: 16px; font-weight: 700; color: #1e293b; text-align: left; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .leaderboard-list { display: none; flex-direction: column; gap: 10px; padding: 16px; background: white; border-top: 1px solid #e2e8f0; }
-        .leaderboard-row { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: #f8fafc; border-radius: 14px; }
+        .game-leaderboard-card { background: white; border-radius: 24px; box-shadow: var(--shadow-premium); border: 1px solid #e2e8f0; overflow: hidden; }
+        .leaderboard-header-btn { width: 100%; background: #f8fafc; border: none; padding: 18px 20px; font-size: 16px; font-weight: 700; color: #1e293b; display: flex; justify-content: space-between; align-items: center; }
+        .leaderboard-list { display: flex; flex-direction: column; gap: 10px; padding: 20px; background: white; }
+        .leaderboard-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: #f8fafc; border-radius: 14px; }
         .leaderboard-row.current-user { border: 2px solid var(--ethio-yellow); background: #fffdf5; }
         .player-info { display: flex; align-items: center; gap: 10px; }
         .player-identity { font-weight: 700; font-size: 14px; color: #334155; }
         .player-score-badge { background: var(--ethio-green); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
 
-        .workspace-title { font-size: 22px; font-weight: 700; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; padding: 0 4px; }
+        .workspace-title { font-size: 26px; font-weight: 700; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
 
-        .fidel-grid-3col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-        .fidel-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
+        /* EXPANDED SIZES FOR CHARACTER DOMINANCE */
+        .fidel-grid-3col { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 14px; margin-bottom: 20px; }
         
-        .fidel-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 22px 0; text-align: center; font-size: 28px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.01); position: relative; min-height: 76px; display: flex; align-items: center; justify-content: center; }
+        .fidel-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 32px 0; text-align: center; font-size: 36px; font-weight: 700; cursor: pointer; box-shadow: var(--shadow-premium); display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
+        .fidel-card:hover { transform: translateY(-2px); }
         .fidel-card.completed { background: #e8f8f5; border-color: #2ecc71; color: #2ecc71; }
         .fidel-card.reviewing { border-color: #e67e22; background: #fef5e7; }
 
-        #isolatedFamilyClassroom { display: none; background: white; padding: 20px 14px; border-radius: 24px; box-shadow: var(--shadow-premium); text-align: center; margin-top: 10px; }
-        .classroom-header-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; background: #1e293b; color: white; border-radius: 12px; padding: 12px 2px; font-size: 12px; font-weight: bold; margin-bottom: 12px; }
-        .classroom-row-giant { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 32px; }
+        #isolatedFamilyClassroom { display: none; background: white; padding: 32px 24px; border-radius: 28px; box-shadow: var(--shadow-premium); border: 1px solid #e2e8f0; text-align: center; }
+        .classroom-header-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; background: #1e293b; color: white; border-radius: 14px; padding: 14px 4px; font-size: 14px; font-weight: bold; margin-bottom: 16px; }
+        .classroom-row-giant { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; margin-bottom: 32px; }
         
-        .giant-char-card { background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 12px; padding: 16px 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .giant-char-card .letter { font-size: 34px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
-        .giant-char-card .sub { font-size: 13px; color: #64748b; font-weight: bold; margin-bottom: 8px; }
-        .giant-char-card .audio-trigger-btn { background: #e2e8f0; border: none; font-size: 11px; padding: 6px 8px; border-radius: 14px; cursor: pointer; width: 90%; text-align: center; font-weight: bold; }
+        .giant-char-card { background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 20px; padding: 24px 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .giant-char-card .letter { font-size: 48px; font-weight: 700; color: #0f172a; margin-bottom: 2px; }
+        .giant-char-card .sub { font-size: 14px; color: #64748b; font-weight: bold; margin-bottom: 14px; }
+        
+        /* STROKE WRITING REPLICATION ENGINE */
+        .stroke-trace-box { width: 64px; height: 64px; background: #fff; border: 1px dashed #94a3b8; border-radius: 10px; margin-bottom: 14px; padding: 4px; cursor: pointer; position: relative; }
+        .stroke-trace-box svg { width: 100%; height: 100%; }
+        .trace-path { stroke: #2c3e50; stroke-width: 5; fill: none; stroke-linecap: round; stroke-dasharray: 200; stroke-dashoffset: 200; }
+        .stroke-trace-box:hover .trace-path { animation: drawStroke 1.8s linear infinite forwards; }
+        
+        @keyframes drawStroke { to { stroke-dashoffset: 0; } }
+
+        .audio-trigger-btn { background: #e2e8f0; border: none; font-size: 12px; padding: 8px 12px; border-radius: 14px; cursor: pointer; width: 100%; font-weight: bold; }
 
         .flashcard-wrapper { background: #fff; border: 2px solid #e2e8f0; border-radius: 24px; padding: 48px 20px; text-align: center; box-shadow: var(--shadow-premium); margin-bottom: 20px; }
         .flashcard-foreign { font-size: 44px; font-weight: bold; color: #2c3e50; margin-bottom: 16px; }
         .flashcard-hidden-answer { background: #f1f5f9; border-radius: 14px; padding: 16px; font-size: 17px; font-weight: bold; color: var(--ethio-green); cursor: pointer; }
-        .grammar-tip { font-size: 14px; color: #64748b; margin-top: 12px; font-style: italic; background: #f8fafc; padding: 8px; border-radius: 8px; border-left: 4px solid #3498db; text-align: left; }
-
-        table { width: 100%; border-collapse: collapse; text-align: left; background: white; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-premium); }
-        th { background: #f1f5f9; padding: 14px; font-size: 13px; color: #475569; }
-        td { padding: 16px 14px; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
-        .letter-badge { font-family: 'Noto Sans Ethiopic', sans-serif; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 6px; font-size: 13px; margin: 2px; display: inline-block; }
-
-        .bottom-banner { position: fixed; bottom: calc(16px + env(safe-area-inset-bottom)); left: 16px; right: 16px; background: #2c3e50; padding: 16px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
-        .logout-btn { background: transparent; color: white; border: none; font-size: 15px; font-weight: bold; cursor: pointer; padding: 6px; }
-        .nav-back-btn { background: #e74c3c; color: white; border: none; padding: 8px 16px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 14px; }
-        .role-switch-btn { background: #f39c12; color: white; border: none; padding: 10px 16px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 14px; }
-
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 200; padding: 16px; backdrop-filter: blur(2px); }
-        .modal-content { background: #fff; padding: 28px 20px; border-radius: 24px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
         
-        .stat-box-row { display: flex; flex-direction: column; gap: 12px; margin: 18px 0; text-align: left; }
-        .stat-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; display: flex; align-items: center; justify-content: space-between; }
-        .stat-card h4 { font-size: 13px; color: #64748b; font-weight: bold; text-transform: uppercase; }
-        .stat-card p { font-size: 17px; font-weight: 700; color: #1e293b; }
+        .bottom-banner { position: fixed; bottom: 24px; left: 24px; right: 24px; background: #2c3e50; padding: 16px 24px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100; box-shadow: 0 8px 24px rgba(0,0,0,0.15); max-width: 1392px; margin: 0 auto; }
+        .logout-btn { background: transparent; color: white; border: none; font-size: 15px; font-weight: bold; cursor: pointer; }
+        .nav-back-btn { background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        .role-switch-btn { background: #f39c12; color: white; border: none; padding: 10px 16px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); align-items: center; justify-content: center; z-index: 200; padding: 16px; backdrop-filter: blur(2px); }
+        .modal-content { background: #fff; padding: 32px 24px; border-radius: 24px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+
+        #teacherDashboardView { display: none; max-width: 1140px; margin: 0 auto; width: 100%; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-premium); }
+        th { background: #f1f5f9; padding: 14px; text-align: left; }
+        td { padding: 16px 14px; border-bottom: 1px solid #e2e8f0; }
+        .letter-badge { background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 6px; margin: 2px; display: inline-block; }
     </style>
 </head>
 <body>
@@ -167,47 +176,42 @@
     <div id="authScreen" class="app-card tricolor-frame">
         <h1 class="main-title">Fidel Classroom</h1>
         <p class="subtitle" id="authSubtitle">Learn the Amharic Alphabet</p>
-        
         <div id="onboardingGate" class="choice-container">
             <button class="btn-filled-rectangle btn-signup-rect" onclick="selectAuthFlow('signup')">Sign Up</button>
             <button class="btn-filled-rectangle btn-login-rect" onclick="selectAuthFlow('login')">Log In</button>
         </div>
-
         <div id="credentialFields" style="display: none;">
-            <input type="email" id="email" placeholder="Email Address" autocomplete="email">
+            <input type="email" id="email" placeholder="Email Address">
             <input type="password" id="password" placeholder="Password (min 6 characters)">
             <button class="btn-primary" id="mainAuthBtn" onclick="handleAuth()">Submit</button>
-            <button class="btn-secondary" onclick="resetToGate()">← Back to Choices</button>
+            <button class="btn-secondary" onclick="resetToGate()">← Back</button>
         </div>
     </div>
 
     <!-- MASTER GATE -->
     <div id="roleSelectionScreen" class="app-card tricolor-frame" style="display: none;">
-        <h2 class="main-title" style="font-size: 24px; margin-bottom: 8px;">Welcome, Teacher!</h2>
-        <p class="subtitle">How would you like to access the portal today?</p>
+        <h2 class="main-title" style="font-size: 24px;">Welcome, Teacher!</h2>
+        <p class="subtitle">Select portal entry context mode:</p>
         <div class="choice-container vertical-choice">
-            <button class="btn-outlined-rectangle" style="border-color: var(--ethio-green);" onclick="enterAsRole('student')">Enter as Student Mode</button>
-            <button class="btn-outlined-rectangle" style="border-color: #2c3e50;" onclick="enterAsRole('teacher')">Enter as Teacher Panel</button>
+            <button class="btn-outlined-rectangle" style="border-color: var(--ethio-green);" onclick="enterAsRole('student')">Student Workspace</button>
+            <button class="btn-outlined-rectangle" style="border-color: #2c3e50;" onclick="enterAsRole('teacher')">Teacher Panel Roster</button>
         </div>
     </div>
 
     <!-- SCREEN 2: STUDENT TASK SELECTION GATES -->
     <div id="taskSelectionScreen" class="app-card tricolor-frame" style="display: none;">
         <h2 class="main-title" style="font-size: 24px; margin-bottom: 8px;">Welcome Back!</h2>
-        <p class="subtitle" style="margin-bottom: 24px;">Select your learning module framework:</p>
+        <p class="subtitle">Select your learning module framework:</p>
         <div class="choice-container vertical-choice">
-            <!-- TRACK 1 -->
-            <button id="btnTrackFidel" class="track-rect-btn track-fidel" onclick="animatedTrackTrigger('fidel', this)">
+            <button id="btnTrackFidel" class="track-rect-btn track-fidel" onclick="launchTaskTrack('fidel')">
                 <div>1. Learn the Fidel ፊደል Script</div>
                 <span class="btn-desc">Interactive framework for seeing, hearing & writing</span>
             </button>
-            <!-- TRACK 2 -->
-            <button id="btnTrackBasics" class="track-rect-btn track-basics" onclick="animatedTrackTrigger('basics', this)">
+            <button id="btnTrackBasics" class="track-rect-btn track-basics" onclick="launchTaskTrack('basics')">
                 <div>2. Learn the Basics & Vocab</div>
                 <span class="btn-desc">Greetings, functional colors, numbers & phrases</span>
             </button>
-            <!-- TRACK 3 -->
-            <button id="btnTrackReading" class="track-rect-btn track-reading" onclick="animatedTrackTrigger('reading', this)">
+            <button id="btnTrackReading" class="track-rect-btn track-reading" onclick="launchTaskTrack('reading')">
                 <div>3. Reading & Grammar</div>
                 <span class="btn-desc">SOV sentence structures and reading comprehension</span>
             </button>
@@ -216,175 +220,127 @@
 
     <!-- SCREEN 3: AVATAR SETUP -->
     <div id="profileSetupScreen" class="app-card tricolor-frame" style="display: none;">
-        <h2 class="welcome-title" style="color: var(--ethio-green); font-size: 26px; margin-bottom: 4px;">Set Up Profile!</h2>
+        <h2 class="welcome-title" style="font-size: 26px; margin-bottom: 4px;">Set Up Profile!</h2>
         <p class="subtitle">Pick a student nickname and your badge</p>
         <input type="text" id="displayName" placeholder="Enter your name / nickname">
         <div class="avatar-grid">
-            <div class="avatar-option selected" onclick="selectAvatar('🦁', this)">🦁<span class="avatar-label">አንበሳ</span></div>
-            <div class="avatar-option" onclick="selectAvatar('🐆', this)">🐆<span class="avatar-label">ነብር</span></div>
-            <div class="avatar-option" onclick="selectAvatar('🐘', this)">🐘<span class="avatar-label">ዝሆን</span></div>
-            <div class="avatar-option" onclick="selectAvatar('☕', this)">☕<span class="avatar-label">ቡና</span></div>
-            <div class="avatar-option" onclick="selectAvatar('🫖', this)">🫖<span class="avatar-label">ጀበና</span></div>
-            <div class="avatar-option" onclick="selectAvatar('🌼', this)">🌼<span class="avatar-label">አደይ አበባ</span></div>
+            <div class="avatar-option selected" onclick="selectAvatar('🦁', this)">🦁</div>
+            <div class="avatar-option" onclick="selectAvatar('🐆', this)">🐆</div>
+            <div class="avatar-option" onclick="selectAvatar('🐘', this)">🐘</div>
         </div>
         <button class="btn-primary" onclick="saveProfileData()">Enter Classroom 🚀</button>
     </div>
 
-    <!-- VIEW A: STUDENT WORKSPACE DASHBOARD -->
+    <!-- VIEW A: STUDENT WORKSPACE SPLIT-LAYOUT PLATFORM -->
     <div id="studentDashboard">
-        <header>
-            <div class="header-top-row" style="display:flex; justify-content:space-between; align-items:flex-start;">
-                <div class="profile-clickable-trigger" onclick="openProfileStatsDashboard()" title="Edit Profile & View Stats">
-                    <div class="user-avatar-badge" id="displayAvatarHeader">🦁</div>
-                    <h1 id="displayUserHeader" style="text-decoration: underline; text-underline-offset: 4px; font-size:20px; font-weight:700;">Student Name</h1>
-                </div>
-                <div id="teacherPortalShortcut" style="display:none;">
-                    <button class="role-switch-btn" onclick="goToRoleSelectionMenu()">Teacher Menu 🛠️</button>
-                </div>
-            </div>
-            <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
-            <div class="user-meta">
-                <span id="studentEmail">student@email.com</span>
-                <span id="progressText">0% Mastered</span>
-            </div>
-        </header>
-
-        <!-- LIVE INTERACTIVE DROPDOWN LEADERBOARD -->
-        <div class="game-leaderboard-card">
-            <button class="leaderboard-header-btn" onclick="toggleLeaderboardDropdown()">
-                <span>🏆 Classroom Champions</span>
-                <span id="dropdownIndicatorIcon">▼</span>
-            </button>
-            <div class="leaderboard-list" id="liveLeaderboardContent">
-                <p style="color:#64748b; font-size:13px;">Loading class standings...</p>
-            </div>
-        </div>
-
-        <div id="workspaceArea">
-            <div class="workspace-title">
-                <span id="trackTitle">Module Space</span>
-                <button class="nav-back-btn" id="masterLeaveWorkspaceBtn" onclick="exitToTaskMenu()">Change Task</button>
-            </div>
+        <div class="dashboard-split-layout">
             
-            <!-- Track 1: Fidel Families View Workspace -->
-            <div id="viewFidelGrid" class="fidel-grid-3col"></div>
-
-            <!-- Full-Page Family Classroom Workspace Mode -->
-            <div id="isolatedFamilyClassroom">
-                <h2 id="classroomFamilyTitle" style="font-size:24px; margin-bottom:6px; color:#1e293b;">Family Practice Row</h2>
-                <p style="color:#64748b; margin-bottom:18px; font-size:13px;">Master phonetic values by sight and ear order structures</p>
+            <!-- LEFT AREA: DOMINANT MAIN TASK & GRID WORKSPACE -->
+            <div class="main-workspace-panel">
+                <div class="workspace-title">
+                    <span id="trackTitle">Fidel Script Matrix</span>
+                    <button class="nav-back-btn" id="masterLeaveWorkspaceBtn" onclick="exitToTaskMenu()">Change Task</button>
+                </div>
                 
-                <div class="classroom-header-strip">
-                    <div>-a/e</div><div>-u</div><div>-ee</div><div>-a</div><div>-ay</div><div>-ih</div><div>-o</div>
+                <!-- Main Grid Container Space -->
+                <div id="viewFidelGrid" class="fidel-grid-3col"></div>
+
+                <!-- Isolated Row View with Writing Trace Vectors -->
+                <div id="isolatedFamilyClassroom">
+                    <h2 id="classroomFamilyTitle" style="font-size:26px; margin-bottom:14px;">Family Practice Row</h2>
+                    <div class="classroom-header-strip">
+                        <div>1st</div><div>2nd</div><div>3rd</div><div>4th</div><div>5th</div><div>6th</div><div>7th</div>
+                    </div>
+                    <div class="classroom-row-giant" id="classroomGiantRowMount"></div>
+                    <div style="display:flex; gap:12px;">
+                        <button class="btn-primary" style="background:#e67e22; flex:1;" onclick="shuffleClassroomRowPhonetics()">Shuffle Practice 🎲</button>
+                        <button class="btn-primary" style="background:#2ecc71; flex:1;" onclick="classroomMarkAsMasteredDirectly()">Mastered ✅</button>
+                    </div>
+                    <button class="btn-secondary" onclick="exitClassroomViewBackToGrid()">← Back to Matrix Grid</button>
                 </div>
-                <div class="classroom-row-giant" id="classroomGiantRowMount"></div>
-                
-                <div style="display:flex; gap:10px; margin-top:20px;">
-                    <button class="btn-primary" style="background:#e67e22; flex:1; padding:14px; font-size:15px;" onclick="shuffleClassroomRowPhonetics()">Test Me 🎲</button>
-                    <button class="btn-primary" style="background:#2ecc71; flex:1; padding:14px; font-size:15px;" onclick="classroomMarkAsMasteredDirectly()">Mastered ✅</button>
+
+                <!-- Core Vocabulary Container View Track 2 -->
+                <div id="viewBasicsTrack" style="display: none;">
+                    <div id="basicsMenuGate" class="choice-container vertical-choice">
+                        <button class="btn-outlined-rectangle" onclick="launchBasicsFlashcardArena('greetings')">Common Greetings 👋</button>
+                        <button class="btn-outlined-rectangle" onclick="launchBasicsFlashcardArena('numbers')">Numbers (1 - 10) 🔢</button>
+                    </div>
+                    <div id="basicsFlashcardArena" class="flashcard-wrapper" style="display: none;">
+                        <div class="flashcard-foreign" id="basicsCardQuestion">ሰላም</div>
+                        <div class="flashcard-hidden-answer" id="basicsCardAnswer" onclick="revealBasicsTranslation()">Click to Reveal Translation</div>
+                        <button class="btn-primary" style="margin-top:20px;" onclick="generateBasicsCard()">Next Flashcard ➡️</button>
+                        <button class="btn-secondary" onclick="backToBasicsMenu()">Back to Selection</button>
+                    </div>
                 </div>
-                <button class="btn-secondary" onclick="exitClassroomViewBackToGrid()">← Back to Families Grid</button>
+
+                <!-- Reading & Grammar Container View Track 3 -->
+                <div id="viewReadingTrack" style="display: none;">
+                    <div id="readingMenuGate" class="choice-container vertical-choice">
+                        <button class="btn-outlined-rectangle" onclick="launchReadingSubMode('structure')">Subject-Object-Verb Structure</button>
+                    </div>
+                    <div id="readingFlashcardArena" class="flashcard-wrapper" style="display: none;">
+                        <div class="flashcard-foreign" id="flashCardQuestion" style="font-size:28px;">ሰላም</div>
+                        <div class="flashcard-hidden-answer" id="flashCardAnswer" onclick="revealFlashcardTranslation()">Click to Reveal Translation</div>
+                        <button class="btn-primary" style="margin-top:20px;" onclick="generateReadingCard()">Next Lesson ➡️</button>
+                        <button class="btn-secondary" onclick="backToReadingMenu()">Back to Reading Menu</button>
+                    </div>
+                </div>
             </div>
 
-            <!-- Track 2: Basics & High-Frequency Vocabulary Workspace -->
-            <div id="viewBasicsTrack" style="display: none;">
-                <div id="basicsMenuGate" class="choice-container vertical-choice">
-                    <button class="btn-outlined-rectangle" onclick="launchBasicsFlashcardArena('greetings')">Common Greetings 👋</button>
-                    <button class="btn-outlined-rectangle" onclick="launchBasicsFlashcardArena('numbers')">Numbers (1 - 10) 🔢</button>
-                    <button class="btn-outlined-rectangle" onclick="launchBasicsFlashcardArena('colors')">Colors Palette 🎨</button>
-                </div>
-                <div id="basicsFlashcardArena" class="flashcard-wrapper" style="display: none;">
-                    <div class="flashcard-foreign" id="basicsCardQuestion">ሰላም</div>
-                    <div class="flashcard-hidden-answer" id="basicsCardAnswer" onclick="revealBasicsTranslation()" style="margin-top:16px; margin-bottom:16px;">Click to Reveal Translation</div>
-                    <button class="btn-primary" onclick="generateBasicsCard()">Next Flashcard ➡️</button>
-                    <button class="btn-secondary" onclick="backToBasicsMenu()">Back to Categories</button>
+            <!-- RIGHT AREA: COMPACT SIDEBAR FOR PROFILE & CHAMPIONS LEADERBOARD -->
+            <div class="sidebar-sticky-panel">
+                <header>
+                    <div class="profile-clickable-trigger" onclick="openProfileStatsDashboard()">
+                        <div class="user-avatar-badge" id="displayAvatarHeader">🦁</div>
+                        <div>
+                            <h3 id="displayUserHeader" style="font-size:18px;">Student</h3>
+                            <span id="progressText" style="font-size:13px; color:#64748b; font-weight:bold;">0% Mastered</span>
+                        </div>
+                    </div>
+                    <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+                    <div id="teacherPortalShortcut" style="display:none; margin-top:10px;">
+                        <button class="role-switch-btn" style="width:100%;" onclick="goToRoleSelectionMenu()">Teacher Portal Menu 🛠️</button>
+                    </div>
+                </header>
+
+                <div class="game-leaderboard-card">
+                    <div class="leaderboard-header-btn"><span>🏆 Classroom Champions</span></div>
+                    <div class="leaderboard-list" id="liveLeaderboardContent"></div>
                 </div>
             </div>
 
-            <!-- Track 3: Reading & Grammar Workspace -->
-            <div id="viewReadingTrack" style="display: none;">
-                <div id="readingMenuGate" class="choice-container vertical-choice">
-                    <button class="btn-outlined-rectangle" onclick="launchReadingSubMode('structure')">Subject-Object-Verb Structure</button>
-                    <button class="btn-outlined-rectangle" onclick="launchReadingSubMode('comprehension')">Reading Comprehension Blocks</button>
-                </div>
-                <div id="readingFlashcardArena" class="flashcard-wrapper" style="display: none;">
-                    <div class="flashcard-foreign" id="flashCardQuestion" style="font-size:30px;">ሰላም</div>
-                    <div class="flashcard-hidden-answer" id="flashCardAnswer" onclick="revealFlashcardTranslation()" style="margin-top:16px; margin-bottom:16px;">Click to Reveal Translation</div>
-                    <div id="grammarTipText" class="grammar-tip"></div>
-                    <button class="btn-primary" style="margin-top:16px;" onclick="generateReadingCard()">Next Lesson ➡️</button>
-                    <button class="btn-secondary" onclick="backToReadingMenu()">Back to Reading Menu</button>
-                </div>
-            </div>
         </div>
         <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
     </div>
 
-    <!-- VIEW B: TEACHER VIEW ROSTER -->
+    <!-- VIEW B: TEACHER CONTROL PANEL VIEW -->
     <div id="teacherDashboardView">
-        <header style="border-left: 6px solid var(--ethio-green); display:flex; justify-content:space-between; align-items:center;">
-            <div>
-                <h1 style="font-size:22px;">Teacher Control Center</h1>
-                <p>Monitoring active student rosters</p>
-                <button class="role-switch-btn" style="margin-top:8px;" onclick="goToRoleSelectionMenu()">Switch to Student Mode</button>
-            </div>
-            <button class="btn-primary" style="width:auto; padding:12px;" onclick="loadTeacherRosterData()">Refresh</button>
+        <header style="margin-bottom:20px;">
+            <h1 style="font-size:22px;">Teacher Control Center</h1>
+            <button class="role-switch-btn" onclick="goToRoleSelectionMenu()">Switch Account Profile Context</button>
         </header>
-        <div style="background:white; padding:16px; border-radius:16px; overflow-x:auto;">
-            <table style="width:100%;">
-                <thead>
-                    <tr><th>Student Profile</th><th>Progress</th><th>Completed Families</th></tr>
-                </thead>
-                <tbody id="teacherTableBody"></tbody>
-            </table>
-        </div>
+        <table>
+            <thead><tr><th>Student</th><th>Progress</th><th>Completed Letters</th></tr></thead>
+            <tbody id="teacherTableBody"></tbody>
+        </table>
         <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
     </div>
 
-    <!-- ROUTING INTERSTITIAL ACTION CHOICE MODAL -->
+    <!-- ROUTING INTERSTITIAL DIALOG MODAL -->
     <div id="fidelActionChoiceModal" class="modal" onclick="closeActionChoiceModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
-            <h3 id="actionChoiceModalTitle" style="font-size:20px; margin-bottom:8px;">Choose Action</h3>
-            <p style="font-size:14px; color:#64748b; margin-bottom:24px;">Would you like to drill this script row family or mark it as mastered immediately?</p>
-            <button class="btn-primary" style="background:#3498db;" onclick="triggerStudyClassroomRouting()">Study Family Row 📖</button>
-            <button class="btn-primary" style="background:#2ecc71;" onclick="triggerActionMasteredDirectly()">Mark As Mastered ✅</button>
-            <button class="btn-secondary" onclick="document.getElementById('fidelActionChoiceModal').style.display='none';">Cancel</button>
+            <button class="btn-primary" style="background:#3498db; margin-bottom:14px; padding:20px;" onclick="triggerStudyClassroomRouting()">Study Family Row 📖</button>
+            <button class="btn-primary" style="background:#2ecc71; margin-bottom:0; padding:20px;" onclick="triggerActionMasteredDirectly()">Mark As Mastered ✅</button>
         </div>
     </div>
 
-    <!-- EDITABLE LIVE PROFILE MODAL -->
+    <!-- PROFILE MANAGEMENT MODAL -->
     <div id="profileStatsModal" class="modal" onclick="closeProfileStatsModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
-            <h3 style="font-size: 20px; color: var(--text-dark); margin-bottom: 12px;">Edit Profile Details</h3>
-            
-            <input type="text" id="editProfileNameInput" placeholder="Update Nickname" style="margin-bottom: 12px;">
-            <div class="avatar-grid" style="grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 16px;">
-                <div class="avatar-option" style="padding: 6px 0; font-size: 16px;" onclick="selectEditAvatar('🦁', this)">🦁</div>
-                <div class="avatar-option" style="padding: 6px 0; font-size: 16px;" onclick="selectEditAvatar('🐆', this)">🐆</div>
-                <div class="avatar-option" style="padding: 6px 0; font-size: 16px;" onclick="selectEditAvatar('🐘', this)">🐘</div>
-                <div class="avatar-option" style="padding: 6px 0; font-size: 16px;" onclick="selectEditAvatar('☕', this)">☕</div>
-                <div class="avatar-option" style="padding: 6px 0; font-size: 16px;" onclick="selectEditAvatar('🫖', this)">🫖</div>
-                <div class="avatar-option" style="padding: 6px 0; font-size: 16px;" onclick="selectEditAvatar('🌼', this)">🌼</div>
-            </div>
-            <button class="btn-primary" style="padding: 12px; margin-bottom: 20px; font-size:14px;" onclick="updateProfileDatabaseChanges()">Save Identity Changes 💾</button>
-            
-            <hr style="border: 0; border-top: 1px solid #e2e8f0; margin-bottom: 16px;">
-            <h3 style="font-size: 16px; color: var(--text-dark);">Your Classroom Progress</h3>
-            
-            <div class="stat-box-row">
-                <div class="stat-card" style="border-left: 4px solid var(--ethio-green);">
-                    <div>
-                        <h4>Fidel Script Mastery</h4>
-                        <p id="statFidelPercent">0% Mastered</p>
-                    </div>
-                </div>
-                <div class="stat-card" style="border-left: 4px solid var(--ethio-yellow);">
-                    <div>
-                        <h4>Core Vocabulary</h4>
-                        <p id="statBasicsCount">Active Module</p>
-                    </div>
-                </div>
-            </div>
-            <button class="btn-primary" style="background: #64748b;" onclick="closeProfileStatsModal(null)">Close Dashboard</button>
+            <h3 style="margin-bottom:14px;">Edit Profile Details</h3>
+            <input type="text" id="editProfileNameInput" placeholder="Update Nickname">
+            <button class="btn-primary" onclick="updateProfileDatabaseChanges()">Save Identity Changes 💾</button>
+            <button class="btn-secondary" onclick="closeProfileStatsModal(null)">Close Dashboard</button>
         </div>
     </div>
 
@@ -394,75 +350,41 @@
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const ADMIN_EMAIL = "senaitrichmond16@gmail.com";
-        const totalFidelFamiliesCount = 33;
-        let currentUser = null; let masteredLetters = []; let reviewingLetters = []; let activeBaseFidel = null; let activeFamilyArrayData = []; let selectedAvatarSymbol = "🦁"; let tempEditAvatar = "🦁"; let currentReadingMode = ''; let currentBasicsCategory = '';
+        let currentUser = null; let masteredLetters = []; let reviewingLetters = []; let activeBaseFidel = null; let activeFamilyArrayData = []; let selectedAvatarSymbol = "🦁"; let currentReadingMode = ''; let currentBasicsCategory = '';
+
+        // Tracing Paths mapping configurations coordinates simulation
+        const vectorTracePathsBank = {
+            "ሀ": "M 15,10 L 15,50 M 15,10 L 45,10 L 45,50 M 15,30 L 45,30",
+            "ሁ": "M 15,10 L 15,50 M 15,10 L 45,10 L 45,50 M 15,30 L 45,30 M 45,30 L 55,35",
+            "ሂ": "M 15,10 L 15,50 M 15,10 L 45,10 L 45,50 M 15,30 L 45,30 M 45,50 Q 55,55 50,40",
+            "ሃ": "M 15,10 L 15,50 M 15,10 L 45,10 L 45,50 M 15,30 L 45,30 M 15,50 L 5,55",
+            "ሄ": "M 15,10 L 15,50 M 15,10 L 45,10 L 45,50 M 15,30 L 45,30 M 45,10 C 55,0 55,20 45,10",
+            "ህ": "M 15,20 L 15,50 M 15,20 L 45,20 L 45,50 M 15,35 L 45,35",
+            "ሆ": "M 15,10 L 15,50 M 15,10 L 45,10 L 45,50 M 15,30 L 45,30 M 25,10 L 25,0",
+            "ለ": "M 15,10 L 15,45 Q 15,55 30,50 L 45,15",
+            "ሉ": "M 15,10 L 15,45 Q 15,55 30,50 L 45,15 M 35,40 L 50,45",
+            "ሊ": "M 15,10 L 15,45 Q 15,55 30,50 L 45,15 M 45,15 Q 55,10 50,25",
+            "ላ": "M 15,10 L 15,45 Q 15,55 30,50 L 45,15 M 15,35 L 5,45",
+            "ሌ": "M 15,10 L 15,45 Q 15,55 30,50 L 45,15 M 15,10 C 20,0 5,0 15,10",
+            "ል": "M 15,15 L 15,45 Q 15,55 30,50 L 45,20",
+            "ሎ": "M 15,10 L 15,45 Q 15,55 30,50 L 45,15 M 25,25 L 35,25"
+        };
 
         const EnglishPhoneticSubscriptBank = {
-            "ሀ": ["he", "hu", "hi", "ha", "hee", "hih", "ho"], "ለ": ["le", "lu", "li", "la", "lee", "lih", "lo"],
-            "ሐ": ["he", "hu", "hi", "ha", "hee", "hih", "ho"], "መ": ["me", "mu", "mi", "ma", "mee", "mih", "mo"],
-            "ሠ": ["se", "su", "si", "sa", "see", "sih", "so"], "ረ": ["re", "ru", "ri", "ra", "ree", "rih", "ro"],
-            "ሰ": ["se", "su", "si", "sa", "see", "sih", "so"], "ሸ": ["she", "shu", "shi", "sha", "shee", "shih", "sho"],
-            "ቀ": ["k'e", "k'u", "k'i", "k'a", "k'ee", "k'ih", "k'o"], "በ": ["be", "bu", "bi", "ba", "bee", "bih", "bo"],
-            "ተ": ["te", "tu", "ti", "ta", "tee", "tih", "to"], "ቸ": ["che", "chu", "chi", "cha", "chee", "chih", "cho"],
-            "ኀ": ["he", "hu", "hi", "ha", "hee", "hih", "ho"], "ነ": ["ne", "nu", "ni", "na", "nee", "nih", "no"],
-            "ኘ": ["nye", "nyu", "nyi", "nya", "nyee", "nyih", "nyo"], "አ": ["a", "u", "i", "a", "e", "ih", "o"],
-            "ከ": ["ke", "ku", "ki", "ka", "kee", "kih", "ko"], "ኸ": ["he", "hu", "hi", "ha", "hee", "hih", "ho"],
-            "ወ": ["we", "wu", "wi", "wa", "wee", "wih", "wo"], "ዐ": ["a", "u", "i", "a", "e", "ih", "o"],
-            "ዘ": ["ze", "zu", "zi", "za", "zee", "zih", "zo"], "ዠ": ["zhe", "zhu", "zhi", "zha", "zhee", "zhih", "zho"],
-            "የ": ["ye", "yu", "yi", "ya", "yee", "yih", "yo"], "ደ": ["de", "du", "di", "da", "dee", "dih", "do"],
-            "ጀ": ["je", "ju", "ji", "ja", "jee", "jih", "jo"], "ገ": ["ge", "gu", "gi", "ga", "gee", "gih", "go"],
-            "ጠ": ["t'e", "t'u", "t'i", "t'a", "t'ee", "t'ih", "t'o"], "ጨ": ["ch'e", "ch'u", "ch'i", "ch'a", "ch'ee", "ch'ih", "ch'o"],
-            "ጰ": ["p'e", "p'u", "p'i", "p'a", "p'ee", "p'o"], "ጸ": ["ts'e", "ts'u", "ts'i", "ts'a", "ts'ee", "ts'ih", "ts'o"],
-            "ፀ": ["ts'e", "ts'u", "ts'i", "ts'a", "ts'ee", "ts'ih", "ts'o"], "ፈ": ["fe", "fu", "fi", "fa", "fee", "fih", "fo"],
-            "ቨ": ["ve", "vu", "vi", "va", "vee", "vih", "vo"]
+            "ሀ": ["he", "hu", "hi", "ha", "hee", "ih", "ho"], "ለ": ["le", "lu", "li", "la", "lee", "lih", "lo"]
         };
 
         const alphabetData = [
-            {base:"ሀ", family:['ሀ','ሁ','ሂ','ሃ','ሄ','ህ','ሆ']}, {base:"ለ", family:['ለ','ሉ','ሊ','ላ','ሌ','ል','ሎ']},
-            {base:"ሐ", family:['ሐ','ሑ','ሒ','ሓ','ሔ','ሕ','ሖ']}, {base:"መ", family:['መ','ሙ','ሚ','ማ','ሜ','ም','ሞ']},
-            {base:"ሠ", family:['ሠ','ሡ','ሢ','ሣ','ሤ','ሥ','ሦ']}, {base:"ረ", family:['ረ','ሩ','ሪ','ራ','ሬ','ር','ሮ']},
-            {base:"ሰ", family:['ሰ','ሱ','ሲ','ሳ','ሴ','ስ','ሶ']}, {base:"ሸ", family:['ሸ','ሹ','ሺ','ሻ','ሼ','ሽ','ሾ']},
-            {base:"ቀ", family:['ቀ','ቁ','ቂ','ቃ','ቄ','ቅ','ቆ']}, {base:"በ", family:['በ','ቡ','ቢ','ባ','ቤ','ብ','ቦ']},
-            {base:"ተ", family:['ተ','ቱ','ቲ','ታ','ቴ','ት','ቶ']}, {base:"ቸ", family:['ቸ','ቹ','ቺ','ቻ','ቼ','ች','ቾ']},
-            {base:"ኀ", family:['ኀ','ኁ','ኂ','ኃ','ኄ','ኅ','ኆ']}, {base:"ነ", family:['ነ','ኑ','ኒ','ና','ኔ','ን','ኖ']},
-            {base:"ኘ", family:['ኘ','ኙ','ኚ','ኛ','ኜ','ኝ','ኞ']}, {base:"አ", family:['አ','ኡ','ኢ','ኣ','ኤ','እ','ኦ']},
-            {base:"ከ", family:['ከ','ኩ','ኪ','ካ','ኬ','ክ','ኮ']}, {base:"ኸ", family:['ኸ','ኹ','ኺ','ኻ','ኼ','ኽ','ኾ']},
-            {base:"ወ", family:['ወ','ዉ','ዊ','ዋ','ዌ','ው','ዎ']}, {base:"ዐ", family:['ዐ','ዑ','ዒ','ዓ','ዔ','ዕ','ዖ']},
-            {base:"ዘ", family:['ዘ','ዙ','ዚ','ዛ','ዜ','ዝ','ዞ']}, {base:"ዠ", family:['ዠ','ዡ','ዢ','ዣ','ዤ','ዥ','ዦ']},
-            {base:"የ", family:['የ','ዩ','ዪ','ያ','ዬ','ይ','ዮ']}, {base:"ደ", family:['ደ','ዱ','ዲ','ዳ','ዴ','ድ','ዶ']},
-            {base:"ጀ", family:['ጀ','ጁ','ጂ','ጃ','ጄ','ጅ','ጆ']}, {base:"ገ", family:['ገ','ጉ','ጊ','ጋ','ጌ','ግ','ጎ']},
-            {base:"ጠ", family:['ጠ','ጡ','ጢ','ጣ','ጤ','ጥ','ጦ']}, {base:"ጨ", family:['ጨ','ጩ','ጪ','ጫ','ጬ','ጭ','ጮ']},
-            {base:"ጰ", family:['ጰ','ጱ','ጲ','ጳ','ጴ','ጵ','ጶ']}, {base:"ጸ", family:['ጸ','ጹ','ጺ','ጻ','ጼ','ጽ','ጾ']},
-            {base:"ፀ", family:['ፀ','ፁ','ፂ','ፃ','ኄ','ፅ','ፅ']}, {base:"ፈ", family:['ፈ','ፉ','ፊ','ፋ','ፌ','ፍ','ፎ']},
-            {base:"ቨ", family:['ቨ','ዹ','ዺ','ቫ','ቬ','ቭ','ቮ']}
+            {base:"ሀ", family:['ሀ','ሁ','ሂ','ሃ','ሄ','ህ','ሆ']}, {base:"ለ", family:['ለ','ሉ','ሊ','ላ','ሌ','ል','ሎ']}
         ];
 
-        // Track 2 Dataset
         const basicsVocabularyBank = {
-            greetings: [
-                {q: "ሰላም", a: "Selam (Hello / Peace)"}, {q: "እንዴት ነህ?", a: "Indet neh? (How are you? - Male)"},
-                {q: "እንዴት ነሽ?", a: "Indet nesh? (How are you? - Female)"}, {q: "ደህና ሁን", a: "Dehna hun (Goodbye)"}
-            ],
-            numbers: [
-                {q: "አንድ", a: "And (1)"}, {q: "ሁለት", a: "Hulet (2)"}, {q: "ሦስት", a: "Sost (3)"},
-                {q: "አራት", a: "Arat (4)"}, {q: "አምስት", a: "Amist (5)"}, {q: "ስድስት", a: "Sidist (6)"},
-                {q: "ሰባት", a: "Sebat (7)"}, {q: "ስምንት", a: "Simint (8)"}, {q: "ዘጠኝ", a: "Zetegn (9)"}, {q: "አሥር", a: "Asir (10)"}
-            ],
-            colors: [
-                {q: "ቀይ", a: "K'ey (Red)"}, {q: "አረንጓዴ", a: "Arengwade (Green)"},
-                {q: "ብጫ", a: "Bicha (Yellow)"}, {q: "ሰማያዊ", a: "Semayawi (Blue)"}
-            ]
+            greetings: [{q: "ሰላም", a: "Selam (Hello / Peace)"}],
+            numbers: [{q: "አንድ", a: "And (1)"}]
         };
 
-        // Track 3 Dataset (Reading & Grammar Structure Framework)
         const readingStructureBank = [
-            {q: "እሱ መጽሐፍ ያነባል።", a: "Isu mets'haf yanebal. (He reads a book.)", tip: "Grammar: Amharic follows SOV (Subject-Object-Verb). Verb 'याነባል።' sits at the absolute end."},
-            {q: "እሷ ቡና ትጠጣለች።", a: "Iswa buna t'et'alech. (She drinks coffee.)", tip: "Grammar: Subject (She) + Object (Coffee) + Verb (Drinks). Notice the feminine prefix/suffix modifications on the verb."},
-            {q: "ውሻው ሥጋ ይበላል።", a: "Wushaw siga yibelal. (The dog eats meat.)", tip: "Grammar: The definite article marker '-u' is appended directly to the noun ('Wushaw')."}
-        ];
-        const readingComprehensionBank = [
-            {q: "ስሜ ሰናይት ይባላል። እኔ ተማሪ ነኝ።", a: "Sime Senait yibalal. Ine temari negn. (My name is Senait. I am a student.)", tip: "Context: 'ነኝ' (negn) acts as the identity linking existential verb (am/is/are) placed at the close of the clause."},
-            {q: "አረንጓዴ፣ ብጫ፣ ቀይ የኢትዮጵያ ሰንደቅ ዓላማ ቀለሞች ናቸው።", a: "Arengwade, bicha, k'ey ye'Ityop'ya sendek' alama k'elemoch nachew. (Green, yellow, red are the colors of the Ethiopian flag.)", tip: "Context: 'የ-' (ye-) is a prefix modifier signifying genitive possessive attributes ('of' or 'belonging to')."}
+            {q: "እሱ መጽሐፍ ያነባል።", a: "Isu mets'haf yanebal. (He reads a book.)"}
         ];
 
         window.addEventListener('DOMContentLoaded', () => { resetToGate(); });
@@ -489,39 +411,26 @@
             if (!email || !password) return alert("Complete fields.");
 
             if (isSignUpMode) {
-                const { data, error } = await _supabase.auth.signUp({ email, password });
-                if (error) return alert(error.message);
-                if (data?.user) { currentUser = data.user; proceedFlowMap(data.user, true); }
+                const { data } = await _supabase.auth.signUp({ email, password });
+                if (data?.user) proceedFlowMap(data.user);
             } else {
-                const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
-                if (error) return alert(error.message);
-                if (data?.user) proceedFlowMap(data.user, false);
+                const { data } = await _supabase.auth.signInWithPassword({ email, password });
+                if (data?.user) proceedFlowMap(data.user);
             }
         }
 
-        async function proceedFlowMap(user, isBrandNew) {
+        async function proceedFlowMap(user) {
             currentUser = user;
-            document.getElementById("studentEmail").innerText = user.email;
-
             if (user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
                 document.getElementById("teacherPortalShortcut").style.display = "block";
             }
-
             const { data: profile } = await _supabase.from('profiles').select('display_name, avatar_character').eq('id', user.id).maybeSingle();
-            
             if (profile && profile.display_name) {
                 selectedAvatarSymbol = profile.avatar_character;
-                tempEditAvatar = profile.avatar_character;
                 document.getElementById("displayUserHeader").innerText = profile.display_name;
                 document.getElementById("displayAvatarHeader").innerText = profile.avatar_character;
-                
-                if (user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-                    document.getElementById("authScreen").style.display = "none";
-                    document.getElementById("roleSelectionScreen").style.display = "block";
-                } else {
-                    document.getElementById("authScreen").style.display = "none";
-                    document.getElementById("taskSelectionScreen").style.display = "block";
-                }
+                document.getElementById("authScreen").style.display = "none";
+                document.getElementById("taskSelectionScreen").style.display = "block";
             } else {
                 document.getElementById("authScreen").style.display = "none";
                 document.getElementById("profileSetupScreen").style.display = "block";
@@ -540,7 +449,6 @@
 
         function goToRoleSelectionMenu() {
             document.getElementById("studentDashboard").style.display = "none";
-            document.getElementById("teacherDashboardView").style.display = "none";
             document.getElementById("taskSelectionScreen").style.display = "none";
             document.getElementById("roleSelectionScreen").style.display = "block";
         }
@@ -549,42 +457,15 @@
             const nameInput = document.getElementById("displayName").value.trim();
             if (!nameInput) return alert("Enter nickname.");
             await _supabase.from('profiles').upsert({ id: currentUser.id, display_name: nameInput, avatar_character: selectedAvatarSymbol });
-            
             document.getElementById("displayUserHeader").innerText = nameInput;
             document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
             document.getElementById("profileSetupScreen").style.display = "none";
-            
-            if (currentUser.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-                document.getElementById("roleSelectionScreen").style.display = "block";
-            } else {
-                document.getElementById("taskSelectionScreen").style.display = "block";
-            }
-        }
-
-        function toggleLeaderboardDropdown() {
-            const list = document.getElementById("liveLeaderboardContent");
-            const indicator = document.getElementById("dropdownIndicatorIcon");
-            if (list.style.display === "flex") {
-                list.style.display = "none";
-                indicator.innerText = "▼";
-            } else {
-                list.style.display = "flex";
-                indicator.innerText = "▲";
-            }
-        }
-
-        function animatedTrackTrigger(track, element) {
-            element.classList.add('btn-clicked-animation');
-            setTimeout(() => {
-                element.classList.remove('btn-clicked-animation');
-                launchTaskTrack(track);
-            }, 350);
+            document.getElementById("taskSelectionScreen").style.display = "block";
         }
 
         function launchTaskTrack(track) {
             document.getElementById("taskSelectionScreen").style.display = "none";
             document.getElementById("studentDashboard").style.display = "block";
-            
             document.getElementById("viewFidelGrid").style.display = (track === 'fidel') ? "grid" : "none";
             document.getElementById("isolatedFamilyClassroom").style.display = "none";
             document.getElementById("viewBasicsTrack").style.display = (track === 'basics') ? "block" : "none";
@@ -593,14 +474,6 @@
             if (track === 'fidel') { 
                 document.getElementById("trackTitle").innerText = "Fidel Script Matrix"; 
                 build3ColumnFidelMatrixContainer(); 
-            }
-            else if (track === 'basics') { 
-                document.getElementById("trackTitle").innerText = "Basics & Vocab"; 
-                backToBasicsMenu(); 
-            }
-            else if (track === 'reading') { 
-                document.getElementById("trackTitle").innerText = "Reading & Grammar"; 
-                backToReadingMenu(); 
             }
             fetchUserProgress();
             renderLiveLeaderboard();
@@ -626,7 +499,6 @@
         function interceptFidelActionChoice(baseLetter, familyArray) {
             activeBaseFidel = baseLetter;
             activeFamilyArrayData = familyArray;
-            document.getElementById("actionChoiceModalTitle").innerText = `"${baseLetter}" Family Options`;
             document.getElementById("fidelActionChoiceModal").style.display = "flex";
         }
 
@@ -638,19 +510,12 @@
 
         async function triggerActionMasteredDirectly() {
             document.getElementById("fidelActionChoiceModal").style.display = "none";
-            if (!masteredLetters.includes(activeBaseFidel)) {
-                masteredLetters.push(activeBaseFidel);
-            }
-            reviewingLetters = reviewingLetters.filter(l => l !== activeBaseFidel);
+            if (!masteredLetters.includes(activeBaseFidel)) masteredLetters.push(activeBaseFidel);
             await saveFidelProgressToSupabase();
         }
 
         function triggerStudyClassroomRouting() {
             document.getElementById("fidelActionChoiceModal").style.display = "none";
-            if (!reviewingLetters.includes(activeBaseFidel) && !masteredLetters.includes(activeBaseFidel)) {
-                reviewingLetters.push(activeBaseFidel);
-                saveFidelProgressToSupabase();
-            }
             launchIsolatedClassroomWorkspace();
         }
 
@@ -658,7 +523,6 @@
             document.getElementById("viewFidelGrid").style.display = "none";
             document.getElementById("masterLeaveWorkspaceBtn").style.display = "none";
             document.getElementById("isolatedFamilyClassroom").style.display = "block";
-            
             document.getElementById("classroomFamilyTitle").innerText = `"${activeBaseFidel}" Family Classroom`;
             renderGiantClassroomRowItems(activeFamilyArrayData);
         }
@@ -671,9 +535,17 @@
             familyArray.forEach((char, idx) => {
                 const card = document.createElement('div');
                 card.className = "giant-char-card";
+                
+                const tracePathVector = vectorTracePathsBank[char] || "M 10,10 L 50,50";
+                
                 card.innerHTML = `
                     <div class="letter">${char}</div>
                     <div class="sub">${subscripts[idx]}</div>
+                    <div class="stroke-trace-box" title="Hover to animate writing stroke trace lines">
+                        <svg viewBox="0 0 60 60">
+                            <path class="trace-path" d="${tracePathVector}" />
+                        </svg>
+                    </div>
                     <button class="audio-trigger-btn" onclick="triggerAudioPhoneticsMimicry('${subscripts[idx]}', this)">🔊 Hear</button>
                 `;
                 mount.appendChild(card);
@@ -682,17 +554,11 @@
 
         function triggerAudioPhoneticsMimicry(phoneticString, btnElement) {
             btnElement.innerText = `✨ ${phoneticString.toUpperCase()}`;
-            btnElement.style.background = "var(--ethio-yellow)";
-            setTimeout(() => {
-                btnElement.innerText = "🔊 Hear";
-                btnElement.style.background = "#e2e8f0";
-            }, 900);
+            setTimeout(() => { btnElement.innerText = "🔊 Hear"; }, 900);
         }
 
         function shuffleClassroomRowPhonetics() {
-            const indices = [0, 1, 2, 3, 4, 5, 6];
-            indices.sort(() => Math.random() - 0.5);
-            
+            const indices = [0, 1, 2, 3, 4, 5, 6].sort(() => Math.random() - 0.5);
             const mount = document.getElementById("classroomGiantRowMount");
             mount.innerHTML = "";
             const subscripts = EnglishPhoneticSubscriptBank[activeBaseFidel] || ["", "", "", "", "", "", ""];
@@ -701,9 +567,15 @@
                 const char = activeFamilyArrayData[idx];
                 const card = document.createElement('div');
                 card.className = "giant-char-card";
+                const tracePathVector = vectorTracePathsBank[char] || "M 10,10 L 50,50";
                 card.innerHTML = `
                     <div class="letter">${char}</div>
                     <div class="sub">${subscripts[idx]}</div>
+                    <div class="stroke-trace-box">
+                        <svg viewBox="0 0 60 60">
+                            <path class="trace-path" d="${tracePathVector}" />
+                        </svg>
+                    </div>
                     <button class="audio-trigger-btn" onclick="triggerAudioPhoneticsMimicry('${subscripts[idx]}', this)">🔊 Hear</button>
                 `;
                 mount.appendChild(card);
@@ -711,10 +583,7 @@
         }
 
         async function classroomMarkAsMasteredDirectly() {
-            if (!masteredLetters.includes(activeBaseFidel)) {
-                masteredLetters.push(activeBaseFidel);
-            }
-            reviewingLetters = reviewingLetters.filter(l => l !== activeBaseFidel);
+            if (!masteredLetters.includes(activeBaseFidel)) masteredLetters.push(activeBaseFidel);
             await saveFidelProgressToSupabase();
             exitClassroomViewBackToGrid();
         }
@@ -728,71 +597,12 @@
         }
 
         async function saveFidelProgressToSupabase() {
-            await _supabase.from('user_progress').upsert({ 
-                user_id: currentUser.id, 
-                mastered_letters: masteredLetters 
-            }, { onConflict: 'user_id' });
+            await _supabase.from('user_progress').upsert({ user_id: currentUser.id, mastered_letters: masteredLetters }, { onConflict: 'user_id' });
             renderUIProgressUpdates();
             renderLiveLeaderboard();
         }
 
-        /* Track 2 Logic Mechanics */
-        function backToBasicsMenu() {
-            document.getElementById("basicsMenuGate").style.display = "flex";
-            document.getElementById("basicsFlashcardArena").style.display = "none";
-        }
-        function launchBasicsFlashcardArena(category) {
-            currentBasicsCategory = category;
-            document.getElementById("basicsMenuGate").style.display = "none";
-            document.getElementById("basicsFlashcardArena").style.display = "block";
-            generateBasicsCard();
-        }
-        function generateBasicsCard() {
-            const bank = basicsVocabularyBank[currentBasicsCategory];
-            const randomized = bank[Math.floor(Math.random() * bank.length)];
-            document.getElementById("basicsCardQuestion").innerText = randomized.q;
-            const ansField = document.getElementById("basicsCardAnswer");
-            ansField.innerText = "Click to Reveal Translation";
-            ansField.style.background = "#f1f5f9";
-            ansField.setAttribute("data-true-answer", randomized.a);
-        }
-        function revealBasicsTranslation() {
-            const ansField = document.getElementById("basicsCardAnswer");
-            ansField.innerText = ansField.getAttribute("data-true-answer");
-            ansField.style.background = "#e8f8f5";
-        }
-
-        /* Track 3 Logic Mechanics (Reading & Grammar Structure Framework) */
-        function backToReadingMenu() {
-            document.getElementById("readingMenuGate").style.display = "flex";
-            document.getElementById("readingFlashcardArena").style.display = "none";
-        }
-        function launchReadingSubMode(subMode) {
-            currentReadingMode = subMode; 
-            document.getElementById("readingMenuGate").style.display = "none";
-            document.getElementById("readingFlashcardArena").style.display = "block"; 
-            generateReadingCard();
-        }
-        function generateReadingCard() {
-            const bank = (currentReadingMode === 'structure') ? readingStructureBank : readingComprehensionBank;
-            const randomized = bank[Math.floor(Math.random() * bank.length)];
-            
-            document.getElementById("flashCardQuestion").innerText = randomized.q;
-            document.getElementById("grammarTipText").innerText = randomized.tip || "";
-            
-            const ansField = document.getElementById("flashCardAnswer"); 
-            ansField.innerText = "Click to Reveal Translation"; 
-            ansField.style.background = "#f1f5f9"; 
-            ansField.setAttribute("data-true-answer", randomized.a);
-        }
-        function revealFlashcardTranslation() {
-            const ansField = document.getElementById("flashCardAnswer"); 
-            ansField.innerText = ansField.getAttribute("data-true-answer"); 
-            ansField.style.background = "#e8f8f5";
-        }
-
         async function fetchUserProgress() {
-            if (!currentUser) return;
             const { data } = await _supabase.from('user_progress').select('mastered_letters').eq('user_id', currentUser.id).maybeSingle();
             if (data && data.mastered_letters) masteredLetters = data.mastered_letters;
             renderUIProgressUpdates();
@@ -801,122 +611,40 @@
         function renderUIProgressUpdates() {
             document.querySelectorAll('.fidel-card').forEach(card => {
                 const letter = card.getAttribute('data-fidel');
-                if (masteredLetters.includes(letter)) {
-                    card.classList.remove('reviewing');
-                    card.classList.add('completed');
-                } else if (reviewingLetters.includes(letter)) {
-                    card.classList.remove('completed');
-                    card.classList.add('reviewing');
-                } else {
-                    card.classList.remove('completed', 'reviewing');
-                }
+                if (masteredLetters.includes(letter)) card.classList.add('completed');
             });
-            const percent = alphabetData.length > 0 ? Math.round((masteredLetters.length / alphabetData.length) * 100) : 0;
+            const percent = Math.round((masteredLetters.length / 33) * 100);
             document.getElementById("progressBar").style.width = `${percent}%`;
             document.getElementById("progressText").innerText = `${percent}% Mastered`;
         }
 
-        function openProfileStatsDashboard() {
-            const name = document.getElementById("displayUserHeader").innerText;
-            const pct = document.getElementById("progressText").innerText;
-            
-            document.getElementById("editProfileNameInput").value = name;
-            document.getElementById("statFidelPercent").innerText = pct;
-            
-            document.querySelectorAll('#profileStatsModal .avatar-option').forEach(opt => {
-                if(opt.innerText === selectedAvatarSymbol) opt.classList.add('selected');
-                else opt.classList.remove('selected');
-            });
-
-            document.getElementById("profileStatsModal").style.display = "flex";
-        }
-
-        function selectEditAvatar(symbol, element) {
-            tempEditAvatar = symbol;
-            document.querySelectorAll('#profileStatsModal .avatar-option').forEach(o => o.classList.remove('selected'));
-            element.classList.add('selected');
-        }
-
-        async function updateProfileDatabaseChanges() {
-            const newName = document.getElementById("editProfileNameInput").value.trim();
-            if(!newName) return alert("Nickname cannot be blank.");
-
-            selectedAvatarSymbol = tempEditAvatar;
-            await _supabase.from('profiles').upsert({ id: currentUser.id, display_name: newName, avatar_character: selectedAvatarSymbol });
-            
-            document.getElementById("displayUserHeader").innerText = newName;
-            document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
-            
-            renderLiveLeaderboard();
-            document.getElementById("profileStatsModal").style.display = "none";
-        }
-
-        function closeProfileStatsModal(e) {
-            if (!e || e.target === document.getElementById("profileStatsModal")) {
-                document.getElementById("profileStatsModal").style.display = "none";
-            }
-        }
-
         async function renderLiveLeaderboard() {
-            try {
-                const { data: profiles } = await _supabase.from('profiles').select('id, display_name, avatar_character');
-                const { data: progressRecords } = await _supabase.from('user_progress').select('user_id, mastered_letters');
-                
-                const progressMap = {};
-                progressRecords.forEach(rec => { progressMap[rec.user_id] = rec.mastered_letters || []; });
-
-                let leaderList = profiles.map(p => {
-                    const mCount = (progressMap[p.id] || []).length;
-                    const pct = Math.round((mCount / totalFidelFamiliesCount) * 100);
-                    return { id: p.id, name: p.display_name, avatar: p.avatar_character || '🦁', percentage: pct };
-                });
-
-                leaderList.sort((a, b) => b.percentage - a.percentage);
-                const container = document.getElementById("liveLeaderboardContent");
-                container.innerHTML = "";
-
-                leaderList.slice(0, 5).forEach((player, idx) => {
-                    const isSelf = currentUser && player.id === currentUser.id;
-                    const row = document.createElement('div');
-                    row.className = `leaderboard-row ${isSelf ? 'current-user' : ''}`;
-                    row.innerHTML = `
-                        <div class="player-info">
-                            <span class="player-rank">#${idx + 1}</span>
-                            <span>${player.avatar}</span>
-                            <span class="player-identity">${player.name} ${isSelf ? '(You)' : ''}</span>
-                        </div>
-                        <span class="player-score-badge">${player.percentage}%</span>
-                    `;
-                    container.appendChild(row);
-                });
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        async function loadTeacherRosterData() {
             const { data: profiles } = await _supabase.from('profiles').select('id, display_name, avatar_character');
             const { data: progressRecords } = await _supabase.from('user_progress').select('user_id, mastered_letters');
-            
             const progressMap = {};
             progressRecords.forEach(rec => { progressMap[rec.user_id] = rec.mastered_letters || []; });
 
-            const tbody = document.getElementById("teacherTableBody"); tbody.innerHTML = "";
-            profiles.forEach(p => {
-                const mList = progressMap[p.id] || [];
-                const pct = Math.round((mList.length / totalFidelFamiliesCount) * 100);
-                tbody.innerHTML += `
-                    <tr>
-                        <td><strong>${p.avatar_character || '🦁'} ${p.display_name}</strong></td>
-                        <td><div style="font-weight:bold; color:var(--ethio-green);">${pct}%</div></td>
-                        <td>${mList.length > 0 ? mList.map(l => `<span class="letter-badge">${l}</span>`).join('') : '<span style="color:#94a3b8; font-size:12px;">None</span>'}</td>
-                    </tr>
+            let leaderList = profiles.map(p => ({
+                id: p.id, name: p.display_name, avatar: p.avatar_character || '🦁', percentage: Math.round(((progressMap[p.id] || []).length / 33) * 100)
+            })).sort((a, b) => b.percentage - a.percentage);
+
+            const container = document.getElementById("liveLeaderboardContent"); container.innerHTML = "";
+            leaderList.slice(0, 4).forEach((player, idx) => {
+                const isSelf = currentUser && player.id === currentUser.id;
+                container.innerHTML += `
+                    <div class="leaderboard-row ${isSelf ? 'current-user' : ''}">
+                        <div class="player-info">
+                            <span>#${idx + 1}</span><span>${player.avatar}</span>
+                            <span class="player-identity">${player.name} ${isSelf ? '(You)' : ''}</span>
+                        </div>
+                        <span class="player-score-badge">${player.percentage}%</span>
+                    </div>
                 `;
             });
         }
 
         function selectAvatar(symbol, el) { selectedAvatarSymbol = symbol; document.querySelectorAll('.avatar-option').forEach(o => o.classList.remove('selected')); el.classList.add('selected'); }
-        async function logout() { await _supabase.auth.signOut(); currentUser = null; resetToGate(); }
+        function logout() { resetToGate(); }
     </script>
 </body>
 </html>
