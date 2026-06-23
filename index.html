@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fidel Classroom - Pod Edition</title>
+    <title>Fidel Classroom - Pod Onboarding</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -98,7 +98,6 @@
 </head>
 <body>
 
-    <!-- Auth Module Gateway -->
     <div id="authScreen" class="app-card tricolor-frame">
         <h1 class="main-title">Fidel Classroom</h1>
         <p class="subtitle" id="authSubtitle">Cohort Learning Platform</p>
@@ -114,11 +113,12 @@
         </div>
     </div>
 
-    <!-- Onboarding Step Profile Creation Modifiers -->
     <div id="profileSetupScreen" class="app-card tricolor-frame" style="display: none;">
         <h2 class="main-title" style="font-size: 26px; margin-bottom: 4px;">Set Up Profile</h2>
-        <p class="subtitle">Pick a classroom badge symbol</p>
+        <p class="subtitle">Choose your classroom setup details</p>
+        
         <input type="text" id="displayName" placeholder="Student Nickname">
+        
         <div class="avatar-grid">
             <div class="avatar-option selected" onclick="selectAvatar('🦁', this)">🦁</div>
             <div class="avatar-option" onclick="selectAvatar('🦅', this)">🦅</div>
@@ -126,15 +126,23 @@
             <div class="avatar-option" onclick="selectAvatar('🦊', this)">🦊</div>
             <div class="avatar-option" onclick="selectAvatar('🐘', this)">🐘</div>
         </div>
+
+        <div id="podAssignmentNotice" style="background: #f1f5f9; padding: 14px; border-radius: 16px; margin-bottom: 14px; font-size: 14px; font-weight: bold; color: #475569;">
+            Calculating Pod Assignment...
+        </div>
+
+        <div id="leaderPodNamingBox" style="display: none;">
+            <p style="font-size: 12px; color: var(--ethio-green); font-weight: bold; margin-bottom: 6px; text-align: left;">👑 You are the Team Leader! Name your new Pod:</p>
+            <input type="text" id="customPodNameInput" placeholder="e.g., Team Anbessa">
+        </div>
+
         <button class="btn-primary" onclick="saveProfileData()">Enter Classroom 🚀</button>
     </div>
 
-    <!-- Master Application Dashboard Frame Workspace Layout -->
     <div id="studentDashboard">
         <div class="dashboard-split-layout">
             <div class="main-workspace-panel">
                 
-                <!-- My Pod Workspace Tracker -->
                 <div class="pod-card">
                     <div class="pod-header">👥 <span id="podTeamNameDisplay">Loading Team Pod...</span></div>
                     <div id="podTeammatesMount"></div>
@@ -144,10 +152,8 @@
                     <span id="workspaceDynamicHeader">Fidel Script Matrix</span>
                 </div>
                 
-                <!-- Component Workspace Engine A: Grid Index Matrix View -->
                 <div id="viewFidelGrid" class="fidel-grid-3col"></div>
 
-                <!-- Component Workspace Engine B: Isolated Classroom Panel View -->
                 <div id="isolatedFamilyClassroom">
                     <h2 id="classroomFamilyTitle" style="font-size:26px; margin-bottom:14px;">Family Practice Row</h2>
                     <div class="classroom-header-strip">
@@ -162,20 +168,19 @@
                 </div>
             </div>
 
-            <!-- Sticky Right-Hand Column Sidebar Navigation Stack Container -->
             <div class="sidebar-sticky-panel">
                 <header>
                     <div class="profile-clickable-trigger">
                         <div class="user-avatar-badge" id="displayAvatarHeader">🦁</div>
                         <div>
                             <h3 id="displayUserHeader" style="font-size:18px;">Student</h3>
+                            <div id="sidebarPodBadge" style="font-size: 12px; color: var(--ethio-green); font-weight: bold; margin-bottom: 4px;">No Pod Assigned</div>
                             <span id="progressText" style="font-size:13px; color:#64748b; font-weight:bold;">0% Mastered</span>
                         </div>
                     </div>
                     <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
                 </header>
 
-                <!-- Dropdown Framework Module A: Accordion Classroom Champions Panel -->
                 <div class="collapsible-dropdown-container">
                     <button class="dropdown-toggle-header" onclick="toggleDropdownElement('liveLeaderboardContent')">
                         <span>🏆 Classroom Champions</span>
@@ -184,7 +189,6 @@
                     <div class="dropdown-content-pane" id="liveLeaderboardContent"></div>
                 </div>
 
-                <!-- Dropdown Framework Module B: Disappearing Photo Shares Stack Container -->
                 <div class="collapsible-dropdown-container">
                     <button class="dropdown-toggle-header" onclick="toggleDropdownElement('photoBoardContent')">
                         <span>📷 Disappearing Daily Artwork</span>
@@ -211,7 +215,7 @@
 
         let currentUser = null; let masteredLetters = []; let activeBaseFidel = null; 
         let activeFamilyArrayData = []; let activeSubscriptsData = []; let selectedAvatarSymbol = "🦁"; 
-        let isSignUpMode = true;
+        let isSignUpMode = true; let targetPodId = null; let isPodLeader = false;
 
         const vowelFrameworkLabels = ["ha", "hu", "hee", "ha", "hay", "hih", "ho"];
         const standardVowelSubscripts = ["-ä/e", "-u/oo", "-ee", "-a", "-ay", "-ih", "-o"];
@@ -271,7 +275,7 @@
         async function handleAuth() {
             const email = document.getElementById("email").value.trim();
             const password = document.getElementById("password").value;
-            if (!email || !password) return alert("Please complete form entry layout keys.");
+            if (!email || !password) return alert("Please fill out all credentials.");
 
             const { data, error } = isSignUpMode 
                 ? await _supabase.auth.signUp({ email, password })
@@ -283,15 +287,45 @@
 
         async function proceedFlowMap(user) {
             currentUser = user;
-            const { data: profile } = await _supabase.from('profiles').select('display_name, avatar_character').eq('id', user.id).maybeSingle();
+            const { data: profile } = await _supabase.from('profiles').select('display_name, avatar_character, pod_id, pods(team_name)').eq('id', user.id).maybeSingle();
+            
             if (profile && profile.display_name) {
                 selectedAvatarSymbol = profile.avatar_character;
                 document.getElementById("displayUserHeader").innerText = profile.display_name;
                 document.getElementById("displayAvatarHeader").innerText = profile.avatar_character;
+                document.getElementById("sidebarPodBadge").innerText = profile.pods?.team_name || "Active Pod";
                 launchDashboard();
             } else {
                 document.getElementById("authScreen").style.display = "none";
                 document.getElementById("profileSetupScreen").style.display = "block";
+                calculatePodPlacementAssignment();
+            }
+        }
+
+        // Onboarding Assignment Algorithm Core
+        async function calculatePodPlacementAssignment() {
+            const { data: allPods } = await _supabase.from('pods').select('id, team_name');
+            const { data: profiles } = await _supabase.from('profiles').select('pod_id');
+
+            // Find current occupants count per pod structure context
+            const counts = {};
+            profiles.forEach(p => { if(p.pod_id) counts[p.pod_id] = (counts[p.pod_id] || 0) + 1; });
+
+            let openPod = null;
+            if (allPods) {
+                openPod = allPods.find(pod => (counts[pod.id] || 0) < 4);
+            }
+
+            if (openPod) {
+                targetPodId = openPod.id;
+                isPodLeader = false;
+                document.getElementById("podAssignmentNotice").innerText = `🎉 Match Found! You are joining: ${openPod.team_name}`;
+                document.getElementById("leaderPodNamingBox").style.display = "none";
+            } else {
+                isPodLeader = true;
+                targetPodId = "NEW_POD";
+                document.getElementById("podAssignmentNotice").innerText = "👑 You are creating a new Pod team cohort!";
+                document.getElementById("leaderPodNamingBox").style.display = "block";
             }
         }
 
@@ -303,10 +337,38 @@
 
         async function saveProfileData() {
             const nameInput = document.getElementById("displayName").value.trim();
-            if (!nameInput) return alert("Enter nickname value configuration keys.");
-            await _supabase.from('profiles').upsert({ id: currentUser.id, display_name: nameInput, avatar_character: selectedAvatarSymbol });
+            if (!nameInput) return alert("Please enter your nickname.");
+
+            let finalPodId = targetPodId;
+            let displayPodName = "Active Pod";
+
+            if (isPodLeader) {
+                let proposedName = document.getElementById("customPodNameInput").value.trim();
+                if (!proposedName) proposedName = `Pod #${Math.floor(Math.random() * 900) + 100}`;
+                
+                // Create new row database record map inside pods engine block
+                const { data: newPod } = await _supabase.from('pods').insert({ team_name: proposedName }).select().single();
+                if (newPod) {
+                    finalPodId = newPod.id;
+                    displayPodName = proposedName;
+                }
+            } else {
+                // Fetch the existing name to assign sidebar profile element directly
+                const { data: existingPod } = await _supabase.from('pods').select('team_name').eq('id', targetPodId).single();
+                if (existingPod) displayPodName = existingPod.team_name;
+            }
+
+            await _supabase.from('profiles').upsert({ 
+                id: currentUser.id, 
+                display_name: nameInput, 
+                avatar_character: selectedAvatarSymbol,
+                pod_id: finalPodId
+            });
+
             document.getElementById("displayUserHeader").innerText = nameInput;
             document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
+            document.getElementById("sidebarPodBadge").innerText = displayPodName;
+            
             launchDashboard();
         }
 
@@ -397,7 +459,6 @@
             if (!masteredLetters.includes(activeBaseFidel)) masteredLetters.push(activeBaseFidel);
             await _supabase.from('user_progress').upsert({ user_id: currentUser.id, mastered_letters: masteredLetters }, { onConflict: 'user_id' });
             
-            // Sync dashboard components locally
             fetchPodTeammateProgress();
             renderLiveLeaderboard();
             exitClassroomViewBackToGrid();
@@ -409,18 +470,18 @@
             buildMatrixInterfaceGrid();
         }
 
-        // Shared Pod Team Progression Engine
         async function fetchPodTeammateProgress() {
             const { data: userProfile } = await _supabase.from('profiles').select('pod_id, pods(team_name)').eq('id', currentUser.id).maybeSingle();
             
             if (!userProfile || !userProfile.pod_id) {
-                document.getElementById("podTeamNameDisplay").innerText = "Unassigned Pod (Waiting for placement)";
+                document.getElementById("podTeamNameDisplay").innerText = "Unassigned Pod";
                 return;
             }
 
-            document.getElementById("podTeamNameDisplay").innerText = userProfile.pods?.team_name || "Active Learning Pod";
+            const currentPodTeamTitle = userProfile.pods?.team_name || "Active Learning Pod";
+            document.getElementById("podTeamNameDisplay").innerText = currentPodTeamTitle;
+            document.getElementById("sidebarPodBadge").innerText = currentPodTeamTitle;
 
-            // Grab all profile parameters sharing this pod layout context
             const { data: members } = await _supabase.from('profiles').select('id, display_name, avatar_character').eq('pod_id', userProfile.pod_id);
             const { data: progressRecords } = await _supabase.from('user_progress').select('user_id, mastered_letters');
             
@@ -446,7 +507,6 @@
             });
         }
 
-        // Disappearing 24-Hour Photo Boards Sharing Interface
         async function handleDrawingShareUpload(inputElement) {
             const file = inputElement.files[0];
             if (!file) return;
