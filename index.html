@@ -220,7 +220,7 @@
                 <!-- Matrix Control Headers View and Game Toggle Elements -->
                 <div class="workspace-title">
                     <span id="workspaceDynamicHeader">Fidel Script Matrix</span>
-                    <button id="gameActivationToggleBtn" class="btn-primary" style="width:auto; padding:10px 18px; font-size:13px; background:#8e44ad;" onclick="openMatchingGameWorkspaceMode()">Play Matching Game 🎮</button>
+                    <button id="gameActivationToggleBtn" class="btn-primary" style="width:auto; padding:10px 18px; font-size:13px; background:#8e44ad;" onclick="openMatchingGameWorkspaceMode('all')">Play Matching Game 🎮</button>
                 </div>
 
                 <!-- Standard Grid Stack -->
@@ -228,7 +228,7 @@
 
                 <!-- Game Arena Workspace -->
                 <div id="gameWorkspace">
-                    <h2 style="font-size:26px; margin-bottom:4px;">Fidel Match Quest</h2>
+                    <h2 id="gameWorkspaceTitle" style="font-size:26px; margin-bottom:4px;">Fidel Match Quest</h2>
                     <p class="subtitle" style="margin-bottom:16px;">Link the correct character script to its corresponding English phonetic footprint</p>
                     <div style="background:#f8fafc; padding:10px 18px; border-radius:12px; display:inline-block; font-weight:bold; color:var(--ethio-green); margin-bottom:12px;">
                         Streak Counter: <span id="gameStreakValue">0</span> 🔥
@@ -239,14 +239,17 @@
                         <div class="game-column-stack" id="gamePhoneticColumnMount"></div>
                     </div>
 
-                    <button class="btn-secondary" style="margin-top:14px;" onclick="exitGameWorkspaceBackToGrid()">← Exit Practice Arena</button>
+                    <button id="gameExitActionBtn" class="btn-secondary" style="margin-top:14px;">← Exit Practice Arena</button>
                 </div>
 
                 <!-- Classroom Space -->
                 <div id="isolatedFamilyClassroom">
-                    <h2 id="classroomFamilyTitle" style="font-size:26px; margin-bottom:14px;">Family Practice Row</h2>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                        <h2 id="classroomFamilyTitle" style="font-size:26px;">Family Practice Row</h2>
+                        <button class="btn-primary" style="width:auto; padding:8px 16px; font-size:13px; background:#8e44ad;" id="classroomRowGameBtn">Match This Family 🎮</button>
+                    </div>
                     <div class="classroom-header-strip">
-                        <div>-ä/e</div><div>-u/oo</div><div>-ee</div><div>-a</div><div>-ay</div><div>-ih</div><div>-o</div>
+                        <div>-ä</div><div>-u</div><div>-ee</div><div>-a</div><div>-ay</div><div>-ih</div><div>-o</div>
                     </div>
                     <div class="classroom-row-giant" id="classroomGiantRowMount"></div>
                     <div style="display:flex; gap:12px;">
@@ -313,14 +316,15 @@
         let activeFamilyArrayData = []; let activeSubscriptsData = []; let selectedAvatarSymbol = "🦁"; 
         let isSignUpMode = true; let targetPodId = null; let isPodLeader = false;
 
-        // Game Track Space Metrics
+        // Game Target Configurations
         let activeGamePairs = []; let selectedGameFidelToken = null; let selectedGamePhoneticToken = null; let currentStreakScore = 0;
+        let gameModeScope = "all"; // "all" or explicit family object references
 
         // Digital Ink Sketchpad Engine State Space
         let canvas, ctx, isDrawing = false;
 
         const vowelFrameworkLabels = ["ha", "hu", "hee", "ha", "hay", "hih", "ho"];
-        const standardVowelSubscripts = ["-ä/e", "-u/oo", "-ee", "-a", "-ay", "-ih", "-o"];
+        const standardVowelSubscripts = ["-ä", "-u", "-ee", "-a", "-ay", "-ih", "-o"];
 
         const alphabetData = [
             {base:"ሀ", family:['ሀ','ሁ','ሂ','ሃ','ሄ','ህ','ሆ'], prefix:"h"},
@@ -531,9 +535,29 @@
         }
 
         // Matching Arena Engine Core Logic Block
-        function openMatchingGameWorkspaceMode() {
+        function openMatchingGameWorkspaceMode(scope) {
+            gameModeScope = scope;
             document.getElementById("viewFidelGrid").style.display = "none";
+            document.getElementById("isolatedFamilyClassroom").style.display = "none";
             document.getElementById("gameWorkspace").style.display = "block";
+            
+            const exitBtn = document.getElementById("gameExitActionBtn");
+            if (scope === "all") {
+                document.getElementById("gameWorkspaceTitle").innerText = "Fidel Match Quest (Full Matrix)";
+                exitBtn.onclick = () => {
+                    document.getElementById("gameWorkspace").style.display = "none";
+                    document.getElementById("viewFidelGrid").style.display = "grid";
+                };
+            } else {
+                document.getElementById("gameWorkspaceTitle").innerText = `Fidel Match Quest ("${scope.base}" Family)`;
+                exitBtn.onclick = () => {
+                    document.getElementById("gameWorkspace").style.display = "none";
+                    document.getElementById("isolatedFamilyClassroom").style.display = "block";
+                };
+            }
+
+            currentStreakScore = 0;
+            document.getElementById("gameStreakValue").innerText = currentStreakScore;
             generateNewGameRoundData();
         }
 
@@ -542,17 +566,28 @@
             selectedGameFidelToken = null;
             selectedGamePhoneticToken = null;
 
-            // Pick 4 completely randomized family rows
-            let pool = [...alphabetData].sort(() => Math.random() - 0.5).slice(0, 4);
-            pool.forEach(item => {
-                let randomIndex = Math.floor(Math.random() * 7);
-                let char = item.family[randomIndex];
-                let prefix = item.prefix;
-                let sub = standardVowelSubscripts[randomIndex];
-                let phoneticString = (prefix === "h" || prefix === "ḥ") ? vowelFrameworkLabels[randomIndex] : `${prefix}${sub}`;
-                
-                activeGamePairs.push({ character: char, phonetic: phoneticString, uniqueId: char });
-            });
+            if (gameModeScope === "all") {
+                // Global Mode: Pick 4 unique completely randomized characters from the entire script
+                let pool = [...alphabetData].sort(() => Math.random() - 0.5).slice(0, 4);
+                pool.forEach(item => {
+                    let randomIndex = Math.floor(Math.random() * 7);
+                    let char = item.family[randomIndex];
+                    let prefix = item.prefix;
+                    let sub = standardVowelSubscripts[randomIndex];
+                    let phoneticString = (prefix === "h" || prefix === "ḥ") ? vowelFrameworkLabels[randomIndex] : `${prefix}${sub}`;
+                    activeGamePairs.push({ character: char, phonetic: phoneticString, uniqueId: char });
+                });
+            } else {
+                // Family Specific Mode: Match 4 random cards strictly from within this explicit 7-character row
+                let indices = [0,1,2,3,4,5,6].sort(() => Math.random() - 0.5).slice(0, 4);
+                indices.forEach(idx => {
+                    let char = gameModeScope.family[idx];
+                    let prefix = gameModeScope.prefix;
+                    let sub = standardVowelSubscripts[idx];
+                    let phoneticString = (prefix === "h" || prefix === "ḥ") ? vowelFrameworkLabels[idx] : `${prefix}${sub}`;
+                    activeGamePairs.push({ character: char, phonetic: phoneticString, uniqueId: char });
+                });
+            }
 
             renderGameTokensLayout();
         }
@@ -597,7 +632,6 @@
                 selectedGamePhoneticToken = element;
             }
 
-            // Verify if cross-column evaluation is valid
             if (selectedGameFidelToken && selectedGamePhoneticToken) {
                 let fidId = selectedGameFidelToken.getAttribute("data-id");
                 let phId = selectedGamePhoneticToken.getAttribute("data-match-id");
@@ -629,11 +663,6 @@
                 showNotificationToast("Round Cleared! Loading next cards...");
                 setTimeout(generateNewGameRoundData, 1200);
             }
-        }
-
-        function exitGameWorkspaceBackToGrid() {
-            document.getElementById("gameWorkspace").style.display = "none";
-            document.getElementById("viewFidelGrid").style.display = "grid";
         }
 
         async function calculatePodPlacementAssignment() {
@@ -735,9 +764,13 @@
         function launchIsolatedClassroomWorkspace(fidelObj) {
             activeBaseFidel = fidelObj.base; activeFamilyArrayData = fidelObj.family;
             activeSubscriptsData = generateClassroomSubscripts(fidelObj.prefix);
+            
             document.getElementById("viewFidelGrid").style.display = "none";
             document.getElementById("isolatedFamilyClassroom").style.display = "block";
             document.getElementById("classroomFamilyTitle").innerText = `"${activeBaseFidel}" Family Classroom Panel`;
+            
+            document.getElementById("classroomRowGameBtn").onclick = () => openMatchingGameWorkspaceMode(fidelObj);
+            
             renderGiantClassroomRowItems(activeFamilyArrayData, activeSubscriptsData);
         }
 
