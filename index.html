@@ -286,7 +286,34 @@
         const SUPABASE_URL = "https://muisfipoyzkhznfdvnes.supabase.co"; 
         const SUPABASE_KEY = "sb_publishable_VBiJZB8TVM2CSl54aDPP0A_4aDXWb5i";
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// --- 6. AUTH & PROFILE CHECK LOGIC ---
+async function handleAuth() {
+    // ... (Your existing Supabase login/signup logic) ...
+    
+    // Once auth is successful, always verify profile:
+    const { data: { user } } = await _supabase.auth.getUser();
+    if (user) {
+        currentUser = user;
+        checkUserProfile(user.id);
+    }
+}
 
+async function checkUserProfile(userId) {
+    const { data: profile } = await _supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+    if (!profile) {
+        // This is the fix: If no profile exists, show the setup screen!
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('profileSetupScreen').style.display = 'block';
+    } else {
+        // They have a profile, take them to the dashboard
+        loadDashboard(profile);
+    }
+}
         const ADMIN_EMAIL = "senaitrichmond16@gmail.com";
         const CLASSROOM_COLORS = ["Red Team 🔴", "Blue Team 🔵", "Green Team 🟢", "Yellow Team 🟡", "Purple Team 🟣"];
 
