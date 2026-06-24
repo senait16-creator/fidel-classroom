@@ -41,9 +41,20 @@
         .btn-primary:hover { background: var(--brand-secondary); }
         .btn-secondary { background: transparent; color: #64748b; font-size: 13px; border: none; cursor: pointer; padding: 6px; font-weight: 500; }
 
-        #studentDashboard, #teacherOnlyDashboard { display: none; max-width: 1300px; margin: 0 auto; width: 100%; }
-        .dashboard-split-layout { display: grid; grid-template-columns: 1fr 360px; gap: 24px; align-items: start; }
-        @media (max-width: 1024px) { .dashboard-split-layout { grid-template-columns: 1fr; } }
+        /* Only apply the grid layout when the dashboard is actually visible */
+#studentDashboard.is-active .dashboard-split-layout {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 24px;
+    align-items: start;
+}
+
+/* Fallback for mobile */
+@media (max-width: 1024px) {
+    #studentDashboard.is-active .dashboard-split-layout {
+        grid-template-columns: 1fr;
+    }
+}
 
         header { background: white; padding: 20px; border-radius: var(--radius-standard); box-shadow: var(--shadow-premium); border: 1px solid var(--border-color); margin-bottom: 20px; }
         .profile-clickable-trigger { display: flex; align-items: center; gap: 12px; }
