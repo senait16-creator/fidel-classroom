@@ -41,20 +41,9 @@
         .btn-primary:hover { background: var(--brand-secondary); }
         .btn-secondary { background: transparent; color: #64748b; font-size: 13px; border: none; cursor: pointer; padding: 6px; font-weight: 500; }
 
-        /* Only apply the grid layout when the dashboard is actually visible */
-#studentDashboard.is-active .dashboard-split-layout {
-    display: grid;
-    grid-template-columns: 1fr 360px;
-    gap: 24px;
-    align-items: start;
-}
-
-/* Fallback for mobile */
-@media (max-width: 1024px) {
-    #studentDashboard.is-active .dashboard-split-layout {
-        grid-template-columns: 1fr;
-    }
-}
+        #studentDashboard, #teacherOnlyDashboard { display: none; max-width: 1300px; margin: 0 auto; width: 100%; }
+        .dashboard-split-layout { display: grid; grid-template-columns: 1fr 360px; gap: 24px; align-items: start; }
+        @media (max-width: 1024px) { .dashboard-split-layout { grid-template-columns: 1fr; } }
 
         header { background: white; padding: 20px; border-radius: var(--radius-standard); box-shadow: var(--shadow-premium); border: 1px solid var(--border-color); margin-bottom: 20px; }
         .profile-clickable-trigger { display: flex; align-items: center; gap: 12px; }
@@ -227,6 +216,13 @@
             <button class="btn-primary" style="width:auto; padding:6px 12px; font-size:11px;" onclick="switchAdminPanelsFromDashboard('teacher')">Back to Teacher Dashboard</button>
         </div>
 
+        <div class="dashboard-split-layout">
+            <div class="main-workspace-panel">
+                
+                <div class="pod-card">
+                    <div class="pod-header"><span id="podTeamNameDisplay">Your Team</span></div>
+                    <div id="podTeammatesMount"></div>
+                </div>
 
                 <div class="workspace-title">
                     <span id="workspaceDynamicHeader">Amharic Letter Board</span>
@@ -323,115 +319,7 @@
 
         const ADMIN_EMAIL = "senaitrichmond16@gmail.com";
         const CLASSROOM_COLORS = ["Red Team 🔴", "Blue Team 🔵", "Green Team 🟢", "Yellow Team 🟡", "Purple Team 🟣"];
-<!DOCTYPE html>
-<html lang="am">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fidel Classroom</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=Abyssinica+SIL&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        :root { --brand-primary: #0f766e; --brand-secondary: #0d9488; --neutral-dark: #1e293b; --neutral-light: #f8fafc; --border-color: #e2e8f0; --shadow-premium: 0 4px 20px rgba(15, 23, 42, 0.04); --radius-standard: 16px; }
-        * { box-sizing: border-box; font-family: 'Ubuntu', 'Abyssinica SIL', serif; margin: 0; padding: 0; }
-        body { background-color: var(--neutral-light); color: var(--neutral-dark); padding: 24px; min-height: 100vh; }
-        .app-card { max-width: 420px; width: 100%; margin: 60px auto; background: white; padding: 32px 24px; border-radius: var(--radius-standard); box-shadow: var(--shadow-premium); border: 1px solid var(--border-color); text-align: center; }
-        .hidden { display: none; }
-        input, select { width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 15px; }
-        .btn-primary { background: var(--brand-primary); color: white; padding: 14px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; width: 100%; }
-        .admin-gate-card, #teacherOnlyDashboard, #studentDashboard { max-width: 1300px; margin: 0 auto; width: 100%; }
-        .fidel-grid-3col { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 12px; }
-        .fidel-card { background: #fff; border: 1px solid var(--border-color); border-radius: 14px; padding: 20px 0; text-align: center; font-size: 28px; cursor: pointer; box-shadow: var(--shadow-premium); }
-    </style>
-</head>
-<body>
 
-    <canvas id="confettiCanvas" style="position:fixed; top:0; left:0; pointer-events:none; z-index:9999;"></canvas>
-    
-    <div id="authScreen" class="app-card">
-        <h1>Fidel Classroom</h1>
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="password" placeholder="Password">
-        <button class="btn-primary" onclick="handleAuth()">Enter Classroom</button>
-    </div>
-
-    <div id="teacherOnlyDashboard" class="hidden">
-        <h2>Teacher Hub</h2>
-        <table id="teacherRosterTableBody" border="1" style="width:100%;"></table>
-        <button onclick="logout()">Log Out</button>
-    </div>
-
-    <div id="studentDashboard" class="hidden">
-        <h2 id="studentWelcome">Welcome!</h2>
-        <div id="viewFidelGrid" class="fidel-grid-3col"></div>
-        <button onclick="logout()">Log Out</button>
-    </div>
-
-    <script>
-        const _supabase = supabase.createClient("https://muisfipoyzkhznfdvnes.supabase.co", "sb_publishable_VBiJZB8TVM2CSl54aDPP0A_4aDXWb5i");
-        const ADMIN_EMAIL = "senaitrichmond16@gmail.com";
-
-        async function handleAuth() {
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-            const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
-            if (error) {
-                const { data: sData, error: sErr } = await _supabase.auth.signUp({ email, password });
-                if (sErr) return alert(sErr.message);
-                checkUserRole(sData.user);
-            } else {
-                checkUserRole(data.user);
-            }
-        }
-
-        async function checkUserRole(user) {
-            document.getElementById('authScreen').classList.add('hidden');
-            if (user.email === ADMIN_EMAIL) {
-                document.getElementById('teacherOnlyDashboard').classList.remove('hidden');
-            } else {
-                document.getElementById('studentDashboard').classList.remove('hidden');
-                // Load your existing grid logic here
-                renderFidelGrid();
-            }
-        }
-
-        function renderFidelGrid() {
-            const grid = document.getElementById("viewFidelGrid");
-            // Add your logic to loop through your alphabetData and create cards
-            grid.innerHTML = "Grid Loaded!";
-        }
-
-        function executeVictoryConfettiCelebration() {
-            const confCanvas = document.getElementById("confettiCanvas");
-            const ctx = confCanvas.getContext("2d");
-            confCanvas.width = window.innerWidth;
-            confCanvas.height = window.innerHeight;
-            
-            let particles = Array.from({length: 100}, () => ({
-                x: confCanvas.width/2, y: confCanvas.height/2,
-                vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10,
-                color: ['#0f766e', '#10b981', '#f59e0b'][Math.floor(Math.random()*3)]
-            }));
-
-            function animate() {
-                ctx.clearRect(0,0, confCanvas.width, confCanvas.height);
-                particles.forEach(p => {
-                    p.x += p.vx; p.y += p.vy;
-                    ctx.fillStyle = p.color;
-                    ctx.fillRect(p.x, p.y, 8, 8);
-                });
-                requestAnimationFrame(animate);
-            }
-            animate();
-            setTimeout(() => confCanvas.style.display = 'none', 3000);
-        }
-
-        function logout() { _supabase.auth.signOut(); location.reload(); }
-    </script>
-</body>
-</html>
         let currentUser = null; let masteredLetters = []; let activeBaseFidel = null; 
         let activeFamilyArrayData = []; let activeSubscriptsData = []; let selectedAvatarSymbol = "🦁"; 
         let isSignUpMode = true;
@@ -480,35 +368,7 @@
             {base:"ፈ", family:['ፈ','ፉ','ፊ','ፋ','ፌ','ፍ','ፎ'], prefix:"f"},
             {base:"ፐ", family:['ፐ','ፑ','ፒ','ፓ','ፔ','ፕ','ፖ'], prefix:"p"}
         ];
-// Vocabulary Database
-const fidelVocabulary = {
-    "ሀ": [{word: "ሀገር", meaning: "Country"}, {word: "ሀብት", meaning: "Wealth"}],
-    "ለ": [{word: "ልብስ", meaning: "Clothes"}, {word: "ለሊት", meaning: "Night"}, {word: "ለምለም", meaning: "Lush"}],
-    "መ": [{word: "መጽሐፍ", meaning: "Book"}, {word: "ማር", meaning: "Honey"}, {word: "መሬት", meaning: "Earth"}],
-    "ሰ": [{word: "ሰላም", meaning: "Peace"}, {word: "ሰማይ", meaning: "Sky"}, {word: "ሰዓት", meaning: "Time"}],
-    "ቀ": [{word: "ቀይ", meaning: "Red"}, {word: "ቀን", meaning: "Day"}],
-    "በ": [{word: "በረዶ", meaning: "Ice"}, {word: "ቡና", meaning: "Coffee"}, {word: "ባሕር", meaning: "Sea"}],
-    "ተ": [{word: "ተራራ", meaning: "Mountain"}, {word: "ታሪክ", meaning: "History"}, {word: "ትምህርት", meaning: "Education"}],
-    "ነ": [{word: "ነፋስ", meaning: "Wind"}, {word: "ንብ", meaning: "Bee"}, {word: "እናት", meaning: "Mother"}]
-};
 
-// Function to render vocabulary based on the selected family
-function renderVocabulary(familyChar) {
-    const container = document.getElementById("vocabDisplay");
-    const words = fidelVocabulary[familyChar] || [];
-    
-    if (words.length === 0) {
-        container.innerHTML = "<p>More words coming soon for this family!</p>";
-        return;
-    }
-
-    container.innerHTML = words.map(item => `
-        <div style="background:white; padding:12px; margin-bottom:8px; border-radius:10px; border:1px solid #e2e8f0; display:flex; justify-content:space-between;">
-            <strong style="color:#0f766e;">${item.word}</strong>
-            <span style="color:#64748b;">${item.meaning}</span>
-        </div>
-    `).join('');
-}
         window.addEventListener('DOMContentLoaded', () => { 
             resetToGate(); 
         });
@@ -546,44 +406,26 @@ function renderVocabulary(familyChar) {
 
         function clearSketchpadCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
 
-async function uploadSketchpadDrawingCanvasData() {
-    console.log("Attempting to share drawing..."); // Debugging trace
-    
-    canvas.toBlob(async (blob) => {
-        const storagePath = `canvas-${Date.now()}.png`;
-        
-        // Attempt upload to Supabase Storage
-        const { data: uploadData, error: uploadError } = await _supabase.storage
-            .from('art_shares')
-            .upload(storagePath, blob, { contentType: 'image/png' });
+        async function uploadSketchpadDrawingCanvasData() {
+            const emptyCheck = document.createElement("canvas");
+            emptyCheck.width = canvas.width; emptyCheck.height = canvas.height;
+            if (canvas.toDataURL() === emptyCheck.toDataURL()) return showNotificationToast("Draw something before sharing!");
 
-        if (uploadError) {
-            console.error("Storage Upload Error:", uploadError);
-            alert("Upload failed: " + uploadError.message);
-            return;
+            showNotificationToast("Uploading your drawing...");
+            canvas.toBlob(async (blob) => {
+                const storagePath = `canvas-${Date.now()}.png`;
+                const { data: uploadData, error: uploadError } = await _supabase.storage.from('art_shares').upload(storagePath, blob, { contentType: 'image/png' });
+                if (uploadError) return showNotificationToast(uploadError.message);
+
+                const { data: urlData } = _supabase.storage.from('art_shares').getPublicUrl(storagePath);
+                const expirationTimestamp = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+                await _supabase.from('photo_shares').insert({ user_id: currentUser.id, image_url: urlData.publicUrl, expires_at: expirationTimestamp, meta_points: 0 });
+                clearSketchpadCanvas();
+                showNotificationToast("Drawing shared to the class board!");
+                fetchDisappearingImageCanvasBoard();
+            }, "image/png");
         }
-
-        // Get public URL
-        const { data: urlData } = _supabase.storage.from('art_shares').getPublicUrl(storagePath);
-        
-        // Insert into Database
-        const { error: dbError } = await _supabase.from('photo_shares').insert({ 
-            user_id: _supabase.auth.getSession().user.id, 
-            image_url: urlData.publicUrl, 
-            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), 
-            meta_points: 0 
-        });
-
-        if (dbError) {
-            console.error("Database Insert Error:", dbError);
-            alert("Database failed: " + dbError.message);
-        } else {
-            console.log("Drawing shared successfully!");
-            clearSketchpadCanvas();
-            showNotificationToast("Drawing shared to the class board!");
-        }
-    }, "image/png");
-}
 
         async function submitVerificationCounterBump(shareId, element) {
             const currentVal = parseInt(element.getAttribute('data-count') || "0");
@@ -694,14 +536,9 @@ async function uploadSketchpadDrawingCanvasData() {
             launchDashboard(targetPanel);
         }
 
-        function launchDashboard() {
-    const dash = document.getElementById('studentDashboard');
-    dash.style.display = 'block'; // Make it visible
-    dash.classList.add('is-active'); // This triggers the CSS Grid layout
-    
-    // Now render your grid content
-    renderFidelGrid();
-}
+        function launchDashboard(viewMode) {
+            if (currentUser.email === ADMIN_EMAIL) {
+                document.getElementById("adminHeaderToggleBar").style.display = "flex";
             }
 
             if (viewMode === "teacher") {
