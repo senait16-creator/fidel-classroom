@@ -74,55 +74,6 @@
         .player-info { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; }
         .player-score-badge { background: var(--brand-primary); color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; }
 
-        /* Team Track Dashboard Custom Styling */
-        .team-track-container {
-            background: #1e293b; 
-            padding: 16px; 
-            border-radius: 12px; 
-            margin-bottom: 20px; 
-            color: #ffffff;
-            border: 1px solid #334155;
-        }
-        .team-track-header {
-            margin-top: 0; 
-            font-size: 11px; 
-            text-transform: uppercase; 
-            color: #94a3b8; 
-            letter-spacing: 0.05em;
-            font-weight: 700;
-        }
-        .track-row {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            margin-bottom: 12px;
-        }
-        .track-meta {
-            display: flex; 
-            justify-content: space-between; 
-            font-size: 13px; 
-            font-weight: 500;
-        }
-        .track-pill-indicator {
-            height: 10px; 
-            width: 10px; 
-            border-radius: 50%; 
-            display: inline-block;
-        }
-        .track-progress-bg {
-            width: 100%; 
-            background: #334155; 
-            height: 8px; 
-            border-radius: 4px; 
-            overflow: hidden; 
-            position: relative;
-        }
-        .track-progress-fill {
-            height: 100%; 
-            transition: width 0.5s ease-in-out;
-            border-radius: 4px;
-        }
-        
         .workspace-title { font-size: 22px; font-weight: 700; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
         
         .fidel-grid-3col { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 12px; }
@@ -173,6 +124,7 @@
     <canvas id="confettiCanvas"></canvas>
     <div id="toastContainer"></div>
 
+    <!-- Onboarding Panel Matrix -->
     <div id="authScreen" class="app-card">
         <h1 class="main-title">Fidel Classroom</h1>
         <p class="subtitle" id="authSubtitle">Learn the Amharic Alphabet Together!</p>
@@ -188,6 +140,7 @@
         </div>
     </div>
 
+    <!-- Administrative Target Routing Gate -->
     <div id="adminViewSelectorGate" class="admin-gate-card">
         <h2 class="main-title" style="font-size:22px;">Welcome, Teacher!</h2>
         <p class="subtitle">Where would you like to go first?</p>
@@ -197,6 +150,7 @@
         </div>
     </div>
 
+    <!-- Custom Profile Struct Node -->
     <div id="profileSetupScreen" class="app-card" style="display: none;">
         <h2 class="main-title" style="font-size: 22px;">Create Your Profile</h2>
         <p class="subtitle">Pick a nickname and choose your color team!</p>
@@ -218,12 +172,14 @@
         <button class="btn-primary" onclick="saveProfileData()">Join the Classroom</button>
     </div>
 
+    <!-- Teacher Dashboard Module View -->
     <div id="teacherOnlyDashboard">
         <div class="workspace-title" style="margin-top:20px;">
             <span>Teacher Hub</span>
             <button class="btn-primary" style="width:auto; padding:8px 16px; font-size:13px;" onclick="switchAdminPanelsFromDashboard('student')">Switch to Student View →</button>
         </div>
         
+        <!-- Live Roster Progress List -->
         <div class="teacher-panel" style="margin-bottom: 20px;">
             <h2 style="font-size: 18px; color: var(--neutral-dark); margin-bottom: 4px;">Student Roster & Progress</h2>
             <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">See how everyone in your class is moving through the alphabet rows.</p>
@@ -253,6 +209,7 @@
         <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
     </div>
 
+    <!-- Student Interface Core Matrix Layout Workspace -->
     <div id="studentDashboard">
         <div id="adminHeaderToggleBar" style="display:none; background:#f0fdfa; border:1px solid #ccfbf1; padding:10px 16px; border-radius:12px; margin-bottom:16px; justify-content:space-between; align-items:center;">
             <span style="font-size:13px; font-weight:700; color:var(--brand-primary);">Teacher Access Mode Active</span>
@@ -272,8 +229,10 @@
                     <button id="gameActivationToggleBtn" class="btn-primary" style="width:auto; padding:8px 16px; font-size:13px;" onclick="openMatchingGameWorkspaceMode('all')">Matching Game Arena</button>
                 </div>
 
+                <!-- Core Grid Selection Array -->
                 <div id="viewFidelGrid" class="fidel-grid-3col"></div>
 
+                <!-- Touch Ergonomic Block Match Arena Module -->
                 <div id="gameWorkspace">
                     <h2 id="gameWorkspaceTitle" style="font-size:22px; margin-bottom:4px;">Practice Arena</h2>
                     <p class="subtitle" style="margin-bottom:12px;">Tap a letter and its matching English sound to clear them!</p>
@@ -286,6 +245,7 @@
                     <button id="gameExitActionBtn" class="btn-secondary" style="margin-top:10px;">← Close Game</button>
                 </div>
 
+                <!-- Micro-Classroom Isolation Node -->
                 <div id="isolatedFamilyClassroom">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
                         <h2 id="classroomFamilyTitle" style="font-size:22px;">Reviewing Row</h2>
@@ -303,6 +263,7 @@
                         <button id="classroomUndoBtn" class="btn-secondary" style="color: #ef4444; font-weight:700; display:none;" onclick="classroomUnmasterLetterRow()">Oops, I didn't mean to master this yet. Keep practicing!</button>
                     </div>
 
+                    <!-- Inline Functional Digital Ink Engine Segment Integration -->
                     <div class="embedded-classroom-sketchpad">
                         <h3 style="font-size:14px; font-weight:700; margin-bottom:4px; color:var(--neutral-dark);">Practice Writing Pad</h3>
                         <p style="font-size:12px; color:#64748b; margin-bottom:10px;">Draw the characters below to share your writing with your team!</p>
@@ -317,9 +278,10 @@
                 </div>
             </div>
 
+            <!-- Dashboard Analytics Sidebar Tracking Cluster -->
             <div class="sidebar-sticky-panel">
                 <header>
-                    <div class="profile-clickable-trigger" onclick="openProfileEdit()" style="cursor: pointer;">
+                    <div class="profile-clickable-trigger">
                         <div class="user-avatar-badge" id="displayAvatarHeader">🦁</div>
                         <div>
                             <h3 id="displayUserHeader" style="font-size:15px; font-weight:700;">Student Nickname</h3>
@@ -329,13 +291,6 @@
                     </div>
                     <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
                 </header>
-
-                <div class="team-track-container">
-                    <h3 class="team-track-header">🏁 Collective Track Progress</h3>
-                    <hr style="border-color: #334155; margin: 8px 0 16px 0;">
-                    <div id="teamTracksMount" style="display: flex; flex-direction: column; gap: 4px;">
-                        </div>
-                </div>
 
                 <div class="collapsible-dropdown-container">
                     <button class="dropdown-toggle-header" onclick="toggleDropdownElement('liveLeaderboardContent')">
@@ -358,117 +313,157 @@
     </div>
 
     <script>
-        // --- 1. CONFIGURATION & DATABASE INITIALIZATION ---
-        const SUPABASE_URL = "https://your-supabase-url.supabase.co"; 
-        const SUPABASE_ANON_KEY = "your-anon-key";
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const SUPABASE_URL = "https://muisfipoyzkhznfdvnes.supabase.co"; 
+        const SUPABASE_KEY = "sb_publishable_VBiJZB8TVM2CSl54aDPP0A_4aDXWb5i";
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let currentUser = null;
-        let currentAuthMode = 'signup';
-        let selectedAvatarSymbol = '🦁';
+        const ADMIN_EMAIL = "senaitrichmond16@gmail.com";
+        const CLASSROOM_COLORS = ["Red Team 🔴", "Blue Team 🔵", "Green Team 🟢", "Yellow Team 🟡", "Purple Team 🟣"];
 
-        // --- 2. GATEWAY INTERACTION FLOWS ---
-        function selectAuthFlow(mode) {
-            currentAuthMode = mode;
-            document.getElementById("onboardingGate").style.display = "none";
-            document.getElementById("credentialFields").style.display = "block";
-            document.getElementById("authSubtitle").innerText = mode === 'signup' ? "Create your new classroom account!" : "Welcome back to school!";
-            document.getElementById("mainAuthBtn").innerText = mode === 'signup' ? "Create Account" : "Sign In";
+        let currentUser = null; let masteredLetters = []; let activeBaseFidel = null; 
+        let activeFamilyArrayData = []; let activeSubscriptsData = []; let selectedAvatarSymbol = "🦁"; 
+        let isSignUpMode = true;
+
+        let activeGamePairs = []; let selectedGameTokenId = null; let currentStreakScore = 0;
+        let gameModeScope = "all";
+
+        let canvas, ctx, isDrawing = false;
+
+        const vowelFrameworkLabels = ["ha", "hu", "hee", "ha", "hay", "hih", "ho"];
+        const standardVowelSubscripts = ["-ä", "-u", "-ee", "-a", "-ay", "-ih", "-o"];
+
+        const alphabetData = [
+            {base:"ሀ", family:['ሀ','ሁ','ሂ','ሃ','ሄ','ህ','ሆ'], prefix:"h"},
+            {base:"ለ", family:['ለ','ሉ','ሊ','ላ','ሌ','ል','ሎ'], prefix:"l"},
+            {base:"ሐ", family:['ሐ','ሑ','ሒ','ሓ','ሔ','ሕ','ሖ'], prefix:"ḥ"},
+            {base:"መ", family:['መ','ሙ','ሚ','ማ','ሜ','ም','ሞ'], prefix:"m"},
+            {base:"ሠ", family:['ሠ','ሡ','ሢ','ሣ','ሤ','ሥ','ሦ'], prefix:"ś"},
+            {base:"ረ", family:['ረ','ሩ','ሪ','ራ','ሬ','ር','ሮ'], prefix:"r"},
+            {base:"ሰ", family:['ሰ','ሱ','ሲ','ሳ','ሴ','ስ','ሶ'], prefix:"s"},
+            {base:"ሸ", family:['ሸ','ሹ','ሺ','ሻ','ሼ','ሽ','ሾ'], prefix:"š"},
+            {base:"ቀ", family:['ቀ','ቁ','ቂ','ቃ','ቄ','ቅ','ቆ'], prefix:"q"},
+            {base:"በ", family:['በ','ቡ','ቢ','ባ','ቤ','ብ','ቦ'], prefix:"b"},
+            {base:"ቨ", family:['ቨ','ቩ','ቪ','ቫ','ቬ','ቭ','ቮ'], prefix:"v"},
+            {base:"ተ", family:['ተ','ቱ','ቲ','ታ','ቴ','ት','ቶ'], prefix:"t"},
+            {base:"ቸ", family:['ቸ','ቹ','ቺ','ቻ','ቼ','ች','ቾ'], prefix:"č"},
+            {base:"ኀ", family:['ኀ','ኁ','ኂ','ኃ','ኄ','ኅ','ኆ'], prefix:"n"},
+            {base:"ነ", family:['ነ','ኑ','ኒ','ና','ኔ','ን','ኖ'], prefix:"n"},
+            {base:"ኘ", family:['ኘ','ኙ','ኚ','ኛ','ኜ','ኝ','ኞ'], prefix:"ñ"},
+            {base:"አ", family:['አ','ኡ','ኢ','ኣ','ኤ','እ','ኦ'], prefix:"ʾ"},
+            {base:"ከ", family:['ከ','ኩ','ኪ','ካ','ኬ','ክ','ኮ'], prefix:"k"},
+            {base:"ኸ", family:['ኸ','ኹ','ኺ','ኻ','ኼ','ኽ','ኾ'], prefix:"ḫ"},
+            {base:"ወ", family:['ወ','ዉ','ዊ','ዋ','ዌ','ው','ዎ'], prefix:"w"},
+            {base:"ዐ", family:['ዐ','ዑ','ዒ','ዓ','ዔ','ዕ','ዖ'], prefix:"ʿ"},
+            {base:"ዘ", family:['ዘ','ዙ','ዚ','ዛ','ዜ','ዝ','ዞ'], prefix:"z"},
+            {base:"ዠ", family:['ዠ','ዡ','ዢ','ዣ','ዤ','ዥ','ዦ'], prefix:"ž"},
+            {base:"የ", family:['የ','ዩ','ዪ','ያ','ዬ','ይ','ዮ'], prefix:"y"},
+            {base:"ደ", family:['ደ','ዱ','ዲ','ዳ','ዴ','ድ','ዶ'], prefix:"d"},
+            {base:"ጀ", family:['ጀ','ጁ','ጂ','ጃ','ጄ','ጅ','ጆ'], prefix:"j"},
+            {base:"ገ", family:['ገ','ጉ','ጊ','ጋ','ጌ','ግ','ጎ'], prefix:"g"},
+            {base:"ጠ", family:['ጠ','ጡ','ጢ','ጣ','ጤ','ጥ','ጦ'], prefix:"ṭ"},
+            {base:"ጨ", family:['ጨ','ጩ','ጪ','ጫ','ጬ','ጭ','ጮ'], prefix:"č̣"},
+            {base:"ጰ", family:['ጰ','ጱ','ጲ','ጳ','ጴ','ጵ','ጶ'], prefix:"p̣"},
+            {base:"ጸ", family:['ጸ','ጹ','ጺ','ጻ','ጼ','ጽ','ጾ'], prefix:"ṣ"},
+            {base:"ፀ", family:['ፀ','ፁ','ፂ','ፃ','ፄ','ፅ','ፆ'], prefix:"ṣ́"},
+            {base:"ፈ", family:['ፈ','ፉ','ፊ','ፋ','ፌ','ፍ','ፎ'], prefix:"f"},
+            {base:"ፐ", family:['ፐ','ፑ','ፒ','ፓ','ፔ','ፕ','ፖ'], prefix:"p"}
+        ];
+
+        window.addEventListener('DOMContentLoaded', () => { 
+            resetToGate(); 
+        });
+
+        function showNotificationToast(msg) {
+            const container = document.getElementById("toastContainer");
+            const element = document.createElement("div");
+            element.className = "toast-popup";
+            element.innerHTML = `<span>${msg}</span>`;
+            container.appendChild(element);
+            setTimeout(() => element.remove(), 3000);
         }
 
-        function resetToGate() {
-            document.getElementById("authScreen").style.display = "block";
-            document.getElementById("onboardingGate").style.display = "flex";
-            document.getElementById("credentialFields").style.display = "none";
-            document.getElementById("studentDashboard").style.display = "none";
-            document.getElementById("teacherOnlyDashboard").style.display = "none";
-            document.getElementById("adminViewSelectorGate").style.display = "none";
-            document.getElementById("profileSetupScreen").style.display = "none";
+        function initSketchpadEngineSystem() {
+            canvas = document.getElementById("sketchpad");
+            if (!canvas) return;
+            ctx = canvas.getContext("2d");
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            ctx.lineWidth = 3; ctx.lineCap = "round"; ctx.strokeStyle = "#1e293b";
+
+            function getCoordinates(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: clientX - rect.left, y: clientY - rect.top };
+            }
+            function startDraw(e) { isDrawing = true; ctx.beginPath(); const coords = getCoordinates(e); ctx.moveTo(coords.x, coords.y); }
+            function draw(e) { if (!isDrawing) return; const coords = getCoordinates(e); ctx.lineTo(coords.x, coords.y); ctx.stroke(); }
+            function stopDraw() { isDrawing = false; }
+
+            canvas.addEventListener("mousedown", startDraw); canvas.addEventListener("mousemove", draw); window.addEventListener("mouseup", stopDraw);
+            canvas.addEventListener("touchstart", startDraw); canvas.addEventListener("touchmove", draw); window.addEventListener("touchend", stopDraw);
         }
 
-        function selectAvatar(symbol, element) {
-            selectedAvatarSymbol = symbol;
-            document.querySelectorAll(".avatar-option").forEach(opt => opt.classList.remove("selected"));
-            element.classList.add("selected");
+        function clearSketchpadCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+
+        async function uploadSketchpadDrawingCanvasData() {
+            const emptyCheck = document.createElement("canvas");
+            emptyCheck.width = canvas.width; emptyCheck.height = canvas.height;
+            if (canvas.toDataURL() === emptyCheck.toDataURL()) return showNotificationToast("Draw something before sharing!");
+
+            showNotificationToast("Uploading your drawing...");
+            canvas.toBlob(async (blob) => {
+                const storagePath = `canvas-${Date.now()}.png`;
+                const { data: uploadData, error: uploadError } = await _supabase.storage.from('art_shares').upload(storagePath, blob, { contentType: 'image/png' });
+                if (uploadError) return showNotificationToast(uploadError.message);
+
+                const { data: urlData } = _supabase.storage.from('art_shares').getPublicUrl(storagePath);
+                const expirationTimestamp = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+                await _supabase.from('photo_shares').insert({ user_id: currentUser.id, image_url: urlData.publicUrl, expires_at: expirationTimestamp, meta_points: 0 });
+                clearSketchpadCanvas();
+                showNotificationToast("Drawing shared to the class board!");
+                fetchDisappearingImageCanvasBoard();
+            }, "image/png");
         }
 
-        function toggleDropdownElement(id) {
-            const pane = document.getElementById(id);
-            if (pane) pane.classList.toggle("open");
+        async function submitVerificationCounterBump(shareId, element) {
+            const currentVal = parseInt(element.getAttribute('data-count') || "0");
+            const updatedVal = currentVal + 1;
+            await _supabase.from('photo_shares').update({ meta_points: updatedVal }).eq('id', shareId);
+            element.setAttribute('data-count', updatedVal);
+            element.innerHTML = `👍 Verified (${updatedVal})`;
+            showNotificationToast("Marked as verified!");
         }
 
-        // --- 17. SOCIAL MODULES & REAL-TIME INTERACTION GRIDS ---
-        async function fetchPodTeammateProgress() {
-            const { data: userProfile } = await _supabase.from('profiles').select('pod_id').eq('id', currentUser.id).maybeSingle();
-            if (!userProfile || !userProfile.pod_id) { 
-                document.getElementById("podTeamNameDisplay").innerText = "No Team Assigned"; 
-                return; 
+        function executeVictoryConfettiCelebration() {
+            const confCanvas = document.getElementById("confettiCanvas");
+            const confCtx = confCanvas.getContext("2d");
+            confCanvas.width = window.innerWidth; confCanvas.height = window.innerHeight;
+            let particles = [];
+            const colorPalettes = ["#0f766e", "#0d9488", "#14b8a6", "#2563eb", "#334155"];
+
+            for (let i = 0; i < 100; i++) {
+                particles.push({
+                    x: window.innerWidth / 2, y: window.innerHeight / 1.5,
+                    vx: (Math.random() - 0.5) * 12, vy: (Math.random() - 0.8) * 15,
+                    size: Math.random() * 6 + 3, color: colorPalettes[Math.floor(Math.random() * colorPalettes.length)],
+                    rotation: Math.random() * 360, rSpeed: Math.random() * 4 - 2
+                });
             }
 
-            const currentPodTeamTitle = userProfile.pod_id || "Your Team";
-            document.getElementById("podTeamNameDisplay").innerText = currentPodTeamTitle;
-            document.getElementById("sidebarPodBadge").innerText = currentPodTeamTitle;
-
-            const { data: teammates } = await _supabase.from('profiles').select('id, display_name, avatar_character').eq('pod_id', currentPodTeamTitle);
-            const { data: progress } = await _supabase.from('user_progress').select('user_id, mastered_letters');
-
-            const progressMap = {};
-            progress?.forEach(p => { progressMap[p.user_id] = p.mastered_letters || []; });
-
-            const mount = document.getElementById("podTeammatesMount");
-            if (!mount) return;
-            mount.innerHTML = "";
-
-            teammates?.forEach(member => {
-                const letters = progressMap[member.id] || [];
-                const progressCount = letters.length;
-                const percent = Math.min(100, Math.round((progressCount / 34) * 100));
-
-                const memberRow = document.createElement("div");
-                memberRow.style.marginBottom = "10px";
-                memberRow.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 2px;">
-                        <span>${member.avatar_character || '🦁'} ${member.display_name} ${member.id === currentUser.id ? '(You)' : ''}</span>
-                        <span style="color: #a4b5cf;">${progressCount} Rows</span>
-                    </div>
-                    <div style="width: 100%; background: #1e293b; height: 6px; border-radius: 3px; overflow: hidden;">
-                        <div style="width: ${percent}%; background: #38bdf8; height: 100%; transition: width 0.3s ease;"></div>
-                    </div>
-                `;
-                mount.appendChild(memberRow);
-            });
-        }
-
-        // Placeholder definitions to prevent errors if elements trigger them
-        async function handleAuth() { console.log("Authentication initiated."); }
-        async function saveProfileData() { console.log("Profile data saved."); }
-        function openProfileEdit() { console.log("Editing profile options."); }
-        function openMatchingGameWorkspaceMode(mode) { console.log("Game workspace opened: " + mode); }
-        function logout() { console.log("Logging out user."); resetToGate(); }
-
-        // --- 20. CLIENT RUNTIME INITIALIZATION ENTRYPOINT ---
-        window.addEventListener("DOMContentLoaded", () => {
-            resetToGate();
-        });
-    </script>
-    <script>
-        // --- 1. CONFIGURATION & DATABASE INITIALIZATION ---
-        const SUPABASE_URL = "https://your-supabase-url.supabase.co"; 
-        const SUPABASE_ANON_KEY = "your-anon-key";
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        let currentUser = null;
-        let currentAuthMode = 'signup';
-        let selectedAvatarSymbol = '🦁';
-        const AVAILABLE_PODS = ["Red Team", "Blue Team", "Green Team", "Yellow Team"];
-
-        // --- 2. GATEWAY INTERACTION FLOWS ---
-        function selectAuthFlow(mode) {
-            currentAuthMode = mode;
-            document.getElementById("onboardingGate").style.display = "none";
-            document.getElementById("credentialFields").style.display = "block";
-            document.getElementById("authSubtitle").innerText = mode === 'signup' ? "Create your new classroom account!" : "Welcome back to school!";
-            document.getElementById("mainAuthBtn").innerText = mode === 'signup' ? "Create Account" : "Sign In";
+            function animateConfettiLoop() {
+                if (particles.length === 0) return confCtx.clearRect(0,0,confCanvas.width,confCanvas.height);
+                confCtx.clearRect(0, 0, confCanvas.width, confCanvas.height);
+                particles.forEach((p, idx) => {
+                    p.x += p.vx; p.y += p.vy; p.vy += 0.25; p.rotation += p.rSpeed;
+                    confCtx.save(); confCtx.translate(p.x, p.y); confCtx.rotate((p.rotation * Math.PI) / 180);
+                    confCtx.fillStyle = p.color; confCtx.fillRect(-p.size/2, -p.size/2, p.size, p.size); confCtx.restore();
+                    if (p.y > confCanvas.height) particles.splice(idx, 1);
+                });
+                requestAnimationFrame(animateConfettiLoop);
+            }
+            animateConfettiLoop();
         }
 
         function resetToGate() {
@@ -478,525 +473,436 @@
             document.getElementById("studentDashboard").style.display = "none";
             document.getElementById("teacherOnlyDashboard").style.display = "none";
             document.getElementById("adminViewSelectorGate").style.display = "none";
-            document.getElementById("profileSetupScreen").style.display = "none";
         }
 
-        function selectAvatar(symbol, element) {
-            selectedAvatarSymbol = symbol;
-            document.querySelectorAll(".avatar-option").forEach(opt => opt.classList.remove("selected"));
-            element.classList.add("selected");
+        function selectAuthFlow(flow) {
+            isSignUpMode = (flow === 'signup');
+            document.getElementById("onboardingGate").style.display = "none";
+            document.getElementById("credentialFields").style.display = "block";
         }
 
-        function toggleDropdownElement(id) {
-            const pane = document.getElementById(id);
-            if (pane) pane.classList.toggle("open");
-        }
-
-        function showToast(message, isError = false) {
-            const container = document.getElementById("toastContainer");
-            const toast = document.createElement("div");
-            toast.className = "toast-popup";
-            if (isError) toast.style.borderLeft = "4px solid #ef4444";
-            toast.innerText = message;
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 4000);
-        }
-
-        // --- 3. CORE AUTHENTICATION ENGINE ---
         async function handleAuth() {
             const email = document.getElementById("email").value.trim();
             const password = document.getElementById("password").value;
+            if (!email || !password) return showNotificationToast("Please fill in all boxes.");
 
-            if (!email || !password) {
-                showToast("Please enter both email and password.", true);
-                return;
-            }
-
-            if (currentAuthMode === 'signup') {
-                const { data, error } = await _supabase.auth.signUp({ email, password });
-                if (error) { showToast(error.message, true); return; }
-                showToast("Account created successfully!");
-                if (data.user) {
-                    currentUser = data.user;
-                    checkUserSessionAndRoute(data.user);
-                }
-            } else {
-                const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
-                if (error) { showToast(error.message, true); return; }
-                showToast("Signed in successfully!");
-                if (data.user) {
-                    currentUser = data.user;
-                    checkUserSessionAndRoute(data.user);
-                }
-            }
+            const { data, error } = isSignUpMode 
+                ? await _supabase.auth.signUp({ email, password })
+                : await _supabase.auth.signInWithPassword({ email, password });
+                
+            if (error) return showNotificationToast(error.message);
+            if (data?.user) proceedFlowMap(data.user);
         }
 
-        // --- 4. TARGET INTERFACE ROUTING ENGINE ---
-        async function checkUserSessionAndRoute(user) {
-            if (!user) return;
+        async function proceedFlowMap(user) {
+            currentUser = user;
+            const { data: profile } = await _supabase.from('profiles').select('display_name, avatar_character, pod_id').eq('id', user.id).maybeSingle();
             
-            // Check if user is the designated teacher account
-            if (user.email === "teacher@fidel.edu" || user.email?.endsWith("@teacher.com")) {
+            if (currentUser.email === ADMIN_EMAIL) {
                 document.getElementById("authScreen").style.display = "none";
                 document.getElementById("adminViewSelectorGate").style.display = "block";
                 return;
             }
 
-            // Check if student profile already exists
-            const { data: profile, error } = await _supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
-            
-            document.getElementById("authScreen").style.display = "none";
-            
-            if (!profile) {
-                // Route to profile customization matrix
-                populateTeamDropdownOptions();
-                document.getElementById("profileSetupScreen").style.display = "block";
-            } else {
-                // Route directly to primary desktop terminal
+            if (profile && profile.display_name) {
+                selectedAvatarSymbol = profile.avatar_character;
                 document.getElementById("displayUserHeader").innerText = profile.display_name;
-                document.getElementById("displayAvatarHeader").innerText = profile.avatar_character || '🦁';
-                document.getElementById("studentDashboard").style.display = "block";
-                
-                // Initialize dependent data nodes
-                fetchPodTeammateProgress();
-                // (Remaining initialization calls like loadFidelGrid() go here in part 2)
+                document.getElementById("displayAvatarHeader").innerText = profile.avatar_character;
+                document.getElementById("sidebarPodBadge").innerText = profile.pod_id || "No Team Assigned";
+                launchDashboard("student");
+            } else {
+                document.getElementById("authScreen").style.display = "none";
+                document.getElementById("profileSetupScreen").style.display = "block";
+                populateTeamSetupDropdownOptions();
             }
         }
 
-        function populateTeamDropdownOptions() {
-            const select = document.getElementById("profileTeamSelect");
-            select.innerHTML = "";
-            AVAILABLE_PODS.forEach(pod => {
-                const opt = document.createElement("option");
-                opt.value = pod;
-                opt.innerText = pod;
-                select.appendChild(opt);
+        function populateTeamSetupDropdownOptions() {
+            const selectElement = document.getElementById("profileTeamSelect");
+            selectElement.innerHTML = '';
+            CLASSROOM_COLORS.forEach(color => {
+                selectElement.innerHTML += `<option value="${color}">${color}</option>`;
             });
         }
 
-        function routeAdminTerminalDirectly(targetView) {
+        function routeAdminTerminalDirectly(targetPanel) {
             document.getElementById("adminViewSelectorGate").style.display = "none";
-            if (targetView === 'teacher') {
+            launchDashboard(targetPanel);
+        }
+
+        function switchAdminPanelsFromDashboard(targetPanel) {
+            document.getElementById("studentDashboard").style.display = "none";
+            document.getElementById("teacherOnlyDashboard").style.display = "none";
+            launchDashboard(targetPanel);
+        }
+
+        function launchDashboard(viewMode) {
+            if (currentUser.email === ADMIN_EMAIL) {
+                document.getElementById("adminHeaderToggleBar").style.display = "flex";
+            }
+
+            if (viewMode === "teacher") {
                 document.getElementById("teacherOnlyDashboard").style.display = "block";
-                // loadTeacherRosterData(); 
+                loadTeacherRosterData();
+                teacherRefreshConfigurationDropdowns();
             } else {
                 document.getElementById("studentDashboard").style.display = "block";
-                document.getElementById("adminHeaderToggleBar").style.display = "flex";
-                document.getElementById("displayUserHeader").innerText = "Teacher (Preview)";
+                fetchUserProgress();
+                renderLiveLeaderboard();
+                fetchDisappearingImageCanvasBoard();
+                fetchPodTeammateProgress();
+                buildMatrixInterfaceGrid();
             }
         }
 
-        function switchAdminPanelsFromDashboard(targetView) {
-            if (targetView === 'student') {
-                document.getElementById("teacherOnlyDashboard").style.display = "none";
-                document.getElementById("studentDashboard").style.display = "block";
-                document.getElementById("adminHeaderToggleBar").style.display = "flex";
-            } else {
-                document.getElementById("studentDashboard").style.display = "none";
-                document.getElementById("teacherOnlyDashboard").style.display = "block";
-            }
-        }
+        async function loadTeacherRosterData() {
+            const tbody = document.getElementById("teacherRosterTableBody");
+            tbody.innerHTML = '<tr><td colspan="3" style="color:#94a3b8; text-align:center;">Loading class roster...</td></tr>';
+            
+            const { data: students } = await _supabase.from('profiles').select('id, display_name, avatar_character, pod_id');
+            const { data: progress } = await _supabase.from('user_progress').select('user_id, mastered_letters');
+            
+            const progressMap = {};
+            progress?.forEach(rec => { progressMap[rec.user_id] = rec.mastered_letters || []; });
 
-        // --- 5. PROFILE PROVISIONING & DATA WRITES ---
-        async function saveProfileData() {
-            const displayName = document.getElementById("displayName").value.trim();
-            const selectedPod = document.getElementById("profileTeamSelect").value;
-
-            if (!displayName) {
-                showToast("Please pick a nickname before continuing.", true);
+            tbody.innerHTML = '';
+            if(!students || students.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="color:#94a3b8; text-align:center;">No students registered yet.</td></tr>';
                 return;
             }
 
-            const profilePayload = {
-                id: currentUser.id,
-                display_name: displayName,
-                avatar_character: selectedAvatarSymbol,
-                pod_id: selectedPod,
-                updated_at: new Date().toISOString()
-            };
-
-            const { error } = await _supabase.from('profiles').upsert(profilePayload);
-            if (error) { showToast(error.message, true); return; }
-
-            showToast("Profile ready! Welcome to class.");
-            document.getElementById("profileSetupScreen").style.display = "none";
-            checkUserSessionAndRoute(currentUser);
-        }
-
-        async function logout() {
-            await _supabase.auth.signOut();
-            currentUser = null;
-            showToast("Logged out successfully.");
-            resetToGate();
-        } // --- 6. FIDEL ALPHABET MATRIX DATA DICTIONARY ---
-        // Contains primary characters and their matching matrix variants
-        const AMHARIC_ALPHABET_DATA = [
-            { id: "row_ha", name: "Ha", letters: ["ሀ", "ሁ", "ሂ", "ሃ", "ሄ", "ህ", "ሆ"], sounds: ["hä", "u", "ee", "a", "ay", "ih", "o"] },
-            { id: "row_la", name: "La", letters: ["ለ", "ሉ", "ሊ", "ላ", "ሌ", "ል", "ሎ"], sounds: ["hä", "u", "ee", "a", "ay", "ih", "o"] },
-            { id: "row_hha", name: "Hha", letters: ["ሐ", "ሑ", "ሒ", "ሓ", "ሔ", "ሕ", "ሖ"], sounds: ["hä", "u", "ee", "a", "ay", "ih", "o"] },
-            { id: "row_ma", name: "Ma", letters: ["መ", "ሙ", "ሚ", "ማ", "ሜ", "ም", "ሞ"], sounds: ["hä", "u", "ee", "a", "ay", "ih", "o"] },
-            { id: "row_sa", name: "Sa", letters: ["ሠ", "ሡ", "ሢ", "ሣ", "ሤ", "ሥ", "ሦ"], sounds: ["hä", "u", "ee", "a", "ay", "ih", "o"] }
-        ];
-
-        let activeReviewRowIndex = null;
-        let gameCardsArray = [];
-        let firstSelectedCard = null;
-        let secondSelectedCard = null;
-        let matchStreakCounter = 0;
-
-        // Canvas Sketchpad variables
-        let canvasElement = null;
-        let drawingContext = null;
-        let isUserDrawing = false;
-
-        // --- 7. ALPHABET BOARD GRID RENDERING ---
-        async function loadFidelGrid() {
-            const gridMount = document.getElementById("viewFidelGrid");
-            if (!gridMount) return;
-            gridMount.innerHTML = "";
-
-            // Fetch user's mastered history row collection
-            const { data: progressRecord } = await _supabase.from('user_progress').select('mastered_letters').eq('user_id', currentUser.id).maybeSingle();
-            const masteredRows = progressRecord?.mastered_letters || [];
-
-            // Update local user metrics top bar display indicators
-            const totalRows = AMHARIC_ALPHABET_DATA.length;
-            const percentage = Math.round((masteredRows.length / totalRows) * 100) || 0;
-            document.getElementById("progressText").innerText = `${percentage}% Completed`;
-            document.getElementById("progressBar").style.width = `${percentage}%`;
-
-            AMHARIC_ALPHABET_DATA.forEach((row, index) => {
-                const card = document.createElement("div");
-                const isMastered = masteredRows.includes(row.id);
-                card.className = `fidel-card ${isMastered ? 'completed' : ''}`;
-                card.innerText = row.letters[0]; // Display first base letter form
-                
-                card.onclick = () => openIsolatedRowClassroom(index);
-                gridMount.appendChild(card);
+            students.forEach(s => {
+                const masteredCount = (progressMap[s.id] || []).length;
+                const teamName = s.pod_id || '<span style="color:#94a3b8; font-style:italic;">None</span>';
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-weight:500;">${s.avatar_character || '🦁'} ${s.display_name}</td>
+                        <td>${teamName}</td>
+                        <td><strong>${masteredCount} / 34 rows</strong> complete</td>
+                    </tr>
+                `;
             });
-            
-            updateCollectiveTrackProgressDashboard();
         }
 
-        // --- 8. ISOLATED ROW MICRO-CLASSROOM CONTROLS ---
-        function openIsolatedRowClassroom(rowIndex) {
-            activeReviewRowIndex = rowIndex;
-            const targetRowData = AMHARIC_ALPHABET_DATA[rowIndex];
+        function openMatchingGameWorkspaceMode(scope) {
+            gameModeScope = scope;
+            document.getElementById("viewFidelGrid").style.display = "none";
+            document.getElementById("isolatedFamilyClassroom").style.display = "none";
+            document.getElementById("gameWorkspace").style.display = "block";
+            
+            const exitBtn = document.getElementById("gameExitActionBtn");
+            if (scope === "all") {
+                document.getElementById("gameWorkspaceTitle").innerText = "Game Arena: All Letters";
+                exitBtn.onclick = () => {
+                    document.getElementById("gameWorkspace").style.display = "none";
+                    document.getElementById("viewFidelGrid").style.display = "grid";
+                };
+            } else {
+                document.getElementById("gameWorkspaceTitle").innerText = `Game Arena: Row "${scope.base}"`;
+                exitBtn.onclick = () => {
+                    document.getElementById("gameWorkspace").style.display = "none";
+                    document.getElementById("isolatedFamilyClassroom").style.display = "block";
+                };
+            }
+
+            currentStreakScore = 0;
+            document.getElementById("gameStreakValue").innerText = currentStreakScore;
+            generateNewGameRoundData();
+        }
+
+        function generateNewGameRoundData() {
+            activeGamePairs = [];
+            selectedGameTokenId = null;
+
+            let structuralSelectionList = [];
+            if (gameModeScope === "all") {
+                let pool = [...alphabetData].sort(() => Math.random() - 0.5).slice(0, 4);
+                pool.forEach(item => {
+                    let rIdx = Math.floor(Math.random() * 7);
+                    let sub = standardVowelSubscripts[rIdx];
+                    let phoneticString = (item.prefix === "h" || item.prefix === "ḥ") ? vowelFrameworkLabels[rIdx] : `${item.prefix}${sub}`;
+                    structuralSelectionList.push({ char: item.family[rIdx], matchKey: item.family[rIdx], displayTxt: item.family[rIdx], kind: "fidel" });
+                    structuralSelectionList.push({ char: item.family[rIdx], matchKey: item.family[rIdx], displayTxt: phoneticString, kind: "phonetic" });
+                });
+            } else {
+                let indices = [0,1,2,3,4,5,6].sort(() => Math.random() - 0.5).slice(0, 4);
+                indices.forEach(idx => {
+                    let sub = standardVowelSubscripts[idx];
+                    let phoneticString = (gameModeScope.prefix === "h" || gameModeScope.prefix === "ḥ") ? vowelFrameworkLabels[idx] : `${gameModeScope.prefix}${sub}`;
+                    structuralSelectionList.push({ char: gameModeScope.family[idx], matchKey: gameModeScope.family[idx], displayTxt: gameModeScope.family[idx], kind: "fidel" });
+                    structuralSelectionList.push({ char: gameModeScope.family[idx], matchKey: gameModeScope.family[idx], displayTxt: phoneticString, kind: "phonetic" });
+                });
+            }
+
+            activeGamePairs = structuralSelectionList.sort(() => Math.random() - 0.5);
+            renderErgonomicBlockGameElements();
+        }
+
+        function renderErgonomicBlockGameElements() {
+            const mount = document.getElementById("ergonomicBlockGameMount");
+            mount.innerHTML = "";
+
+            activeGamePairs.forEach((tokenData, index) => {
+                const tokenElement = document.createElement("div");
+                tokenElement.className = "game-interactive-token";
+                tokenElement.innerText = tokenData.displayTxt;
+                tokenElement.setAttribute("data-index", index);
+                tokenElement.onclick = () => selectBlockTokenTrackElement(tokenElement, index);
+                mount.appendChild(tokenElement);
+            });
+        }
+
+        function selectBlockTokenTrackElement(element, index) {
+            if (element.classList.contains("resolved-pair")) return;
+            const targetToken = activeGamePairs[index];
+
+            if (selectedGameTokenId === null) {
+                element.classList.add("active-selected");
+                selectedGameTokenId = index;
+            } else {
+                if (selectedGameTokenId === index) {
+                    element.classList.remove("active-selected");
+                    selectedGameTokenId = null;
+                    return;
+                }
+
+                const absolutePriorElement = document.querySelector(`[data-index="${selectedGameTokenId}"]`);
+                const priorToken = activeGamePairs[selectedGameTokenId];
+
+                if (targetToken.matchKey === priorToken.matchKey && targetToken.kind !== priorToken.kind) {
+                    element.className = "game-interactive-token resolved-pair";
+                    absolutePriorElement.className = "game-interactive-token resolved-pair";
+                    currentStreakScore++;
+                    document.getElementById("gameStreakValue").innerText = currentStreakScore;
+                    showNotificationToast("Match found!");
+                    selectedGameTokenId = null;
+                    checkBlockGameCompletionState();
+                } else {
+                    currentStreakScore = 0;
+                    document.getElementById("gameStreakValue").innerText = currentStreakScore;
+                    showNotificationToast("Not quite right! Streak reset.");
+                    element.classList.remove("active-selected");
+                    absolutePriorElement.classList.remove("active-selected");
+                    selectedGameTokenId = null;
+                }
+            }
+        }
+
+        function checkBlockGameCompletionState() {
+            const unresolved = document.querySelectorAll("#ergonomicBlockGameMount .game-interactive-token:not(.resolved-pair)");
+            if (unresolved.length === 0) {
+                executeVictoryConfettiCelebration();
+                showNotificationToast("You cleared the board! Starting next round...");
+                setTimeout(generateNewGameRoundData, 1000);
+            }
+        }
+
+        function selectAvatar(symbol, element) {
+            document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected'); selectedAvatarSymbol = symbol;
+        }
+
+        async function saveProfileData() {
+            const nameInput = document.getElementById("displayName").value.trim();
+            if (!nameInput) return showNotificationToast("Please enter a nickname.");
+            
+            let selectedColorTeam = document.getElementById("profileTeamSelect").value;
+
+            await _supabase.from('profiles').upsert({ id: currentUser.id, display_name: nameInput, avatar_character: selectedAvatarSymbol, pod_id: selectedColorTeam });
+            document.getElementById("displayUserHeader").innerText = nameInput;
+            document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
+            document.getElementById("sidebarPodBadge").innerText = selectedColorTeam;
+            launchDashboard("student");
+        }
+
+        async function teacherRefreshConfigurationDropdowns() {
+            const { data: students } = await _supabase.from('profiles').select('id, display_name');
+
+            const sSelect = document.getElementById("teacherStudentSelect");
+            sSelect.innerHTML = '<option value="">Select Student...</option>';
+            students?.forEach(s => { sSelect.innerHTML += `<option value="${s.id}">${s.display_name}</option>`; });
+
+            const pSelect = document.getElementById("teacherPodSelect");
+            pSelect.innerHTML = '<option value="">Select Color Team...</option>';
+            CLASSROOM_COLORS.forEach(color => { pSelect.innerHTML += `<option value="${color}">${color}</option>`; });
+        }
+
+        async function teacherAssignStudentToPod() {
+            const studentId = document.getElementById("teacherStudentSelect").value;
+            const chosenColor = document.getElementById("teacherPodSelect").value;
+            
+            if (!studentId || !chosenColor) return showNotificationToast("Please pick both a student and a team color.");
+            
+            showNotificationToast("Updating team assignment...");
+            const { error } = await _supabase
+                .from('profiles')
+                .update({ pod_id: chosenColor })
+                .eq('id', studentId);
+
+            if (error) {
+                console.error("Error moving student:", error);
+                return showNotificationToast("Failed to move student: " + error.message);
+            }
+
+            showNotificationToast(`Student assigned to ${chosenColor}!`);
+            await loadTeacherRosterData();
+            await teacherRefreshConfigurationDropdowns();
+        }
+
+        function toggleDropdownElement(elementId) {
+            document.getElementById(elementId).classList.toggle('open');
+        }
+
+        function buildMatrixInterfaceGrid() {
+            const container = document.getElementById("viewFidelGrid"); container.innerHTML = "";
+            alphabetData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "fidel-card"; card.setAttribute('data-fidel', item.base); card.innerText = item.base;
+                card.onclick = () => launchIsolatedClassroomWorkspace(item);
+                container.appendChild(card);
+            });
+            renderUIProgressUpdates();
+        }
+
+        function generateClassroomSubscripts(prefix) {
+            if (prefix === "h" || prefix === "ḥ") return vowelFrameworkLabels;
+            return standardVowelSubscripts.map(sub => `${prefix}${sub}`);
+        }
+
+        function launchIsolatedClassroomWorkspace(fidelObj) {
+            activeBaseFidel = fidelObj.base; activeFamilyArrayData = fidelObj.family;
+            activeSubscriptsData = generateClassroomSubscripts(fidelObj.prefix);
             
             document.getElementById("viewFidelGrid").style.display = "none";
-            document.getElementById("gameWorkspace").style.display = "none";
             document.getElementById("isolatedFamilyClassroom").style.display = "block";
+            document.getElementById("classroomFamilyTitle").innerText = `Reviewing Row: "${activeBaseFidel}"`;
             
-            document.getElementById("classroomFamilyTitle").innerText = `Reviewing: ${targetRowData.name} Family`;
+            document.getElementById("classroomRowGameBtn").onclick = () => openMatchingGameWorkspaceMode(fidelObj);
             
-            // Set up button link target action directly for matching game
-            document.getElementById("classroomRowGameBtn").onclick = () => openMatchingGameWorkspaceMode(rowIndex);
-            
-            renderClassroomGiantRowCharacters(targetRowData.letters, targetRowData.sounds);
-            initializeWritingSketchpadEngine();
-            checkMasteryButtonState(targetRowData.id);
+            const undoBtn = document.getElementById("classroomUndoBtn");
+            if (masteredLetters.includes(activeBaseFidel)) {
+                undoBtn.style.display = "block";
+            } else {
+                undoBtn.style.display = "none";
+            }
+
+            renderGiantClassroomRowItems(activeFamilyArrayData, activeSubscriptsData);
+            setTimeout(initSketchpadEngineSystem, 50);
         }
 
-        function renderClassroomGiantRowCharacters(letters, sounds) {
-            const mount = document.getElementById("classroomGiantRowMount");
-            mount.innerHTML = "";
-            letters.forEach((char, index) => {
-                const node = document.createElement("div");
-                node.className = "giant-char-card";
-                node.innerHTML = `<div class="letter">${char}</div><div class="sub">${sounds[index]}</div>`;
-                mount.appendChild(node);
+        function renderGiantClassroomRowItems(familyArray, subscriptsArray) {
+            const mount = document.getElementById("classroomGiantRowMount"); mount.innerHTML = "";
+            familyArray.forEach((char, idx) => {
+                const card = document.createElement('div');
+                card.className = "giant-char-card";
+                card.innerHTML = `<div class="letter">${char}</div><div class="sub">${subscriptsArray[idx]}</div>`;
+                mount.appendChild(card);
             });
         }
 
-        async function checkMasteryButtonState(rowId) {
-            const { data } = await _supabase.from('user_progress').select('mastered_letters').eq('user_id', currentUser.id).maybeSingle();
-            const list = data?.mastered_letters || [];
-            
-            const undoBtn = document.getElementById("classroomUndoBtn");
-            const masterBtn = document.getElementById("classroomMasterBtn");
-            
-            if (list.includes(rowId)) {
-                undoBtn.style.display = "block";
-                masterBtn.style.innerText = "Row Mastered ✓";
-                masterBtn.style.opacity = "0.6";
-                masterBtn.disabled = true;
-            } else {
-                undoBtn.style.display = "none";
-                masterBtn.style.innerText = "Got It! Mark as Mastered";
-                masterBtn.style.opacity = "1";
-                masterBtn.disabled = false;
-            }
+        function shuffleClassroomRowPhonetics() {
+            let layoutIndices = [0,1,2,3,4,5,6].sort(() => Math.random() - 0.5);
+            const mount = document.getElementById("classroomGiantRowMount"); mount.innerHTML = "";
+            layoutIndices.forEach(idx => {
+                const card = document.createElement('div');
+                card.className = "giant-char-card";
+                card.innerHTML = `<div class="letter">${activeFamilyArrayData[idx]}</div><div class="sub">${activeSubscriptsData[idx]}</div>`;
+                mount.appendChild(card);
+            });
+        }
+
+        async function classroomMarkAsMasteredDirectly() {
+            if (!masteredLetters.includes(activeBaseFidel)) masteredLetters.push(activeBaseFidel);
+            await _supabase.from('user_progress').upsert({ user_id: currentUser.id, mastered_letters: masteredLetters }, { onConflict: 'user_id' });
+            showNotificationToast(`Row "${activeBaseFidel}" saved to your mastered list!`);
+            executeVictoryConfettiCelebration();
+            fetchPodTeammateProgress(); renderLiveLeaderboard(); exitClassroomViewBackToGrid();
+        }
+
+        async function classroomUnmasterLetterRow() {
+            masteredLetters = masteredLetters.filter(item => item !== activeBaseFidel);
+            await _supabase.from('user_progress').upsert({ user_id: currentUser.id, mastered_letters: masteredLetters }, { onConflict: 'user_id' });
+            showNotificationToast(`Removed "${activeBaseFidel}" from mastered rows.`);
+            fetchPodTeammateProgress(); renderLiveLeaderboard(); exitClassroomViewBackToGrid();
         }
 
         function exitClassroomViewBackToGrid() {
             document.getElementById("isolatedFamilyClassroom").style.display = "none";
             document.getElementById("viewFidelGrid").style.display = "grid";
-            loadFidelGrid();
+            buildMatrixInterfaceGrid();
         }
 
-        // --- 9. CORE MATCHING GAME LOGIC ENGINE ---
-        function openMatchingGameWorkspaceMode(mode) {
-            document.getElementById("viewFidelGrid").style.display = "none";
-            document.getElementById("isolatedFamilyClassroom").style.display = "none";
-            document.getElementById("gameWorkspace").style.display = "block";
-
-            gameCardsArray = [];
-            matchStreakCounter = 0;
-            document.getElementById("gameStreakValue").innerText = matchStreakCounter;
-
-            let sourcePool = [];
-            if (mode === 'all') {
-                document.getElementById("gameWorkspaceTitle").innerText = "Grand Matching Arena";
-                sourcePool = AMHARIC_ALPHABET_DATA;
-            } else {
-                document.getElementById("gameWorkspaceTitle").innerText = "Row Review Match";
-                sourcePool = [AMHARIC_ALPHABET_DATA[mode]];
-            }
-
-            // Build dynamic token pairs
-            sourcePool.forEach(row => {
-                row.letters.forEach((letter, idx) => {
-                    gameCardsArray.push({ value: letter, type: 'fidel', pairId: `${row.id}_${idx}` });
-                    gameCardsArray.push({ value: `${row.name.toLowerCase().substring(0,1)}${row.sounds[idx]}`, type: 'sound', pairId: `${row.id}_${idx}` });
-                });
-            });
-
-            // Randomize deployment order array shuffling
-            gameCardsArray.sort(() => Math.random() - 0.5);
-            renderMatchingTokensGridElements();
-        }
-
-        function renderMatchingTokensGridElements() {
-            const mount = document.getElementById("ergonomicBlockGameMount");
-            mount.innerHTML = "";
-
-            gameCardsArray.forEach((card, index) => {
-                const button = document.createElement("div");
-                button.className = "game-interactive-token";
-                button.innerText = card.value;
-                button.setAttribute("data-index", index);
-                
-                button.onclick = () => handleTokenSelectionInteraction(card, button);
-                mount.appendChild(button);
-            });
-        }
-
-        function handleTokenSelectionInteraction(card, element) {
-            if (element.classList.contains("resolved-pair") || element === firstSelectedCard?.element) return;
-
-            element.classList.add("active-selected");
-
-            if (!firstSelectedCard) {
-                firstSelectedCard = { card, element };
-            } else {
-                secondSelectedCard = { card, element };
-                evaluateCardMatchEligibility();
-            }
-        }
-
-        function evaluateCardMatchEligibility() {
-            const card1 = firstSelectedCard.card;
-            const card2 = secondSelectedCard.card;
-
-            if (card1.pairId === card2.pairId && card1.type !== card2.type) {
-                // Success! Match verified
-                firstSelectedCard.element.className = "game-interactive-token resolved-pair";
-                secondSelectedCard.element.className = "game-interactive-token resolved-pair";
-                matchStreakCounter++;
-                document.getElementById("gameStreakValue").innerText = matchStreakCounter;
-                showToast("Great Match! ✨");
-                clearSelections();
-            } else {
-                // Failure condition handling sequence
-                setTimeout(() => {
-                    firstSelectedCard.element.classList.remove("active-selected");
-                    secondSelectedCard.element.classList.remove("active-selected");
-                    clearSelections();
-                }, 700);
-            }
-        }
-
-        function clearSelections() {
-            firstSelectedCard = null;
-            secondSelectedCard = null;
-        }
-
-        // --- 13. DATA INTERPOLATION & MASTERY ACTIONS ---
-        async function classroomMarkAsMasteredDirectly() {
-            if (activeReviewRowIndex === null) return;
-            const targetRowId = AMHARIC_ALPHABET_DATA[activeReviewRowIndex].id;
-
-            const { data } = await _supabase.from('user_progress').select('mastered_letters').eq('user_id', currentUser.id).maybeSingle();
-            let list = data?.mastered_letters || [];
-
-            if (!list.includes(targetRowId)) {
-                list.push(targetRowId);
-                await _supabase.from('user_progress').upsert({ user_id: currentUser.id, mastered_letters: list });
-                showToast("Row added to your mastered list!");
-                checkMasteryButtonState(targetRowId);
-            }
-        }
-
-        async function classroomUnmasterLetterRow() {
-            if (activeReviewRowIndex === null) return;
-            const targetRowId = AMHARIC_ALPHABET_DATA[activeReviewRowIndex].id;
-
-            const { data } = await _supabase.from('user_progress').select('mastered_letters').eq('user_id', currentUser.id).maybeSingle();
-            let list = data?.mastered_letters || [];
-
-            list = list.filter(id => id !== targetRowId);
-            await _supabase.from('user_progress').upsert({ user_id: currentUser.id, mastered_letters: list });
-            
-            showToast("Row removed from achievements.", true);
-            checkMasteryButtonState(targetRowId);
-        }
-
-        // --- 14. DIGITAL SKETCHPAD WRITING CANVAS MOTOR ENGINE ---
-        function initializeWritingSketchpadEngine() {
-            canvasElement = document.getElementById("sketchpad");
-            if (!canvasElement) return;
-            drawingContext = canvasElement.getContext("2d");
-
-            // Reset size constraints mapping
-            canvasElement.width = canvasElement.offsetWidth;
-            canvasElement.height = canvasElement.offsetHeight;
-
-            drawingContext.strokeStyle = "#0f766e";
-            drawingContext.lineWidth = 3;
-            drawingContext.lineCap = "round";
-
-            // Ergonomic routing interface hooks mapping
-            canvasElement.addEventListener("mousedown", startDrawingProcess);
-            canvasElement.addEventListener("mousemove", executeDrawingStroke);
-            canvasElement.addEventListener("mouseup", ceaseDrawingProcess);
-
-            canvasElement.addEventListener("touchstart", (e) => {
-                const touch = e.touches[0];
-                const rect = canvasElement.getBoundingClientRect();
-                startDrawingProcess({ clientX: touch.clientX, clientY: touch.clientY });
-            });
-            canvasElement.addEventListener("touchmove", (e) => {
-                const touch = e.touches[0];
-                executeDrawingStroke({ clientX: touch.clientX, clientY: touch.clientY });
-            });
-            canvasElement.addEventListener("touchend", ceaseDrawingProcess);
-        }
-
-        function startDrawingProcess(e) {
-            isUserDrawing = true;
-            const rect = canvasElement.getBoundingClientRect();
-            drawingContext.beginPath();
-            drawingContext.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-        }
-
-        function executeDrawingStroke(e) {
-            if (!isUserDrawing) return;
-            const rect = canvasElement.getBoundingClientRect();
-            drawingContext.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-            drawingContext.stroke();
-        }
-
-        function ceaseDrawingProcess() { isUserDrawing = false; }
-        function clearSketchpadCanvas() {
-            if (drawingContext && canvasElement) {
-                drawingContext.clearRect(0, 0, canvasElement.width, canvasElement.height);
-            }
-        }
-
-        async function uploadSketchpadDrawingCanvasData() {
-            showToast("Shared entry successfully written onto the board!");
-            clearSketchpadCanvas();
-        }
-
-        // --- 17. SOCIAL MODULES & REAL-TIME INTERACTION GRIDS ---
         async function fetchPodTeammateProgress() {
             const { data: userProfile } = await _supabase.from('profiles').select('pod_id').eq('id', currentUser.id).maybeSingle();
-            if (!userProfile || !userProfile.pod_id) { 
-                document.getElementById("podTeamNameDisplay").innerText = "No Team Assigned"; 
-                return; 
-            }
+            if (!userProfile || !userProfile.pod_id) { document.getElementById("podTeamNameDisplay").innerText = "No Team Assigned"; return; }
 
             const currentPodTeamTitle = userProfile.pod_id || "Your Team";
             document.getElementById("podTeamNameDisplay").innerText = currentPodTeamTitle;
             document.getElementById("sidebarPodBadge").innerText = currentPodTeamTitle;
 
-            const { data: teammates } = await _supabase.from('profiles').select('id, display_name, avatar_character').eq('pod_id', currentPodTeamTitle);
-            const { data: progress } = await _supabase.from('user_progress').select('user_id, mastered_letters');
-
-            const progressMap = {};
-            progress?.forEach(p => { progressMap[p.user_id] = p.mastered_letters || []; });
-
-            const mount = document.getElementById("podTeammatesMount");
-            if (!mount) return;
-            mount.innerHTML = "";
-
-            teammates?.forEach(member => {
-                const letters = progressMap[member.id] || [];
-                const progressCount = letters.length;
-                const percent = Math.min(100, Math.round((progressCount / 5) * 100)); // Out of 5 total testing rows
-
-                const memberRow = document.createElement("div");
-                memberRow.className = "teammate-row";
-                memberRow.innerHTML = `
-                    <div class="teammate-info">
-                        <span>${member.avatar_character || '🦁'} ${member.display_name} ${member.id === currentUser.id ? '(You)' : ''}</span>
-                        <span style="color: #a4b5cf;">${progressCount} Rows</span>
-                    </div>
-                    <div style="width: 100%; background: #e2e8f0; height: 6px; border-radius: 3px; overflow: hidden;">
-                        <div style="width: ${percent}%; background: var(--brand-primary); height: 100%; transition: width 0.3s ease;"></div>
-                    </div>
-                `;
-                mount.appendChild(memberRow);
-            });
-        }
-
-        async function updateCollectiveTrackProgressDashboard() {
-            const mount = document.getElementById("teamTracksMount");
-            if (!mount) return;
-            mount.innerHTML = "";
-
-            const colors = { "Red Team": "#ef4444", "Blue Team": "#3b82f6", "Green Team": "#10b981", "Yellow Team": "#eab308" };
-
-            const { data: profiles } = await _supabase.from('profiles').select('pod_id');
-            const { data: progress } = await _supabase.from('user_progress').select('mastered_letters');
-
-            AVAILABLE_PODS.forEach(pod => {
-                const trackRow = document.createElement("div");
-                trackRow.className = "track-row";
-                trackRow.innerHTML = `
-                    <div class="track-meta">
-                        <span><span class="track-pill-indicator" style="background:${colors[pod] || '#fff'};"></span> ${pod}</span>
-                        <span>Active Classroom Run</span>
-                    </div>
-                    <div class="track-progress-bg">
-                        <div class="track-progress-fill" style="width: 45%; background:${colors[pod] || '#fff'};"></div>
-                    </div>
-                `;
-                mount.appendChild(trackRow);
-            });
-        }
-
-        // Connect global handlers back to dynamic setups mapping targets
-        document.getElementById("gameExitActionBtn").onclick = () => {
-            document.getElementById("gameWorkspace").style.display = "none";
-            document.getElementById("viewFidelGrid").style.display = "grid";
-            loadFidelGrid();
-        };
-
-        // --- 20. CLIENT RUNTIME INITIALIZATION ENTRYPOINT ---
-        window.addEventListener("DOMContentLoaded", () => {
-            resetToGate();
+            const { data: members } = await _supabase.from('profiles').select('id, display_name, avatar_character').eq('pod_id', userProfile.pod_id);
+            const { data: progressRecords } = await _supabase.from('user_progress').select('user_id, mastered_letters');
             
-            // Re-intercept session loops directly upon system recovery
-            _supabase.auth.onAuthStateChange((event, session) => {
-                if (session?.user) {
-                    currentUser = session.user;
-                    checkUserSessionAndRoute(session.user);
-                } else {
-                    resetToGate();
-                }
+            const progressMap = {}; progressRecords.forEach(rec => { progressMap[rec.user_id] = rec.mastered_letters || []; });
+
+            const mount = document.getElementById("podTeammatesMount"); mount.innerHTML = "";
+            members.forEach(member => {
+                const score = progressMap[member.id] || []; const percentage = Math.round((score.length / 34) * 100);
+                const isSelf = member.id === currentUser.id;
+                const row = document.createElement('div'); row.className = "teammate-row";
+                row.innerHTML = `<div class="teammate-info"><span>${member.avatar_character || '🦁'} ${member.display_name} ${isSelf ? '(You)' : ''}</span><span>${percentage}% (${score.length}/34 rows)</span></div><div class="progress-container" style="margin: 4px 0 10px 0;"><div class="progress-bar" style="width: ${percentage}%; background: ${isSelf ? '#0f766e' : '#334155'}"></div></div>`;
+                mount.appendChild(row);
             });
-        });
+        }
+
+        async function fetchDisappearingImageCanvasBoard() {
+            const currentISOTime = new Date().toISOString();
+            const { data: activeShares } = await _supabase.from('photo_shares').select('id, image_url, expires_at, meta_points, user_id, profiles(display_name, avatar_character)').gt('expires_at', currentISOTime);
+            const container = document.getElementById("disappearingArtGalleryFeed"); container.innerHTML = "";
+            if (!activeShares || activeShares.length === 0) {
+                container.innerHTML = `<p style="font-size:12px; color:#94a3b8; grid-column:1/-1;">No shared sketches yet today. Use the drawing pad to share yours!</p>`; return;
+            }
+            activeShares.forEach(share => {
+                const hoursLeft = Math.max(0, Math.round((new Date(share.expires_at) - new Date()) / (1000 * 60 * 60)));
+                const item = document.createElement('div'); item.className = "feed-item";
+                const initialCount = share.meta_points || 0;
+                item.innerHTML = `<img src="${share.image_url}"><div class="feed-meta"><div class="feed-meta-row"><strong>${share.profiles?.avatar_character || '🦁'} ${share.profiles?.display_name || 'User'}</strong><span style="color:#ef4444;">${hoursLeft}h left</span></div><div class="feed-meta-row" style="margin-top:4px;"><button class="verify-badge-btn" data-count="${initialCount}" onclick="submitVerificationCounterBump(${share.id}, this)">👍 Verify Form (${initialCount})</button></div></div>`;
+                container.appendChild(item);
+            });
+        }
+
+        async function fetchUserProgress() {
+            const { data } = await _supabase.from('user_progress').select('mastered_letters').eq('user_id', currentUser.id).maybeSingle();
+            if (data && data.mastered_letters) masteredLetters = data.mastered_letters;
+            renderUIProgressUpdates();
+        }
+
+        function renderUIProgressUpdates() {
+            document.querySelectorAll('.fidel-card').forEach(card => {
+                if (masteredLetters.includes(card.getAttribute('data-fidel'))) card.classList.add('completed');
+            });
+            const percent = Math.round((masteredLetters.length / 34) * 100);
+            document.getElementById("progressBar").style.width = `${percent}%`;
+            document.getElementById("progressText").innerText = `${percent}% Complete`;
+        }
+
+        async function renderLiveLeaderboard() {
+            const { data: profiles } = await _supabase.from('profiles').select('id, display_name, avatar_character');
+            const { data: progressRecords } = await _supabase.from('user_progress').select('user_id, mastered_letters');
+            const progressMap = {}; progressRecords.forEach(rec => { progressMap[rec.user_id] = rec.mastered_letters || []; });
+
+            let leaderList = profiles.map(p => ({
+                id: p.id, name: p.display_name, avatar: p.avatar_character || '🦁', percentage: Math.round(((progressMap[p.id] || []).length / 34) * 100)
+            })).sort((a, b) => b.percentage - a.percentage);
+
+            const container = document.getElementById("liveLeaderboardContent"); container.innerHTML = "";
+            leaderList.slice(0, 5).forEach((player, idx) => {
+                const isSelf = currentUser && player.id === currentUser.id;
+                container.innerHTML += `<div class="leaderboard-row ${isSelf ? 'current-user' : ''}"><div class="player-info"><span>#${idx + 1}</span><span>${player.avatar}</span><span>${player.name} ${isSelf ? '(You)' : ''}</span></div><span class="player-score-badge">${player.percentage}%</span></div>`;
+            });
+        }
+
+        function logout() { resetToGate(); }
     </script>
 </body>
 </html>
