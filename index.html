@@ -485,52 +485,69 @@ function initSketchpadEngineSystem() {
     canvas.addEventListener("mousedown", startDraw); canvas.addEventListener("mousemove", draw); window.addEventListener("mouseup", stopDraw);
     canvas.addEventListener("touchstart", startDraw); canvas.addEventListener("touchmove", draw); window.addEventListener("touchend", stopDraw);
 }
-        function clearSketchpadCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+        // --- 8. SKETCHPAD & SHARING FUNCTIONS ---
+function clearSketchpadCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
 
-        async function uploadSketchpadDrawingCanvasData() {
-            const emptyCheck = document.createElement("canvas");
-            emptyCheck.width = canvas.width; emptyCheck.height = canvas.height;
-            if (canvas.toDataURL() === emptyCheck.toDataURL()) return showNotificationToast("Draw something before sharing!");
+async function uploadSketchpadDrawingCanvasData() {
+    const emptyCheck = document.createElement("canvas");
+    emptyCheck.width = canvas.width; 
+    emptyCheck.height = canvas.height;
+    
+    if (canvas.toDataURL() === emptyCheck.toDataURL()) {
+        return showNotificationToast("Draw something before sharing!");
+    }
 
-            showNotificationToast("Uploading your drawing...");
-            canvas.toBlob(async (blob) => {
-                const storagePath = `canvas-${Date.now()}.png`;
-                const { data: uploadData, error: uploadError } = await _supabase.storage.from('art_shares').upload(storagePath, blob, { contentType: 'image/png' });
-                if (uploadError) return showNotificationToast(uploadError.message);
+    showNotificationToast("Uploading your drawing...");
 
-                const { data: urlData } = _supabase.storage.from('art_shares').getPublicUrl(storagePath);
-                const expirationTimestamp = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    canvas.toBlob(async (blob) => {
+        const storagePath = `canvas-${Date.now()}.png`;
+        const { error: uploadError } = await _supabase.storage
+            .from('art_shares')
+            .upload(storagePath, blob, { contentType: 'image/png' });
 
-                await _supabase.from('photo_shares').insert({ user_id: currentUser.id, image_url: urlData.publicUrl, expires_at: expirationTimestamp, meta_points: 0 });
-                clearSketchpadCanvas();
-                showNotificationToast("Drawing shared to the class board!");
-                fetchDisappearingImageCanvasBoard();
-            }, "image/png");
-        }
+        if (uploadError) return showNotificationToast("Upload failed: " + uploadError.message);
+
+        const { data: urlData } = _supabase.storage.from('art_shares').getPublicUrl(storagePath);
+        const expiresAt = new Date(Date.now() + 86400000).toISOString(); // 24 hours
+
+        await _supabase.from('photo_shares').insert({ 
+            user_id: currentUser.id, 
+            image_url: urlData.publicUrl, 
+            expires_at: expiresAt, 
+            meta_points: 0 
+        });
+
+        clearSketchpadCanvas();
+        showNotificationToast("Drawing shared to the class board!");
+        fetchDisappearingImageCanvasBoard();
+    }, "image/png");
+}
+
+// --- 9. CAPTAIN & SUBMISSION FUNCTIONS ---
 async function renderCaptainInbox() {
-    // 1. Fetch pending work for this captain's team
     const { data: submissions } = await _supabase
         .from('work_submissions')
         .select('*, profiles(display_name)')
         .eq('status', 'pending');
 
-    const inboxContainer = document.getElementById('captainInboxMount'); // Make sure this exists in your HTML
+    const inboxContainer = document.getElementById('captainInboxMount');
     if (!inboxContainer) return;
 
-    inboxContainer.innerHTML = `<h3>Pending Submissions</h3>`;
-
-    submissions.forEach(sub => {
-        const div = document.createElement('div');
-        div.className = 'submission-card';
-        div.innerHTML = `
-            <p>${sub.profiles.display_name} submitted work</p>
+    // Optimized: Build HTML string once to prevent layout thrashing
+    const html = `<h3>Pending Submissions</h3>` + submissions.map(sub => `
+        <div class="submission-card">
+            <p>${sub.profiles?.display_name || 'Student'} submitted work</p>
             <img src="${sub.image_url}" style="width:100px; height:100px;">
             <button onclick="approveStudentWork('${sub.id}')">Approve</button>
-        `;
-        inboxContainer.appendChild(div);
-    });
+        </div>
+    `).join('');
+
+    inboxContainer.innerHTML = html;
 }
-        async function checkMySubmissionStatus() {
+
+async function checkMySubmissionStatus() {
     const { data: statusData } = await _supabase
         .from('work_submissions')
         .select('status')
@@ -539,9 +556,7 @@ async function renderCaptainInbox() {
         .maybeSingle();
 
     const statusMount = document.getElementById('myStatusMount');
-    if (!statusMount) return;
-
-    if (statusData) {
+    if (statusMount && statusData) {
         statusMount.innerHTML = `
             <div class="status-badge ${statusData.status}">
                 Status: ${statusData.status.toUpperCase()}
@@ -549,44 +564,59 @@ async function renderCaptainInbox() {
         `;
     }
 }
-        async function submitVerificationCounterBump(shareId, element) {
-            const currentVal = parseInt(element.getAttribute('data-count') || "0");
-            const updatedVal = currentVal + 1;
-            await _supabase.from('photo_shares').update({ meta_points: updatedVal }).eq('id', shareId);
-            element.setAttribute('data-count', updatedVal);
-            element.innerHTML = `👍 Verified (${updatedVal})`;
-            showNotificationToast("Marked as verified!");
-        }
 
-        function executeVictoryConfettiCelebration() {
-            const confCanvas = document.getElementById("confettiCanvas");
-            const confCtx = confCanvas.getContext("2d");
-            confCanvas.width = window.innerWidth; confCanvas.height = window.innerHeight;
-            let particles = [];
-            const colorPalettes = ["#0f766e", "#0d9488", "#14b8a6", "#2563eb", "#334155"];
+async function submitVerificationCounterBump(shareId, element) {
+    const currentVal = parseInt(element.getAttribute('data-count') || "0");
+    const updatedVal = currentVal + 1;
+    
+    await _supabase.from('photo_shares').update({ meta_points: updatedVal }).eq('id', shareId);
+    
+    element.setAttribute('data-count', updatedVal);
+    element.innerHTML = `👍 Verified (${updatedVal})`;
+    showNotificationToast("Marked as verified!");
+}
 
-            for (let i = 0; i < 100; i++) {
-                particles.push({
-                    x: window.innerWidth / 2, y: window.innerHeight / 1.5,
-                    vx: (Math.random() - 0.5) * 12, vy: (Math.random() - 0.8) * 15,
-                    size: Math.random() * 6 + 3, color: colorPalettes[Math.floor(Math.random() * colorPalettes.length)],
-                    rotation: Math.random() * 360, rSpeed: Math.random() * 4 - 2
-                });
-            }
+// --- 10. CELEBRATION EFFECTS ---
+function executeVictoryConfettiCelebration() {
+    const confCanvas = document.getElementById("confettiCanvas");
+    const confCtx = confCanvas.getContext("2d");
+    confCanvas.width = window.innerWidth; 
+    confCanvas.height = window.innerHeight;
+    
+    let particles = [];
+    const colors = ["#0f766e", "#0d9488", "#14b8a6", "#2563eb", "#334155"];
 
-            function animateConfettiLoop() {
-                if (particles.length === 0) return confCtx.clearRect(0,0,confCanvas.width,confCanvas.height);
-                confCtx.clearRect(0, 0, confCanvas.width, confCanvas.height);
-                particles.forEach((p, idx) => {
-                    p.x += p.vx; p.y += p.vy; p.vy += 0.25; p.rotation += p.rSpeed;
-                    confCtx.save(); confCtx.translate(p.x, p.y); confCtx.rotate((p.rotation * Math.PI) / 180);
-                    confCtx.fillStyle = p.color; confCtx.fillRect(-p.size/2, -p.size/2, p.size, p.size); confCtx.restore();
-                    if (p.y > confCanvas.height) particles.splice(idx, 1);
-                });
-                requestAnimationFrame(animateConfettiLoop);
-            }
-            animateConfettiLoop();
-        }
+    for (let i = 0; i < 100; i++) {
+        particles.push({
+            x: window.innerWidth / 2, y: window.innerHeight / 1.5,
+            vx: (Math.random() - 0.5) * 12, vy: (Math.random() - 0.8) * 15,
+            size: Math.random() * 6 + 3, 
+            color: colors[Math.floor(Math.random() * colors.length)],
+            rotation: Math.random() * 360, 
+            rSpeed: Math.random() * 4 - 2
+        });
+    }
+
+    function animateConfettiLoop() {
+        if (particles.length === 0) return confCtx.clearRect(0,0,confCanvas.width,confCanvas.height);
+        confCtx.clearRect(0, 0, confCanvas.width, confCanvas.height);
+        
+        // Fixed: Use filter to remove particles to avoid skipping elements during iteration
+        particles = particles.filter(p => p.y < confCanvas.height);
+        
+        particles.forEach(p => {
+            p.x += p.vx; p.y += p.vy; p.vy += 0.25; p.rotation += p.rSpeed;
+            confCtx.save(); 
+            confCtx.translate(p.x, p.y); 
+            confCtx.rotate((p.rotation * Math.PI) / 180);
+            confCtx.fillStyle = p.color; 
+            confCtx.fillRect(-p.size/2, -p.size/2, p.size, p.size); 
+            confCtx.restore();
+        });
+        requestAnimationFrame(animateConfettiLoop);
+    }
+    animateConfettiLoop();
+}
 
         function resetToGate() {
             document.getElementById("authScreen").style.display = "block";
