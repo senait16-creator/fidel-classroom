@@ -820,14 +820,14 @@
             await _supabase.from('user_progress').upsert({ user_id: currentUser.id, mastered_letters: masteredLetters }, { onConflict: 'user_id' });
             showNotificationToast(`Row "${activeBaseFidel}" saved to your mastered list!`);
             executeVictoryConfettiCelebration();
-            fetchPodTeammateProgress(); renderLiveLeaderboard(); exitClassroomViewBackToGrid();
+            
         }
 
         async function classroomUnmasterLetterRow() {
             masteredLetters = masteredLetters.filter(item => item !== activeBaseFidel);
             await _supabase.from('user_progress').upsert({ user_id: currentUser.id, mastered_letters: masteredLetters }, { onConflict: 'user_id' });
             showNotificationToast(`Removed "${activeBaseFidel}" from mastered rows.`);
-            fetchPodTeammateProgress(); renderLiveLeaderboard(); exitClassroomViewBackToGrid();
+            
         }
 
         function exitClassroomViewBackToGrid() {
@@ -836,28 +836,7 @@
             buildMatrixInterfaceGrid();
         }
 
-        async function fetchPodTeammateProgress() {
-            const { data: userProfile } = await _supabase.from('profiles').select('pod_id').eq('id', currentUser.id).maybeSingle();
-            if (!userProfile || !userProfile.pod_id) { document.getElementById("podTeamNameDisplay").innerText = "No Team Assigned"; return; }
-
-            const currentPodTeamTitle = userProfile.pod_id || "Your Team";
-            document.getElementById("podTeamNameDisplay").innerText = currentPodTeamTitle;
-            document.getElementById("sidebarPodBadge").innerText = currentPodTeamTitle;
-
-            const { data: members } = await _supabase.from('profiles').select('id, display_name, avatar_character').eq('pod_id', userProfile.pod_id);
-            const { data: progressRecords } = await _supabase.from('user_progress').select('user_id, mastered_letters');
-            
-            const progressMap = {}; progressRecords.forEach(rec => { progressMap[rec.user_id] = rec.mastered_letters || []; });
-
-            const mount = document.getElementById("podTeammatesMount"); mount.innerHTML = "";
-            members.forEach(member => {
-                const score = progressMap[member.id] || []; const percentage = Math.round((score.length / 34) * 100);
-                const isSelf = member.id === currentUser.id;
-                const row = document.createElement('div'); row.className = "teammate-row";
-                row.innerHTML = `<div class="teammate-info"><span>${member.avatar_character || '🦁'} ${member.display_name} ${isSelf ? '(You)' : ''}</span><span>${percentage}% (${score.length}/34 rows)</span></div><div class="progress-container" style="margin: 4px 0 10px 0;"><div class="progress-bar" style="width: ${percentage}%; background: ${isSelf ? '#0f766e' : '#334155'}"></div></div>`;
-                mount.appendChild(row);
-            });
-        }
+    
 
         async function fetchDisappearingImageCanvasBoard() {
             const currentISOTime = new Date().toISOString();
