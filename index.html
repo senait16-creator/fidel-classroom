@@ -1052,3 +1052,272 @@
             const currentPodTeamTitle = userProfile.pod_id || "Your Team";
             document.getElementById("podTeamNameDisplay").innerText = currentPodTeamTitle;
             document.getElementById("sidebarPodBadge").innerText = currentPodTeamTitle;
+
+       // --- Continuation of Section 17: SOCIAL MODULES & REAL-TIME INTERACTION GRIDS ---
+            const { data: teammates } = await _supabase.from('profiles').select('id, display_name, avatar_character').eq('pod_id', currentPodTeamTitle);
+            const { data: progress } = await _supabase.from('user_progress').select('user_id, mastered_letters');
+
+            const progressMap = {};
+            progress?.forEach(p => { progressMap[p.user_id] = p.mastered_letters || []; });
+
+            const mount = document.getElementById("podTeammatesMount");
+            if (!mount) return;
+            mount.innerHTML = "";
+
+            teammates?.forEach(member => {
+                const letters = progressMap[member.id] || [];
+                const progressCount = letters.length;
+                const percent = Math.min(100, Math.round((progressCount / 34) * 100));
+
+                const memberRow = document.createElement("div");
+                memberRow.style.marginBottom = "10px";
+                memberRow.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 2px;">
+                        <span>${member.avatar_character || '🦁'} ${member.display_name} ${member.id === currentUser.id ? '(You)' : ''}</span>
+                        <span style="color: #a4b5cf;">${progressCount} Rows</span>
+                    </div>
+                    <div style="width: 100%; background: #1e293b; height: 6px; border-radius: 3px; overflow: hidden;">
+                        <div style="width: ${percent}%; background: #38bdf8; height: 100%; transition: width 0.3s ease;"></div>
+                    </div>
+                `;
+                mount.appendChild(memberRow);
+            });
+        }
+
+        async function renderLiveLeaderboard() {
+            const mount = document.getElementById("globalLeaderboardMount");
+            if (!mount) return;
+            mount.innerHTML = '<div style="color: #94a3b8; font-size: 12px;">Updating scoreboard...</div>';
+
+            const { data: profiles } = await _supabase.from('profiles').select('id, display_name, avatar_character, pod_id');
+            const { data: progress } = await _supabase.from('user_progress').select('user_id, mastered_letters');
+
+            const progressMap = {};
+            progress?.forEach(p => { progressMap[p.user_id] = p.mastered_letters || []; });
+
+            let leaderboardData = profiles?.map(p => ({
+                name: p.display_name || "Unknown Learner",
+                avatar: p.avatar_character || "🦊",
+                team: p.pod_id || "Free Agent",
+                score: (progressMap[p.id] || []).length
+            })) || [];
+
+            leaderboardData.sort((a, b) => b.score - a.score);
+            mount.innerHTML = "";
+
+            if (leaderboardData.length === 0) {
+                mount.innerHTML = '<div style="color: #94a3b8; font-size: 12px;">No rankings available.</div>';
+                return;
+            }
+
+            leaderboardData.slice(0, 5).forEach((player, idx) => {
+                const rankRow = document.createElement("div");
+                rankRow.style.cssText = "display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #334155; font-size: 13px;";
+                rankRow.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-weight: bold; color: #f59e0b; width: 14px;">#${idx + 1}</span>
+                        <span>${player.avatar} ${player.name}</span>
+                        <span style="font-size: 10px; padding: 1px 5px; border-radius: 10px; background: #334155; color: #cbd5e1;">${player.team}</span>
+                    </div>
+                    <span style="font-weight: 600; color: #10b981;">${player.score} rows</span>
+                `;
+                mount.appendChild(rankRow);
+            });
+        }
+
+        async function fetchDisappearingImageCanvasBoard() {
+            const board = document.getElementById("classArtSharesBoard");
+            if (!board) return;
+            board.innerHTML = '<div style="color: #94a3b8; padding: 10px; text-align: center;">Syncing ephemeral canvas feed...</div>';
+
+            const currentTimeISO = new Date().toISOString();
+            const { data: activeShares, error } = await _supabase
+                .from('photo_shares')
+                .select('id, user_id, image_url, meta_points')
+                .gt('expires_at', currentTimeISO);
+
+            if (error || !activeShares || activeShares.length === 0) {
+                board.innerHTML = '<div style="color: #64748b; padding: 20px; text-align: center; font-size: 13px;">No drawings shared on the board right now. Draw something above to inspire your team!</div>';
+                return;
+            }
+
+            const { data: profiles } = await _supabase.from('profiles').select('id, display_name, avatar_character');
+            const profileMap = {};
+            profiles?.forEach(p => { profileMap[p.id] = p; });
+
+            board.innerHTML = "";
+            activeShares.forEach(share => {
+                const creator = profileMap[share.user_id] || { display_name: "Classmate", avatar_character: "🎨" };
+                const frame = document.createElement("div");
+                frame.className = "ephemeral-art-card";
+                frame.style.cssText = "background: #1e293b; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px; border: 1px solid #334155;";
+                
+                frame.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: space-between; font-size: 12px;">
+                        <span style="font-weight: 500;">${creator.avatar_character} ${creator.display_name}</span>
+                        <span style="color: #64748b; font-size: 10px;">Expires in 24h</span>
+                    </div>
+                    <img src="${share.image_url}" alt="Class Writing Practice" style="width: 100%; border-radius: 4px; background: #0f172a; border: 1px solid #1e293b; aspect-ratio: 4/3; object-fit: contain;" />
+                    <button id="verify-btn-${share.id}" class="action-verify-btn" style="width: 100%; padding: 6px; background: #0284c7; border: none; border-radius: 4px; color: white; font-size: 12px; font-weight: 500; cursor: pointer; transition: background 0.2s;">
+                        ${share.meta_points > 0 ? '✅ Approved by Captain' : '⭐ Verify Proficiency'}
+                    </button>
+                `;
+                board.appendChild(frame);
+
+                const buttonElement = document.getElementById(`verify-btn-${share.id}`);
+                if (buttonElement) {
+                    if (share.meta_points > 0) {
+                        buttonElement.className = "action-verify-btn verified-state";
+                        buttonElement.style.background = "#059669";
+                    }
+                    buttonElement.onclick = () => submitVerificationCounterBump(share.id, buttonElement, share.user_id);
+                }
+            });
+        }
+
+        // --- --- 18. COLLABORATIVE PROGRESSION GATEKEEPER ENGINE --- ---
+        async function checkTeamProgressionGate(teamId) {
+            if (!teamId || teamId === "No Team Assigned") return;
+
+            const { data: teamLevelData } = await _supabase.from('team_levels').select('current_level').eq('team_id', teamId).maybeSingle();
+            if (!teamLevelData) return;
+            const targetGateLevel = teamLevelData.current_level;
+
+            const { data: profilesOnTeam } = await _supabase.from('profiles').select('id').eq('pod_id', teamId);
+            if (!profilesOnTeam || profilesOnTeam.length === 0) return;
+            const absoluteTeamSize = profilesOnTeam.length;
+
+            const teamMemberIds = profilesOnTeam.map(p => p.id);
+            const { data: targetChallenges } = await _supabase
+                .from('user_challenges')
+                .select('user_id, matching_passed, writing_passed')
+                .eq('level', targetGateLevel)
+                .in('user_id', teamMemberIds);
+
+            let completelyClearedCount = 0;
+            teamMemberIds.forEach(uId => {
+                const record = targetChallenges?.find(c => c.user_id === uId);
+                if (record && record.matching_passed && record.writing_passed) {
+                    completelyClearedCount++;
+                }
+            });
+
+            if (completelyClearedCount >= absoluteTeamSize && targetGateLevel < 11) {
+                const nextLevelIndex = targetGateLevel + 1;
+                await _supabase.from('team_levels').update({ current_level: nextLevelIndex }).eq('team_id', teamId);
+                showNotificationToast(`🎉 Incredible! The entire ${teamId} Team advanced to Level ${nextLevelIndex}!`);
+                executeVictoryConfettiCelebration();
+                
+                if (badgeText === teamId) {
+                    currentTeamCollectiveLevel = nextLevelIndex;
+                }
+                renderTeamTrackDashboard();
+                buildMatrixInterfaceGrid();
+            }
+        }
+
+        async function fetchUserProgress() {
+            const { data: record } = await _supabase.from('user_progress').select('mastered_letters').eq('user_id', currentUser.id).maybeSingle();
+            if (record) {
+                masteredLetters = record.mastered_letters || [];
+            } else {
+                masteredLetters = [];
+            }
+        }
+
+        function renderUIProgressUpdates() {
+            const count = masteredLetters.length;
+            const textElement = document.getElementById("masteryRatioTextLabel");
+            if (textElement) {
+                textElement.innerText = `${count} / 34 Rows Mastered`;
+            }
+        }
+
+        function showNotificationToast(msg) {
+            const toast = document.getElementById("notificationToastAlert");
+            if (!toast) {
+                alert(msg);
+                return;
+            }
+            toast.innerText = msg;
+            toast.style.display = "block";
+            toast.style.opacity = "1";
+            
+            clearTimeout(window.toastTimerReference);
+            window.toastTimerReference = setTimeout(() => {
+                toast.style.opacity = "0";
+                setTimeout(() => { toast.style.display = "none"; }, 300);
+            }, 3500);
+        }
+
+        // --- --- 19. LOW-LEVEL SKETCHPAD CANVAS INTERFACE HANDLERS --- ---
+        function initSketchpadEngineSystem() {
+            canvas = document.getElementById("sketchpadCanvasComponent");
+            if (!canvas) return;
+            ctx = canvas.getContext("2d");
+
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            canvas.style.width = "100%";
+            canvas.style.height = "100%";
+
+            ctx.lineWidth = 4;
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            ctx.strokeStyle = "#ffffff";
+
+            let structuralDrawingFlag = false;
+
+            function extractCanvasCoordinateMatrix(e) {
+                const bRect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: clientX - bRect.left,
+                    y: clientY - bRect.top
+                };
+            }
+
+            canvas.onmousedown = (e) => {
+                structuralDrawingFlag = true;
+                const loc = extractCanvasCoordinateMatrix(e);
+                ctx.beginPath();
+                ctx.moveTo(loc.x, loc.y);
+            };
+
+            canvas.onmousemove = (e) => {
+                if (!structuralDrawingFlag) return;
+                e.preventDefault();
+                const loc = extractCanvasCoordinateMatrix(e);
+                ctx.lineTo(loc.x, loc.y);
+                ctx.stroke();
+            };
+
+            canvas.onmouseup = () => { structuralDrawingFlag = false; ctx.closePath(); };
+            canvas.onmouseleave = () => { structuralDrawingFlag = false; ctx.closePath(); };
+
+            canvas.addEventListener("touchstart", (e) => {
+                structuralDrawingFlag = true;
+                const loc = extractCanvasCoordinateMatrix(e);
+                ctx.beginPath();
+                ctx.moveTo(loc.x, loc.y);
+            }, { passive: false });
+
+            canvas.addEventListener("touchmove", (e) => {
+                if (!structuralDrawingFlag) return;
+                e.preventDefault();
+                const loc = extractCanvasCoordinateMatrix(e);
+                ctx.lineTo(loc.x, loc.y);
+                ctx.stroke();
+            }, { passive: false });
+
+            canvas.addEventListener("touchend", () => { structuralDrawingFlag = false; ctx.closePath(); });
+        }
+
+        // --- --- 20. CLIENT RUNTIME INITIALIZATION ENTRYPOINT --- ---
+        window.addEventListener("DOMContentLoaded", () => {
+            resetToGate();
+        });
