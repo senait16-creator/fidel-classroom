@@ -368,7 +368,35 @@
             {base:"ፈ", family:['ፈ','ፉ','ፊ','ፋ','ፌ','ፍ','ፎ'], prefix:"f"},
             {base:"ፐ", family:['ፐ','ፑ','ፒ','ፓ','ፔ','ፕ','ፖ'], prefix:"p"}
         ];
+// Vocabulary Database
+const fidelVocabulary = {
+    "ሀ": [{word: "ሀገር", meaning: "Country"}, {word: "ሀብት", meaning: "Wealth"}],
+    "ለ": [{word: "ልብስ", meaning: "Clothes"}, {word: "ለሊት", meaning: "Night"}, {word: "ለምለም", meaning: "Lush"}],
+    "መ": [{word: "መጽሐፍ", meaning: "Book"}, {word: "ማር", meaning: "Honey"}, {word: "መሬት", meaning: "Earth"}],
+    "ሰ": [{word: "ሰላም", meaning: "Peace"}, {word: "ሰማይ", meaning: "Sky"}, {word: "ሰዓት", meaning: "Time"}],
+    "ቀ": [{word: "ቀይ", meaning: "Red"}, {word: "ቀን", meaning: "Day"}],
+    "በ": [{word: "በረዶ", meaning: "Ice"}, {word: "ቡና", meaning: "Coffee"}, {word: "ባሕር", meaning: "Sea"}],
+    "ተ": [{word: "ተራራ", meaning: "Mountain"}, {word: "ታሪክ", meaning: "History"}, {word: "ትምህርት", meaning: "Education"}],
+    "ነ": [{word: "ነፋስ", meaning: "Wind"}, {word: "ንብ", meaning: "Bee"}, {word: "እናት", meaning: "Mother"}]
+};
 
+// Function to render vocabulary based on the selected family
+function renderVocabulary(familyChar) {
+    const container = document.getElementById("vocabDisplay");
+    const words = fidelVocabulary[familyChar] || [];
+    
+    if (words.length === 0) {
+        container.innerHTML = "<p>More words coming soon for this family!</p>";
+        return;
+    }
+
+    container.innerHTML = words.map(item => `
+        <div style="background:white; padding:12px; margin-bottom:8px; border-radius:10px; border:1px solid #e2e8f0; display:flex; justify-content:space-between;">
+            <strong style="color:#0f766e;">${item.word}</strong>
+            <span style="color:#64748b;">${item.meaning}</span>
+        </div>
+    `).join('');
+}
         window.addEventListener('DOMContentLoaded', () => { 
             resetToGate(); 
         });
