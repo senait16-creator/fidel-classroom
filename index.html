@@ -1053,6 +1053,35 @@
             document.getElementById("podTeamNameDisplay").innerText = currentPodTeamTitle;
             document.getElementById("sidebarPodBadge").innerText = currentPodTeamTitle;
 
+            const { data: teammates } = await _supabase.from('profiles').select('id, display_name, avatar_character').eq('pod_id', currentPodTeamTitle);
+            const { data: progress } = await _supabase.from('user_progress').select('user_id, mastered_letters');
+
+            const progressMap = {};
+            progress?.forEach(p => { progressMap[p.user_id] = p.mastered_letters || []; });
+
+            const mount = document.getElementById("podTeammatesMount");
+            if (!mount) return;
+            mount.innerHTML = "";
+
+            teammates?.forEach(member => {
+                const letters = progressMap[member.id] || [];
+                const progressCount = letters.length;
+                const percent = Math.min(100, Math.round((progressCount / 34) * 100));
+
+                const memberRow = document.createElement("div");
+                memberRow.style.marginBottom = "10px";
+                memberRow.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 2px;">
+                        <span>${member.avatar_character || '🦁'} ${member.display_name} ${member.id === currentUser.id ? '(You)' : ''}</span>
+                        <span style="color: #a4b5cf;">${progressCount} Rows</span>
+                    </div>
+                    <div style="width: 100%; background: #1e293b; height: 6px; border-radius: 3px; overflow: hidden;">
+                        <div style="width: ${percent}%; background: #38bdf8; height: 100%; transition: width 0.3s ease;"></div>
+                    </div>
+                `;
+                mount.appendChild(memberRow);
+            });
+        } // <--- This bracket successfully closes fetchPodTeammateProgress()
        // --- Continuation of Section 17: SOCIAL MODULES & REAL-TIME INTERACTION GRIDS ---
             const { data: teammates } = await _supabase.from('profiles').select('id, display_name, avatar_character').eq('pod_id', currentPodTeamTitle);
             const { data: progress } = await _supabase.from('user_progress').select('user_id, mastered_letters');
