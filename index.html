@@ -882,7 +882,7 @@
                 if (masteredLetters.includes(card.getAttribute('data-fidel'))) card.classList.add('completed');
             });
             const percent = Math.round((masteredLetters.length / 34) * 100);
-            document.getElementById("progressBar").style.width = `${percent}%`;
+            document.getElementById("progressBar").style.width = `${percent}%`; 
             document.getElementById("progressText").innerText = `${percent}% Complete`;
         }
 
