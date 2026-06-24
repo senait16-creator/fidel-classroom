@@ -216,13 +216,22 @@
             <button class="btn-primary" style="width:auto; padding:6px 12px; font-size:11px;" onclick="switchAdminPanelsFromDashboard('teacher')">Back to Teacher Dashboard</button>
         </div>
 
-        <div class="dashboard-split-layout">
-            <div class="main-workspace-panel">
-                
-                <div class="pod-card">
-                    <div class="pod-header"><span id="podTeamNameDisplay">Your Team</span></div>
-                    <div id="podTeammatesMount"></div>
-                </div>
+<div class="dashboard-split-layout">
+    <div class="main-workspace-panel">
+        <div class="workspace-title">
+            <span id="workspaceDynamicHeader">Amharic Letter Board</span>
+        </div>
+        <div id="viewFidelGrid" class="fidel-grid-3col"></div>
+    </div>
+
+    <div class="sidebar-sticky-panel">
+        <div id="vocabSection" style="background: white; padding: 20px; border-radius: 16px; border: 1px solid var(--border-color);">
+            <h3 id="vocabHeader" style="margin-bottom: 15px;">Select a letter</h3>
+            <div id="familyDisplay" style="font-size: 24px; margin-bottom: 15px; font-weight: bold; color: var(--brand-primary);"></div>
+            <div id="vocabDisplay"></div>
+        </div>
+    </div>
+</div>
 
                 <div class="workspace-title">
                     <span id="workspaceDynamicHeader">Amharic Letter Board</span>
