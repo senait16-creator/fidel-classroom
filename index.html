@@ -43,7 +43,7 @@
 
         #studentDashboard, #teacherOnlyDashboard { display: none; max-width: 1300px; margin: 0 auto; width: 100%; }
         .dashboard-split-layout { display: grid; grid-template-columns: 1fr 360px; gap: 24px; align-items: start; }
-        @media (max-width: 1024px) { .dashboard-split-layout { grid-template-columns: 1fr; } }
+        @media (max-width: 1024px) { .dashboard-split-layout { grid-template-columns: 1fr; } } 
 
         header { background: white; padding: 20px; border-radius: var(--radius-standard); box-shadow: var(--shadow-premium); border: 1px solid var(--border-color); margin-bottom: 20px; }
         .profile-clickable-trigger { display: flex; align-items: center; gap: 12px; }
@@ -215,6 +215,7 @@
             <span style="font-size:13px; font-weight:700; color:var(--brand-primary);">Teacher Access Mode Active</span>
             <button class="btn-primary" style="width:auto; padding:6px 12px; font-size:11px;" onclick="switchAdminPanelsFromDashboard('teacher')">Back to Teacher Dashboard</button>
         </div>
+        <div id="captainInboxMount"></div>
 
         <div class="dashboard-split-layout">
             <div class="main-workspace-panel">
