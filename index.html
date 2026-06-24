@@ -326,7 +326,8 @@
 
         let activeGamePairs = []; let selectedGameTokenId = null; let currentStreakScore = 0;
         let gameModeScope = "all";
-
+let currentTeamCollectiveLevel = 1; 
+let isUserCaptain = false; // Will be set during login/profile load
         let canvas, ctx, isDrawing = false;
 
         const vowelFrameworkLabels = ["ha", "hu", "hee", "ha", "hay", "hih", "ho"];
@@ -435,14 +436,37 @@
             }, "image/png");
         }
 
-        async function submitVerificationCounterBump(shareId, element) {
-            const currentVal = parseInt(element.getAttribute('data-count') || "0");
-            const updatedVal = currentVal + 1;
-            await _supabase.from('photo_shares').update({ meta_points: updatedVal }).eq('id', shareId);
-            element.setAttribute('data-count', updatedVal);
-            element.innerHTML = `👍 Verified (${updatedVal})`;
-            showNotificationToast("Marked as verified!");
-        }
+       async function submitVerificationCounterBump(shareId, element, uploaderId) {
+    // 1. Verify if the currently logged-in user is a captain
+    if (!isUserCaptain) {
+        showNotificationToast("Only Team Captains can officially verify writing proficiency!");
+        return;
+    }
+
+    const currentVal = parseInt(element.getAttribute('data-count') || "0");
+    const updatedVal = currentVal + 1;
+    
+    // 2. Update image points
+    await _supabase.from('photo_shares').update({ meta_points: updatedVal }).eq('id', shareId);
+    
+    // 3. Flag the student's writing challenge as complete for this specific collective level
+    await _supabase.from('user_challenges')
+        .upsert({ 
+            user_id: uploaderId, 
+            level: currentTeamCollectiveLevel, 
+            writing_passed: true 
+        }, { onConflict: 'user_id,level' });
+
+    element.setAttribute('data-count', updatedVal);
+    element.innerHTML = `✅ Approved by Captain`;
+    showNotificationToast("Writing proficiency verified!");
+    
+    // 4. Run checking protocol to see if the entire team can advance
+    const { data: currentProfile } = await _supabase.from('profiles').select('pod_id').eq('id', currentUser.id).single();
+    if (currentProfile) {
+        checkTeamProgressionGate(currentProfile.pod_id);
+    }
+}
 
         function executeVictoryConfettiCelebration() {
             const confCanvas = document.getElementById("confettiCanvas");
@@ -502,28 +526,47 @@
             if (data?.user) proceedFlowMap(data.user);
         }
 
-        async function proceedFlowMap(user) {
-            currentUser = user;
-            const { data: profile } = await _supabase.from('profiles').select('display_name, avatar_character, pod_id').eq('id', user.id).maybeSingle();
-            
-            if (currentUser.email === ADMIN_EMAIL) {
-                document.getElementById("authScreen").style.display = "none";
-                document.getElementById("adminViewSelectorGate").style.display = "block";
-                return;
-            }
+  async function proceedFlowMap(user) {
+    currentUser = user;
+    
+    // 1. Fetch profile details including the captain status
+    const { data: profile } = await _supabase.from('profiles')
+        .select('display_name, avatar_character, pod_id, is_captain')
+        .eq('id', user.id)
+        .maybeSingle();
+    
+    if (currentUser.email === ADMIN_EMAIL) {
+        document.getElementById("authScreen").style.display = "none";
+        document.getElementById("adminViewSelectorGate").style.display = "block";
+        return;
+    }
 
-            if (profile && profile.display_name) {
-                selectedAvatarSymbol = profile.avatar_character;
-                document.getElementById("displayUserHeader").innerText = profile.display_name;
-                document.getElementById("displayAvatarHeader").innerText = profile.avatar_character;
-                document.getElementById("sidebarPodBadge").innerText = profile.pod_id || "No Team Assigned";
-                launchDashboard("student");
-            } else {
-                document.getElementById("authScreen").style.display = "none";
-                document.getElementById("profileSetupScreen").style.display = "block";
-                populateTeamSetupDropdownOptions();
+    if (profile && profile.display_name) {
+        selectedAvatarSymbol = profile.avatar_character;
+        isUserCaptain = profile.is_captain || false; // Set global captain state
+        
+        document.getElementById("displayUserHeader").innerText = profile.display_name;
+        document.getElementById("displayAvatarHeader").innerText = profile.avatar_character;
+        document.getElementById("sidebarPodBadge").innerText = profile.pod_id || "No Team Assigned";
+        
+        // 2. Fetch the collective team level before launching the dashboard
+        if (profile.pod_id) {
+            const { data: teamLevelData } = await _supabase.from('team_levels')
+                .select('current_level')
+                .eq('team_id', profile.pod_id)
+                .maybeSingle();
+            if (teamLevelData) {
+                currentTeamCollectiveLevel = teamLevelData.current_level;
             }
         }
+
+        launchDashboard("student");
+    } else {
+        document.getElementById("authScreen").style.display = "none";
+        document.getElementById("profileSetupScreen").style.display = "block";
+        populateTeamSetupDropdownOptions();
+    }
+}
 
         function populateTeamSetupDropdownOptions() {
             const selectElement = document.getElementById("profileTeamSelect");
@@ -699,9 +742,23 @@
         function checkBlockGameCompletionState() {
             const unresolved = document.querySelectorAll("#ergonomicBlockGameMount .game-interactive-token:not(.resolved-pair)");
             if (unresolved.length === 0) {
-                executeVictoryConfettiCelebration();
-                showNotificationToast("You cleared the board! Starting next round...");
-                setTimeout(generateNewGameRoundData, 1000);
+    executeVictoryConfettiCelebration();
+    showNotificationToast("You cleared the board! Starting next round...");
+    
+    // Add this code right here to log the matching achievement to your table:
+    _supabase.from('user_challenges').upsert({
+        user_id: currentUser.id,
+        level: currentTeamCollectiveLevel,
+        matching_passed: true
+    }, { onConflict: 'user_id,level' }).then(() => {
+        // Run check to see if your victory clears the level for the team
+        if(document.getElementById("sidebarPodBadge").innerText !== "No Team Assigned") {
+            checkTeamProgressionGate(document.getElementById("sidebarPodBadge").innerText);
+        }
+    });
+
+    setTimeout(generateNewGameRoundData, 1000);
+}
             }
         }
 
@@ -761,16 +818,38 @@
             document.getElementById(elementId).classList.toggle('open');
         }
 
-        function buildMatrixInterfaceGrid() {
-            const container = document.getElementById("viewFidelGrid"); container.innerHTML = "";
-            alphabetData.forEach(item => {
-                const card = document.createElement('div');
-                card.className = "fidel-card"; card.setAttribute('data-fidel', item.base); card.innerText = item.base;
-                card.onclick = () => launchIsolatedClassroomWorkspace(item);
-                container.appendChild(card);
-            });
-            renderUIProgressUpdates();
+   // Helper to group rows into chunks of 3 (Rows 0-2 = Level 1, Rows 3-5 = Level 2, etc.)
+function getLevelForFidelIndex(index) {
+    return Math.floor(index / 3) + 1; 
+}
+
+function buildMatrixInterfaceGrid() {
+    const container = document.getElementById("viewFidelGrid"); 
+    container.innerHTML = "";
+    
+    alphabetData.forEach((item, index) => {
+        const itemLevel = getLevelForFidelIndex(index);
+        
+        // Only render/enable rows if their level is less than or equal to the team's level
+        if (itemLevel <= currentTeamCollectiveLevel) {
+            const card = document.createElement('div');
+            card.className = "fidel-card"; 
+            card.setAttribute('data-fidel', item.base); 
+            card.innerText = item.base;
+            card.onclick = () => launchIsolatedClassroomWorkspace(item);
+            container.appendChild(card);
+        } else {
+            // OPTIONAL: Render a locked placeholder card so they can see upcoming rows
+            const lockedCard = document.createElement('div');
+            lockedCard.className = "fidel-card locked"; 
+            lockedCard.style.opacity = "0.3";
+            lockedCard.style.cursor = "not-allowed";
+            lockedCard.innerText = "🔒";
+            container.appendChild(lockedCard);
         }
+    });
+    renderUIProgressUpdates();
+}
 
         function generateClassroomSubscripts(prefix) {
             if (prefix === "h" || prefix === "ḥ") return vowelFrameworkLabels;
@@ -874,8 +953,8 @@
                 const hoursLeft = Math.max(0, Math.round((new Date(share.expires_at) - new Date()) / (1000 * 60 * 60)));
                 const item = document.createElement('div'); item.className = "feed-item";
                 const initialCount = share.meta_points || 0;
-                item.innerHTML = `<img src="${share.image_url}"><div class="feed-meta"><div class="feed-meta-row"><strong>${share.profiles?.avatar_character || '🦁'} ${share.profiles?.display_name || 'User'}</strong><span style="color:#ef4444;">${hoursLeft}h left</span></div><div class="feed-meta-row" style="margin-top:4px;"><button class="verify-badge-btn" data-count="${initialCount}" onclick="submitVerificationCounterBump(${share.id}, this)">👍 Verify Form (${initialCount})</button></div></div>`;
-                container.appendChild(item);
+
+onclick="submitVerificationCounterBump(${share.id}, this, '${share.user_id}')"                container.appendChild(item);
             });
         }
 
@@ -909,7 +988,41 @@
                 container.innerHTML += `<div class="leaderboard-row ${isSelf ? 'current-user' : ''}"><div class="player-info"><span>#${idx + 1}</span><span>${player.avatar}</span><span>${player.name} ${isSelf ? '(You)' : ''}</span></div><span class="player-score-badge">${player.percentage}%</span></div>`;
             });
         }
+async function checkTeamProgressionGate(teamId) {
+    // 1. Fetch all student IDs assigned to this color track
+    const { data: teamMembers } = await _supabase.from('profiles').select('id').eq('pod_id', teamId);
+    if (!teamMembers || teamMembers.length === 0) return;
+    
+    const memberIds = teamMembers.map(m => m.id);
 
+    // 2. Fetch challenge statuses for all members on this level
+    const { data: challenges } = await _supabase.from('user_challenges')
+        .select('*')
+        .in('user_id', memberIds)
+        .eq('level', currentTeamCollectiveLevel);
+
+    // 3. Validate if every team member has successfully passed all tasks
+    const everyonePassed = challenges.length === teamMembers.length && challenges.every(c => 
+        c.matching_passed && c.writing_passed // You can add c.quiz_passed here later!
+    );
+
+    if (everyonePassed) {
+        let nextLevel = currentTeamCollectiveLevel + 1;
+        
+        // 4. Update team master tracking matrix level
+        await _supabase.from('team_levels')
+            .upsert({ team_id: teamId, current_level: nextLevel }, { onConflict: 'team_id' });
+        
+        currentTeamCollectiveLevel = nextLevel;
+        
+        executeVictoryConfettiCelebration();
+        showNotificationToast(`🎉 Incredible! The WHOLE ${teamId} has cleared Level ${currentTeamCollectiveLevel - 1}! Level ${nextLevel} is now unlocked!`);
+        
+        // Re-render dashboard elements to pull newly unlocked rows
+        buildMatrixInterfaceGrid();
+        fetchPodTeammateProgress();
+    }
+}
         function logout() { resetToGate(); }
     </script>
 </body>
