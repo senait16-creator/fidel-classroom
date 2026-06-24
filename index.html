@@ -450,6 +450,25 @@ async function renderCaptainInbox() {
         inboxContainer.appendChild(div);
     });
 }
+        async function checkMySubmissionStatus() {
+    const { data: statusData } = await _supabase
+        .from('work_submissions')
+        .select('status')
+        .eq('student_id', currentUser.id)
+        .order('created_at', { ascending: false })
+        .maybeSingle();
+
+    const statusMount = document.getElementById('myStatusMount');
+    if (!statusMount) return;
+
+    if (statusData) {
+        statusMount.innerHTML = `
+            <div class="status-badge ${statusData.status}">
+                Status: ${statusData.status.toUpperCase()}
+            </div>
+        `;
+    }
+}
         async function submitVerificationCounterBump(shareId, element) {
             const currentVal = parseInt(element.getAttribute('data-count') || "0");
             const updatedVal = currentVal + 1;
