@@ -285,40 +285,28 @@
                 </div>
             </div>
 
-            <!-- Dashboard Analytics Sidebar Tracking Cluster -->
-            <div class="sidebar-sticky-panel">
-                <header>
-                    <div class="profile-clickable-trigger" onclick="openProfileEdit()" style="cursor: pointer;">
-        <div class="user-avatar-badge" id="displayAvatarHeader">🦁</div>
-                        <div>
-                            <h3 id="displayUserHeader" style="font-size:15px; font-weight:700;">Student Nickname</h3>
-                            <div id="sidebarPodBadge" style="font-size: 11px; color: var(--brand-primary); font-weight: 700; margin-top: 2px;">Your Team...</div>
-                            <span id="progressText" style="font-size:12px; color:#64748b; font-weight:500;">0% Completed</span>
-                        </div>
-                    </div>
-                    <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
-                </header>
-
-                <div class="collapsible-dropdown-container">
-                    <button class="dropdown-toggle-header" onclick="toggleDropdownElement('liveLeaderboardContent')">
-                        <span>Class Leaderboard</span><span>▼</span>
-                    </button>
-                    <div class="dropdown-content-pane" id="liveLeaderboardContent"></div>
-                </div>
-
-                <div class="collapsible-dropdown-container">
-                    <button class="dropdown-toggle-header" onclick="toggleDropdownElement('photoBoardContent')">
-                        <span>Shared Class Drawings</span><span>▼</span>
-                    </button>
-                    <div class="dropdown-content-pane open" id="photoBoardContent">
-                        <div class="feed-grid" id="disappearingArtGalleryFeed"></div>
-                    </div>
-                </div>
-            </div>
+           <!-- New Simplified Sidebar -->
+<div class="sidebar-sticky-panel">
+    
+    <!-- Leaderboard Section -->
+    <div id="leaderboardSection" style="margin-top: 20px;">
+        <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+            <button onclick="switchLeaderboard('individual')" style="flex:1;">Individual</button>
+            <button onclick="switchLeaderboard('team')" style="flex:1;">Team</button>
         </div>
-        <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
+        
+        <!-- This is where the leaderboard list will load -->
+        <div id="leaderboardList" style="background: white; border-radius: 8px; padding: 10px;">
+            <!-- Content will be injected here -->
+        </div>
     </div>
 
+    <!-- Keep your Gallery section below it if you still want it -->
+    <div style="margin-top: 20px;">
+        <h4 style="margin-bottom:10px;">Shared Sketches</h4>
+        <div class="feed-grid" id="disappearingArtGalleryFeed"></div>
+    </div>
+</div>
     <script>
         const SUPABASE_URL = "https://muisfipoyzkhznfdvnes.supabase.co"; 
         const SUPABASE_KEY = "sb_publishable_VBiJZB8TVM2CSl54aDPP0A_4aDXWb5i";
