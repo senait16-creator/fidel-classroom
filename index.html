@@ -282,767 +282,104 @@
         <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
     </div>
     
- <script>
-
+    <script>
         const SUPABASE_URL = "https://muisfipoyzkhznfdvnes.supabase.co"; 
-
         const SUPABASE_KEY = "sb_publishable_VBiJZB8TVM2CSl54aDPP0A_4aDXWb5i";
-
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-
-
         const ADMIN_EMAIL = "senaitrichmond16@gmail.com";
-
         const CLASSROOM_COLORS = ["Red Team 🔴", "Blue Team 🔵", "Green Team 🟢", "Yellow Team 🟡", "Purple Team 🟣"];
 
-
-
         let currentUser = null; let masteredLetters = []; let activeBaseFidel = null; 
-
         let activeFamilyArrayData = []; let activeSubscriptsData = []; let selectedAvatarSymbol = "🦁"; 
-
         let isSignUpMode = true;
 
-
-
         let activeGamePairs = []; let selectedGameTokenId = null; let currentStreakScore = 0;
-
         let gameModeScope = "all";
-
-
 
         let canvas, ctx, isDrawing = false;
 
-
-
         const vowelFrameworkLabels = ["ha", "hu", "hee", "ha", "hay", "hih", "ho"];
-
         const standardVowelSubscripts = ["-ä", "-u", "-ee", "-a", "-ay", "-ih", "-o"];
 
-
-
         const alphabetData = [
-
             {base:"ሀ", family:['ሀ','ሁ','ሂ','ሃ','ሄ','ህ','ሆ'], prefix:"h"},
-
             {base:"ለ", family:['ለ','ሉ','ሊ','ላ','ሌ','ል','ሎ'], prefix:"l"},
-
             {base:"ሐ", family:['ሐ','ሑ','ሒ','ሓ','ሔ','ሕ','ሖ'], prefix:"ḥ"},
-
             {base:"መ", family:['መ','ሙ','ሚ','ማ','ሜ','ም','ሞ'], prefix:"m"},
-
             {base:"ሠ", family:['ሠ','ሡ','ሢ','ሣ','ሤ','ሥ','ሦ'], prefix:"ś"},
-
             {base:"ረ", family:['ረ','ሩ','ሪ','ራ','ሬ','ር','ሮ'], prefix:"r"},
-
             {base:"ሰ", family:['ሰ','ሱ','ሲ','ሳ','ሴ','ስ','ሶ'], prefix:"s"},
-
             {base:"ሸ", family:['ሸ','ሹ','ሺ','ሻ','ሼ','ሽ','ሾ'], prefix:"š"},
-
             {base:"ቀ", family:['ቀ','ቁ','ቂ','ቃ','ቄ','ቅ','ቆ'], prefix:"q"},
-
             {base:"በ", family:['በ','ቡ','ቢ','ባ','ቤ','ብ','ቦ'], prefix:"b"},
-
             {base:"ቨ", family:['ቨ','ቩ','ቪ','ቫ','ቬ','ቭ','ቮ'], prefix:"v"},
-
             {base:"ተ", family:['ተ','ቱ','ቲ','ታ','ቴ','ት','ቶ'], prefix:"t"},
-
             {base:"ቸ", family:['ቸ','ቹ','ቺ','ቻ','ቼ','ች','ቾ'], prefix:"č"},
-
             {base:"ኀ", family:['ኀ','ኁ','ኂ','ኃ','ኄ','ኅ','ኆ'], prefix:"n"},
-
             {base:"ነ", family:['ነ','ኑ','ኒ','ና','ኔ','ን','ኖ'], prefix:"n"},
-
             {base:"ኘ", family:['ኘ','ኙ','ኚ','ኛ','ኜ','ኝ','ኞ'], prefix:"ñ"},
-
             {base:"አ", family:['አ','ኡ','ኢ','ኣ','ኤ','እ','ኦ'], prefix:"ʾ"},
-
             {base:"ከ", family:['ከ','ኩ','ኪ','ካ','ኬ','ክ','ኮ'], prefix:"k"},
-
             {base:"ኸ", family:['ኸ','ኹ','ኺ','ኻ','ኼ','ኽ','ኾ'], prefix:"ḫ"},
-
             {base:"ወ", family:['ወ','ዉ','ዊ','ዋ','ዌ','ው','ዎ'], prefix:"w"},
-
             {base:"ዐ", family:['ዐ','ዑ','ዒ','ዓ','ዔ','ዕ','ዖ'], prefix:"ʿ"},
-
             {base:"ዘ", family:['ዘ','ዙ','ዚ','ዛ','ዜ','ዝ','ዞ'], prefix:"z"},
-
             {base:"ዠ", family:['ዠ','ዡ','ዢ','ዣ','ዤ','ዥ','ዦ'], prefix:"ž"},
-
             {base:"የ", family:['የ','ዩ','ዪ','ያ','ዬ','ይ','ዮ'], prefix:"y"},
-
             {base:"ደ", family:['ደ','ዱ','ዲ','ዳ','ዴ','ድ','ዶ'], prefix:"d"},
-
             {base:"ጀ", family:['ጀ','ጁ','ጂ','ጃ','ጄ','ጅ','ጆ'], prefix:"j"},
-
             {base:"ገ", family:['ገ','ጉ','ጊ','ጋ','ጌ','ግ','ጎ'], prefix:"g"},
-
             {base:"ጠ", family:['ጠ','ጡ','ጢ','ጣ','ጤ','ጥ','ጦ'], prefix:"ṭ"},
-
             {base:"ጨ", family:['ጨ','ጩ','ጪ','ጫ','ጬ','ጭ','ጮ'], prefix:"č̣"},
-
             {base:"ጰ", family:['ጰ','ጱ','ጲ','ጳ','ጴ','ጵ','ጶ'], prefix:"p̣"},
-
             {base:"ጸ", family:['ጸ','ጹ','ጺ','ጻ','ጼ','ጽ','ጾ'], prefix:"ṣ"},
-
             {base:"ፀ", family:['ፀ','ፁ','ፂ','ፃ','ፄ','ፅ','ፆ'], prefix:"ṣ́"},
-
             {base:"ፈ", family:['ፈ','ፉ','ፊ','ፋ','ፌ','ፍ','ፎ'], prefix:"f"},
-
             {base:"ፐ", family:['ፐ','ፑ','ፒ','ፓ','ፔ','ፕ','ፖ'], prefix:"p"}
-
         ];
 
-
-
         window.addEventListener('DOMContentLoaded', () => { 
-
             resetToGate(); 
-
         });
 
-
-
         function showNotificationToast(msg) {
-
             const container = document.getElementById("toastContainer");
-
             const element = document.createElement("div");
-
             element.className = "toast-popup";
-
             element.innerHTML = `<span>${msg}</span>`;
-
             container.appendChild(element);
-
             setTimeout(() => element.remove(), 3000);
-
         }
-
-
 
       async function switchLeaderboard(type) {
-
     const listMount = document.getElementById('leaderboardList');
-
     listMount.innerHTML = "Loading...";
 
-
-
     if (type === 'individual') {
-
         const { data: students } = await _supabase
-
             .from('profiles')
-
             .select('display_name, avatar_character, progress_percent'); // Ensure column names match yours
 
-            
-
         listMount.innerHTML = students.map(s => `
-
             <div style="padding: 5px; border-bottom: 1px solid #eee;">
-
                 ${s.avatar_character} ${s.display_name} - ${s.progress_percent}%
-
             </div>
-
         `).join('');
-
     } 
 
-    
-
     else if (type === 'team') {
-
         const { data: teams } = await _supabase
-
             .from('teams')
-
             .select('name, current_level'); // Adjust based on your table
 
-            
-
         listMount.innerHTML = teams.map(t => `
-
             <div style="padding: 5px; border-bottom: 1px solid #eee;">
-
                 🦁 ${t.name} - Level ${t.current_level}
-
             </div>
-
         `).join('');
-
     }
-
-}  --- dont touch this unless needed and tell me if thats the case: <!DOCTYPE html>
-
-<html lang="am">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-    <title>Fidel Classroom</title>
-
-    
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=Abyssinica+SIL&display=swap" rel="stylesheet">
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    
-
-    <style>
-
-        :root {
-
-            --brand-primary: #0f766e; 
-
-            --brand-secondary: #0d9488;
-
-            --neutral-dark: #1e293b;
-
-            --neutral-light: #f8fafc;
-
-            --border-color: #e2e8f0;
-
-            --shadow-premium: 0 4px 20px rgba(15, 23, 42, 0.04);
-
-            --radius-standard: 16px;
-
-        }
-
-
-
-        * { box-sizing: border-box; font-family: 'Ubuntu', 'Abyssinica SIL', serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-        body { background-color: var(--neutral-light); color: var(--neutral-dark); padding: 24px; min-height: 100vh; }
-
-
-
-        .app-card { max-width: 420px; width: 100%; margin: 60px auto; background: white; padding: 32px 24px; border-radius: var(--radius-standard); box-shadow: var(--shadow-premium); border: 1px solid var(--border-color); text-align: center; }
-
-        
-
-        .main-title { font-size: 28px; font-weight: 700; color: var(--neutral-dark); letter-spacing: -0.5px; margin-bottom: 6px; }
-
-        .subtitle { font-size: 14px; color: #64748b; margin-bottom: 24px; font-weight: 400; }
-
-        
-
-        input, select { width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 15px; outline: none; background: #ffffff; transition: border-color 0.2s; }
-
-        input:focus, select:focus { border-color: var(--brand-primary); }
-
-
-
-        .choice-container { display: flex; gap: 12px; margin-bottom: 12px; }
-
-        .btn-filled-rectangle { flex: 1; padding: 14px; font-size: 14px; font-weight: 700; border-radius: 10px; border: none; cursor: pointer; }
-
-        .btn-signup-rect { background: var(--brand-primary); color: white; }
-
-        .btn-login-rect { background: #334155; color: white; }
-
-        
-
-        .btn-primary { background: var(--brand-primary); color: white; padding: 14px; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; transition: background-color 0.2s; }
-
-        .btn-primary:hover { background: var(--brand-secondary); }
-
-        .btn-secondary { background: transparent; color: #64748b; font-size: 13px; border: none; cursor: pointer; padding: 6px; font-weight: 500; }
-
-
-
-        #studentDashboard, #teacherOnlyDashboard { display: none; max-width: 1300px; margin: 0 auto; width: 100%; }
-
-        .dashboard-split-layout { display: grid; grid-template-columns: 1fr 360px; gap: 24px; align-items: start; }
-
-        @media (max-width: 1024px) { .dashboard-split-layout { grid-template-columns: 1fr; } } 
-
-
-
-        header { background: white; padding: 20px; border-radius: var(--radius-standard); box-shadow: var(--shadow-premium); border: 1px solid var(--border-color); margin-bottom: 20px; }
-
-        .profile-clickable-trigger { display: flex; align-items: center; gap: 12px; }
-
-        .user-avatar-badge { width: 48px; height: 48px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; }
-
-        .progress-container { width: 100%; background: #e2e8f0; border-radius: 8px; height: 8px; overflow: hidden; margin-top: 12px; }
-
-        .progress-bar { height: 100%; width: 0%; background: #10b981; transition: width 0.4s ease; }
-
-
-
-        .pod-card { background: white; border: 1px solid var(--border-color); border-radius: var(--radius-standard); padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow-premium); }
-
-        .pod-header { font-size: 18px; font-weight: 700; color: var(--neutral-dark); margin-bottom: 14px; }
-
-        .teammate-row { margin-bottom: 10px; }
-
-        .teammate-info { display: flex; justify-content: space-between; font-size: 13px; font-weight: 500; color: #475569; margin-bottom: 4px; }
-
-
-
-        .admin-gate-card { display: none; max-width: 450px; width: 100%; margin: 60px auto; background: white; border-radius: var(--radius-standard); padding: 28px; box-shadow: var(--shadow-premium); border: 1px solid var(--border-color); text-align: center; }
-
-        
-
-        .teacher-panel { background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-standard); padding: 24px; box-shadow: var(--shadow-premium); margin-top: 20px; }
-
-        
-
-        .teacher-roster-table { width: 100%; border-collapse: collapse; margin-top: 12px; text-align: left; }
-
-        .teacher-roster-table th, .teacher-roster-table td { padding: 12px; border-bottom: 1px solid var(--border-color); font-size: 14px; }
-
-        .teacher-roster-table th { background: #f8fafc; font-weight: 700; color: #475569; }
-
-
-
-        .collapsible-dropdown-container { background: white; border-radius: var(--radius-standard); box-shadow: var(--shadow-premium); border: 1px solid var(--border-color); overflow: hidden; margin-bottom: 20px; }
-
-        .dropdown-toggle-header { width: 100%; background: #f8fafc; border: none; padding: 16px 20px; font-size: 15px; font-weight: 700; color: var(--neutral-dark); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-
-        .dropdown-content-pane { display: none; padding: 16px; background: white; border-top: 1px solid var(--border-color); flex-direction: column; gap: 8px; }
-
-        .dropdown-content-pane.open { display: flex; }
-
-        
-
-        .leaderboard-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #f8fafc; border-radius: 10px; }
-
-        .leaderboard-row.current-user { border: 1px solid var(--brand-primary); background: #f0fdfa; }
-
-        .player-info { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; }
-
-        .player-score-badge { background: var(--brand-primary); color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; }
-
-
-
-        .workspace-title { font-size: 22px; font-weight: 700; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
-
-        
-
-        .fidel-grid-3col { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 12px; }
-
-        .fidel-card { background: #fff; border: 1px solid var(--border-color); border-radius: 14px; padding: 20px 0; text-align: center; font-size: 28px; cursor: pointer; box-shadow: var(--shadow-premium); display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-family: 'Abyssinica SIL', serif; color: var(--neutral-dark); }
-
-        .fidel-card:hover { transform: translateY(-1px); border-color: var(--brand-primary); box-shadow: 0 6px 20px rgba(15, 118, 110, 0.08); }
-
-        .fidel-card.completed { background: #f0fdf4; border-color: #10b981; color: #10b981; }
-
-        
-
-        #isolatedFamilyClassroom, #gameWorkspace { display: none; background: white; padding: 24px; border-radius: var(--radius-standard); box-shadow: var(--shadow-premium); border: 1px solid var(--border-color); text-align: center; }
-
-        
-
-        .classroom-header-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; background: var(--neutral-dark); color: white; border-radius: 10px; padding: 10px 4px; font-size: 12px; font-weight: 500; margin-bottom: 12px; }
-
-        .classroom-row-giant { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 24px; }
-
-        .giant-char-card { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 16px 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-
-        .giant-char-card .letter { font-size: 32px; color: var(--neutral-dark); font-family: 'Abyssinica SIL', serif; margin-bottom: 4px; }
-
-        .giant-char-card .sub { font-size: 13px; color: #64748b; font-weight: 500; }
-
-
-
-        .matching-game-grid-blocks { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 20px 0; }
-
-        .game-interactive-token { background: white; border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px 12px; font-size: 18px; font-weight: 500; cursor: pointer; text-align: center; transition: all 0.2s; box-shadow: var(--shadow-premium); min-height: 70px; display: flex; align-items: center; justify-content: center; }
-
-        .game-interactive-token:hover { border-color: var(--brand-primary); background-color: #fafafa; }
-
-        .game-interactive-token.active-selected { border-color: var(--brand-primary); background: #f0fdfa; color: var(--brand-primary); font-weight: 700; box-shadow: 0 0 0 2px var(--brand-primary); }
-
-        .game-interactive-token.resolved-pair { background: #f0fdf4; border-color: #10b981; color: #10b981; opacity: 0.5; pointer-events: none; }
-
-
-
-        .embedded-classroom-sketchpad { background: #f8fafc; border: 1px solid var(--border-color); padding: 16px; border-radius: 14px; margin-top: 24px; text-align: left; }
-
-        .sketch-canvas-element { background: white; border: 1px dashed #cbd5e1; border-radius: 8px; width: 100%; height: 140px; cursor: crosshair; display: block; touch-action: none; }
-
-        .sketchpad-actions-row { display: flex; gap: 8px; margin-top: 10px; }
-
-
-
-        .feed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-top: 12px; }
-
-        .feed-item { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
-
-        .feed-item img { width: 100%; height: 110px; object-fit: cover; display: block; background: white; border-bottom: 1px solid var(--border-color); }
-
-        .feed-meta { padding: 8px; font-size: 11px; color: #64748b; display: flex; flex-direction: column; gap: 4px; }
-
-        .feed-meta-row { display: flex; justify-content: space-between; align-items: center; }
-
-        .verify-badge-btn { background: white; border: 1px solid #cbd5e1; border-radius: 6px; padding: 2px 6px; cursor: pointer; font-size: 10px; font-weight: 700; color: var(--neutral-dark); display: flex; align-items: center; gap: 3px; }
-
-        .verify-badge-btn:hover { border-color: var(--brand-primary); background: #f0fdfa; }
-
-
-
-        .avatar-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 16px; }
-
-        .avatar-option { font-size: 24px; padding: 8px; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; }
-
-        .avatar-option.selected { border-color: var(--brand-primary); background: #f0fdfa; }
-
-
-
-        #toastContainer { position: fixed; bottom: 90px; right: 24px; display: flex; flex-direction: column; gap: 8px; z-index: 9999; pointer-events: none; }
-
-        .toast-popup { background: var(--neutral-dark); color: white; padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 6px; }
-
-
-
-        #confettiCanvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 99999; }
-
-        .bottom-banner { position: fixed; bottom: 20px; left: 24px; right: 24px; background: var(--neutral-dark); padding: 14px 20px; border-radius: var(--radius-standard); display: flex; justify-content: space-between; align-items: center; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 1252px; margin: 0 auto; }
-
-        .logout-btn { background: transparent; color: white; border: none; font-size: 14px; font-weight: 500; cursor: pointer; }
-
-    </style>
-
-</head>
-
-<body>
-
-    <canvas id="confettiCanvas"></canvas>
-
-    <div id="toastContainer"></div>
-
-
-
-    <div id="authScreen" class="app-card">
-
-        <h1 class="main-title">Fidel Classroom</h1>
-
-        <p class="subtitle" id="authSubtitle">Learn the Amharic Alphabet Together!</p>
-
-        <div id="onboardingGate" class="choice-container">
-
-            <button class="btn-filled-rectangle btn-signup-rect" onclick="selectAuthFlow('signup')">Sign Up</button>
-
-            <button class="btn-filled-rectangle btn-login-rect" onclick="selectAuthFlow('login')">Log In</button>
-
-        </div>
-
-        <div id="credentialFields" style="display: none;">
-
-            <input type="email" id="email" placeholder="Email Address">
-
-            <input type="password" id="password" placeholder="Password (at least 6 characters)">
-
-            <button class="btn-primary" id="mainAuthBtn" onclick="handleAuth()">Let's Go!</button>
-
-            <button class="btn-secondary" onclick="resetToGate()">← Back</button>
-
-        </div>
-
-    </div>
-
-
-
-    <div id="adminViewSelectorGate" class="admin-gate-card">
-
-        <h2 class="main-title" style="font-size:22px;">Welcome, Teacher!</h2>
-
-        <p class="subtitle">Where would you like to go first?</p>
-
-        <div style="display:flex; flex-direction:column; gap:10px; margin-top:16px;">
-
-            <button class="btn-primary" style="background:#475569;" onclick="routeAdminTerminalDirectly('teacher')">Go to Teacher Dashboard</button>
-
-            <button class="btn-primary" onclick="routeAdminTerminalDirectly('student')">Go to Student View</button>
-
-        </div>
-
-    </div>
-
-
-
-    <div id="profileSetupScreen" class="app-card" style="display: none;">
-
-        <h2 class="main-title" style="font-size: 22px;">Create Your Profile</h2>
-
-        <p class="subtitle">Pick a nickname and choose your color team!</p>
-
-        <input type="text" id="displayName" placeholder="Your Nickname">
-
-        <div class="avatar-grid">
-
-            <div class="avatar-option selected" onclick="selectAvatar('🦁', this)">🦁</div>
-
-            <div class="avatar-option" onclick="selectAvatar('🦅', this)">🦅</div>
-
-            <div class="avatar-option" onclick="selectAvatar('🐆', this)">🐆</div>
-
-            <div class="avatar-option" onclick="selectAvatar('🦊', this)">🦊</div>
-
-            <div class="avatar-option" onclick="selectAvatar('🐘', this)">🐘</div>
-
-        </div>
-
-        <div style="text-align: left; margin-bottom: 16px;">
-
-            <label style="font-size: 13px; font-weight: 700; color: var(--neutral-dark);">Pick Your Color Team:</label>
-
-            <select id="profileTeamSelect"></select>
-
-        </div>
-
-        <button class="btn-primary" onclick="saveProfileData()">Join the Classroom</button>
-
-    </div>
-
-
-
-    <div id="teacherOnlyDashboard">
-
-        <div class="workspace-title" style="margin-top:20px;">
-
-            <span>Teacher Hub</span>
-
-            <button class="btn-primary" style="width:auto; padding:8px 16px; font-size:13px;" onclick="switchAdminPanelsFromDashboard('student')">Switch to Student View →</button>
-
-        </div>
-
-        <div class="teacher-panel" style="margin-bottom: 20px;">
-
-            <h2 style="font-size: 18px; color: var(--neutral-dark); margin-bottom: 4px;">Student Roster & Progress</h2>
-
-            <table class="teacher-roster-table">
-
-                <thead><tr><th>Student</th><th>Team</th><th>Progress Status</th></tr></thead>
-
-                <tbody id="teacherRosterTableBody"><tr><td colspan="3" style="color:#94a3b8; text-align:center;">Loading class roster...</td></tr></tbody>
-
-            </table>
-
-        </div>
-
-        <div class="teacher-panel">
-
-            <h2 style="font-size: 18px; color: var(--neutral-dark); margin-bottom: 4px;">Manage Student Color Teams</h2>
-
-            <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); max-width: 500px;">
-
-                <select id="teacherStudentSelect"><option value="">Select Student...</option></select>
-
-                <select id="teacherPodSelect"><option value="">Select Color Team...</option></select>
-
-                <button class="btn-primary" onclick="teacherAssignStudentToPod()">Change Color Team</button>
-
-            </div>
-
-        </div>
-
-        <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
-
-    </div>
-
-
-
-    <div id="studentDashboard">
-
-        <div id="adminHeaderToggleBar" style="display:none; background:#f0fdfa; border:1px solid #ccfbf1; padding:10px 16px; border-radius:12px; margin-bottom:16px; justify-content:space-between; align-items:center;">
-
-            <span style="font-size:13px; font-weight:700; color:var(--brand-primary);">Teacher Access Mode Active</span>
-
-            <button class="btn-primary" style="width:auto; padding:6px 12px; font-size:11px;" onclick="switchAdminPanelsFromDashboard('teacher')">Back to Teacher Dashboard</button>
-
-        </div>
-
-        
-
-        <div id="captainInboxMount"></div>
-
-        <div id="myStatusMount"></div>
-
-        
-
-        <div id="submissionPortal">
-
-            <h4>Submit Your Progress</h4>
-
-            <input type="text" id="workUrlInput" placeholder="Paste link to your photo...">
-
-            <button onclick="handleSubmissionClick()">Submit for Captain Review</button>
-
-        </div>
-
-
-
-        <div class="dashboard-split-layout">
-
-            <div class="main-workspace-panel">
-
-                <div class="pod-card">
-
-                    <div class="pod-header"><span id="podTeamNameDisplay">Your Team</span></div>
-
-                    <div id="podTeammatesMount"></div>
-
-                </div>
-
-                <div class="workspace-title">
-
-                    <span id="workspaceDynamicHeader">Amharic Letter Board</span>
-
-                    <button id="gameActivationToggleBtn" class="btn-primary" style="width:auto; padding:8px 16px; font-size:13px;" onclick="openMatchingGameWorkspaceMode('all')">Matching Game Arena</button>
-
-                </div>
-
-                <div id="viewFidelGrid" class="fidel-grid-3col"></div>
-
-                <div id="gameWorkspace">
-
-                    <h2 id="gameWorkspaceTitle" style="font-size:22px; margin-bottom:4px;">Practice Arena</h2>
-
-                    <p class="subtitle" style="margin-bottom:12px;">Tap a letter and its matching English sound to clear them!</p>
-
-                    <div style="background:#f1f5f9; padding:6px 14px; border-radius:8px; display:inline-block; font-size:13px; font-weight:700; color:var(--brand-primary); margin-bottom:12px;">
-
-                        Current Streak: <span id="gameStreakValue">0</span>
-
-                    </div>
-
-                    <div class="matching-game-grid-blocks" id="ergonomicBlockGameMount"></div>
-
-                    <button id="gameExitActionBtn" class="btn-secondary" style="margin-top:10px;">← Close Game</button>
-
-                </div>
-
-                <div id="isolatedFamilyClassroom">
-
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-
-                        <h2 id="classroomFamilyTitle" style="font-size:22px;">Reviewing Row</h2>
-
-                        <button class="btn-primary" style="width:auto; padding:8px 14px; font-size:12px;" id="classroomRowGameBtn">Play Row Match</button>
-
-                    </div>
-
-                    <div class="classroom-header-strip">
-
-                        <div>-ä</div><div>-u</div><div>-ee</div><div>-a</div><div>-ay</div><div>-ih</div><div>-o</div>
-
-                    </div>
-
-                    <div class="classroom-row-giant" id="classroomGiantRowMount"></div>
-
-                    <div style="display:flex; flex-direction:column; gap:10px;">
-
-                        <div style="display:flex; gap:10px;">
-
-                            <button class="btn-primary" style="background:#475569; flex:1;" onclick="shuffleClassroomRowPhonetics()">Mix Up Sounds</button>
-
-                            <button id="classroomMasterBtn" class="btn-primary" style="background:#10b981; flex:1;" onclick="classroomMarkAsMasteredDirectly()">Got It! Mark as Mastered</button>
-
-                        </div>
-
-                        <button id="classroomUndoBtn" class="btn-secondary" style="color: #ef4444; font-weight:700; display:none;" onclick="classroomUnmasterLetterRow()">Oops, I didn't mean to master this yet. Keep practicing!</button>
-
-                    </div>
-
-                    <div class="embedded-classroom-sketchpad">
-
-                        <h3 style="font-size:14px; font-weight:700; margin-bottom:4px; color:var(--neutral-dark);">Practice Writing Pad</h3>
-
-                        <p style="font-size:12px; color:#64748b; margin-bottom:10px;">Draw the characters below to share your writing with your team!</p>
-
-                        <canvas id="sketchpad" class="sketch-canvas-element"></canvas>
-
-                        <div class="sketchpad-actions-row">
-
-                            <button class="btn-primary" style="padding:6px 12px; font-size:12px; background:#64748b;" onclick="clearSketchpadCanvas()">Clear Pad</button>
-
-                            <button class="btn-primary" style="padding:6px 12px; font-size:12px;" onclick="uploadSketchpadDrawingCanvasData()">Share My Drawing</button>
-
-                        </div>
-
-                    </div>
-
-                    <button class="btn-secondary" style="margin-top:16px;" onclick="exitClassroomViewBackToGrid()">← Back to Letter Board</button>
-
-                </div>
-
-            </div>
-
-            <div class="sidebar-sticky-panel">
-
-                <header>
-
-                    <div class="profile-clickable-trigger" onclick="openProfileEdit()" style="cursor: pointer;">
-
-                        <div class="user-avatar-badge" id="displayAvatarHeader">🦁</div>
-
-                        <div>
-
-                            <h3 id="displayUserHeader" style="font-size:15px; font-weight:700;">Student Nickname</h3>
-
-                            <div id="sidebarPodBadge" style="font-size: 11px; color: var(--brand-primary); font-weight: 700; margin-top: 2px;">Your Team...</div>
-
-                            <span id="progressText" style="font-size:12px; color:#64748b; font-weight:500;">0% Completed</span>
-
-                        </div>
-
-                    </div>
-
-                    <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
-
-                </header>
-
-                <div class="collapsible-dropdown-container">
-
-                    <button class="dropdown-toggle-header" onclick="toggleDropdownElement('liveLeaderboardContent')">
-
-                        <span>Class Leaderboard</span><span>▼</span>
-
-                    </button>
-
-                    <div class="dropdown-content-pane" id="liveLeaderboardContent"></div>
-
-                </div>
-
-                <div class="collapsible-dropdown-container">
-
-                    <button class="dropdown-toggle-header" onclick="toggleDropdownElement('photoBoardContent')">
-
-                        <span>Shared Class Drawings</span><span>▼</span>
-
-                    </button>
-
-                    <div class="dropdown-content-pane open" id="photoBoardContent">
-
-                        <div class="feed-grid" id="disappearingArtGalleryFeed"></div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
-
-    </div> 
-
-
+} 
         async function openProfileModal() {
     // 1. Show the modal
     document.getElementById("profileModal").style.display = "block";
