@@ -706,91 +706,74 @@ async function submitWorkForVerification(imageUrl) {
     
     showNotificationToast("Work submitted to your Captain!");
 }
-       async function approveStudentWork(submissionId) {
-    // 1. First, check if the person clicking the button is the Captain
+ // --- 6. DASHBOARD & FLOW MANAGER ---
+function launchDashboard(viewMode) {
+    // Admin Toggle
+    if (currentUser.email === ADMIN_EMAIL) {
+        document.getElementById("adminHeaderToggleBar").style.display = "flex";
+    }
+
+    if (viewMode === "teacher") {
+        document.getElementById("teacherOnlyDashboard").style.display = "block";
+        document.getElementById("studentDashboard").style.display = "none";
+        loadTeacherRosterData();
+        teacherRefreshConfigurationDropdowns();
+    } else {
+        document.getElementById("studentDashboard").style.display = "block";
+        document.getElementById("teacherOnlyDashboard").style.display = "none";
+        
+        // Load data once
+        fetchUserProgress();
+        renderLiveLeaderboard();
+        fetchDisappearingImageCanvasBoard();
+        loadTeamDashboard(currentUser); 
+        buildMatrixInterfaceGrid();
+    }
+}
+
+// --- 7. TEAM CAPTAIN LOGIC ---
+async function approveStudentWork(submissionId) {
+    // 1. Verify Captain Role
     const { data: team } = await _supabase.from('teams')
         .select('captain_id')
         .eq('captain_id', currentUser.id)
         .maybeSingle();
     
     if (!team) {
-        showNotificationToast("Only the Captain can approve work!");
-        return;
+        return showNotificationToast("Only the Captain can approve work!");
     }
 
-    // 2. Perform the update in the database FIRST
-    const { data: sub } = await _supabase.from('work_submissions')
+    // 2. Perform safe update
+    const { data: sub, error } = await _supabase.from('work_submissions')
         .update({ status: 'approved' })
         .eq('id', submissionId)
-        .select('team_id') // We need to get the team_id back from the update
+        .eq('status', 'pending') // Prevent double-approvals
+        .select('team_id')
         .single();
 
-    showNotificationToast("Work approved! Progress updated.");
+    if (error) return showNotificationToast("Could not approve work.");
 
-    // 3. Now that the status is 'approved', check if the team is ready to level up
+    showNotificationToast("Work approved!");
+    
+    // 3. Trigger level-up logic
     if (sub) {
         checkAndAdvanceTeamLevel(sub.team_id);
-        renderCaptainInbox(); // Refresh the inbox so the approved item disappears
+        renderCaptainInbox(); 
     }
 }
-        function routeAdminTerminalDirectly(targetPanel) {
-            document.getElementById("adminViewSelectorGate").style.display = "none";
-            launchDashboard(targetPanel);
-        }
 
-        function switchAdminPanelsFromDashboard(targetPanel) {
-            document.getElementById("studentDashboard").style.display = "none";
-            document.getElementById("teacherOnlyDashboard").style.display = "none";
-            launchDashboard(targetPanel);
-        }
+// --- 8. ADMIN NAVIGATION ---
+function routeAdminTerminalDirectly(targetPanel) {
+    document.getElementById("adminViewSelectorGate").style.display = "none";
+    launchDashboard(targetPanel);
+}
 
-        // Save Changes to Supabase
-async function saveProfileChanges() {
-    const newName = document.getElementById("editNickname").value;
-    
-    // This finds which emoji was clicked in your grid
-    const selectedEmoji = document.querySelector('[data-selected="true"]')?.innerText || '🦁';
-    
-    // Get the team from the dropdown
-    const newTeam = document.getElementById('editTeamSelect').value;
-
-    const { error } = await _supabase
-        .from('profiles')
-        .update({ 
-            display_name: newName, 
-            avatar_character: selectedEmoji,
-            team_id: newTeam
-        })
-        .eq('id', currentUser.id);
-
-    if (!error) {
-        document.getElementById("navAvatar").innerText = selectedEmoji;
-        showNotificationToast("Profile updated!");
-        closeProfileModal();
-        loadTeamDashboard(currentUser); 
-    }
-} function launchDashboard(viewMode) {
-            if (currentUser.email === ADMIN_EMAIL) {
-                document.getElementById("adminHeaderToggleBar").style.display = "flex";
-            }
-
-            if (viewMode === "teacher") {
-                document.getElementById("teacherOnlyDashboard").style.display = "block";
-                loadTeacherRosterData();
-                teacherRefreshConfigurationDropdowns();
-            } else {
-            document.getElementById("studentDashboard").style.display = "block";
-            fetchUserProgress();
-            renderLiveLeaderboard();
-            fetchDisappearingImageCanvasBoard();
-            
-            // --- NEW TEAM LOGIC ---
-            loadTeamDashboard(currentUser); 
-            // ----------------------
-            
-            buildMatrixInterfaceGrid();
-        }
-        }
+function switchAdminPanelsFromDashboard(targetPanel) {
+    // Standardize panel hiding
+    document.getElementById("studentDashboard").style.display = "none";
+    document.getElementById("teacherOnlyDashboard").style.display = "none";
+    launchDashboard(targetPanel);
+}
 
         async function loadTeacherRosterData() {
             const tbody = document.getElementById("teacherRosterTableBody");
