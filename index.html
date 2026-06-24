@@ -323,7 +323,115 @@
 
         const ADMIN_EMAIL = "senaitrichmond16@gmail.com";
         const CLASSROOM_COLORS = ["Red Team 🔴", "Blue Team 🔵", "Green Team 🟢", "Yellow Team 🟡", "Purple Team 🟣"];
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fidel Classroom</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=Abyssinica+SIL&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --brand-primary: #0f766e; --brand-secondary: #0d9488; --neutral-dark: #1e293b; --neutral-light: #f8fafc; --border-color: #e2e8f0; --shadow-premium: 0 4px 20px rgba(15, 23, 42, 0.04); --radius-standard: 16px; }
+        * { box-sizing: border-box; font-family: 'Ubuntu', 'Abyssinica SIL', serif; margin: 0; padding: 0; }
+        body { background-color: var(--neutral-light); color: var(--neutral-dark); padding: 24px; min-height: 100vh; }
+        .app-card { max-width: 420px; width: 100%; margin: 60px auto; background: white; padding: 32px 24px; border-radius: var(--radius-standard); box-shadow: var(--shadow-premium); border: 1px solid var(--border-color); text-align: center; }
+        .hidden { display: none; }
+        input, select { width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 15px; }
+        .btn-primary { background: var(--brand-primary); color: white; padding: 14px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; width: 100%; }
+        .admin-gate-card, #teacherOnlyDashboard, #studentDashboard { max-width: 1300px; margin: 0 auto; width: 100%; }
+        .fidel-grid-3col { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 12px; }
+        .fidel-card { background: #fff; border: 1px solid var(--border-color); border-radius: 14px; padding: 20px 0; text-align: center; font-size: 28px; cursor: pointer; box-shadow: var(--shadow-premium); }
+    </style>
+</head>
+<body>
 
+    <canvas id="confettiCanvas" style="position:fixed; top:0; left:0; pointer-events:none; z-index:9999;"></canvas>
+    
+    <div id="authScreen" class="app-card">
+        <h1>Fidel Classroom</h1>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Password">
+        <button class="btn-primary" onclick="handleAuth()">Enter Classroom</button>
+    </div>
+
+    <div id="teacherOnlyDashboard" class="hidden">
+        <h2>Teacher Hub</h2>
+        <table id="teacherRosterTableBody" border="1" style="width:100%;"></table>
+        <button onclick="logout()">Log Out</button>
+    </div>
+
+    <div id="studentDashboard" class="hidden">
+        <h2 id="studentWelcome">Welcome!</h2>
+        <div id="viewFidelGrid" class="fidel-grid-3col"></div>
+        <button onclick="logout()">Log Out</button>
+    </div>
+
+    <script>
+        const _supabase = supabase.createClient("https://muisfipoyzkhznfdvnes.supabase.co", "sb_publishable_VBiJZB8TVM2CSl54aDPP0A_4aDXWb5i");
+        const ADMIN_EMAIL = "senaitrichmond16@gmail.com";
+
+        async function handleAuth() {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+            if (error) {
+                const { data: sData, error: sErr } = await _supabase.auth.signUp({ email, password });
+                if (sErr) return alert(sErr.message);
+                checkUserRole(sData.user);
+            } else {
+                checkUserRole(data.user);
+            }
+        }
+
+        async function checkUserRole(user) {
+            document.getElementById('authScreen').classList.add('hidden');
+            if (user.email === ADMIN_EMAIL) {
+                document.getElementById('teacherOnlyDashboard').classList.remove('hidden');
+            } else {
+                document.getElementById('studentDashboard').classList.remove('hidden');
+                // Load your existing grid logic here
+                renderFidelGrid();
+            }
+        }
+
+        function renderFidelGrid() {
+            const grid = document.getElementById("viewFidelGrid");
+            // Add your logic to loop through your alphabetData and create cards
+            grid.innerHTML = "Grid Loaded!";
+        }
+
+        function executeVictoryConfettiCelebration() {
+            const confCanvas = document.getElementById("confettiCanvas");
+            const ctx = confCanvas.getContext("2d");
+            confCanvas.width = window.innerWidth;
+            confCanvas.height = window.innerHeight;
+            
+            let particles = Array.from({length: 100}, () => ({
+                x: confCanvas.width/2, y: confCanvas.height/2,
+                vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10,
+                color: ['#0f766e', '#10b981', '#f59e0b'][Math.floor(Math.random()*3)]
+            }));
+
+            function animate() {
+                ctx.clearRect(0,0, confCanvas.width, confCanvas.height);
+                particles.forEach(p => {
+                    p.x += p.vx; p.y += p.vy;
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(p.x, p.y, 8, 8);
+                });
+                requestAnimationFrame(animate);
+            }
+            animate();
+            setTimeout(() => confCanvas.style.display = 'none', 3000);
+        }
+
+        function logout() { _supabase.auth.signOut(); location.reload(); }
+    </script>
+</body>
+</html>
         let currentUser = null; let masteredLetters = []; let activeBaseFidel = null; 
         let activeFamilyArrayData = []; let activeSubscriptsData = []; let selectedAvatarSymbol = "🦁"; 
         let isSignUpMode = true;
