@@ -586,9 +586,14 @@ async function uploadSketchpadDrawingCanvasData() {
             launchDashboard(targetPanel);
         }
 
-        function launchDashboard(viewMode) {
-            if (currentUser.email === ADMIN_EMAIL) {
-                document.getElementById("adminHeaderToggleBar").style.display = "flex";
+        function launchDashboard() {
+    const dash = document.getElementById('studentDashboard');
+    dash.style.display = 'block'; // Make it visible
+    dash.classList.add('is-active'); // This triggers the CSS Grid layout
+    
+    // Now render your grid content
+    renderFidelGrid();
+}
             }
 
             if (viewMode === "teacher") {
