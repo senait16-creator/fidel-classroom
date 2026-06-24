@@ -389,6 +389,16 @@
             setTimeout(() => element.remove(), 3000);
         }
 
+        async function openProfileModal() {
+    // 1. Show the modal
+    document.getElementById("profileModal").style.display = "block";
+    
+    // 2. Fetch teams and fill the dropdown so they can pick one
+    const { data: teams } = await _supabase.from('teams').select('id, name');
+    const select = document.getElementById('editTeamSelect');
+    select.innerHTML = teams.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+}
+
         function initSketchpadEngineSystem() {
             canvas = document.getElementById("sketchpad");
             if (!canvas) return;
