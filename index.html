@@ -990,7 +990,32 @@ async function submitWorkForVerification(imageUrl) {
                 container.innerHTML += `<div class="leaderboard-row ${isSelf ? 'current-user' : ''}"><div class="player-info"><span>#${idx + 1}</span><span>${player.avatar}</span><span>${player.name} ${isSelf ? '(You)' : ''}</span></div><span class="player-score-badge">${player.percentage}%</span></div>`;
             });
         }
-// Add this to your main script to fetch and display the team status
+// --- ADD THESE NEAR YOUR OTHER TEAM FUNCTIONS ---
+
+async function submitWorkForVerification(imageUrl) {
+    const { data: profile } = await _supabase.from('profiles').select('team_id').eq('id', currentUser.id).single();
+    
+    await _supabase.from('work_submissions').insert({
+        student_id: currentUser.id,
+        team_id: profile.team_id,
+        image_url: imageUrl,
+        status: 'pending'
+    });
+    
+    showNotificationToast("Work submitted to your Captain!");
+}
+
+async function handleSubmissionClick() {
+    const url = document.getElementById('workUrlInput').value;
+    if (!url) {
+        showNotificationToast("Please paste a link to your work first!");
+        return;
+    }
+    
+    await submitWorkForVerification(url);
+    document.getElementById('workUrlInput').value = ""; // Clear input
+    checkMySubmissionStatus(); // Refresh badge
+}
 async function loadTeamDashboard(user) {
     // 1. Get the user's team info
     const { data: userProfile } = await _supabase
