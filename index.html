@@ -580,18 +580,32 @@ async function submitWorkForVerification(imageUrl) {
     
     showNotificationToast("Work submitted to your Captain!");
 }
-        async function approveStudentWork(submissionId) {
-    // Only allow if current user is the Captain
-    const { data: team } = await _supabase.from('teams').select('captain_id').eq('captain_id', currentUser.id).maybeSingle();
+       async function approveStudentWork(submissionId) {
+    // 1. First, check if the person clicking the button is the Captain
+    const { data: team } = await _supabase.from('teams')
+        .select('captain_id')
+        .eq('captain_id', currentUser.id)
+        .maybeSingle();
     
     if (!team) {
         showNotificationToast("Only the Captain can approve work!");
         return;
     }
 
-    await _supabase.from('work_submissions').update({ status: 'approved' }).eq('id', submissionId);
+    // 2. Perform the update in the database FIRST
+    const { data: sub } = await _supabase.from('work_submissions')
+        .update({ status: 'approved' })
+        .eq('id', submissionId)
+        .select('team_id') // We need to get the team_id back from the update
+        .single();
+
     showNotificationToast("Work approved! Progress updated.");
-    // Trigger a refresh of the Team Board here
+
+    // 3. Now that the status is 'approved', check if the team is ready to level up
+    if (sub) {
+        checkAndAdvanceTeamLevel(sub.team_id);
+        renderCaptainInbox(); // Refresh the inbox so the approved item disappears
+    }
 }
         function routeAdminTerminalDirectly(targetPanel) {
             document.getElementById("adminViewSelectorGate").style.display = "none";
