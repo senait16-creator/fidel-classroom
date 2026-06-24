@@ -406,26 +406,44 @@
 
         function clearSketchpadCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
 
-        async function uploadSketchpadDrawingCanvasData() {
-            const emptyCheck = document.createElement("canvas");
-            emptyCheck.width = canvas.width; emptyCheck.height = canvas.height;
-            if (canvas.toDataURL() === emptyCheck.toDataURL()) return showNotificationToast("Draw something before sharing!");
+async function uploadSketchpadDrawingCanvasData() {
+    console.log("Attempting to share drawing..."); // Debugging trace
+    
+    canvas.toBlob(async (blob) => {
+        const storagePath = `canvas-${Date.now()}.png`;
+        
+        // Attempt upload to Supabase Storage
+        const { data: uploadData, error: uploadError } = await _supabase.storage
+            .from('art_shares')
+            .upload(storagePath, blob, { contentType: 'image/png' });
 
-            showNotificationToast("Uploading your drawing...");
-            canvas.toBlob(async (blob) => {
-                const storagePath = `canvas-${Date.now()}.png`;
-                const { data: uploadData, error: uploadError } = await _supabase.storage.from('art_shares').upload(storagePath, blob, { contentType: 'image/png' });
-                if (uploadError) return showNotificationToast(uploadError.message);
-
-                const { data: urlData } = _supabase.storage.from('art_shares').getPublicUrl(storagePath);
-                const expirationTimestamp = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-
-                await _supabase.from('photo_shares').insert({ user_id: currentUser.id, image_url: urlData.publicUrl, expires_at: expirationTimestamp, meta_points: 0 });
-                clearSketchpadCanvas();
-                showNotificationToast("Drawing shared to the class board!");
-                fetchDisappearingImageCanvasBoard();
-            }, "image/png");
+        if (uploadError) {
+            console.error("Storage Upload Error:", uploadError);
+            alert("Upload failed: " + uploadError.message);
+            return;
         }
+
+        // Get public URL
+        const { data: urlData } = _supabase.storage.from('art_shares').getPublicUrl(storagePath);
+        
+        // Insert into Database
+        const { error: dbError } = await _supabase.from('photo_shares').insert({ 
+            user_id: _supabase.auth.getSession().user.id, 
+            image_url: urlData.publicUrl, 
+            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), 
+            meta_points: 0 
+        });
+
+        if (dbError) {
+            console.error("Database Insert Error:", dbError);
+            alert("Database failed: " + dbError.message);
+        } else {
+            console.log("Drawing shared successfully!");
+            clearSketchpadCanvas();
+            showNotificationToast("Drawing shared to the class board!");
+        }
+    }, "image/png");
+}
 
         async function submitVerificationCounterBump(shareId, element) {
             const currentVal = parseInt(element.getAttribute('data-count') || "0");
