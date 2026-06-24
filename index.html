@@ -886,44 +886,39 @@
         }
 // Add this to your main script to fetch and display the team status
 async function loadTeamDashboard(user) {
-    // 1. Get the user's team information
+    // 1. Get the user's team info
     const { data: userProfile } = await _supabase
         .from('profiles')
         .select('team_id, role')
         .eq('id', user.id)
         .single();
 
-    if (!userProfile?.team_id) return; // Not on a team yet
+    if (!userProfile?.team_id) {
+        document.getElementById("podTeammatesMount").innerHTML = "<p>No Team Assigned</p>";
+        return;
+    }
 
-    // 2. Fetch the whole team's progress and members
-    const { data: teamMembers } = await _supabase
+    // 2. Fetch all members of this specific team
+    const { data: members } = await _supabase
         .from('profiles')
-        .select('username, role')
+        .select('display_name, avatar_character, role')
         .eq('team_id', userProfile.team_id);
 
-    const { data: teamProgress } = await _supabase
-        .from('team_progress')
-        .select('current_level, mastered_families')
-        .eq('team_id', userProfile.team_id)
-        .single();
-
-    // 3. Render the Board
-    const dashboardContainer = document.getElementById('dashboard-container');
-    dashboardContainer.innerHTML = `
-        <div class="team-board">
-            <h2>Team Progress: Level ${teamProgress?.current_level || 1}</h2>
-            <div class="roster">
-                ${teamMembers.map(m => `
-                    <div class="member-card ${m.role === 'captain' ? 'captain-badge' : ''}">
-                        ${m.username} ${m.role === 'captain' ? '(Captain)' : ''}
-                    </div>
-                `).join('')}
+    // 3. Render the Team Board
+    const mount = document.getElementById("podTeammatesMount");
+    mount.innerHTML = `<h4>Your Team Roster</h4>`;
+    
+    members.forEach(member => {
+        const row = document.createElement('div');
+        row.className = "teammate-row";
+        row.innerHTML = `
+            <div class="teammate-info">
+                <span>${member.avatar_character || '🦁'} ${member.display_name}</span>
+                <span style="font-size: 0.8em; color: #64748b;">${member.role === 'captain' ? '👑 Captain' : 'Student'}</span>
             </div>
-            <div class="progress-bar">
-                <!-- You can add a CSS bar here to show how close they are to the next level -->
-            </div>
-        </div>
-    `;
+        `;
+        mount.appendChild(row);
+    });
 }
         function logout() { resetToGate(); }
     </script>
