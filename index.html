@@ -524,7 +524,31 @@
                 selectElement.innerHTML += `<option value="${color}">${color}</option>`;
             });
         }
+async function submitWorkForVerification(imageUrl) {
+    const { data: profile } = await _supabase.from('profiles').select('team_id').eq('id', currentUser.id).single();
+    
+    await _supabase.from('work_submissions').insert({
+        student_id: currentUser.id,
+        team_id: profile.team_id,
+        image_url: imageUrl,
+        status: 'pending'
+    });
+    
+    showNotificationToast("Work submitted to your Captain!");
+}
+        async function approveStudentWork(submissionId) {
+    // Only allow if current user is the Captain
+    const { data: team } = await _supabase.from('teams').select('captain_id').eq('captain_id', currentUser.id).maybeSingle();
+    
+    if (!team) {
+        showNotificationToast("Only the Captain can approve work!");
+        return;
+    }
 
+    await _supabase.from('work_submissions').update({ status: 'approved' }).eq('id', submissionId);
+    showNotificationToast("Work approved! Progress updated.");
+    // Trigger a refresh of the Team Board here
+}
         function routeAdminTerminalDirectly(targetPanel) {
             document.getElementById("adminViewSelectorGate").style.display = "none";
             launchDashboard(targetPanel);
