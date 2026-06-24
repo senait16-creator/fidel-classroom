@@ -406,6 +406,14 @@
 
         function clearSketchpadCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
 
+        function openProfileEdit() {
+    // Hide dashboard, show the profile setup screen
+    document.getElementById("studentDashboard").style.display = "none";
+    document.getElementById("profileSetupScreen").style.display = "block";
+    
+    // Fill existing data into the inputs
+    document.getElementById("displayName").value = document.getElementById("displayUserHeader").innerText;
+}
         async function uploadSketchpadDrawingCanvasData() {
             const emptyCheck = document.createElement("canvas");
             emptyCheck.width = canvas.width; emptyCheck.height = canvas.height;
