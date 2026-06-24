@@ -554,11 +554,19 @@ async function renderCaptainInbox() {
                 document.getElementById("sidebarPodBadge").innerText = profile.pod_id || "No Team Assigned";
                 launchDashboard("student");
             } else {
-                document.getElementById("authScreen").style.display = "none";
-                document.getElementById("profileSetupScreen").style.display = "block";
-                populateTeamSetupDropdownOptions();
-                checkMySubmissionStatus();
-            }
+            document.getElementById("studentDashboard").style.display = "block";
+            fetchUserProgress();
+            renderLiveLeaderboard();
+            fetchDisappearingImageCanvasBoard();
+            
+            loadTeamDashboard(currentUser); 
+            
+            // --- ADD THIS LINE ---
+            checkMySubmissionStatus(); 
+            // ---------------------
+            
+            buildMatrixInterfaceGrid();
+        }
         }
 
         function populateTeamSetupDropdownOptions() {
