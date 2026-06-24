@@ -370,7 +370,8 @@
         <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
     </div>
 
-    <script>
+   <script>
+        // --- 1. CONFIGURATION & CORE INITIALIZATION ---
         const SUPABASE_URL = "https://muisfipoyzkhznfdvnes.supabase.co"; 
         const SUPABASE_KEY = "sb_publishable_VBiJZB8TVM2CSl54aDPP0A_4aDXWb5i";
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -378,19 +379,27 @@
         const ADMIN_EMAIL = "senaitrichmond16@gmail.com";
         const CLASSROOM_COLORS = ["Red Team 🔴", "Blue Team 🔵", "Green Team 🟢", "Yellow Team 🟡", "Purple Team 🟣"];
 
-        let currentUser = null; let masteredLetters = []; let activeBaseFidel = null; 
-        let activeFamilyArrayData = []; let activeSubscriptsData = []; let selectedAvatarSymbol = "🦁"; 
+        // --- 2. GLOBAL APP STATE ENGINE ---
+        let currentUser = null; 
+        let masteredLetters = []; 
+        let activeBaseFidel = null; 
+        let activeFamilyArrayData = []; 
+        let activeSubscriptsData = []; 
+        let selectedAvatarSymbol = "🦁"; 
         let isSignUpMode = true;
 
-        let activeGamePairs = []; let selectedGameTokenId = null; let currentStreakScore = 0;
+        let activeGamePairs = []; 
+        let selectedGameTokenId = null; 
+        let currentStreakScore = 0;
         let gameModeScope = "all";
-let currentTeamCollectiveLevel = 1; 
-let isUserCaptain = false; // Will be set during login/profile load
+        let currentTeamCollectiveLevel = 1; 
+        let isUserCaptain = false; 
         let canvas, ctx, isDrawing = false;
 
         const vowelFrameworkLabels = ["ha", "hu", "hee", "ha", "hay", "hih", "ho"];
         const standardVowelSubscripts = ["-ä", "-u", "-ee", "-a", "-ay", "-ih", "-o"];
 
+        // --- 3. AMHARIC FIDEL SYLLABARY MATRIX ---
         const alphabetData = [
             {base:"ሀ", family:['ሀ','ሁ','ሂ','ሃ','ሄ','ህ','ሆ'], prefix:"h"},
             {base:"ለ", family:['ለ','ሉ','ሊ','ላ','ሌ','ል','ሎ'], prefix:"l"},
@@ -428,12 +437,15 @@ let isUserCaptain = false; // Will be set during login/profile load
             {base:"ፐ", family:['ፐ','ፑ','ፒ','ፓ','ፔ','ፕ','ፖ'], prefix:"p"}
         ];
 
+        // --- 4. LIFECYCLE DOM LISTENERS ---
         window.addEventListener('DOMContentLoaded', () => { 
             resetToGate(); 
         });
 
+        // --- 5. UI NOTIFICATION TOAST ENGINE ---
         function showNotificationToast(msg) {
             const container = document.getElementById("toastContainer");
+            if (!container) return;
             const element = document.createElement("div");
             element.className = "toast-popup";
             element.innerHTML = `<span>${msg}</span>`;
@@ -441,6 +453,7 @@ let isUserCaptain = false; // Will be set during login/profile load
             setTimeout(() => element.remove(), 3000);
         }
 
+        // --- 6. CANVAS WRITING SKETCHPAD ENGINE ---
         function initSketchpadEngineSystem() {
             canvas = document.getElementById("sketchpad");
             if (!canvas) return;
@@ -463,16 +476,25 @@ let isUserCaptain = false; // Will be set during login/profile load
             canvas.addEventListener("touchstart", startDraw); canvas.addEventListener("touchmove", draw); window.addEventListener("touchend", stopDraw);
         }
 
-        function clearSketchpadCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+        function clearSketchpadCanvas() { if (ctx && canvas) ctx.clearRect(0, 0, canvas.width, canvas.height); }
 
+        // --- 7. ACCOUNT PROFILE SYSTEMS ---
         function openProfileEdit() {
-    // Hide dashboard, show the profile setup screen
-    document.getElementById("studentDashboard").style.display = "none";
-    document.getElementById("profileSetupScreen").style.display = "block";
-    
-    // Fill existing data into the inputs
-    document.getElementById("displayName").value = document.getElementById("displayUserHeader").innerText;
-}
+            document.getElementById("studentDashboard").style.display = "none";
+            document.getElementById("profileSetupScreen").style.display = "block";
+            document.getElementById("displayName").value = document.getElementById("displayUserHeader").innerText;
+        }
+
+        function populateTeamSetupDropdownOptions() {
+            const selectElement = document.getElementById("profileTeamSelect");
+            if (!selectElement) return;
+            selectElement.innerHTML = '';
+            CLASSROOM_COLORS.forEach(color => {
+                selectElement.innerHTML += `<option value="${color}">${color}</option>`;
+            });
+        }
+
+        // --- 8. SUPABASE DATA INTERACTION (UPLOAD & VERIFICATION) ---
         async function uploadSketchpadDrawingCanvasData() {
             const emptyCheck = document.createElement("canvas");
             emptyCheck.width = canvas.width; emptyCheck.height = canvas.height;
@@ -494,38 +516,35 @@ let isUserCaptain = false; // Will be set during login/profile load
             }, "image/png");
         }
 
-       async function submitVerificationCounterBump(shareId, element, uploaderId) {
-    // 1. Verify if the currently logged-in user is a captain
-    if (!isUserCaptain) {
-        showNotificationToast("Only Team Captains can officially verify writing proficiency!");
-        return;
-    }
+        async function submitVerificationCounterBump(shareId, element, uploaderId) {
+            if (!isUserCaptain) {
+                showNotificationToast("Only Team Captains can officially verify writing proficiency!");
+                return;
+            }
 
-    const currentVal = parseInt(element.getAttribute('data-count') || "0");
-    const updatedVal = currentVal + 1;
-    
-    // 2. Update image points
-    await _supabase.from('photo_shares').update({ meta_points: updatedVal }).eq('id', shareId);
-    
-    // 3. Flag the student's writing challenge as complete for this specific collective level
-    await _supabase.from('user_challenges')
-        .upsert({ 
-            user_id: uploaderId, 
-            level: currentTeamCollectiveLevel, 
-            writing_passed: true 
-        }, { onConflict: 'user_id,level' });
+            const currentVal = parseInt(element.getAttribute('data-count') || "0");
+            const updatedVal = currentVal + 1;
+            
+            await _supabase.from('photo_shares').update({ meta_points: updatedVal }).eq('id', shareId);
+            
+            await _supabase.from('user_challenges')
+                .upsert({ 
+                    user_id: uploaderId, 
+                    level: currentTeamCollectiveLevel, 
+                    writing_passed: true 
+                }, { onConflict: 'user_id,level' });
 
-    element.setAttribute('data-count', updatedVal);
-    element.innerHTML = `✅ Approved by Captain`;
-    showNotificationToast("Writing proficiency verified!");
-    
-    // 4. Run checking protocol to see if the entire team can advance
-    const { data: currentProfile } = await _supabase.from('profiles').select('pod_id').eq('id', currentUser.id).single();
-    if (currentProfile) {
-        checkTeamProgressionGate(currentProfile.pod_id);
-    }
-}
+            element.setAttribute('data-count', updatedVal);
+            element.innerHTML = `✅ Approved by Captain`;
+            showNotificationToast("Writing proficiency verified!");
+            
+            const { data: currentProfile } = await _supabase.from('profiles').select('pod_id').eq('id', currentUser.id).single();
+            if (currentProfile) {
+                checkTeamProgressionGate(currentProfile.pod_id);
+            }
+        }
 
+        // --- 9. ANIMATION & CELEBRATION ---
         function executeVictoryConfettiCelebration() {
             const confCanvas = document.getElementById("confettiCanvas");
             const confCtx = confCanvas.getContext("2d");
@@ -556,6 +575,7 @@ let isUserCaptain = false; // Will be set during login/profile load
             animateConfettiLoop();
         }
 
+        // --- 10. NAVIGATION GATEWAY & ROUTING AUTH ---
         function resetToGate() {
             document.getElementById("authScreen").style.display = "block";
             document.getElementById("onboardingGate").style.display = "flex";
@@ -584,54 +604,44 @@ let isUserCaptain = false; // Will be set during login/profile load
             if (data?.user) proceedFlowMap(data.user);
         }
 
-  async function proceedFlowMap(user) {
-    currentUser = user;
-    
-    // 1. Fetch profile details including the captain status
-    const { data: profile } = await _supabase.from('profiles')
-        .select('display_name, avatar_character, pod_id, is_captain')
-        .eq('id', user.id)
-        .maybeSingle();
-    
-    if (currentUser.email === ADMIN_EMAIL) {
-        document.getElementById("authScreen").style.display = "none";
-        document.getElementById("adminViewSelectorGate").style.display = "block";
-        return;
-    }
-
-    if (profile && profile.display_name) {
-        selectedAvatarSymbol = profile.avatar_character;
-        isUserCaptain = profile.is_captain || false; // Set global captain state
-        
-        document.getElementById("displayUserHeader").innerText = profile.display_name;
-        document.getElementById("displayAvatarHeader").innerText = profile.avatar_character;
-        document.getElementById("sidebarPodBadge").innerText = profile.pod_id || "No Team Assigned";
-        
-        // 2. Fetch the collective team level before launching the dashboard
-        if (profile.pod_id) {
-            const { data: teamLevelData } = await _supabase.from('team_levels')
-                .select('current_level')
-                .eq('team_id', profile.pod_id)
+        async function proceedFlowMap(user) {
+            currentUser = user;
+            
+            const { data: profile } = await _supabase.from('profiles')
+                .select('display_name, avatar_character, pod_id, is_captain')
+                .eq('id', user.id)
                 .maybeSingle();
-            if (teamLevelData) {
-                currentTeamCollectiveLevel = teamLevelData.current_level;
+            
+            if (currentUser.email === ADMIN_EMAIL) {
+                document.getElementById("authScreen").style.display = "none";
+                document.getElementById("adminViewSelectorGate").style.display = "block";
+                return;
             }
-        }
 
-        launchDashboard("student");
-    } else {
-        document.getElementById("authScreen").style.display = "none";
-        document.getElementById("profileSetupScreen").style.display = "block";
-        populateTeamSetupDropdownOptions();
-    }
-}
+            if (profile && profile.display_name) {
+                selectedAvatarSymbol = profile.avatar_character;
+                isUserCaptain = profile.is_captain || false; 
+                
+                document.getElementById("displayUserHeader").innerText = profile.display_name;
+                document.getElementById("displayAvatarHeader").innerText = profile.avatar_character;
+                document.getElementById("sidebarPodBadge").innerText = profile.pod_id || "No Team Assigned";
+                
+                if (profile.pod_id) {
+                    const { data: teamLevelData } = await _supabase.from('team_levels')
+                        .select('current_level')
+                        .eq('team_id', profile.pod_id)
+                        .maybeSingle();
+                    if (teamLevelData) {
+                        currentTeamCollectiveLevel = teamLevelData.current_level;
+                    }
+                }
 
-        function populateTeamSetupDropdownOptions() {
-            const selectElement = document.getElementById("profileTeamSelect");
-            selectElement.innerHTML = '';
-            CLASSROOM_COLORS.forEach(color => {
-                selectElement.innerHTML += `<option value="${color}">${color}</option>`;
-            });
+                launchDashboard("student");
+            } else {
+                document.getElementById("authScreen").style.display = "none";
+                document.getElementById("profileSetupScreen").style.display = "block";
+                populateTeamSetupDropdownOptions();
+            }
         }
 
         function routeAdminTerminalDirectly(targetPanel) {
@@ -645,6 +655,7 @@ let isUserCaptain = false; // Will be set during login/profile load
             launchDashboard(targetPanel);
         }
 
+        // --- 11. DASHBOARD MOUNTING ENGINE ---
         function launchDashboard(viewMode) {
             if (currentUser.email === ADMIN_EMAIL) {
                 document.getElementById("adminHeaderToggleBar").style.display = "flex";
@@ -654,67 +665,57 @@ let isUserCaptain = false; // Will be set during login/profile load
                 document.getElementById("teacherOnlyDashboard").style.display = "block";
                 loadTeacherRosterData();
                 teacherRefreshConfigurationDropdowns();
-            } else { // Inside your function launchDashboard(viewMode) -> else structural path:
-else {
-    document.getElementById("studentDashboard").style.display = "block";
-    fetchUserProgress();
-    renderLiveLeaderboard();
-    renderTeamTrackDashboard(); // <-- Add this line here
-    fetchDisappearingImageCanvasBoard();
-    fetchPodTeammateProgress();
-    buildMatrixInterfaceGrid();
-}
+            } else { 
                 document.getElementById("studentDashboard").style.display = "block";
                 fetchUserProgress();
                 renderLiveLeaderboard();
-                async function renderTeamTrackDashboard() {
-    const mount = document.getElementById("teamTracksMount");
-    if (!mount) return;
-    
-    // 1. Fetch current collective levels for all defined tracks
-    const { data: tracks } = await _supabase.from('team_levels').select('team_id, current_level');
-    
-    // Create a local map of levels default to level 1 if not in DB yet
-    const trackLevels = { "Red": 1, "Blue": 1, "Green": 1 };
-    tracks?.forEach(t => {
-        if(t.team_id) trackLevels[t.team_id] = t.current_level || 1;
-    });
-
-    mount.innerHTML = "";
-
-    // 2. Loop through each color to render its progress track visualizer
-    Object.keys(trackLevels).forEach(color => {
-        const currentLvl = trackLevels[color];
-        // Calculate percentage complete based on total 11 possible levels (34 rows / 3)
-        const totalLevels = 11;
-        const progressPercentage = Math.min(100, Math.round((currentLvl / totalLevels) * 100));
-        
-        // Define color hexes matching your theme
-        const colorHexes = { "Red": "#ef4444", "Blue": "#3b82f6", "Green": "#10b981" };
-        const activeColor = colorHexes[color] || "#64748b";
-
-        const trackRow = document.createElement('div');
-        trackRow.style.marginBottom = "4px";
-        trackRow.innerHTML = `
-            <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 500; margin-bottom: 4px;">
-                <div style="display: flex; align-items: center; gap: 6px;">
-                    <span style="height: 10px; width: 10px; border-radius: 50%; background-color: ${activeColor}; display: inline-block;"></span>
-                    <span>${color} Track</span>
-                </div>
-                <span style="color: #94a3b8;">Level ${currentLvl} / ${totalLevels}</span>
-            </div>
-            <div style="width: 100%; background: #334155; height: 8px; border-radius: 4px; overflow: hidden; position: relative;">
-                <div style="width: ${progressPercentage}%; background: ${activeColor}; height: 100%; transition: width 0.5s ease-in-out;"></div>
-            </div>
-        `;
-        mount.appendChild(trackRow);
-    });
-}
+                renderTeamTrackDashboard(); 
                 fetchDisappearingImageCanvasBoard();
                 fetchPodTeammateProgress();
                 buildMatrixInterfaceGrid();
             }
         }
+
+        // --- 12. TEAM PROGRESSION VISUALIZER METRICS ---
+        async function renderTeamTrackDashboard() {
+            const mount = document.getElementById("teamTracksMount");
+            if (!mount) return;
+            
+            const { data: tracks } = await _supabase.from('team_levels').select('team_id, current_level');
+            
+            const trackLevels = { "Red": 1, "Blue": 1, "Green": 1 };
+            tracks?.forEach(t => {
+                if(t.team_id) trackLevels[t.team_id] = t.current_level || 1;
+            });
+
+            mount.innerHTML = "";
+
+            Object.keys(trackLevels).forEach(color => {
+                const currentLvl = trackLevels[color];
+                const totalLevels = 11;
+                const progressPercentage = Math.min(100, Math.round((currentLvl / totalLevels) * 100));
+                
+                const colorHexes = { "Red": "#ef4444", "Blue": "#3b82f6", "Green": "#10b981" };
+                const activeColor = colorHexes[color] || "#64748b";
+
+                const trackRow = document.createElement('div');
+                trackRow.style.marginBottom = "4px";
+                trackRow.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 500; margin-bottom: 4px;">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span style="height: 10px; width: 10px; border-radius: 50%; background-color: ${activeColor}; display: inline-block;"></span>
+                            <span>${color} Track</span>
+                        </div>
+                        <span style="color: #94a3b8;">Level ${currentLvl} / ${totalLevels}</span>
+                    </div>
+                    <div style="width: 100%; background: #334155; height: 8px; border-radius: 4px; overflow: hidden; position: relative;">
+                        <div style="width: ${progressPercentage}%; background: ${activeColor}; height: 100%; transition: width 0.5s ease-in-out;"></div>
+                    </div>
+                `;
+                mount.appendChild(trackRow);
+            });
+        }
+</script>
 
         async function loadTeacherRosterData() {
             const tbody = document.getElementById("teacherRosterTableBody");
