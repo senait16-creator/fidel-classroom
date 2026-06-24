@@ -74,55 +74,6 @@
         .player-info { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; }
         .player-score-badge { background: var(--brand-primary); color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; }
 
-        /* Team Track Dashboard Custom Styling */
-        .team-track-container {
-            background: #1e293b; 
-            padding: 16px; 
-            border-radius: 12px; 
-            margin-bottom: 20px; 
-            color: #ffffff;
-            border: 1px solid #334155;
-        }
-        .team-track-header {
-            margin-top: 0; 
-            font-size: 11px; 
-            text-transform: uppercase; 
-            color: #94a3b8; 
-            letter-spacing: 0.05em;
-            font-weight: 700;
-        }
-        .track-row {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            margin-bottom: 12px;
-        }
-        .track-meta {
-            display: flex; 
-            justify-content: space-between; 
-            font-size: 13px; 
-            font-weight: 500;
-        }
-        .track-pill-indicator {
-            height: 10px; 
-            width: 10px; 
-            border-radius: 50%; 
-            display: inline-block;
-        }
-        .track-progress-bg {
-            width: 100%; 
-            background: #334155; 
-            height: 8px; 
-            border-radius: 4px; 
-            overflow: hidden; 
-            position: relative;
-        }
-        .track-progress-fill {
-            height: 100%; 
-            transition: width 0.5s ease-in-out;
-            border-radius: 4px;
-        }
-        
         .workspace-title { font-size: 22px; font-weight: 700; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
         
         .fidel-grid-3col { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 12px; }
@@ -330,7 +281,7 @@
             <!-- Dashboard Analytics Sidebar Tracking Cluster -->
             <div class="sidebar-sticky-panel">
                 <header>
-                    <div class="profile-clickable-trigger" onclick="openProfileEdit()" style="cursor: pointer;">
+                    <div class="profile-clickable-trigger">
                         <div class="user-avatar-badge" id="displayAvatarHeader">🦁</div>
                         <div>
                             <h3 id="displayUserHeader" style="font-size:15px; font-weight:700;">Student Nickname</h3>
@@ -340,15 +291,6 @@
                     </div>
                     <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
                 </header>
-
-                <!-- Team Track Visual Dashboard Container (Correct Location) -->
-                <div class="team-track-container">
-                    <h3 class="team-track-header">🏁 Collective Track Progress</h3>
-                    <hr style="border-color: #334155; margin: 8px 0 16px 0;">
-                    <div id="teamTracksMount" style="display: flex; flex-direction: column; gap: 4px;">
-                        <!-- Rows dynamically update here -->
-                    </div>
-                </div>
 
                 <div class="collapsible-dropdown-container">
                     <button class="dropdown-toggle-header" onclick="toggleDropdownElement('liveLeaderboardContent')">
@@ -370,8 +312,7 @@
         <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
     </div>
 
-   <script>
-        // --- 1. CONFIGURATION & CORE INITIALIZATION ---
+    <script>
         const SUPABASE_URL = "https://muisfipoyzkhznfdvnes.supabase.co"; 
         const SUPABASE_KEY = "sb_publishable_VBiJZB8TVM2CSl54aDPP0A_4aDXWb5i";
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -379,27 +320,18 @@
         const ADMIN_EMAIL = "senaitrichmond16@gmail.com";
         const CLASSROOM_COLORS = ["Red Team 🔴", "Blue Team 🔵", "Green Team 🟢", "Yellow Team 🟡", "Purple Team 🟣"];
 
-        // --- 2. GLOBAL APP STATE ENGINE ---
-        let currentUser = null; 
-        let masteredLetters = []; 
-        let activeBaseFidel = null; 
-        let activeFamilyArrayData = []; 
-        let activeSubscriptsData = []; 
-        let selectedAvatarSymbol = "🦁"; 
+        let currentUser = null; let masteredLetters = []; let activeBaseFidel = null; 
+        let activeFamilyArrayData = []; let activeSubscriptsData = []; let selectedAvatarSymbol = "🦁"; 
         let isSignUpMode = true;
 
-        let activeGamePairs = []; 
-        let selectedGameTokenId = null; 
-        let currentStreakScore = 0;
+        let activeGamePairs = []; let selectedGameTokenId = null; let currentStreakScore = 0;
         let gameModeScope = "all";
-        let currentTeamCollectiveLevel = 1; 
-        let isUserCaptain = false; 
+
         let canvas, ctx, isDrawing = false;
 
         const vowelFrameworkLabels = ["ha", "hu", "hee", "ha", "hay", "hih", "ho"];
         const standardVowelSubscripts = ["-ä", "-u", "-ee", "-a", "-ay", "-ih", "-o"];
 
-        // --- 3. AMHARIC FIDEL SYLLABARY MATRIX ---
         const alphabetData = [
             {base:"ሀ", family:['ሀ','ሁ','ሂ','ሃ','ሄ','ህ','ሆ'], prefix:"h"},
             {base:"ለ", family:['ለ','ሉ','ሊ','ላ','ሌ','ል','ሎ'], prefix:"l"},
@@ -437,15 +369,12 @@
             {base:"ፐ", family:['ፐ','ፑ','ፒ','ፓ','ፔ','ፕ','ፖ'], prefix:"p"}
         ];
 
-        // --- 4. LIFECYCLE DOM LISTENERS ---
         window.addEventListener('DOMContentLoaded', () => { 
             resetToGate(); 
         });
 
-        // --- 5. UI NOTIFICATION TOAST ENGINE ---
         function showNotificationToast(msg) {
             const container = document.getElementById("toastContainer");
-            if (!container) return;
             const element = document.createElement("div");
             element.className = "toast-popup";
             element.innerHTML = `<span>${msg}</span>`;
@@ -453,7 +382,6 @@
             setTimeout(() => element.remove(), 3000);
         }
 
-        // --- 6. CANVAS WRITING SKETCHPAD ENGINE ---
         function initSketchpadEngineSystem() {
             canvas = document.getElementById("sketchpad");
             if (!canvas) return;
@@ -476,25 +404,8 @@
             canvas.addEventListener("touchstart", startDraw); canvas.addEventListener("touchmove", draw); window.addEventListener("touchend", stopDraw);
         }
 
-        function clearSketchpadCanvas() { if (ctx && canvas) ctx.clearRect(0, 0, canvas.width, canvas.height); }
+        function clearSketchpadCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
 
-        // --- 7. ACCOUNT PROFILE SYSTEMS ---
-        function openProfileEdit() {
-            document.getElementById("studentDashboard").style.display = "none";
-            document.getElementById("profileSetupScreen").style.display = "block";
-            document.getElementById("displayName").value = document.getElementById("displayUserHeader").innerText;
-        }
-
-        function populateTeamSetupDropdownOptions() {
-            const selectElement = document.getElementById("profileTeamSelect");
-            if (!selectElement) return;
-            selectElement.innerHTML = '';
-            CLASSROOM_COLORS.forEach(color => {
-                selectElement.innerHTML += `<option value="${color}">${color}</option>`;
-            });
-        }
-
-        // --- 8. SUPABASE DATA INTERACTION (UPLOAD & VERIFICATION) ---
         async function uploadSketchpadDrawingCanvasData() {
             const emptyCheck = document.createElement("canvas");
             emptyCheck.width = canvas.width; emptyCheck.height = canvas.height;
@@ -516,35 +427,15 @@
             }, "image/png");
         }
 
-        async function submitVerificationCounterBump(shareId, element, uploaderId) {
-            if (!isUserCaptain) {
-                showNotificationToast("Only Team Captains can officially verify writing proficiency!");
-                return;
-            }
-
+        async function submitVerificationCounterBump(shareId, element) {
             const currentVal = parseInt(element.getAttribute('data-count') || "0");
             const updatedVal = currentVal + 1;
-            
             await _supabase.from('photo_shares').update({ meta_points: updatedVal }).eq('id', shareId);
-            
-            await _supabase.from('user_challenges')
-                .upsert({ 
-                    user_id: uploaderId, 
-                    level: currentTeamCollectiveLevel, 
-                    writing_passed: true 
-                }, { onConflict: 'user_id,level' });
-
             element.setAttribute('data-count', updatedVal);
-            element.innerHTML = `✅ Approved by Captain`;
-            showNotificationToast("Writing proficiency verified!");
-            
-            const { data: currentProfile } = await _supabase.from('profiles').select('pod_id').eq('id', currentUser.id).single();
-            if (currentProfile) {
-                checkTeamProgressionGate(currentProfile.pod_id);
-            }
+            element.innerHTML = `👍 Verified (${updatedVal})`;
+            showNotificationToast("Marked as verified!");
         }
 
-        // --- 9. ANIMATION & CELEBRATION ---
         function executeVictoryConfettiCelebration() {
             const confCanvas = document.getElementById("confettiCanvas");
             const confCtx = confCanvas.getContext("2d");
@@ -575,7 +466,6 @@
             animateConfettiLoop();
         }
 
-        // --- 10. NAVIGATION GATEWAY & ROUTING AUTH ---
         function resetToGate() {
             document.getElementById("authScreen").style.display = "block";
             document.getElementById("onboardingGate").style.display = "flex";
@@ -606,11 +496,7 @@
 
         async function proceedFlowMap(user) {
             currentUser = user;
-            
-            const { data: profile } = await _supabase.from('profiles')
-                .select('display_name, avatar_character, pod_id, is_captain')
-                .eq('id', user.id)
-                .maybeSingle();
+            const { data: profile } = await _supabase.from('profiles').select('display_name, avatar_character, pod_id').eq('id', user.id).maybeSingle();
             
             if (currentUser.email === ADMIN_EMAIL) {
                 document.getElementById("authScreen").style.display = "none";
@@ -620,28 +506,23 @@
 
             if (profile && profile.display_name) {
                 selectedAvatarSymbol = profile.avatar_character;
-                isUserCaptain = profile.is_captain || false; 
-                
                 document.getElementById("displayUserHeader").innerText = profile.display_name;
                 document.getElementById("displayAvatarHeader").innerText = profile.avatar_character;
                 document.getElementById("sidebarPodBadge").innerText = profile.pod_id || "No Team Assigned";
-                
-                if (profile.pod_id) {
-                    const { data: teamLevelData } = await _supabase.from('team_levels')
-                        .select('current_level')
-                        .eq('team_id', profile.pod_id)
-                        .maybeSingle();
-                    if (teamLevelData) {
-                        currentTeamCollectiveLevel = teamLevelData.current_level;
-                    }
-                }
-
                 launchDashboard("student");
             } else {
                 document.getElementById("authScreen").style.display = "none";
                 document.getElementById("profileSetupScreen").style.display = "block";
                 populateTeamSetupDropdownOptions();
             }
+        }
+
+        function populateTeamSetupDropdownOptions() {
+            const selectElement = document.getElementById("profileTeamSelect");
+            selectElement.innerHTML = '';
+            CLASSROOM_COLORS.forEach(color => {
+                selectElement.innerHTML += `<option value="${color}">${color}</option>`;
+            });
         }
 
         function routeAdminTerminalDirectly(targetPanel) {
@@ -655,7 +536,6 @@
             launchDashboard(targetPanel);
         }
 
-        // --- 11. DASHBOARD MOUNTING ENGINE ---
         function launchDashboard(viewMode) {
             if (currentUser.email === ADMIN_EMAIL) {
                 document.getElementById("adminHeaderToggleBar").style.display = "flex";
@@ -665,61 +545,18 @@
                 document.getElementById("teacherOnlyDashboard").style.display = "block";
                 loadTeacherRosterData();
                 teacherRefreshConfigurationDropdowns();
-            } else { 
+            } else {
                 document.getElementById("studentDashboard").style.display = "block";
                 fetchUserProgress();
                 renderLiveLeaderboard();
-                renderTeamTrackDashboard(); 
                 fetchDisappearingImageCanvasBoard();
                 fetchPodTeammateProgress();
                 buildMatrixInterfaceGrid();
             }
         }
 
-        // --- 12. TEAM PROGRESSION VISUALIZER METRICS ---
-        async function renderTeamTrackDashboard() {
-            const mount = document.getElementById("teamTracksMount");
-            if (!mount) return;
-            
-            const { data: tracks } = await _supabase.from('team_levels').select('team_id, current_level');
-            
-            const trackLevels = { "Red": 1, "Blue": 1, "Green": 1 };
-            tracks?.forEach(t => {
-                if(t.team_id) trackLevels[t.team_id] = t.current_level || 1;
-            });
-
-            mount.innerHTML = "";
-
-            Object.keys(trackLevels).forEach(color => {
-                const currentLvl = trackLevels[color];
-                const totalLevels = 11;
-                const progressPercentage = Math.min(100, Math.round((currentLvl / totalLevels) * 100));
-                
-                const colorHexes = { "Red": "#ef4444", "Blue": "#3b82f6", "Green": "#10b981" };
-                const activeColor = colorHexes[color] || "#64748b";
-
-                const trackRow = document.createElement('div');
-                trackRow.style.marginBottom = "4px";
-                trackRow.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 500; margin-bottom: 4px;">
-                        <div style="display: flex; align-items: center; gap: 6px;">
-                            <span style="height: 10px; width: 10px; border-radius: 50%; background-color: ${activeColor}; display: inline-block;"></span>
-                            <span>${color} Track</span>
-                        </div>
-                        <span style="color: #94a3b8;">Level ${currentLvl} / ${totalLevels}</span>
-                    </div>
-                    <div style="width: 100%; background: #334155; height: 8px; border-radius: 4px; overflow: hidden; position: relative;">
-                        <div style="width: ${progressPercentage}%; background: ${activeColor}; height: 100%; transition: width 0.5s ease-in-out;"></div>
-                    </div>
-                `;
-                mount.appendChild(trackRow);
-            });
-        }
-
-// --- 13. TEACHER PANEL AND ROSTER MANAGEMENT ---
         async function loadTeacherRosterData() {
             const tbody = document.getElementById("teacherRosterTableBody");
-            if (!tbody) return;
             tbody.innerHTML = '<tr><td colspan="3" style="color:#94a3b8; text-align:center;">Loading class roster...</td></tr>';
             
             const { data: students } = await _supabase.from('profiles').select('id, display_name, avatar_character, pod_id');
@@ -729,7 +566,7 @@
             progress?.forEach(rec => { progressMap[rec.user_id] = rec.mastered_letters || []; });
 
             tbody.innerHTML = '';
-            if (!students || students.length === 0) {
+            if(!students || students.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="3" style="color:#94a3b8; text-align:center;">No students registered yet.</td></tr>';
                 return;
             }
@@ -747,45 +584,6 @@
             });
         }
 
-        async function teacherRefreshConfigurationDropdowns() {
-            const { data: students } = await _supabase.from('profiles').select('id, display_name');
-
-            const sSelect = document.getElementById("teacherStudentSelect");
-            if (sSelect) {
-                sSelect.innerHTML = '<option value="">Select Student...</option>';
-                students?.forEach(s => { sSelect.innerHTML += `<option value="${s.id}">${s.display_name}</option>`; });
-            }
-
-            const pSelect = document.getElementById("teacherPodSelect");
-            if (pSelect) {
-                pSelect.innerHTML = '<option value="">Select Color Team...</option>';
-                CLASSROOM_COLORS.forEach(color => { pSelect.innerHTML += `<option value="${color}">${color}</option>`; });
-            }
-        }
-
-        async function teacherAssignStudentToPod() {
-            const studentId = document.getElementById("teacherStudentSelect").value;
-            const chosenColor = document.getElementById("teacherPodSelect").value;
-            
-            if (!studentId || !chosenColor) return showNotificationToast("Please pick both a student and a team color.");
-            
-            showNotificationToast("Updating team assignment...");
-            const { error } = await _supabase
-                .from('profiles')
-                .update({ pod_id: chosenColor })
-                .eq('id', studentId);
-
-            if (error) {
-                console.error("Error moving student:", error);
-                return showNotificationToast("Failed to move student: " + error.message);
-            }
-
-            showNotificationToast(`Student assigned to ${chosenColor}!`);
-            await loadTeacherRosterData();
-            await teacherRefreshConfigurationDropdowns();
-        }
-
-        // --- 14. MATCHING GAME ARENA ENGINE ---
         function openMatchingGameWorkspaceMode(scope) {
             gameModeScope = scope;
             document.getElementById("viewFidelGrid").style.display = "none";
@@ -815,8 +613,8 @@
         function generateNewGameRoundData() {
             activeGamePairs = [];
             selectedGameTokenId = null;
-            let structuralSelectionList = [];
 
+            let structuralSelectionList = [];
             if (gameModeScope === "all") {
                 let pool = [...alphabetData].sort(() => Math.random() - 0.5).slice(0, 4);
                 pool.forEach(item => {
@@ -842,7 +640,6 @@
 
         function renderErgonomicBlockGameElements() {
             const mount = document.getElementById("ergonomicBlockGameMount");
-            if (!mount) return;
             mount.innerHTML = "";
 
             activeGamePairs.forEach((tokenData, index) => {
@@ -874,8 +671,7 @@
 
                 if (targetToken.matchKey === priorToken.matchKey && targetToken.kind !== priorToken.kind) {
                     element.className = "game-interactive-token resolved-pair";
-                    if (absolutePriorElement) absolutePriorElement.className = "game-interactive-token resolved-pair";
-                    
+                    absolutePriorElement.className = "game-interactive-token resolved-pair";
                     currentStreakScore++;
                     document.getElementById("gameStreakValue").innerText = currentStreakScore;
                     showNotificationToast("Match found!");
@@ -886,7 +682,7 @@
                     document.getElementById("gameStreakValue").innerText = currentStreakScore;
                     showNotificationToast("Not quite right! Streak reset.");
                     element.classList.remove("active-selected");
-                    if (absolutePriorElement) absolutePriorElement.classList.remove("active-selected");
+                    absolutePriorElement.classList.remove("active-selected");
                     selectedGameTokenId = null;
                 }
             }
@@ -897,134 +693,13 @@
             if (unresolved.length === 0) {
                 executeVictoryConfettiCelebration();
                 showNotificationToast("You cleared the board! Starting next round...");
-                
-                _supabase.from('user_challenges').upsert({
-                    user_id: currentUser.id,
-                    level: currentTeamCollectiveLevel,
-                    matching_passed: true
-                }, { onConflict: 'user_id,level' }).then(() => {
-                    const badgeText = document.getElementById("sidebarPodBadge").innerText;
-                    if (badgeText !== "No Team Assigned") {
-                        checkTeamProgressionGate(badgeText);
-                    }
-                });
-
                 setTimeout(generateNewGameRoundData, 1000);
             }
         }
 
-        // --- 15. STUDENT MATRIX GRID & WORKSPACE ENVIRONMENT ---
-        function getLevelForFidelIndex(index) {
-            return Math.floor(index / 3) + 1; 
-        }
-
-        function buildMatrixInterfaceGrid() {
-            const container = document.getElementById("viewFidelGrid"); 
-            if (!container) return;
-            container.innerHTML = "";
-            
-            alphabetData.forEach((item, index) => {
-                const itemLevel = getLevelForFidelIndex(index);
-                
-                if (itemLevel <= currentTeamCollectiveLevel) {
-                    const card = document.createElement('div');
-                    card.className = "fidel-card"; 
-                    card.setAttribute('data-fidel', item.base); 
-                    card.innerText = item.base;
-                    card.onclick = () => launchIsolatedClassroomWorkspace(item);
-                    container.appendChild(card);
-                } else {
-                    const lockedCard = document.createElement('div');
-                    lockedCard.className = "fidel-card locked"; 
-                    lockedCard.style.opacity = "0.3";
-                    lockedCard.style.cursor = "not-allowed";
-                    lockedCard.innerText = "🔒";
-                    container.appendChild(lockedCard);
-                }
-            });
-            renderUIProgressUpdates();
-        }
-
-        function generateClassroomSubscripts(prefix) {
-            if (prefix === "h" || prefix === "ḥ") return vowelFrameworkLabels;
-            return standardVowelSubscripts.map(sub => `${prefix}${sub}`);
-        }
-
-        function launchIsolatedClassroomWorkspace(fidelObj) {
-            activeBaseFidel = fidelObj.base; 
-            activeFamilyArrayData = fidelObj.family;
-            activeSubscriptsData = generateClassroomSubscripts(fidelObj.prefix);
-            
-            document.getElementById("viewFidelGrid").style.display = "none";
-            document.getElementById("isolatedFamilyClassroom").style.display = "block";
-            document.getElementById("classroomFamilyTitle").innerText = `Reviewing Row: "${activeBaseFidel}"`;
-            
-            document.getElementById("classroomRowGameBtn").onclick = () => openMatchingGameWorkspaceMode(fidelObj);
-            
-            const undoBtn = document.getElementById("classroomUndoBtn");
-            if (undoBtn) {
-                undoBtn.style.display = masteredLetters.includes(activeBaseFidel) ? "block" : "none";
-            }
-
-            renderGiantClassroomRowItems(activeFamilyArrayData, activeSubscriptsData);
-            setTimeout(initSketchpadEngineSystem, 50);
-        }
-
-        function renderGiantClassroomRowItems(familyArray, subscriptsArray) {
-            const mount = document.getElementById("classroomGiantRowMount"); 
-            if (!mount) return;
-            mount.innerHTML = "";
-            familyArray.forEach((char, idx) => {
-                const card = document.createElement('div');
-                card.className = "giant-char-card";
-                card.innerHTML = `<div class="letter">${char}</div><div class="sub">${subscriptsArray[idx]}</div>`;
-                mount.appendChild(card);
-            });
-        }
-
-        function shuffleClassroomRowPhonetics() {
-            let layoutIndices = [0,1,2,3,4,5,6].sort(() => Math.random() - 0.5);
-            const mount = document.getElementById("classroomGiantRowMount"); 
-            if (!mount) return;
-            mount.innerHTML = "";
-            layoutIndices.forEach(idx => {
-                const card = document.createElement('div');
-                card.className = "giant-char-card";
-                card.innerHTML = `<div class="letter">${activeFamilyArrayData[idx]}</div><div class="sub">${activeSubscriptsData[idx]}</div>`;
-                mount.appendChild(card);
-            });
-        }
-
-        // --- 16. INDIVIDUAL PROGRESS MUTATION SYSTEMS ---
-        async function classroomMarkAsMasteredDirectly() {
-            if (!masteredLetters.includes(activeBaseFidel)) masteredLetters.push(activeBaseFidel);
-            await _supabase.from('user_progress').upsert({ user_id: currentUser.id, mastered_letters: masteredLetters }, { onConflict: 'user_id' });
-            showNotificationToast(`Row "${activeBaseFidel}" saved to your mastered list!`);
-            executeVictoryConfettiCelebration();
-            fetchPodTeammateProgress(); 
-            renderLiveLeaderboard(); 
-            exitClassroomViewBackToGrid();
-        }
-
-        async function classroomUnmasterLetterRow() {
-            masteredLetters = masteredLetters.filter(item => item !== activeBaseFidel);
-            await _supabase.from('user_progress').upsert({ user_id: currentUser.id, mastered_letters: masteredLetters }, { onConflict: 'user_id' });
-            showNotificationToast(`Removed "${activeBaseFidel}" from mastered rows.`);
-            fetchPodTeammateProgress(); 
-            renderLiveLeaderboard(); 
-            exitClassroomViewBackToGrid();
-        }
-
-        function exitClassroomViewBackToGrid() {
-            document.getElementById("isolatedFamilyClassroom").style.display = "none";
-            document.getElementById("viewFidelGrid").style.display = "grid";
-            buildMatrixInterfaceGrid();
-        }
-
         function selectAvatar(symbol, element) {
             document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
-            element.classList.add('selected'); 
-            selectedAvatarSymbol = symbol;
+            element.classList.add('selected'); selectedAvatarSymbol = symbol;
         }
 
         async function saveProfileData() {
@@ -1040,13 +715,126 @@
             launchDashboard("student");
         }
 
-        // --- 17. SOCIAL MODULES & REAL-TIME INTERACTION GRIDS ---
+        async function teacherRefreshConfigurationDropdowns() {
+            const { data: students } = await _supabase.from('profiles').select('id, display_name');
+
+            const sSelect = document.getElementById("teacherStudentSelect");
+            sSelect.innerHTML = '<option value="">Select Student...</option>';
+            students?.forEach(s => { sSelect.innerHTML += `<option value="${s.id}">${s.display_name}</option>`; });
+
+            const pSelect = document.getElementById("teacherPodSelect");
+            pSelect.innerHTML = '<option value="">Select Color Team...</option>';
+            CLASSROOM_COLORS.forEach(color => { pSelect.innerHTML += `<option value="${color}">${color}</option>`; });
+        }
+
+        async function teacherAssignStudentToPod() {
+            const studentId = document.getElementById("teacherStudentSelect").value;
+            const chosenColor = document.getElementById("teacherPodSelect").value;
+            
+            if (!studentId || !chosenColor) return showNotificationToast("Please pick both a student and a team color.");
+            
+            showNotificationToast("Updating team assignment...");
+            const { error } = await _supabase
+                .from('profiles')
+                .update({ pod_id: chosenColor })
+                .eq('id', studentId);
+
+            if (error) {
+                console.error("Error moving student:", error);
+                return showNotificationToast("Failed to move student: " + error.message);
+            }
+
+            showNotificationToast(`Student assigned to ${chosenColor}!`);
+            await loadTeacherRosterData();
+            await teacherRefreshConfigurationDropdowns();
+        }
+
+        function toggleDropdownElement(elementId) {
+            document.getElementById(elementId).classList.toggle('open');
+        }
+
+        function buildMatrixInterfaceGrid() {
+            const container = document.getElementById("viewFidelGrid"); container.innerHTML = "";
+            alphabetData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "fidel-card"; card.setAttribute('data-fidel', item.base); card.innerText = item.base;
+                card.onclick = () => launchIsolatedClassroomWorkspace(item);
+                container.appendChild(card);
+            });
+            renderUIProgressUpdates();
+        }
+
+        function generateClassroomSubscripts(prefix) {
+            if (prefix === "h" || prefix === "ḥ") return vowelFrameworkLabels;
+            return standardVowelSubscripts.map(sub => `${prefix}${sub}`);
+        }
+
+        function launchIsolatedClassroomWorkspace(fidelObj) {
+            activeBaseFidel = fidelObj.base; activeFamilyArrayData = fidelObj.family;
+            activeSubscriptsData = generateClassroomSubscripts(fidelObj.prefix);
+            
+            document.getElementById("viewFidelGrid").style.display = "none";
+            document.getElementById("isolatedFamilyClassroom").style.display = "block";
+            document.getElementById("classroomFamilyTitle").innerText = `Reviewing Row: "${activeBaseFidel}"`;
+            
+            document.getElementById("classroomRowGameBtn").onclick = () => openMatchingGameWorkspaceMode(fidelObj);
+            
+            const undoBtn = document.getElementById("classroomUndoBtn");
+            if (masteredLetters.includes(activeBaseFidel)) {
+                undoBtn.style.display = "block";
+            } else {
+                undoBtn.style.display = "none";
+            }
+
+            renderGiantClassroomRowItems(activeFamilyArrayData, activeSubscriptsData);
+            setTimeout(initSketchpadEngineSystem, 50);
+        }
+
+        function renderGiantClassroomRowItems(familyArray, subscriptsArray) {
+            const mount = document.getElementById("classroomGiantRowMount"); mount.innerHTML = "";
+            familyArray.forEach((char, idx) => {
+                const card = document.createElement('div');
+                card.className = "giant-char-card";
+                card.innerHTML = `<div class="letter">${char}</div><div class="sub">${subscriptsArray[idx]}</div>`;
+                mount.appendChild(card);
+            });
+        }
+
+        function shuffleClassroomRowPhonetics() {
+            let layoutIndices = [0,1,2,3,4,5,6].sort(() => Math.random() - 0.5);
+            const mount = document.getElementById("classroomGiantRowMount"); mount.innerHTML = "";
+            layoutIndices.forEach(idx => {
+                const card = document.createElement('div');
+                card.className = "giant-char-card";
+                card.innerHTML = `<div class="letter">${activeFamilyArrayData[idx]}</div><div class="sub">${activeSubscriptsData[idx]}</div>`;
+                mount.appendChild(card);
+            });
+        }
+
+        async function classroomMarkAsMasteredDirectly() {
+            if (!masteredLetters.includes(activeBaseFidel)) masteredLetters.push(activeBaseFidel);
+            await _supabase.from('user_progress').upsert({ user_id: currentUser.id, mastered_letters: masteredLetters }, { onConflict: 'user_id' });
+            showNotificationToast(`Row "${activeBaseFidel}" saved to your mastered list!`);
+            executeVictoryConfettiCelebration();
+            fetchPodTeammateProgress(); renderLiveLeaderboard(); exitClassroomViewBackToGrid();
+        }
+
+        async function classroomUnmasterLetterRow() {
+            masteredLetters = masteredLetters.filter(item => item !== activeBaseFidel);
+            await _supabase.from('user_progress').upsert({ user_id: currentUser.id, mastered_letters: masteredLetters }, { onConflict: 'user_id' });
+            showNotificationToast(`Removed "${activeBaseFidel}" from mastered rows.`);
+            fetchPodTeammateProgress(); renderLiveLeaderboard(); exitClassroomViewBackToGrid();
+        }
+
+        function exitClassroomViewBackToGrid() {
+            document.getElementById("isolatedFamilyClassroom").style.display = "none";
+            document.getElementById("viewFidelGrid").style.display = "grid";
+            buildMatrixInterfaceGrid();
+        }
+
         async function fetchPodTeammateProgress() {
             const { data: userProfile } = await _supabase.from('profiles').select('pod_id').eq('id', currentUser.id).maybeSingle();
-            if (!userProfile || !userProfile.pod_id) { 
-                document.getElementById("podTeamNameDisplay").innerText = "No Team Assigned"; 
-                return; 
-            }
+            if (!userProfile || !userProfile.pod_id) { document.getElementById("podTeamNameDisplay").innerText = "No Team Assigned"; return; }
 
             const currentPodTeamTitle = userProfile.pod_id || "Your Team";
             document.getElementById("podTeamNameDisplay").innerText = currentPodTeamTitle;
@@ -1055,80 +843,34 @@
             const { data: members } = await _supabase.from('profiles').select('id, display_name, avatar_character').eq('pod_id', userProfile.pod_id);
             const { data: progressRecords } = await _supabase.from('user_progress').select('user_id, mastered_letters');
             
-            const progressMap = {}; 
-            progressRecords?.forEach(rec => { progressMap[rec.user_id] = rec.mastered_letters || []; });
+            const progressMap = {}; progressRecords.forEach(rec => { progressMap[rec.user_id] = rec.mastered_letters || []; });
 
-            const mount = document.getElementById("podTeammatesMount"); 
-            if (!mount) return;
-            mount.innerHTML = "";
-            
-            members?.forEach(member => {
-                const score = progressMap[member.id] || []; 
-                const percentage = Math.round((score.length / 34) * 100);
+            const mount = document.getElementById("podTeammatesMount"); mount.innerHTML = "";
+            members.forEach(member => {
+                const score = progressMap[member.id] || []; const percentage = Math.round((score.length / 34) * 100);
                 const isSelf = member.id === currentUser.id;
-                const row = document.createElement('div'); 
-                row.className = "teammate-row";
-                row.innerHTML = `
-                    <div class="teammate-info">
-                        <span>${member.avatar_character || '🦁'} ${member.display_name} ${isSelf ? '(You)' : ''}</span>
-                        <span>${percentage}% (${score.length}/34 rows)</span>
-                    </div>
-                    <div class="progress-container" style="margin: 4px 0 10px 0;">
-                        <div class="progress-bar" style="width: ${percentage}%; background: ${isSelf ? '#0f766e' : '#334155'}"></div>
-                    </div>
-                `;
+                const row = document.createElement('div'); row.className = "teammate-row";
+                row.innerHTML = `<div class="teammate-info"><span>${member.avatar_character || '🦁'} ${member.display_name} ${isSelf ? '(You)' : ''}</span><span>${percentage}% (${score.length}/34 rows)</span></div><div class="progress-container" style="margin: 4px 0 10px 0;"><div class="progress-bar" style="width: ${percentage}%; background: ${isSelf ? '#0f766e' : '#334155'}"></div></div>`;
                 mount.appendChild(row);
             });
         }
 
         async function fetchDisappearingImageCanvasBoard() {
-            const container = document.getElementById("disappearingArtGalleryFeed"); 
-            if (!container) return;
-            container.innerHTML = "";
-            
             const currentISOTime = new Date().toISOString();
-            const { data: activeShares } = await _supabase
-                .from('photo_shares')
-                .select('id, image_url, expires_at, meta_points, user_id, profiles(display_name, avatar_character)')
-                .gt('expires_at', currentISOTime);
-                
+            const { data: activeShares } = await _supabase.from('photo_shares').select('id, image_url, expires_at, meta_points, user_id, profiles(display_name, avatar_character)').gt('expires_at', currentISOTime);
+            const container = document.getElementById("disappearingArtGalleryFeed"); container.innerHTML = "";
             if (!activeShares || activeShares.length === 0) {
-                container.innerHTML = `<p style="font-size:12px; color:#94a3b8; grid-column:1/-1;">No shared sketches yet today. Use the drawing pad to share yours!</p>`; 
-                return;
+                container.innerHTML = `<p style="font-size:12px; color:#94a3b8; grid-column:1/-1;">No shared sketches yet today. Use the drawing pad to share yours!</p>`; return;
             }
-            
             activeShares.forEach(share => {
                 const hoursLeft = Math.max(0, Math.round((new Date(share.expires_at) - new Date()) / (1000 * 60 * 60)));
-                const item = document.createElement('div'); 
-                item.className = "feed-item";
-                
-                const profileInfo = share.profiles || {};
-                const creatorName = profileInfo.display_name || "Unknown Student";
-                const creatorAvatar = profileInfo.avatar_character || "🦁";
-                
-                item.innerHTML = `
-                    <div class="feed-card-header" style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
-                        <span>${creatorAvatar} ${creatorName}</span>
-                        <span style="color:#94a3b8;">🕒 ${hoursLeft}h left</span>
-                    </div>
-                    <img src="${share.image_url}" style="width:100%; border-radius:6px; background:#f8fafc; border:1px solid #334155;" alt="Canvas Share"/>
-                    <div class="feed-card-actions" style="margin-top:6px;">
-                        <button class="verify-btn" data-count="${share.meta_points || 0}" style="width:100%; font-size:12px; padding:4px; border-radius:4px; background:#1e293b; color:#fff; border:1px solid #475569; cursor:pointer;">
-                            ${isUserCaptain ? '✍️ Verify Proficiency' : `✅ Approved (${share.meta_points || 0})`}
-                        </button>
-                    </div>
-                `;
-                
-                const button = item.querySelector('.verify-btn');
-                button.onclick = function() {
-                    submitVerificationCounterBump(share.id, this, share.user_id);
-                };
-                
+                const item = document.createElement('div'); item.className = "feed-item";
+                const initialCount = share.meta_points || 0;
+                item.innerHTML = `<img src="${share.image_url}"><div class="feed-meta"><div class="feed-meta-row"><strong>${share.profiles?.avatar_character || '🦁'} ${share.profiles?.display_name || 'User'}</strong><span style="color:#ef4444;">${hoursLeft}h left</span></div><div class="feed-meta-row" style="margin-top:4px;"><button class="verify-badge-btn" data-count="${initialCount}" onclick="submitVerificationCounterBump(${share.id}, this)">👍 Verify Form (${initialCount})</button></div></div>`;
                 container.appendChild(item);
             });
         }
 
-        // --- 18. GENERAL PROGRESS VISUALIZATION & LEADERBOARD ---
         async function fetchUserProgress() {
             const { data } = await _supabase.from('user_progress').select('mastered_letters').eq('user_id', currentUser.id).maybeSingle();
             if (data && data.mastered_letters) masteredLetters = data.mastered_letters;
@@ -1140,91 +882,27 @@
                 if (masteredLetters.includes(card.getAttribute('data-fidel'))) card.classList.add('completed');
             });
             const percent = Math.round((masteredLetters.length / 34) * 100);
-            const pBar = document.getElementById("progressBar");
-            const pText = document.getElementById("progressText");
-            if (pBar) pBar.style.width = `${percent}%`;
-            if (pText) pText.innerText = `${percent}% Complete`;
+            document.getElementById("progressBar").style.width = `${percent}%`;
+            document.getElementById("progressText").innerText = `${percent}% Complete`;
         }
 
         async function renderLiveLeaderboard() {
             const { data: profiles } = await _supabase.from('profiles').select('id, display_name, avatar_character');
             const { data: progressRecords } = await _supabase.from('user_progress').select('user_id, mastered_letters');
-            
-            const container = document.getElementById("liveLeaderboardContent"); 
-            if (!container) return;
-            container.innerHTML = "";
-            
-            if (!profiles) return;
-            const progressMap = {}; 
-            progressRecords?.forEach(rec => { progressMap[rec.user_id] = rec.mastered_letters || []; });
+            const progressMap = {}; progressRecords.forEach(rec => { progressMap[rec.user_id] = rec.mastered_letters || []; });
 
             let leaderList = profiles.map(p => ({
-                id: p.id, 
-                name: p.display_name, 
-                avatar: p.avatar_character || '🦁', 
-                percentage: Math.round(((progressMap[p.id] || []).length / 34) * 100)
+                id: p.id, name: p.display_name, avatar: p.avatar_character || '🦁', percentage: Math.round(((progressMap[p.id] || []).length / 34) * 100)
             })).sort((a, b) => b.percentage - a.percentage);
 
+            const container = document.getElementById("liveLeaderboardContent"); container.innerHTML = "";
             leaderList.slice(0, 5).forEach((player, idx) => {
                 const isSelf = currentUser && player.id === currentUser.id;
-                container.innerHTML += `
-                    <div class="leaderboard-row ${isSelf ? 'current-user' : ''}">
-                        <div class="player-info">
-                            <span>#${idx + 1}</span>
-                            <span>${player.avatar}</span>
-                            <span>${player.name} ${isSelf ? '(You)' : ''}</span>
-                        </div>
-                        <span class="player-score-badge">${player.percentage}%</span>
-                    </div>`;
+                container.innerHTML += `<div class="leaderboard-row ${isSelf ? 'current-user' : ''}"><div class="player-info"><span>#${idx + 1}</span><span>${player.avatar}</span><span>${player.name} ${isSelf ? '(You)' : ''}</span></div><span class="player-score-badge">${player.percentage}%</span></div>`;
             });
         }
 
-        // --- 19. TEAM PROGRESSION GATING SYSTEMS ---
-        async function checkTeamProgressionGate(teamId) {
-            const { data: teamMembers } = await _supabase.from('profiles').select('id').eq('pod_id', teamId);
-            if (!teamMembers || teamMembers.length === 0) return;
-            
-            const memberIds = teamMembers.map(m => m.id);
-
-            const { data: challenges } = await _supabase.from('user_challenges')
-                .select('*')
-                .in('user_id', memberIds)
-                .eq('level', currentTeamCollectiveLevel);
-
-            if (!challenges) return;
-
-            const everyonePassed = challenges.length === teamMembers.length && challenges.every(c => 
-                c.matching_passed && c.writing_passed
-            );
-
-            if (everyonePassed) {
-                let nextLevel = currentTeamCollectiveLevel + 1;
-                
-                await _supabase.from('team_levels')
-                    .upsert({ team_id: teamId, current_level: nextLevel }, { onConflict: 'team_id' });
-                
-                currentTeamCollectiveLevel = nextLevel;
-                
-                executeVictoryConfettiCelebration();
-                showNotificationToast(`🎉 Incredible! The WHOLE ${teamId} has cleared Level ${currentTeamCollectiveLevel - 1}! Level ${nextLevel} is now unlocked!`);
-                
-                buildMatrixInterfaceGrid();
-                fetchPodTeammateProgress();
-                if (typeof renderTeamTrackDashboard === "function") {
-                    renderTeamTrackDashboard();
-                }
-            }
-        }
-
-        function toggleDropdownElement(elementId) {
-            const el = document.getElementById(elementId);
-            if (el) el.classList.toggle('open');
-        }
-
         function logout() { resetToGate(); }
-
-                    </script>
-
+    </script>
 </body>
-
-</html> 
+</html>
