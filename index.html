@@ -992,7 +992,22 @@ async function submitWorkForVerification(imageUrl) {
         }
 // --- ADD THESE NEAR YOUR OTHER TEAM FUNCTIONS ---
 
-async function submitWorkForVerification(imageUrl) {
+async function checkMySubmissionStatus() {
+    const statusMount = document.getElementById('myStatusMount');
+    if (!statusMount) return;
+
+    const { data: statusData } = await _supabase
+        .from('work_submissions')
+        .select('status')
+        .eq('student_id', currentUser.id)
+        .order('created_at', { ascending: false })
+        .maybeSingle();
+
+    if (statusData) {
+        statusMount.innerHTML = `<div class="status-badge ${statusData.status}">Status: ${statusData.status.toUpperCase()}</div>`;
+    }
+} 
+        async function submitWorkForVerification(imageUrl) {
     const { data: profile } = await _supabase.from('profiles').select('team_id').eq('id', currentUser.id).single();
     
     await _supabase.from('work_submissions').insert({
