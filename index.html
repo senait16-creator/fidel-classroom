@@ -546,13 +546,17 @@
                 loadTeacherRosterData();
                 teacherRefreshConfigurationDropdowns();
             } else {
-                document.getElementById("studentDashboard").style.display = "block";
-                fetchUserProgress();
-                renderLiveLeaderboard();
-                fetchDisappearingImageCanvasBoard();
-                fetchPodTeammateProgress();
-                buildMatrixInterfaceGrid();
-            }
+            document.getElementById("studentDashboard").style.display = "block";
+            fetchUserProgress();
+            renderLiveLeaderboard();
+            fetchDisappearingImageCanvasBoard();
+            
+            // --- NEW TEAM LOGIC ---
+            loadTeamDashboard(currentUser); 
+            // ----------------------
+            
+            buildMatrixInterfaceGrid();
+        }
         }
 
         async function loadTeacherRosterData() {
