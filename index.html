@@ -151,26 +151,24 @@
     </div>
 
     <!-- Custom Profile Struct Node -->
-    <div id="profileSetupScreen" class="app-card" style="display: none;">
-        <h2 class="main-title" style="font-size: 22px;">Create Your Profile</h2>
-        <p class="subtitle">Pick a nickname and choose your color team!</p>
-        <input type="text" id="displayName" placeholder="Your Nickname">
-        
-        <div class="avatar-grid">
-            <div class="avatar-option selected" onclick="selectAvatar('🦁', this)">🦁</div>
-            <div class="avatar-option" onclick="selectAvatar('🦅', this)">🦅</div>
-            <div class="avatar-option" onclick="selectAvatar('🐆', this)">🐆</div>
-            <div class="avatar-option" onclick="selectAvatar('🦊', this)">🦊</div>
-            <div class="avatar-option" onclick="selectAvatar('🐘', this)">🐘</div>
-        </div>
+   <!-- New Profile Modal -->
+<div id="profileModal" style="display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%); background:white; padding:20px; border-radius:12px; width: 320px; max-height: 80vh; overflow-y: auto; box-shadow:0 4px 15px rgba(0,0,0,0.3); z-index:1000;">
+    <h3>Edit Profile</h3>
+    <input type="text" id="editNickname" placeholder="New Nickname" style="width:100%; margin-bottom:10px;">
+    
+    <label>Pick Your Team:</label>
+    <select id="editTeamSelect" style="width:100%; margin-bottom:15px;"></select>
 
-        <div style="text-align: left; margin-bottom: 16px;">
-            <label style="font-size: 13px; font-weight: 700; color: var(--neutral-dark);">Pick Your Color Team:</label>
-            <select id="profileTeamSelect"></select>
-        </div>
-
-        <button class="btn-primary" onclick="saveProfileData()">Join the Classroom</button>
+    <label>Choose Avatar:</label>
+    <div id="avatarGrid" style="display:grid; grid-template-columns:repeat(5, 1fr); gap:5px; margin-top:5px;">
+        <!-- Avatars injected by JS -->
     </div>
+
+    <div style="margin-top: 20px;">
+        <button onclick="saveProfileChanges()">Save</button>
+        <button onclick="closeProfileModal()">Close</button>
+    </div>
+</div>
 
     <!-- Teacher Dashboard Module View -->
     <div id="teacherOnlyDashboard">
