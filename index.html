@@ -74,6 +74,63 @@
         .player-info { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; }
         .player-score-badge { background: var(--brand-primary); color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; }
 
+        <!-- Team Track Visual Dashboard Container -->
+<div class="team-track-container">
+    <h3 class="team-track-header">🏁 Collective Track Progress</h3>
+    <hr style="border-color: #334155; margin: 8px 0 16px 0;">
+    <div id="teamTracksMount" style="display: flex; flex-direction: column; gap: 4px;">
+        <!-- Rows dynamically update here -->
+    </div>
+</div>
+        /* Team Track Dashboard Custom Styling */
+        .team-track-container {
+            background: #1e293b; 
+            padding: 16px; 
+            border-radius: 12px; 
+            margin-bottom: 20px; 
+            color: #ffffff;
+            border: 1px solid #334155;
+        }
+        .team-track-header {
+            margin-top: 0; 
+            font-size: 11px; 
+            text-transform: uppercase; 
+            color: #94a3b8; 
+            letter-spacing: 0.05em;
+            font-weight: 700;
+        }
+        .track-row {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+        .track-meta {
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 13px; 
+            font-weight: 500;
+        }
+        .track-pill-indicator {
+            height: 10px; 
+            width: 10px; 
+            border-radius: 50%; 
+            display: inline-block;
+        }
+        .track-progress-bg {
+            width: 100%; 
+            background: #334155; 
+            height: 8px; 
+            border-radius: 4px; 
+            overflow: hidden; 
+            position: relative;
+        }
+        .track-progress-fill {
+            height: 100%; 
+            transition: width 0.5s ease-in-out;
+            border-radius: 4px;
+        }
+        
         .workspace-title { font-size: 22px; font-weight: 700; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
         
         .fidel-grid-3col { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 12px; }
@@ -596,10 +653,62 @@ let isUserCaptain = false; // Will be set during login/profile load
                 document.getElementById("teacherOnlyDashboard").style.display = "block";
                 loadTeacherRosterData();
                 teacherRefreshConfigurationDropdowns();
-            } else {
+            } else { // Inside your function launchDashboard(viewMode) -> else structural path:
+else {
+    document.getElementById("studentDashboard").style.display = "block";
+    fetchUserProgress();
+    renderLiveLeaderboard();
+    renderTeamTrackDashboard(); // <-- Add this line here
+    fetchDisappearingImageCanvasBoard();
+    fetchPodTeammateProgress();
+    buildMatrixInterfaceGrid();
+}
                 document.getElementById("studentDashboard").style.display = "block";
                 fetchUserProgress();
                 renderLiveLeaderboard();
+                async function renderTeamTrackDashboard() {
+    const mount = document.getElementById("teamTracksMount");
+    if (!mount) return;
+    
+    // 1. Fetch current collective levels for all defined tracks
+    const { data: tracks } = await _supabase.from('team_levels').select('team_id, current_level');
+    
+    // Create a local map of levels default to level 1 if not in DB yet
+    const trackLevels = { "Red": 1, "Blue": 1, "Green": 1 };
+    tracks?.forEach(t => {
+        if(t.team_id) trackLevels[t.team_id] = t.current_level || 1;
+    });
+
+    mount.innerHTML = "";
+
+    // 2. Loop through each color to render its progress track visualizer
+    Object.keys(trackLevels).forEach(color => {
+        const currentLvl = trackLevels[color];
+        // Calculate percentage complete based on total 11 possible levels (34 rows / 3)
+        const totalLevels = 11;
+        const progressPercentage = Math.min(100, Math.round((currentLvl / totalLevels) * 100));
+        
+        // Define color hexes matching your theme
+        const colorHexes = { "Red": "#ef4444", "Blue": "#3b82f6", "Green": "#10b981" };
+        const activeColor = colorHexes[color] || "#64748b";
+
+        const trackRow = document.createElement('div');
+        trackRow.style.marginBottom = "4px";
+        trackRow.innerHTML = `
+            <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 500; margin-bottom: 4px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="height: 10px; width: 10px; border-radius: 50%; background-color: ${activeColor}; display: inline-block;"></span>
+                    <span>${color} Track</span>
+                </div>
+                <span style="color: #94a3b8;">Level ${currentLvl} / ${totalLevels}</span>
+            </div>
+            <div style="width: 100%; background: #334155; height: 8px; border-radius: 4px; overflow: hidden; position: relative;">
+                <div style="width: ${progressPercentage}%; background: ${activeColor}; height: 100%; transition: width 0.5s ease-in-out;"></div>
+            </div>
+        `;
+        mount.appendChild(trackRow);
+    });
+}
                 fetchDisappearingImageCanvasBoard();
                 fetchPodTeammateProgress();
                 buildMatrixInterfaceGrid();
@@ -1006,7 +1115,21 @@ async function checkTeamProgressionGate(teamId) {
         c.matching_passed && c.writing_passed // You can add c.quiz_passed here later!
     );
 
-    if (everyonePassed) {
+    if (everyonePassed) { if (everyonePassed) {
+    let nextLevel = currentTeamCollectiveLevel + 1;
+    
+    await _supabase.from('team_levels')
+        .upsert({ team_id: teamId, current_level: nextLevel }, { onConflict: 'team_id' });
+    
+    currentTeamCollectiveLevel = nextLevel;
+    
+    executeVictoryConfettiCelebration();
+    showNotificationToast(`🎉 Incredible! The WHOLE ${teamId} has cleared Level ${currentTeamCollectiveLevel - 1}!`);
+    
+    buildMatrixInterfaceGrid();
+    fetchPodTeammateProgress();
+    renderTeamTrackDashboard(); // <-- Add this line here to redraw tracks live
+}
         let nextLevel = currentTeamCollectiveLevel + 1;
         
         // 4. Update team master tracking matrix level
