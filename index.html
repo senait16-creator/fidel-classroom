@@ -282,27 +282,29 @@
         <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
     </div>
     
-    <script>
+   <script>
+        // --- 1. CONFIGURATION & INITIALIZATION ---
         const SUPABASE_URL = "https://muisfipoyzkhznfdvnes.supabase.co"; 
         const SUPABASE_KEY = "sb_publishable_VBiJZB8TVM2CSl54aDPP0A_4aDXWb5i";
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        const GAME_CONFIG = {
+            FAMILIES_PER_LEVEL: 3,
+            REQUIRED_STREAK: 10,
+            TEAMS: ["Red Team 🔴", "Blue Team 🔵", "Green Team 🟢", "Yellow Team 🟡", "Purple Team 🟣"],
+            AVATARS: ["🦁", "🦅", "🐆", "🦊", "🐘", "🦒", "🦓", "🐒", "🦏", "🦛", "🐊", "🐢", "🐍", "🦚", "🦜", "🐋", "🐬", "🐙", "🦋", "🐉"]
+        };
+
         const ADMIN_EMAIL = "senaitrichmond16@gmail.com";
-        const CLASSROOM_COLORS = ["Red Team 🔴", "Blue Team 🔵", "Green Team 🟢", "Yellow Team 🟡", "Purple Team 🟣"];
 
-        let currentUser = null; let masteredLetters = []; let activeBaseFidel = null; 
-        let activeFamilyArrayData = []; let activeSubscriptsData = []; let selectedAvatarSymbol = "🦁"; 
+        // --- 2. GLOBAL STATE ---
+        let currentUser = null;
+        let userLevel = 1; 
+        let activeFamilyIndex = 0; 
+        let selectedAvatarSymbol = GAME_CONFIG.AVATARS[0];
         let isSignUpMode = true;
-
-        let activeGamePairs = []; let selectedGameTokenId = null; let currentStreakScore = 0;
-        let gameModeScope = "all";
-
-        let canvas, ctx, isDrawing = false;
-
-        const vowelFrameworkLabels = ["ha", "hu", "hee", "ha", "hay", "hih", "ho"];
-        const standardVowelSubscripts = ["-ä", "-u", "-ee", "-a", "-ay", "-ih", "-o"];
-
-        const alphabetData = [
+        let currentStreakScore = 0;
+        let alphabetData = [
             {base:"ሀ", family:['ሀ','ሁ','ሂ','ሃ','ሄ','ህ','ሆ'], prefix:"h"},
             {base:"ለ", family:['ለ','ሉ','ሊ','ላ','ሌ','ል','ሎ'], prefix:"l"},
             {base:"ሐ", family:['ሐ','ሑ','ሒ','ሓ','ሔ','ሕ','ሖ'], prefix:"ḥ"},
@@ -339,10 +341,23 @@
             {base:"ፐ", family:['ፐ','ፑ','ፒ','ፓ','ፔ','ፕ','ፖ'], prefix:"p"}
         ];
 
+        // --- 3. DYNAMIC UI GENERATION ---
+        function populateAvatarGrid() {
+            const grid = document.getElementById("avatarGrid");
+            if (!grid) return;
+            grid.innerHTML = GAME_CONFIG.AVATARS.map(icon => `
+                <div class="avatar-option ${icon === selectedAvatarSymbol ? 'selected' : ''}" 
+                     onclick="selectAvatar('${icon}', this)">${icon}</div>
+            `).join('');
+        }
+
+        // --- 4. INITIALIZATION ---
         window.addEventListener('DOMContentLoaded', () => { 
+            populateAvatarGrid();
             resetToGate(); 
         });
 
+        // --- 5. UTILS ---
         function showNotificationToast(msg) {
             const container = document.getElementById("toastContainer");
             const element = document.createElement("div");
@@ -352,34 +367,29 @@
             setTimeout(() => element.remove(), 3000);
         }
 
-      async function switchLeaderboard(type) {
-    const listMount = document.getElementById('leaderboardList');
-    listMount.innerHTML = "Loading...";
+        async function switchLeaderboard(type) {
+            const listMount = document.getElementById('liveLeaderboardContent');
+            listMount.innerHTML = "Loading...";
 
-    if (type === 'individual') {
-        const { data: students } = await _supabase
-            .from('profiles')
-            .select('display_name, avatar_character, progress_percent'); // Ensure column names match yours
-            
-        listMount.innerHTML = students.map(s => `
-            <div style="padding: 5px; border-bottom: 1px solid #eee;">
-                ${s.avatar_character} ${s.display_name} - ${s.progress_percent}%
-            </div>
-        `).join('');
-    } 
-    
-    else if (type === 'team') {
-        const { data: teams } = await _supabase
-            .from('teams')
-            .select('name, current_level'); // Adjust based on your table
-            
-        listMount.innerHTML = teams.map(t => `
-            <div style="padding: 5px; border-bottom: 1px solid #eee;">
-                🦁 ${t.name} - Level ${t.current_level}
-            </div>
-        `).join('');
-    }
-} 
+            if (type === 'individual') {
+                const { data: students } = await _supabase.from('profiles').select('display_name, avatar_character, progress_percent');
+                listMount.innerHTML = students.map(s => `
+                    <div class="leaderboard-row">
+                        <div class="player-info">${s.avatar_character} ${s.display_name}</div>
+                        <div class="player-score-badge">${s.progress_percent}%</div>
+                    </div>
+                `).join('');
+            } else if (type === 'team') {
+                const { data: teams } = await _supabase.from('teams').select('name, current_level');
+                listMount.innerHTML = teams.map(t => `
+                    <div class="leaderboard-row">
+                        <div class="player-info">🦁 ${t.name}</div>
+                        <div class="player-score-badge">LVL ${t.current_level}</div>
+                    </div>
+                `).join('');
+            }
+        }
+    </script> 
         async function openProfileModal() {
     // 1. Show the modal
     document.getElementById("profileModal").style.display = "block";
