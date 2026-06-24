@@ -656,6 +656,30 @@ async function submitWorkForVerification(imageUrl) {
             });
         }
 
+       async function checkAndAdvanceTeamLevel(teamId) {
+    // 1. Get all members and their submission status
+    const { data: members } = await _supabase.from('profiles').select('id').eq('team_id', teamId);
+    const { data: approvedSubmissions } = await _supabase
+        .from('work_submissions')
+        .select('student_id')
+        .eq('team_id', teamId)
+        .eq('status', 'approved');
+
+    // 2. Check if every member has at least one approved submission
+    const allMastered = members.every(member => 
+        approvedSubmissions.some(sub => sub.student_id === member.id)
+    );
+
+    // 3. If everyone is done, advance the level
+    if (allMastered) {
+        const { data: progress } = await _supabase.from('team_progress').select('current_level').eq('team_id', teamId).single();
+        await _supabase.from('team_progress')
+            .update({ current_level: progress.current_level + 1 })
+            .eq('team_id', teamId);
+            
+        showNotificationToast("Team Mastery Achieved! Advancing to next level...");
+    }
+} 
         function openMatchingGameWorkspaceMode(scope) {
             gameModeScope = scope;
             document.getElementById("viewFidelGrid").style.display = "none";
