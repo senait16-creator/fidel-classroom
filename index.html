@@ -905,7 +905,47 @@
                 container.innerHTML += `<div class="leaderboard-row ${isSelf ? 'current-user' : ''}"><div class="player-info"><span>#${idx + 1}</span><span>${player.avatar}</span><span>${player.name} ${isSelf ? '(You)' : ''}</span></div><span class="player-score-badge">${player.percentage}%</span></div>`;
             });
         }
+// Add this to your main script to fetch and display the team status
+async function loadTeamDashboard(user) {
+    // 1. Get the user's team information
+    const { data: userProfile } = await _supabase
+        .from('profiles')
+        .select('team_id, role')
+        .eq('id', user.id)
+        .single();
 
+    if (!userProfile?.team_id) return; // Not on a team yet
+
+    // 2. Fetch the whole team's progress and members
+    const { data: teamMembers } = await _supabase
+        .from('profiles')
+        .select('username, role')
+        .eq('team_id', userProfile.team_id);
+
+    const { data: teamProgress } = await _supabase
+        .from('team_progress')
+        .select('current_level, mastered_families')
+        .eq('team_id', userProfile.team_id)
+        .single();
+
+    // 3. Render the Board
+    const dashboardContainer = document.getElementById('dashboard-container');
+    dashboardContainer.innerHTML = `
+        <div class="team-board">
+            <h2>Team Progress: Level ${teamProgress?.current_level || 1}</h2>
+            <div class="roster">
+                ${teamMembers.map(m => `
+                    <div class="member-card ${m.role === 'captain' ? 'captain-badge' : ''}">
+                        ${m.username} ${m.role === 'captain' ? '(Captain)' : ''}
+                    </div>
+                `).join('')}
+            </div>
+            <div class="progress-bar">
+                <!-- You can add a CSS bar here to show how close they are to the next level -->
+            </div>
+        </div>
+    `;
+}
         function logout() { resetToGate(); }
     </script>
 </body>
