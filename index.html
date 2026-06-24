@@ -966,6 +966,14 @@ async function loadTeamDashboard(user) {
         `;
         mount.appendChild(row);
     });
+
+    // --- NEW: SHOW LOGIC FOR CAPTAIN ---
+    if (userProfile.role === 'captain') {
+        const inboxMount = document.createElement('div');
+        inboxMount.id = 'captainInboxMount';
+        mount.appendChild(inboxMount); // Attach inbox below the roster
+        renderCaptainInbox();          // Call the function to fetch & show submissions
+    }
 }
         function logout() { resetToGate(); }
     </script>
