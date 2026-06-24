@@ -377,6 +377,34 @@
             setTimeout(() => element.remove(), 3000);
         }
 
+      async function switchLeaderboard(type) {
+    const listMount = document.getElementById('leaderboardList');
+    listMount.innerHTML = "Loading...";
+
+    if (type === 'individual') {
+        const { data: students } = await _supabase
+            .from('profiles')
+            .select('display_name, avatar_character, progress_percent'); // Ensure column names match yours
+            
+        listMount.innerHTML = students.map(s => `
+            <div style="padding: 5px; border-bottom: 1px solid #eee;">
+                ${s.avatar_character} ${s.display_name} - ${s.progress_percent}%
+            </div>
+        `).join('');
+    } 
+    
+    else if (type === 'team') {
+        const { data: teams } = await _supabase
+            .from('teams')
+            .select('name, current_level'); // Adjust based on your table
+            
+        listMount.innerHTML = teams.map(t => `
+            <div style="padding: 5px; border-bottom: 1px solid #eee;">
+                🦁 ${t.name} - Level ${t.current_level}
+            </div>
+        `).join('');
+    }
+} 
         async function openProfileModal() {
     // 1. Show the modal
     document.getElementById("profileModal").style.display = "block";
