@@ -125,20 +125,23 @@
     <div id="toastContainer"></div>
 
     <!-- Onboarding Panel Matrix -->
-    <div id="authScreen" class="app-card">
-        <h1 class="main-title">Fidel Classroom</h1>
-        <p class="subtitle" id="authSubtitle">Learn the Amharic Alphabet Together!</p>
-        <div id="onboardingGate" class="choice-container">
-            <button class="btn-filled-rectangle btn-signup-rect" onclick="selectAuthFlow('signup')">Sign Up</button>
-            <button class="btn-filled-rectangle btn-login-rect" onclick="selectAuthFlow('login')">Log In</button>
-        </div>
-        <div id="credentialFields" style="display: none;">
-            <input type="email" id="email" placeholder="Email Address">
-            <input type="password" id="password" placeholder="Password (at least 6 characters)">
-            <button class="btn-primary" id="mainAuthBtn" onclick="handleAuth()">Let's Go!</button>
-            <button class="btn-secondary" onclick="resetToGate()">← Back</button>
-        </div>
+   <div id="authScreen" class="app-card">
+    <h1 class="main-title">Fidel Classroom</h1>
+    <p class="subtitle" id="authSubtitle">Learn the Amharic Alphabet Together!</p>
+
+    <div id="onboardingGate" class="choice-container">
+        <button class="btn-filled-rectangle btn-signup-rect" onclick="selectAuthFlow('signup')">Sign Up</button>
+        <button class="btn-filled-rectangle btn-login-rect" onclick="selectAuthFlow('login')">Log In</button>
     </div>
+
+    <div id="credentialFields" style="display: none;">
+        <input type="email" id="email" placeholder="Email Address">
+        <input type="password" id="password" placeholder="Password (at least 6 characters)">
+        
+        <button class="btn-primary" id="mainAuthBtn" onclick="handleAuth()">Let's Go!</button>
+        <button class="btn-secondary" onclick="resetToGate()">← Back</button>
+    </div>
+</div>
 
     <!-- Administrative Target Routing Gate -->
     <div id="adminViewSelectorGate" class="admin-gate-card">
