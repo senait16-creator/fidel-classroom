@@ -384,6 +384,24 @@
             setTimeout(() => element.remove(), 3000);
         }
 
+        function launchDashboard(role) {
+    // Hide all screens
+    document.getElementById("authScreen").style.display = "none";
+    document.getElementById("profileSetupScreen").style.display = "none";
+    document.getElementById("adminViewSelectorGate").style.display = "none";
+    
+    // Show correct dashboard
+    if (role === "teacher") {
+        document.getElementById("teacherOnlyDashboard").style.display = "block";
+        document.getElementById("studentDashboard").style.display = "none";
+    } else {
+        document.getElementById("teacherOnlyDashboard").style.display = "none";
+        document.getElementById("studentDashboard").style.display = "block";
+        // Initialize components for student
+        initSketchpadEngineSystem();
+        renderFidelGrid(); // Ensure this function exists to populate your grid
+    }
+}
         function initSketchpadEngineSystem() {
             canvas = document.getElementById("sketchpad");
             if (!canvas) return;
