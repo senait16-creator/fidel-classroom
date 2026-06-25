@@ -730,7 +730,7 @@ async function submitWorkForVerification(imageUrl) {
             element.classList.add('selected'); selectedAvatarSymbol = symbol;
         }
 
-     async function saveProfileData() {
+    async function saveProfileData() {
     const nameInput = document.getElementById("displayName").value.trim();
     if (!nameInput) return showNotificationToast("Please enter a nickname.");
 
@@ -754,6 +754,18 @@ async function submitWorkForVerification(imageUrl) {
         }, { onConflict: 'user_id' });
 
         if (progressError) throw progressError;
+
+        // 3. Update UI
+        document.getElementById("displayUserHeader").innerText = nameInput;
+        document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
+        document.getElementById("sidebarPodBadge").innerText = selectedColorTeam;
+        
+        showNotificationToast("Welcome to the classroom!");
+        launchDashboard("student");
+    } catch (err) {
+        showNotificationToast("Error saving profile: " + err.message);
+    }
+}
 
         // 3. Update UI
         document.getElementById("displayUserHeader").innerText = nameInput;
