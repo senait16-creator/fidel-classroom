@@ -2,6 +2,12 @@
 import { SUPABASE_URL } from './config.js';
 import { initSketchpad } from './game.js';
 import { handleAuth } from './auth.js';
+import { showScreen } from './ui.js';
+
+// When the app starts, show only the login screen
+document.addEventListener('DOMContentLoaded', () => {
+    showScreen('authScreen');
+});
 
 // Now your app.js can "talk" to your functions
 window.handleAuth = handleAuth;
