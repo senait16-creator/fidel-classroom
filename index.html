@@ -379,57 +379,49 @@
     }
 });
 
-    // --- 6. UTILS ---
-    function showNotificationToast(msg) {
-        const container = document.getElementById("toastContainer");
-        const element = document.createElement("div");
-        element.className = "toast-popup";
-        element.innerHTML = `<span>${msg}</span>`;
-        container.appendChild(element);
-        setTimeout(() => element.remove(), 3000);
-    }
+// --- 6. UTILS & HELPERS ---
+function showNotificationToast(msg) {
+    const container = document.getElementById("toastContainer");
+    const element = document.createElement("div");
+    element.className = "toast-popup";
+    element.innerHTML = `<span>${msg}</span>`;
+    container.appendChild(element);
+    setTimeout(() => element.remove(), 3000);
+}
 
-    async function switchLeaderboard(type) {
-        const listMount = document.getElementById('leaderboardList');
-        listMount.innerHTML = "Loading...";
+function hideAllScreens() {
+    const screens = ["authScreen", "studentDashboard", "teacherOnlyDashboard", "adminViewSelectorGate", "profileSetupScreen"];
+    screens.forEach(s => {
+        const el = document.getElementById(s);
+        if (el) el.style.display = "none";
+    });
+}
 
-        if (type === 'individual') {
-            const { data: students } = await _supabase.from('profiles').select('display_name, avatar_character, progress_percent');
-            listMount.innerHTML = students.map(s => `
-                <div style="padding: 5px; border-bottom: 1px solid #eee;">
-                    ${s.avatar_character} ${s.display_name} - ${s.progress_percent}%
-                </div>
-            `).join('');
-        } else if (type === 'team') {
-            const { data: teams } = await _supabase.from('teams').select('name, current_level');
-            listMount.innerHTML = teams.map(t => `
-                <div style="padding: 5px; border-bottom: 1px solid #eee;">
-                    🦁 ${t.name} - Level ${t.current_level}
-                </div>
-            `).join('');
-        }
+// THE GUARD: This ensures you never run database code without a verified user
+async function getCurrentUserOrRedirect() {
+    const { data: { user } } = await _supabase.auth.getUser();
+    if (!user) {
+        resetToGate(); 
+        return null;
     }
-    
-    // --- 7. UI INTERACTION FUNCTIONS ---
+    return user;
+}
+
+// --- 7. UI INTERACTION FUNCTIONS ---
 async function switchLeaderboard(type) {
     const listMount = document.getElementById('leaderboardList');
+    if (!listMount) return;
     listMount.innerHTML = "Loading...";
 
     if (type === 'individual') {
-        const { data: students } = await _supabase
-            .from('profiles')
-            .select('display_name, avatar_character, progress_percent');
-        
+        const { data: students } = await _supabase.from('profiles').select('display_name, avatar_character, progress_percent');
         listMount.innerHTML = students.map(s => `
             <div style="padding: 5px; border-bottom: 1px solid #eee;">
                 ${s.avatar_character} ${s.display_name} - ${s.progress_percent}%
             </div>
         `).join('');
     } else if (type === 'team') {
-        const { data: teams } = await _supabase
-            .from('teams')
-            .select('name, current_level');
-
+        const { data: teams } = await _supabase.from('teams').select('name, current_level');
         listMount.innerHTML = teams.map(t => `
             <div style="padding: 5px; border-bottom: 1px solid #eee;">
                 🦁 ${t.name} - Level ${t.current_level}
@@ -439,15 +431,22 @@ async function switchLeaderboard(type) {
 }
 
 async function openProfileModal() {
-    document.getElementById("profileModal").style.display = "block";
+    const modal = document.getElementById("profileModal");
+    if (modal) modal.style.display = "block";
+    
     const { data: teams } = await _supabase.from('teams').select('id, name');
     const select = document.getElementById('editTeamSelect');
-    select.innerHTML = teams.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+    if (select && teams) {
+        select.innerHTML = teams.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+    }
 }
 
 async function saveProfileChanges() {
+    const user = await getCurrentUserOrRedirect();
+    if (!user) return;
+
     const newName = document.getElementById("editNickname").value;
-    const selectedEmoji = document.querySelector('[data-selected="true"]')?.innerText || '🦁';
+    const selectedEmoji = document.querySelector('.avatar-option.selected')?.innerText || '🦁';
     const newTeam = document.getElementById('editTeamSelect').value;
 
     const { error } = await _supabase
@@ -457,15 +456,30 @@ async function saveProfileChanges() {
             avatar_character: selectedEmoji,
             team_id: newTeam
         })
-        .eq('id', currentUser.id);
+        .eq('id', user.id);
 
     if (!error) {
-        document.getElementById("navAvatar").innerText = selectedEmoji;
+        const navAvatar = document.getElementById("navAvatar");
+        if (navAvatar) navAvatar.innerText = selectedEmoji;
         showNotificationToast("Profile updated!");
-        document.getElementById("profileModal").style.display = "none";
-        loadTeamDashboard(currentUser); 
+        const modal = document.getElementById("profileModal");
+        if (modal) modal.style.display = "none";
+        // Assuming loadTeamDashboard exists in your main code:
+        loadTeamDashboard(user); 
+    } else {
+        showNotificationToast("Error saving profile.");
     }
 }
+
+// --- 8. INITIALIZATION ---
+window.addEventListener('DOMContentLoaded', async () => {
+    const user = await getCurrentUserOrRedirect();
+    if (user) {
+        proceedFlowMap(user);
+    } else {
+        resetToGate();
+    }
+});
 
 // --- 8. ENGINE FUNCTIONS ---
 function initSketchpadEngineSystem() {
