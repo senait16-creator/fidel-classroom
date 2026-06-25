@@ -28,3 +28,17 @@ async function teacherAssignStudentToPod(studentId, newTeamColor) {
         loadTeacherRoster(); // Refresh the list
     }
 }
+
+async function initTeacherDashboard() {
+    // 1. Load the table
+    loadTeacherRoster();
+
+    // 2. Populate the 'Student' dropdown
+    const { data: students } = await _supabase.from('profiles').select('id, display_name');
+    const studentSelect = document.getElementById('teacherStudentSelect');
+    studentSelect.innerHTML = students.map(s => `<option value="${s.id}">${s.display_name}</option>`).join('');
+
+    // 3. Populate the 'Team' dropdown
+    const podSelect = document.getElementById('teacherPodSelect');
+    podSelect.innerHTML = CLASSROOM_COLORS.map(c => `<option value="${c}">${c}</option>`).join('');
+}
