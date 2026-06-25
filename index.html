@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="am">
 <head>
@@ -43,7 +44,7 @@
 
         #studentDashboard, #teacherOnlyDashboard { display: none; max-width: 1300px; margin: 0 auto; width: 100%; }
         .dashboard-split-layout { display: grid; grid-template-columns: 1fr 360px; gap: 24px; align-items: start; }
-        @media (max-width: 1024px) { .dashboard-split-layout { grid-template-columns: 1fr; } } 
+        @media (max-width: 1024px) { .dashboard-split-layout { grid-template-columns: 1fr; } }
 
         header { background: white; padding: 20px; border-radius: var(--radius-standard); box-shadow: var(--shadow-premium); border: 1px solid var(--border-color); margin-bottom: 20px; }
         .profile-clickable-trigger { display: flex; align-items: center; gap: 12px; }
@@ -73,6 +74,55 @@
         .leaderboard-row.current-user { border: 1px solid var(--brand-primary); background: #f0fdfa; }
         .player-info { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; }
         .player-score-badge { background: var(--brand-primary); color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+
+        /* Team Track Dashboard Custom Styling */
+        .team-track-container {
+            background: #1e293b; 
+            padding: 16px; 
+            border-radius: 12px; 
+            margin-bottom: 20px; 
+            color: #ffffff;
+            border: 1px solid #334155;
+        }
+        .team-track-header {
+            margin-top: 0; 
+            font-size: 11px; 
+            text-transform: uppercase; 
+            color: #94a3b8; 
+            letter-spacing: 0.05em;
+            font-weight: 700;
+        }
+        .track-row {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+        .track-meta {
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 13px; 
+            font-weight: 500;
+        }
+        .track-pill-indicator {
+            height: 10px; 
+            width: 10px; 
+            border-radius: 50%; 
+            display: inline-block;
+        }
+        .track-progress-bg {
+            width: 100%; 
+            background: #334155; 
+            height: 8px; 
+            border-radius: 4px; 
+            overflow: hidden; 
+            position: relative;
+        }
+        .track-progress-fill {
+            height: 100%; 
+            transition: width 0.5s ease-in-out;
+            border-radius: 4px;
+        }
 
         .workspace-title { font-size: 22px; font-weight: 700; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
 
@@ -120,9 +170,11 @@
     </style>
 </head>
 <body>
+
     <canvas id="confettiCanvas"></canvas>
     <div id="toastContainer"></div>
 
+    <!-- Onboarding Panel Matrix -->
     <div id="authScreen" class="app-card">
         <h1 class="main-title">Fidel Classroom</h1>
         <p class="subtitle" id="authSubtitle">Learn the Amharic Alphabet Together!</p>
@@ -138,6 +190,7 @@
         </div>
     </div>
 
+    <!-- Administrative Target Routing Gate -->
     <div id="adminViewSelectorGate" class="admin-gate-card">
         <h2 class="main-title" style="font-size:22px;">Welcome, Teacher!</h2>
         <p class="subtitle">Where would you like to go first?</p>
@@ -147,10 +200,12 @@
         </div>
     </div>
 
+    <!-- Custom Profile Struct Node -->
     <div id="profileSetupScreen" class="app-card" style="display: none;">
         <h2 class="main-title" style="font-size: 22px;">Create Your Profile</h2>
         <p class="subtitle">Pick a nickname and choose your color team!</p>
         <input type="text" id="displayName" placeholder="Your Nickname">
+
         <div class="avatar-grid">
             <div class="avatar-option selected" onclick="selectAvatar('🦁', this)">🦁</div>
             <div class="avatar-option" onclick="selectAvatar('🦅', this)">🦅</div>
@@ -158,27 +213,43 @@
             <div class="avatar-option" onclick="selectAvatar('🦊', this)">🦊</div>
             <div class="avatar-option" onclick="selectAvatar('🐘', this)">🐘</div>
         </div>
+
         <div style="text-align: left; margin-bottom: 16px;">
             <label style="font-size: 13px; font-weight: 700; color: var(--neutral-dark);">Pick Your Color Team:</label>
             <select id="profileTeamSelect"></select>
         </div>
+
         <button class="btn-primary" onclick="saveProfileData()">Join the Classroom</button>
     </div>
 
+    <!-- Teacher Dashboard Module View -->
     <div id="teacherOnlyDashboard">
         <div class="workspace-title" style="margin-top:20px;">
             <span>Teacher Hub</span>
             <button class="btn-primary" style="width:auto; padding:8px 16px; font-size:13px;" onclick="switchAdminPanelsFromDashboard('student')">Switch to Student View →</button>
         </div>
+
+        <!-- Live Roster Progress List -->
         <div class="teacher-panel" style="margin-bottom: 20px;">
             <h2 style="font-size: 18px; color: var(--neutral-dark); margin-bottom: 4px;">Student Roster & Progress</h2>
+            <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">See how everyone in your class is moving through the alphabet rows.</p>
             <table class="teacher-roster-table">
-                <thead><tr><th>Student</th><th>Team</th><th>Progress Status</th></tr></thead>
-                <tbody id="teacherRosterTableBody"><tr><td colspan="3" style="color:#94a3b8; text-align:center;">Loading class roster...</td></tr></tbody>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Team</th>
+                        <th>Progress Status</th>
+                    </tr>
+                </thead>
+                <tbody id="teacherRosterTableBody">
+                    <tr><td colspan="3" style="color:#94a3b8; text-align:center;">Loading class roster...</td></tr>
+                </tbody>
             </table>
         </div>
+
         <div class="teacher-panel">
             <h2 style="font-size: 18px; color: var(--neutral-dark); margin-bottom: 4px;">Manage Student Color Teams</h2>
+            <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">Reassign students to predecided classroom color tracks.</p>
             <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); max-width: 500px;">
                 <select id="teacherStudentSelect"><option value="">Select Student...</option></select>
                 <select id="teacherPodSelect"><option value="">Select Color Team...</option></select>
@@ -188,41 +259,43 @@
         <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
     </div>
 
+    <!-- Student Interface Core Matrix Layout Workspace -->
     <div id="studentDashboard">
         <div id="adminHeaderToggleBar" style="display:none; background:#f0fdfa; border:1px solid #ccfbf1; padding:10px 16px; border-radius:12px; margin-bottom:16px; justify-content:space-between; align-items:center;">
             <span style="font-size:13px; font-weight:700; color:var(--brand-primary);">Teacher Access Mode Active</span>
             <button class="btn-primary" style="width:auto; padding:6px 12px; font-size:11px;" onclick="switchAdminPanelsFromDashboard('teacher')">Back to Teacher Dashboard</button>
         </div>
 
-        <div id="captainInboxMount"></div>
-        <div id="myStatusMount"></div>
-
-        <div id="submissionPortal">
-            <h4>Submit Your Progress</h4>
-            <input type="text" id="workUrlInput" placeholder="Paste link to your photo...">
-            <button onclick="handleSubmissionClick()">Submit for Captain Review</button>
-        </div>
-
         <div class="dashboard-split-layout">
             <div class="main-workspace-panel">
+
                 <div class="pod-card">
                     <div class="pod-header"><span id="podTeamNameDisplay">Your Team</span></div>
                     <div id="podTeammatesMount"></div>
                 </div>
+
                 <div class="workspace-title">
                     <span id="workspaceDynamicHeader">Amharic Letter Board</span>
                     <button id="gameActivationToggleBtn" class="btn-primary" style="width:auto; padding:8px 16px; font-size:13px;" onclick="openMatchingGameWorkspaceMode('all')">Matching Game Arena</button>
                 </div>
+
+                <!-- Core Grid Selection Array -->
                 <div id="viewFidelGrid" class="fidel-grid-3col"></div>
+
+                <!-- Touch Ergonomic Block Match Arena Module -->
                 <div id="gameWorkspace">
                     <h2 id="gameWorkspaceTitle" style="font-size:22px; margin-bottom:4px;">Practice Arena</h2>
                     <p class="subtitle" style="margin-bottom:12px;">Tap a letter and its matching English sound to clear them!</p>
                     <div style="background:#f1f5f9; padding:6px 14px; border-radius:8px; display:inline-block; font-size:13px; font-weight:700; color:var(--brand-primary); margin-bottom:12px;">
                         Current Streak: <span id="gameStreakValue">0</span>
                     </div>
+
                     <div class="matching-game-grid-blocks" id="ergonomicBlockGameMount"></div>
+
                     <button id="gameExitActionBtn" class="btn-secondary" style="margin-top:10px;">← Close Game</button>
                 </div>
+
+                <!-- Micro-Classroom Isolation Node -->
                 <div id="isolatedFamilyClassroom">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
                         <h2 id="classroomFamilyTitle" style="font-size:22px;">Reviewing Row</h2>
@@ -239,6 +312,8 @@
                         </div>
                         <button id="classroomUndoBtn" class="btn-secondary" style="color: #ef4444; font-weight:700; display:none;" onclick="classroomUnmasterLetterRow()">Oops, I didn't mean to master this yet. Keep practicing!</button>
                     </div>
+
+                    <!-- Inline Functional Digital Ink Engine Segment Integration -->
                     <div class="embedded-classroom-sketchpad">
                         <h3 style="font-size:14px; font-weight:700; margin-bottom:4px; color:var(--neutral-dark);">Practice Writing Pad</h3>
                         <p style="font-size:12px; color:#64748b; margin-bottom:10px;">Draw the characters below to share your writing with your team!</p>
@@ -248,9 +323,12 @@
                             <button class="btn-primary" style="padding:6px 12px; font-size:12px;" onclick="uploadSketchpadDrawingCanvasData()">Share My Drawing</button>
                         </div>
                     </div>
+
                     <button class="btn-secondary" style="margin-top:16px;" onclick="exitClassroomViewBackToGrid()">← Back to Letter Board</button>
                 </div>
             </div>
+
+            <!-- Dashboard Analytics Sidebar Tracking Cluster -->
             <div class="sidebar-sticky-panel">
                 <header>
                     <div class="profile-clickable-trigger" onclick="openProfileEdit()" style="cursor: pointer;">
@@ -263,12 +341,23 @@
                     </div>
                     <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
                 </header>
+
+                <!-- Team Track Visual Dashboard Container (Correct Location) -->
+                <div class="team-track-container">
+                    <h3 class="team-track-header">🏁 Collective Track Progress</h3>
+                    <hr style="border-color: #334155; margin: 8px 0 16px 0;">
+                    <div id="teamTracksMount" style="display: flex; flex-direction: column; gap: 4px;">
+                        <!-- Rows dynamically update here -->
+                    </div>
+                </div>
+
                 <div class="collapsible-dropdown-container">
                     <button class="dropdown-toggle-header" onclick="toggleDropdownElement('liveLeaderboardContent')">
                         <span>Class Leaderboard</span><span>▼</span>
                     </button>
                     <div class="dropdown-content-pane" id="liveLeaderboardContent"></div>
                 </div>
+
                 <div class="collapsible-dropdown-container">
                     <button class="dropdown-toggle-header" onclick="toggleDropdownElement('photoBoardContent')">
                         <span>Shared Class Drawings</span><span>▼</span>
@@ -282,53 +371,36 @@
         <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
     </div>
 
-    <script>
+   <script>
+        // --- 1. CONFIGURATION & CORE INITIALIZATION ---
         const SUPABASE_URL = "https://muisfipoyzkhznfdvnes.supabase.co"; 
         const SUPABASE_KEY = "sb_publishable_VBiJZB8TVM2CSl54aDPP0A_4aDXWb5i";
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-// --- 6. AUTH & PROFILE CHECK LOGIC ---
-async function handleAuth() {
-    // ... (Your existing Supabase login/signup logic) ...
-    
-    // Once auth is successful, always verify profile:
-    const { data: { user } } = await _supabase.auth.getUser();
-    if (user) {
-        currentUser = user;
-        checkUserProfile(user.id);
-    }
-}
 
-async function checkUserProfile(userId) {
-    const { data: profile } = await _supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-    if (!profile) {
-        // This is the fix: If no profile exists, show the setup screen!
-        document.getElementById('authScreen').style.display = 'none';
-        document.getElementById('profileSetupScreen').style.display = 'block';
-    } else {
-        // They have a profile, take them to the dashboard
-        loadDashboard(profile);
-    }
-}
         const ADMIN_EMAIL = "senaitrichmond16@gmail.com";
         const CLASSROOM_COLORS = ["Red Team 🔴", "Blue Team 🔵", "Green Team 🟢", "Yellow Team 🟡", "Purple Team 🟣"];
 
-        let currentUser = null; let masteredLetters = []; let activeBaseFidel = null; 
-        let activeFamilyArrayData = []; let activeSubscriptsData = []; let selectedAvatarSymbol = "🦁"; 
+        // --- 2. GLOBAL APP STATE ENGINE ---
+        let currentUser = null; 
+        let masteredLetters = []; 
+        let activeBaseFidel = null; 
+        let activeFamilyArrayData = []; 
+        let activeSubscriptsData = []; 
+        let selectedAvatarSymbol = "🦁"; 
         let isSignUpMode = true;
 
-        let activeGamePairs = []; let selectedGameTokenId = null; let currentStreakScore = 0;
+        let activeGamePairs = []; 
+        let selectedGameTokenId = null; 
+        let currentStreakScore = 0;
         let gameModeScope = "all";
-
+        let currentTeamCollectiveLevel = 1; 
+        let isUserCaptain = false; 
         let canvas, ctx, isDrawing = false;
 
         const vowelFrameworkLabels = ["ha", "hu", "hee", "ha", "hay", "hih", "ho"];
         const standardVowelSubscripts = ["-ä", "-u", "-ee", "-a", "-ay", "-ih", "-o"];
 
+        // --- 3. AMHARIC FIDEL SYLLABARY MATRIX ---
         const alphabetData = [
             {base:"ሀ", family:['ሀ','ሁ','ሂ','ሃ','ሄ','ህ','ሆ'], prefix:"h"},
             {base:"ለ", family:['ለ','ሉ','ሊ','ላ','ሌ','ል','ሎ'], prefix:"l"},
@@ -366,12 +438,15 @@ async function checkUserProfile(userId) {
             {base:"ፐ", family:['ፐ','ፑ','ፒ','ፓ','ፔ','ፕ','ፖ'], prefix:"p"}
         ];
 
+        // --- 4. LIFECYCLE DOM LISTENERS ---
         window.addEventListener('DOMContentLoaded', () => { 
             resetToGate(); 
         });
 
+        // --- 5. UI NOTIFICATION TOAST ENGINE ---
         function showNotificationToast(msg) {
             const container = document.getElementById("toastContainer");
+            if (!container) return;
             const element = document.createElement("div");
             element.className = "toast-popup";
             element.innerHTML = `<span>${msg}</span>`;
@@ -379,44 +454,7 @@ async function checkUserProfile(userId) {
             setTimeout(() => element.remove(), 3000);
         }
 
-      async function switchLeaderboard(type) {
-    const listMount = document.getElementById('leaderboardList');
-    listMount.innerHTML = "Loading...";
-
-    if (type === 'individual') {
-        const { data: students } = await _supabase
-            .from('profiles')
-            .select('display_name, avatar_character, progress_percent'); // Ensure column names match yours
-
-        listMount.innerHTML = students.map(s => `
-            <div style="padding: 5px; border-bottom: 1px solid #eee;">
-                ${s.avatar_character} ${s.display_name} - ${s.progress_percent}%
-            </div>
-        `).join('');
-    } 
-
-    else if (type === 'team') {
-        const { data: teams } = await _supabase
-            .from('teams')
-            .select('name, current_level'); // Adjust based on your table
-
-        listMount.innerHTML = teams.map(t => `
-            <div style="padding: 5px; border-bottom: 1px solid #eee;">
-                🦁 ${t.name} - Level ${t.current_level}
-            </div>
-        `).join('');
-    }
-} 
-        async function openProfileModal() {
-    // 1. Show the modal
-    document.getElementById("profileModal").style.display = "block";
-
-    // 2. Fetch teams and fill the dropdown so they can pick one
-    const { data: teams } = await _supabase.from('teams').select('id, name');
-    const select = document.getElementById('editTeamSelect');
-    select.innerHTML = teams.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
-}
-
+        // --- 6. CANVAS WRITING SKETCHPAD ENGINE ---
         function initSketchpadEngineSystem() {
             canvas = document.getElementById("sketchpad");
             if (!canvas) return;
@@ -439,34 +477,25 @@ async function checkUserProfile(userId) {
             canvas.addEventListener("touchstart", startDraw); canvas.addEventListener("touchmove", draw); window.addEventListener("touchend", stopDraw);
         }
 
-        // Save Changes to Supabase
-async function saveProfileChanges() {
-    const newName = document.getElementById("editNickname").value;
+        function clearSketchpadCanvas() { if (ctx && canvas) ctx.clearRect(0, 0, canvas.width, canvas.height); }
 
-    // This finds which emoji was clicked in your grid
-    const selectedEmoji = document.querySelector('[data-selected="true"]')?.innerText || '🦁';
+        // --- 7. ACCOUNT PROFILE SYSTEMS ---
+        function openProfileEdit() {
+            document.getElementById("studentDashboard").style.display = "none";
+            document.getElementById("profileSetupScreen").style.display = "block";
+            document.getElementById("displayName").value = document.getElementById("displayUserHeader").innerText;
+        }
 
-    // Get the team from the dropdown
-    const newTeam = document.getElementById('editTeamSelect').value;
+        function populateTeamSetupDropdownOptions() {
+            const selectElement = document.getElementById("profileTeamSelect");
+            if (!selectElement) return;
+            selectElement.innerHTML = '';
+            CLASSROOM_COLORS.forEach(color => {
+                selectElement.innerHTML += `<option value="${color}">${color}</option>`;
+            });
+        }
 
-    const { error } = await _supabase
-        .from('profiles')
-        .update({ 
-            display_name: newName, 
-            avatar_character: selectedEmoji,
-            team_id: newTeam
-        })
-        .eq('id', currentUser.id);
-
-    if (!error) {
-        document.getElementById("navAvatar").innerText = selectedEmoji;
-        showNotificationToast("Profile updated!");
-        closeProfileModal();
-        loadTeamDashboard(currentUser); 
-    }
-} 
-        function clearSketchpadCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
-
+        // --- 8. SUPABASE DATA INTERACTION (UPLOAD & VERIFICATION) ---
         async function uploadSketchpadDrawingCanvasData() {
             const emptyCheck = document.createElement("canvas");
             emptyCheck.width = canvas.width; emptyCheck.height = canvas.height;
@@ -487,57 +516,36 @@ async function saveProfileChanges() {
                 fetchDisappearingImageCanvasBoard();
             }, "image/png");
         }
-async function renderCaptainInbox() {
-    // 1. Fetch pending work for this captain's team
-    const { data: submissions } = await _supabase
-        .from('work_submissions')
-        .select('*, profiles(display_name)')
-        .eq('status', 'pending');
 
-    const inboxContainer = document.getElementById('captainInboxMount'); // Make sure this exists in your HTML
-    if (!inboxContainer) return;
+        async function submitVerificationCounterBump(shareId, element, uploaderId) {
+            if (!isUserCaptain) {
+                showNotificationToast("Only Team Captains can officially verify writing proficiency!");
+                return;
+            }
 
-    inboxContainer.innerHTML = `<h3>Pending Submissions</h3>`;
-
-    submissions.forEach(sub => {
-        const div = document.createElement('div');
-        div.className = 'submission-card';
-        div.innerHTML = `
-            <p>${sub.profiles.display_name} submitted work</p>
-            <img src="${sub.image_url}" style="width:100px; height:100px;">
-            <button onclick="approveStudentWork('${sub.id}')">Approve</button>
-        `;
-        inboxContainer.appendChild(div);
-    });
-}
-        async function checkMySubmissionStatus() {
-    const { data: statusData } = await _supabase
-        .from('work_submissions')
-        .select('status')
-        .eq('student_id', currentUser.id)
-        .order('created_at', { ascending: false })
-        .maybeSingle();
-
-    const statusMount = document.getElementById('myStatusMount');
-    if (!statusMount) return;
-
-    if (statusData) {
-        statusMount.innerHTML = `
-            <div class="status-badge ${statusData.status}">
-                Status: ${statusData.status.toUpperCase()}
-            </div>
-        `;
-    }
-}
-        async function submitVerificationCounterBump(shareId, element) {
             const currentVal = parseInt(element.getAttribute('data-count') || "0");
             const updatedVal = currentVal + 1;
+
             await _supabase.from('photo_shares').update({ meta_points: updatedVal }).eq('id', shareId);
+
+            await _supabase.from('user_challenges')
+                .upsert({ 
+                    user_id: uploaderId, 
+                    level: currentTeamCollectiveLevel, 
+                    writing_passed: true 
+                }, { onConflict: 'user_id,level' });
+
             element.setAttribute('data-count', updatedVal);
-            element.innerHTML = `👍 Verified (${updatedVal})`;
-            showNotificationToast("Marked as verified!");
+            element.innerHTML = `✅ Approved by Captain`;
+            showNotificationToast("Writing proficiency verified!");
+
+            const { data: currentProfile } = await _supabase.from('profiles').select('pod_id').eq('id', currentUser.id).single();
+            if (currentProfile) {
+                checkTeamProgressionGate(currentProfile.pod_id);
+            }
         }
 
+        // --- 9. ANIMATION & CELEBRATION ---
         function executeVictoryConfettiCelebration() {
             const confCanvas = document.getElementById("confettiCanvas");
             const confCtx = confCanvas.getContext("2d");
@@ -568,6 +576,7 @@ async function renderCaptainInbox() {
             animateConfettiLoop();
         }
 
+        // --- 10. NAVIGATION GATEWAY & ROUTING AUTH ---
         function resetToGate() {
             document.getElementById("authScreen").style.display = "block";
             document.getElementById("onboardingGate").style.display = "flex";
@@ -598,7 +607,11 @@ async function renderCaptainInbox() {
 
         async function proceedFlowMap(user) {
             currentUser = user;
-            const { data: profile } = await _supabase.from('profiles').select('display_name, avatar_character, pod_id').eq('id', user.id).maybeSingle();
+
+            const { data: profile } = await _supabase.from('profiles')
+                .select('display_name, avatar_character, pod_id, is_captain')
+                .eq('id', user.id)
+                .maybeSingle();
 
             if (currentUser.email === ADMIN_EMAIL) {
                 document.getElementById("authScreen").style.display = "none";
@@ -608,72 +621,30 @@ async function renderCaptainInbox() {
 
             if (profile && profile.display_name) {
                 selectedAvatarSymbol = profile.avatar_character;
+                isUserCaptain = profile.is_captain || false; 
+
                 document.getElementById("displayUserHeader").innerText = profile.display_name;
                 document.getElementById("displayAvatarHeader").innerText = profile.avatar_character;
                 document.getElementById("sidebarPodBadge").innerText = profile.pod_id || "No Team Assigned";
+
+                if (profile.pod_id) {
+                    const { data: teamLevelData } = await _supabase.from('team_levels')
+                        .select('current_level')
+                        .eq('team_id', profile.pod_id)
+                        .maybeSingle();
+                    if (teamLevelData) {
+                        currentTeamCollectiveLevel = teamLevelData.current_level;
+                    }
+                }
+
                 launchDashboard("student");
             } else {
-            document.getElementById("studentDashboard").style.display = "block";
-            fetchUserProgress();
-            renderLiveLeaderboard();
-            fetchDisappearingImageCanvasBoard();
-
-            loadTeamDashboard(currentUser); 
-
-            // --- ADD THIS LINE ---
-            checkMySubmissionStatus(); 
-            // ---------------------
-
-            buildMatrixInterfaceGrid();
-        }
+                document.getElementById("authScreen").style.display = "none";
+                document.getElementById("profileSetupScreen").style.display = "block";
+                populateTeamSetupDropdownOptions();
+            }
         }
 
-        function populateTeamSetupDropdownOptions() {
-            const selectElement = document.getElementById("profileTeamSelect");
-            selectElement.innerHTML = '';
-            CLASSROOM_COLORS.forEach(color => {
-                selectElement.innerHTML += `<option value="${color}">${color}</option>`;
-            });
-        }
-async function submitWorkForVerification(imageUrl) {
-    const { data: profile } = await _supabase.from('profiles').select('team_id').eq('id', currentUser.id).single();
-
-    await _supabase.from('work_submissions').insert({
-        student_id: currentUser.id,
-        team_id: profile.team_id,
-        image_url: imageUrl,
-        status: 'pending'
-    });
-
-    showNotificationToast("Work submitted to your Captain!");
-}
-       async function approveStudentWork(submissionId) {
-    // 1. First, check if the person clicking the button is the Captain
-    const { data: team } = await _supabase.from('teams')
-        .select('captain_id')
-        .eq('captain_id', currentUser.id)
-        .maybeSingle();
-
-    if (!team) {
-        showNotificationToast("Only the Captain can approve work!");
-        return;
-    }
-
-    // 2. Perform the update in the database FIRST
-    const { data: sub } = await _supabase.from('work_submissions')
-        .update({ status: 'approved' })
-        .eq('id', submissionId)
-        .select('team_id') // We need to get the team_id back from the update
-        .single();
-
-    showNotificationToast("Work approved! Progress updated.");
-
-    // 3. Now that the status is 'approved', check if the team is ready to level up
-    if (sub) {
-        checkAndAdvanceTeamLevel(sub.team_id);
-        renderCaptainInbox(); // Refresh the inbox so the approved item disappears
-    }
-}
         function routeAdminTerminalDirectly(targetPanel) {
             document.getElementById("adminViewSelectorGate").style.display = "none";
             launchDashboard(targetPanel);
@@ -685,32 +656,8 @@ async function submitWorkForVerification(imageUrl) {
             launchDashboard(targetPanel);
         }
 
-        // Save Changes to Supabase
-async function saveProfileChanges() {
-    const newName = document.getElementById("editNickname").value;
-
-    // This finds which emoji was clicked in your grid
-    const selectedEmoji = document.querySelector('[data-selected="true"]')?.innerText || '🦁';
-
-    // Get the team from the dropdown
-    const newTeam = document.getElementById('editTeamSelect').value;
-
-    const { error } = await _supabase
-        .from('profiles')
-        .update({ 
-            display_name: newName, 
-            avatar_character: selectedEmoji,
-            team_id: newTeam
-        })
-        .eq('id', currentUser.id);
-
-    if (!error) {
-        document.getElementById("navAvatar").innerText = selectedEmoji;
-        showNotificationToast("Profile updated!");
-        closeProfileModal();
-        loadTeamDashboard(currentUser); 
-    }
-} function launchDashboard(viewMode) {
+        // --- 11. DASHBOARD MOUNTING ENGINE ---
+        function launchDashboard(viewMode) {
             if (currentUser.email === ADMIN_EMAIL) {
                 document.getElementById("adminHeaderToggleBar").style.display = "flex";
             }
@@ -719,22 +666,61 @@ async function saveProfileChanges() {
                 document.getElementById("teacherOnlyDashboard").style.display = "block";
                 loadTeacherRosterData();
                 teacherRefreshConfigurationDropdowns();
-            } else {
-            document.getElementById("studentDashboard").style.display = "block";
-            fetchUserProgress();
-            renderLiveLeaderboard();
-            fetchDisappearingImageCanvasBoard();
-
-            // --- NEW TEAM LOGIC ---
-            loadTeamDashboard(currentUser); 
-            // ----------------------
-
-            buildMatrixInterfaceGrid();
-        }
+            } else { 
+                document.getElementById("studentDashboard").style.display = "block";
+                fetchUserProgress();
+                renderLiveLeaderboard();
+                renderTeamTrackDashboard(); 
+                fetchDisappearingImageCanvasBoard();
+                fetchPodTeammateProgress();
+                buildMatrixInterfaceGrid();
+            }
         }
 
+        // --- 12. TEAM PROGRESSION VISUALIZER METRICS ---
+        async function renderTeamTrackDashboard() {
+            const mount = document.getElementById("teamTracksMount");
+            if (!mount) return;
+
+            const { data: tracks } = await _supabase.from('team_levels').select('team_id, current_level');
+
+            const trackLevels = { "Red": 1, "Blue": 1, "Green": 1 };
+            tracks?.forEach(t => {
+                if(t.team_id) trackLevels[t.team_id] = t.current_level || 1;
+            });
+
+            mount.innerHTML = "";
+
+            Object.keys(trackLevels).forEach(color => {
+                const currentLvl = trackLevels[color];
+                const totalLevels = 11;
+                const progressPercentage = Math.min(100, Math.round((currentLvl / totalLevels) * 100));
+
+                const colorHexes = { "Red": "#ef4444", "Blue": "#3b82f6", "Green": "#10b981" };
+                const activeColor = colorHexes[color] || "#64748b";
+
+                const trackRow = document.createElement('div');
+                trackRow.style.marginBottom = "4px";
+                trackRow.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 500; margin-bottom: 4px;">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span style="height: 10px; width: 10px; border-radius: 50%; background-color: ${activeColor}; display: inline-block;"></span>
+                            <span>${color} Track</span>
+                        </div>
+                        <span style="color: #94a3b8;">Level ${currentLvl} / ${totalLevels}</span>
+                    </div>
+                    <div style="width: 100%; background: #334155; height: 8px; border-radius: 4px; overflow: hidden; position: relative;">
+                        <div style="width: ${progressPercentage}%; background: ${activeColor}; height: 100%; transition: width 0.5s ease-in-out;"></div>
+                    </div>
+                `;
+                mount.appendChild(trackRow);
+            });
+        }
+
+// --- 13. TEACHER PANEL AND ROSTER MANAGEMENT ---
         async function loadTeacherRosterData() {
             const tbody = document.getElementById("teacherRosterTableBody");
+            if (!tbody) return;
             tbody.innerHTML = '<tr><td colspan="3" style="color:#94a3b8; text-align:center;">Loading class roster...</td></tr>';
 
             const { data: students } = await _supabase.from('profiles').select('id, display_name, avatar_character, pod_id');
@@ -744,7 +730,7 @@ async function saveProfileChanges() {
             progress?.forEach(rec => { progressMap[rec.user_id] = rec.mastered_letters || []; });
 
             tbody.innerHTML = '';
-            if(!students || students.length === 0) {
+            if (!students || students.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="3" style="color:#94a3b8; text-align:center;">No students registered yet.</td></tr>';
                 return;
             }
@@ -762,30 +748,45 @@ async function saveProfileChanges() {
             });
         }
 
-       async function checkAndAdvanceTeamLevel(teamId) {
-    // 1. Get all members and their submission status
-    const { data: members } = await _supabase.from('profiles').select('id').eq('team_id', teamId);
-    const { data: approvedSubmissions } = await _supabase
-        .from('work_submissions')
-        .select('student_id')
-        .eq('team_id', teamId)
-        .eq('status', 'approved');
+        async function teacherRefreshConfigurationDropdowns() {
+            const { data: students } = await _supabase.from('profiles').select('id, display_name');
 
-    // 2. Check if every member has at least one approved submission
-    const allMastered = members.every(member => 
-        approvedSubmissions.some(sub => sub.student_id === member.id)
-    );
+            const sSelect = document.getElementById("teacherStudentSelect");
+            if (sSelect) {
+                sSelect.innerHTML = '<option value="">Select Student...</option>';
+                students?.forEach(s => { sSelect.innerHTML += `<option value="${s.id}">${s.display_name}</option>`; });
+            }
 
-    // 3. If everyone is done, advance the level
-    if (allMastered) {
-        const { data: progress } = await _supabase.from('team_progress').select('current_level').eq('team_id', teamId).single();
-        await _supabase.from('team_progress')
-            .update({ current_level: progress.current_level + 1 })
-            .eq('team_id', teamId);
+            const pSelect = document.getElementById("teacherPodSelect");
+            if (pSelect) {
+                pSelect.innerHTML = '<option value="">Select Color Team...</option>';
+                CLASSROOM_COLORS.forEach(color => { pSelect.innerHTML += `<option value="${color}">${color}</option>`; });
+            }
+        }
 
-        showNotificationToast("Team Mastery Achieved! Advancing to next level...");
-    }
-} 
+        async function teacherAssignStudentToPod() {
+            const studentId = document.getElementById("teacherStudentSelect").value;
+            const chosenColor = document.getElementById("teacherPodSelect").value;
+
+            if (!studentId || !chosenColor) return showNotificationToast("Please pick both a student and a team color.");
+
+            showNotificationToast("Updating team assignment...");
+            const { error } = await _supabase
+                .from('profiles')
+                .update({ pod_id: chosenColor })
+                .eq('id', studentId);
+
+            if (error) {
+                console.error("Error moving student:", error);
+                return showNotificationToast("Failed to move student: " + error.message);
+            }
+
+            showNotificationToast(`Student assigned to ${chosenColor}!`);
+            await loadTeacherRosterData();
+            await teacherRefreshConfigurationDropdowns();
+        }
+
+        // --- 14. MATCHING GAME ARENA ENGINE ---
         function openMatchingGameWorkspaceMode(scope) {
             gameModeScope = scope;
             document.getElementById("viewFidelGrid").style.display = "none";
@@ -815,8 +816,8 @@ async function saveProfileChanges() {
         function generateNewGameRoundData() {
             activeGamePairs = [];
             selectedGameTokenId = null;
-
             let structuralSelectionList = [];
+
             if (gameModeScope === "all") {
                 let pool = [...alphabetData].sort(() => Math.random() - 0.5).slice(0, 4);
                 pool.forEach(item => {
@@ -842,6 +843,7 @@ async function saveProfileChanges() {
 
         function renderErgonomicBlockGameElements() {
             const mount = document.getElementById("ergonomicBlockGameMount");
+            if (!mount) return;
             mount.innerHTML = "";
 
             activeGamePairs.forEach((tokenData, index) => {
@@ -873,7 +875,8 @@ async function saveProfileChanges() {
 
                 if (targetToken.matchKey === priorToken.matchKey && targetToken.kind !== priorToken.kind) {
                     element.className = "game-interactive-token resolved-pair";
-                    absolutePriorElement.className = "game-interactive-token resolved-pair";
+                    if (absolutePriorElement) absolutePriorElement.className = "game-interactive-token resolved-pair";
+
                     currentStreakScore++;
                     document.getElementById("gameStreakValue").innerText = currentStreakScore;
                     showNotificationToast("Match found!");
@@ -884,7 +887,7 @@ async function saveProfileChanges() {
                     document.getElementById("gameStreakValue").innerText = currentStreakScore;
                     showNotificationToast("Not quite right! Streak reset.");
                     element.classList.remove("active-selected");
-                    absolutePriorElement.classList.remove("active-selected");
+                    if (absolutePriorElement) absolutePriorElement.classList.remove("active-selected");
                     selectedGameTokenId = null;
                 }
             }
@@ -895,13 +898,134 @@ async function saveProfileChanges() {
             if (unresolved.length === 0) {
                 executeVictoryConfettiCelebration();
                 showNotificationToast("You cleared the board! Starting next round...");
+
+                _supabase.from('user_challenges').upsert({
+                    user_id: currentUser.id,
+                    level: currentTeamCollectiveLevel,
+                    matching_passed: true
+                }, { onConflict: 'user_id,level' }).then(() => {
+                    const badgeText = document.getElementById("sidebarPodBadge").innerText;
+                    if (badgeText !== "No Team Assigned") {
+                        checkTeamProgressionGate(badgeText);
+                    }
+                });
+
                 setTimeout(generateNewGameRoundData, 1000);
             }
         }
 
+        // --- 15. STUDENT MATRIX GRID & WORKSPACE ENVIRONMENT ---
+        function getLevelForFidelIndex(index) {
+            return Math.floor(index / 3) + 1; 
+        }
+
+        function buildMatrixInterfaceGrid() {
+            const container = document.getElementById("viewFidelGrid"); 
+            if (!container) return;
+            container.innerHTML = "";
+
+            alphabetData.forEach((item, index) => {
+                const itemLevel = getLevelForFidelIndex(index);
+
+                if (itemLevel <= currentTeamCollectiveLevel) {
+                    const card = document.createElement('div');
+                    card.className = "fidel-card"; 
+                    card.setAttribute('data-fidel', item.base); 
+                    card.innerText = item.base;
+                    card.onclick = () => launchIsolatedClassroomWorkspace(item);
+                    container.appendChild(card);
+                } else {
+                    const lockedCard = document.createElement('div');
+                    lockedCard.className = "fidel-card locked"; 
+                    lockedCard.style.opacity = "0.3";
+                    lockedCard.style.cursor = "not-allowed";
+                    lockedCard.innerText = "🔒";
+                    container.appendChild(lockedCard);
+                }
+            });
+            renderUIProgressUpdates();
+        }
+
+        function generateClassroomSubscripts(prefix) {
+            if (prefix === "h" || prefix === "ḥ") return vowelFrameworkLabels;
+            return standardVowelSubscripts.map(sub => `${prefix}${sub}`);
+        }
+
+        function launchIsolatedClassroomWorkspace(fidelObj) {
+            activeBaseFidel = fidelObj.base; 
+            activeFamilyArrayData = fidelObj.family;
+            activeSubscriptsData = generateClassroomSubscripts(fidelObj.prefix);
+
+            document.getElementById("viewFidelGrid").style.display = "none";
+            document.getElementById("isolatedFamilyClassroom").style.display = "block";
+            document.getElementById("classroomFamilyTitle").innerText = `Reviewing Row: "${activeBaseFidel}"`;
+
+            document.getElementById("classroomRowGameBtn").onclick = () => openMatchingGameWorkspaceMode(fidelObj);
+
+            const undoBtn = document.getElementById("classroomUndoBtn");
+            if (undoBtn) {
+                undoBtn.style.display = masteredLetters.includes(activeBaseFidel) ? "block" : "none";
+            }
+
+            renderGiantClassroomRowItems(activeFamilyArrayData, activeSubscriptsData);
+            setTimeout(initSketchpadEngineSystem, 50);
+        }
+
+        function renderGiantClassroomRowItems(familyArray, subscriptsArray) {
+            const mount = document.getElementById("classroomGiantRowMount"); 
+            if (!mount) return;
+            mount.innerHTML = "";
+            familyArray.forEach((char, idx) => {
+                const card = document.createElement('div');
+                card.className = "giant-char-card";
+                card.innerHTML = `<div class="letter">${char}</div><div class="sub">${subscriptsArray[idx]}</div>`;
+                mount.appendChild(card);
+            });
+        }
+
+        function shuffleClassroomRowPhonetics() {
+            let layoutIndices = [0,1,2,3,4,5,6].sort(() => Math.random() - 0.5);
+            const mount = document.getElementById("classroomGiantRowMount"); 
+            if (!mount) return;
+            mount.innerHTML = "";
+            layoutIndices.forEach(idx => {
+                const card = document.createElement('div');
+                card.className = "giant-char-card";
+                card.innerHTML = `<div class="letter">${activeFamilyArrayData[idx]}</div><div class="sub">${activeSubscriptsData[idx]}</div>`;
+                mount.appendChild(card);
+            });
+        }
+
+        // --- 16. INDIVIDUAL PROGRESS MUTATION SYSTEMS ---
+        async function classroomMarkAsMasteredDirectly() {
+            if (!masteredLetters.includes(activeBaseFidel)) masteredLetters.push(activeBaseFidel);
+            await _supabase.from('user_progress').upsert({ user_id: currentUser.id, mastered_letters: masteredLetters }, { onConflict: 'user_id' });
+            showNotificationToast(`Row "${activeBaseFidel}" saved to your mastered list!`);
+            executeVictoryConfettiCelebration();
+            fetchPodTeammateProgress(); 
+            renderLiveLeaderboard(); 
+            exitClassroomViewBackToGrid();
+        }
+
+        async function classroomUnmasterLetterRow() {
+            masteredLetters = masteredLetters.filter(item => item !== activeBaseFidel);
+            await _supabase.from('user_progress').upsert({ user_id: currentUser.id, mastered_letters: masteredLetters }, { onConflict: 'user_id' });
+            showNotificationToast(`Removed "${activeBaseFidel}" from mastered rows.`);
+            fetchPodTeammateProgress(); 
+            renderLiveLeaderboard(); 
+            exitClassroomViewBackToGrid();
+        }
+
+        function exitClassroomViewBackToGrid() {
+            document.getElementById("isolatedFamilyClassroom").style.display = "none";
+            document.getElementById("viewFidelGrid").style.display = "grid";
+            buildMatrixInterfaceGrid();
+        }
+
         function selectAvatar(symbol, element) {
             document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
-            element.classList.add('selected'); selectedAvatarSymbol = symbol;
+            element.classList.add('selected'); 
+            selectedAvatarSymbol = symbol;
         }
 
         async function saveProfileData() {
@@ -917,256 +1041,283 @@ async function saveProfileChanges() {
             launchDashboard("student");
         }
 
-        async function teacherRefreshConfigurationDropdowns() {
-            const { data: students } = await _supabase.from('profiles').select('id, display_name');
-
-            const sSelect = document.getElementById("teacherStudentSelect");
-            sSelect.innerHTML = '<option value="">Select Student...</option>';
-            students?.forEach(s => { sSelect.innerHTML += `<option value="${s.id}">${s.display_name}</option>`; });
-
-            const pSelect = document.getElementById("teacherPodSelect");
-            pSelect.innerHTML = '<option value="">Select Color Team...</option>';
-            CLASSROOM_COLORS.forEach(color => { pSelect.innerHTML += `<option value="${color}">${color}</option>`; });
-        }
-
-        async function teacherAssignStudentToPod() {
-            const studentId = document.getElementById("teacherStudentSelect").value;
-            const chosenColor = document.getElementById("teacherPodSelect").value;
-
-            if (!studentId || !chosenColor) return showNotificationToast("Please pick both a student and a team color.");
-
-            showNotificationToast("Updating team assignment...");
-            const { error } = await _supabase
-                .from('profiles')
-                .update({ pod_id: chosenColor })
-                .eq('id', studentId);
-
-            if (error) {
-                console.error("Error moving student:", error);
-                return showNotificationToast("Failed to move student: " + error.message);
+        // --- 17. SOCIAL MODULES & REAL-TIME INTERACTION GRIDS ---
+        async function fetchPodTeammateProgress() {
+            const { data: userProfile } = await _supabase.from('profiles').select('pod_id').eq('id', currentUser.id).maybeSingle();
+            if (!userProfile || !userProfile.pod_id) { 
+                document.getElementById("podTeamNameDisplay").innerText = "No Team Assigned"; 
+                return; 
             }
 
-            showNotificationToast(`Student assigned to ${chosenColor}!`);
-            await loadTeacherRosterData();
-            await teacherRefreshConfigurationDropdowns();
-        }
+            const currentPodTeamTitle = userProfile.pod_id || "Your Team";
+            document.getElementById("podTeamNameDisplay").innerText = currentPodTeamTitle;
+            document.getElementById("sidebarPodBadge").innerText = currentPodTeamTitle;
 
-        function toggleDropdownElement(elementId) {
-            document.getElementById(elementId).classList.toggle('open');
-        }
+       // --- Continuation of Section 17: SOCIAL MODULES & REAL-TIME INTERACTION GRIDS ---
+            const { data: teammates } = await _supabase.from('profiles').select('id, display_name, avatar_character').eq('pod_id', currentPodTeamTitle);
+            const { data: progress } = await _supabase.from('user_progress').select('user_id, mastered_letters');
 
-        function buildMatrixInterfaceGrid() {
-            const container = document.getElementById("viewFidelGrid"); container.innerHTML = "";
-            alphabetData.forEach(item => {
-                const card = document.createElement('div');
-                card.className = "fidel-card"; card.setAttribute('data-fidel', item.base); card.innerText = item.base;
-                card.onclick = () => launchIsolatedClassroomWorkspace(item);
-                container.appendChild(card);
+            const progressMap = {};
+            progress?.forEach(p => { progressMap[p.user_id] = p.mastered_letters || []; });
+
+            const mount = document.getElementById("podTeammatesMount");
+            if (!mount) return;
+            mount.innerHTML = "";
+
+            teammates?.forEach(member => {
+                const letters = progressMap[member.id] || [];
+                const progressCount = letters.length;
+                const percent = Math.min(100, Math.round((progressCount / 34) * 100));
+
+                const memberRow = document.createElement("div");
+                memberRow.style.marginBottom = "10px";
+                memberRow.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 2px;">
+                        <span>${member.avatar_character || '🦁'} ${member.display_name} ${member.id === currentUser.id ? '(You)' : ''}</span>
+                        <span style="color: #a4b5cf;">${progressCount} Rows</span>
+                    </div>
+                    <div style="width: 100%; background: #1e293b; height: 6px; border-radius: 3px; overflow: hidden;">
+                        <div style="width: ${percent}%; background: #38bdf8; height: 100%; transition: width 0.3s ease;"></div>
+                    </div>
+                `;
+                mount.appendChild(memberRow);
             });
-            renderUIProgressUpdates();
-        }
-
-        function generateClassroomSubscripts(prefix) {
-            if (prefix === "h" || prefix === "ḥ") return vowelFrameworkLabels;
-            return standardVowelSubscripts.map(sub => `${prefix}${sub}`);
-        }
-
-        function launchIsolatedClassroomWorkspace(fidelObj) {
-            activeBaseFidel = fidelObj.base; activeFamilyArrayData = fidelObj.family;
-            activeSubscriptsData = generateClassroomSubscripts(fidelObj.prefix);
-
-            document.getElementById("viewFidelGrid").style.display = "none";
-            document.getElementById("isolatedFamilyClassroom").style.display = "block";
-            document.getElementById("classroomFamilyTitle").innerText = `Reviewing Row: "${activeBaseFidel}"`;
-
-            document.getElementById("classroomRowGameBtn").onclick = () => openMatchingGameWorkspaceMode(fidelObj);
-
-            const undoBtn = document.getElementById("classroomUndoBtn");
-            if (masteredLetters.includes(activeBaseFidel)) {
-                undoBtn.style.display = "block";
-            } else {
-                undoBtn.style.display = "none";
-            }
-
-            renderGiantClassroomRowItems(activeFamilyArrayData, activeSubscriptsData);
-            setTimeout(initSketchpadEngineSystem, 50);
-        }
-
-        function renderGiantClassroomRowItems(familyArray, subscriptsArray) {
-            const mount = document.getElementById("classroomGiantRowMount"); mount.innerHTML = "";
-            familyArray.forEach((char, idx) => {
-                const card = document.createElement('div');
-                card.className = "giant-char-card";
-                card.innerHTML = `<div class="letter">${char}</div><div class="sub">${subscriptsArray[idx]}</div>`;
-                mount.appendChild(card);
-            });
-        }
-
-        function shuffleClassroomRowPhonetics() {
-            let layoutIndices = [0,1,2,3,4,5,6].sort(() => Math.random() - 0.5);
-            const mount = document.getElementById("classroomGiantRowMount"); mount.innerHTML = "";
-            layoutIndices.forEach(idx => {
-                const card = document.createElement('div');
-                card.className = "giant-char-card";
-                card.innerHTML = `<div class="letter">${activeFamilyArrayData[idx]}</div><div class="sub">${activeSubscriptsData[idx]}</div>`;
-                mount.appendChild(card);
-            });
-        }
-
-        async function classroomMarkAsMasteredDirectly() {
-            if (!masteredLetters.includes(activeBaseFidel)) masteredLetters.push(activeBaseFidel);
-            await _supabase.from('user_progress').upsert({ user_id: currentUser.id, mastered_letters: masteredLetters }, { onConflict: 'user_id' });
-            showNotificationToast(`Row "${activeBaseFidel}" saved to your mastered list!`);
-            executeVictoryConfettiCelebration();
-
-        }
-
-        async function classroomUnmasterLetterRow() {
-            masteredLetters = masteredLetters.filter(item => item !== activeBaseFidel);
-            await _supabase.from('user_progress').upsert({ user_id: currentUser.id, mastered_letters: masteredLetters }, { onConflict: 'user_id' });
-            showNotificationToast(`Removed "${activeBaseFidel}" from mastered rows.`);
-
-        }
-
-        function exitClassroomViewBackToGrid() {
-            document.getElementById("isolatedFamilyClassroom").style.display = "none";
-            document.getElementById("viewFidelGrid").style.display = "grid";
-            buildMatrixInterfaceGrid();
-        }
-
-
-
-        async function fetchDisappearingImageCanvasBoard() {
-            const currentISOTime = new Date().toISOString();
-            const { data: activeShares } = await _supabase.from('photo_shares').select('id, image_url, expires_at, meta_points, user_id, profiles(display_name, avatar_character)').gt('expires_at', currentISOTime);
-            const container = document.getElementById("disappearingArtGalleryFeed"); container.innerHTML = "";
-            if (!activeShares || activeShares.length === 0) {
-                container.innerHTML = `<p style="font-size:12px; color:#94a3b8; grid-column:1/-1;">No shared sketches yet today. Use the drawing pad to share yours!</p>`; return;
-            }
-            activeShares.forEach(share => {
-                const hoursLeft = Math.max(0, Math.round((new Date(share.expires_at) - new Date()) / (1000 * 60 * 60)));
-                const item = document.createElement('div'); item.className = "feed-item";
-                const initialCount = share.meta_points || 0;
-                item.innerHTML = `<img src="${share.image_url}"><div class="feed-meta"><div class="feed-meta-row"><strong>${share.profiles?.avatar_character || '🦁'} ${share.profiles?.display_name || 'User'}</strong><span style="color:#ef4444;">${hoursLeft}h left</span></div><div class="feed-meta-row" style="margin-top:4px;"><button class="verify-badge-btn" data-count="${initialCount}" onclick="submitVerificationCounterBump(${share.id}, this)">👍 Verify Form (${initialCount})</button></div></div>`;
-                container.appendChild(item);
-            });
-        }
-
-        async function fetchUserProgress() {
-            const { data } = await _supabase.from('user_progress').select('mastered_letters').eq('user_id', currentUser.id).maybeSingle();
-            if (data && data.mastered_letters) masteredLetters = data.mastered_letters;
-            renderUIProgressUpdates();
-        }
-
-        function renderUIProgressUpdates() {
-            document.querySelectorAll('.fidel-card').forEach(card => {
-                if (masteredLetters.includes(card.getAttribute('data-fidel'))) card.classList.add('completed');
-            });
-            const percent = Math.round((masteredLetters.length / 34) * 100);
-            document.getElementById("progressBar").style.width = `${percent}%`; 
-            document.getElementById("progressText").innerText = `${percent}% Complete`;
         }
 
         async function renderLiveLeaderboard() {
-            const { data: profiles } = await _supabase.from('profiles').select('id, display_name, avatar_character');
-            const { data: progressRecords } = await _supabase.from('user_progress').select('user_id, mastered_letters');
-            const progressMap = {}; progressRecords.forEach(rec => { progressMap[rec.user_id] = rec.mastered_letters || []; });
+            const mount = document.getElementById("globalLeaderboardMount");
+            if (!mount) return;
+            mount.innerHTML = '<div style="color: #94a3b8; font-size: 12px;">Updating scoreboard...</div>';
 
-            let leaderList = profiles.map(p => ({
-                id: p.id, name: p.display_name, avatar: p.avatar_character || '🦁', percentage: Math.round(((progressMap[p.id] || []).length / 34) * 100)
-            })).sort((a, b) => b.percentage - a.percentage);
+            const { data: profiles } = await _supabase.from('profiles').select('id, display_name, avatar_character, pod_id');
+            const { data: progress } = await _supabase.from('user_progress').select('user_id, mastered_letters');
 
-            const container = document.getElementById("liveLeaderboardContent"); container.innerHTML = "";
-            leaderList.slice(0, 5).forEach((player, idx) => {
-                const isSelf = currentUser && player.id === currentUser.id;
-                container.innerHTML += `<div class="leaderboard-row ${isSelf ? 'current-user' : ''}"><div class="player-info"><span>#${idx + 1}</span><span>${player.avatar}</span><span>${player.name} ${isSelf ? '(You)' : ''}</span></div><span class="player-score-badge">${player.percentage}%</span></div>`;
+            const progressMap = {};
+            progress?.forEach(p => { progressMap[p.user_id] = p.mastered_letters || []; });
+
+            let leaderboardData = profiles?.map(p => ({
+                name: p.display_name || "Unknown Learner",
+                avatar: p.avatar_character || "🦊",
+                team: p.pod_id || "Free Agent",
+                score: (progressMap[p.id] || []).length
+            })) || [];
+
+            leaderboardData.sort((a, b) => b.score - a.score);
+            mount.innerHTML = "";
+
+            if (leaderboardData.length === 0) {
+                mount.innerHTML = '<div style="color: #94a3b8; font-size: 12px;">No rankings available.</div>';
+                return;
+            }
+
+            leaderboardData.slice(0, 5).forEach((player, idx) => {
+                const rankRow = document.createElement("div");
+                rankRow.style.cssText = "display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #334155; font-size: 13px;";
+                rankRow.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-weight: bold; color: #f59e0b; width: 14px;">#${idx + 1}</span>
+                        <span>${player.avatar} ${player.name}</span>
+                        <span style="font-size: 10px; padding: 1px 5px; border-radius: 10px; background: #334155; color: #cbd5e1;">${player.team}</span>
+                    </div>
+                    <span style="font-weight: 600; color: #10b981;">${player.score} rows</span>
+                `;
+                mount.appendChild(rankRow);
             });
         }
-// --- ADD THESE NEAR YOUR OTHER TEAM FUNCTIONS ---
 
-async function checkMySubmissionStatus() {
-    const statusMount = document.getElementById('myStatusMount');
-    if (!statusMount) return;
+        async function fetchDisappearingImageCanvasBoard() {
+            const board = document.getElementById("classArtSharesBoard");
+            if (!board) return;
+            board.innerHTML = '<div style="color: #94a3b8; padding: 10px; text-align: center;">Syncing ephemeral canvas feed...</div>';
 
-    const { data: statusData } = await _supabase
-        .from('work_submissions')
-        .select('status')
-        .eq('student_id', currentUser.id)
-        .order('created_at', { ascending: false })
-        .maybeSingle();
+            const currentTimeISO = new Date().toISOString();
+            const { data: activeShares, error } = await _supabase
+                .from('photo_shares')
+                .select('id, user_id, image_url, meta_points')
+                .gt('expires_at', currentTimeISO);
 
-    if (statusData) {
-        statusMount.innerHTML = `<div class="status-badge ${statusData.status}">Status: ${statusData.status.toUpperCase()}</div>`;
-    }
-} 
-        async function submitWorkForVerification(imageUrl) {
-    const { data: profile } = await _supabase.from('profiles').select('team_id').eq('id', currentUser.id).single();
+            if (error || !activeShares || activeShares.length === 0) {
+                board.innerHTML = '<div style="color: #64748b; padding: 20px; text-align: center; font-size: 13px;">No drawings shared on the board right now. Draw something above to inspire your team!</div>';
+                return;
+            }
 
-    await _supabase.from('work_submissions').insert({
-        student_id: currentUser.id,
-        team_id: profile.team_id,
-        image_url: imageUrl,
-        status: 'pending'
-    });
+            const { data: profiles } = await _supabase.from('profiles').select('id, display_name, avatar_character');
+            const profileMap = {};
+            profiles?.forEach(p => { profileMap[p.id] = p; });
 
-    showNotificationToast("Work submitted to your Captain!");
-}
+            board.innerHTML = "";
+            activeShares.forEach(share => {
+                const creator = profileMap[share.user_id] || { display_name: "Classmate", avatar_character: "🎨" };
+                const frame = document.createElement("div");
+                frame.className = "ephemeral-art-card";
+                frame.style.cssText = "background: #1e293b; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px; border: 1px solid #334155;";
+                
+                frame.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: space-between; font-size: 12px;">
+                        <span style="font-weight: 500;">${creator.avatar_character} ${creator.display_name}</span>
+                        <span style="color: #64748b; font-size: 10px;">Expires in 24h</span>
+                    </div>
+                    <img src="${share.image_url}" alt="Class Writing Practice" style="width: 100%; border-radius: 4px; background: #0f172a; border: 1px solid #1e293b; aspect-ratio: 4/3; object-fit: contain;" />
+                    <button id="verify-btn-${share.id}" class="action-verify-btn" style="width: 100%; padding: 6px; background: #0284c7; border: none; border-radius: 4px; color: white; font-size: 12px; font-weight: 500; cursor: pointer; transition: background 0.2s;">
+                        ${share.meta_points > 0 ? '✅ Approved by Captain' : '⭐ Verify Proficiency'}
+                    </button>
+                `;
+                board.appendChild(frame);
 
-async function handleSubmissionClick() {
-    const url = document.getElementById('workUrlInput').value;
-    if (!url) {
-        showNotificationToast("Please paste a link to your work first!");
-        return;
-    }
+                const buttonElement = document.getElementById(`verify-btn-${share.id}`);
+                if (buttonElement) {
+                    if (share.meta_points > 0) {
+                        buttonElement.className = "action-verify-btn verified-state";
+                        buttonElement.style.background = "#059669";
+                    }
+                    buttonElement.onclick = () => submitVerificationCounterBump(share.id, buttonElement, share.user_id);
+                }
+            });
+        }
 
-    await submitWorkForVerification(url);
-    document.getElementById('workUrlInput').value = ""; // Clear input
-    checkMySubmissionStatus(); // Refresh badge
-}
-async function loadTeamDashboard(user) {
-    // 1. Get the user's team info
-    const { data: userProfile } = await _supabase
-        .from('profiles')
-        .select('team_id, role')
-        .eq('id', user.id)
-        .single();
+        // --- --- 18. COLLABORATIVE PROGRESSION GATEKEEPER ENGINE --- ---
+        async function checkTeamProgressionGate(teamId) {
+            if (!teamId || teamId === "No Team Assigned") return;
 
-    if (!userProfile?.team_id) {
-        document.getElementById("podTeammatesMount").innerHTML = "<p>No Team Assigned</p>";
-        return;
-    }
+            const { data: teamLevelData } = await _supabase.from('team_levels').select('current_level').eq('team_id', teamId).maybeSingle();
+            if (!teamLevelData) return;
+            const targetGateLevel = teamLevelData.current_level;
 
-    // 2. Fetch all members of this specific team
-    const { data: members } = await _supabase
-        .from('profiles')
-        .select('display_name, avatar_character, role')
-        .eq('team_id', userProfile.team_id);
+            const { data: profilesOnTeam } = await _supabase.from('profiles').select('id').eq('pod_id', teamId);
+            if (!profilesOnTeam || profilesOnTeam.length === 0) return;
+            const absoluteTeamSize = profilesOnTeam.length;
 
-    // 3. Render the Team Board
-    const mount = document.getElementById("podTeammatesMount");
-    mount.innerHTML = `<h4>Your Team Roster</h4>`;
+            const teamMemberIds = profilesOnTeam.map(p => p.id);
+            const { data: targetChallenges } = await _supabase
+                .from('user_challenges')
+                .select('user_id, matching_passed, writing_passed')
+                .eq('level', targetGateLevel)
+                .in('user_id', teamMemberIds);
 
-    members.forEach(member => {
-        const row = document.createElement('div');
-        row.className = "teammate-row";
-        row.innerHTML = `
-            <div class="teammate-info">
-                <span>${member.avatar_character || '🦁'} ${member.display_name}</span>
-                <span style="font-size: 0.8em; color: #64748b;">${member.role === 'captain' ? '👑 Captain' : 'Student'}</span>
-            </div>
-        `;
-        mount.appendChild(row);
-    });
+            let completelyClearedCount = 0;
+            teamMemberIds.forEach(uId => {
+                const record = targetChallenges?.find(c => c.user_id === uId);
+                if (record && record.matching_passed && record.writing_passed) {
+                    completelyClearedCount++;
+                }
+            });
 
-    // --- NEW: SHOW LOGIC FOR CAPTAIN ---
-    if (userProfile.role === 'captain') {
-        const inboxMount = document.createElement('div');
-        inboxMount.id = 'captainInboxMount';
-        mount.appendChild(inboxMount); // Attach inbox below the roster
-        renderCaptainInbox();          // Call the function to fetch & show submissions
-    }
-}
-        function logout() { resetToGate(); }
-    </script>
-</body>
-</html>
+            if (completelyClearedCount >= absoluteTeamSize && targetGateLevel < 11) {
+                const nextLevelIndex = targetGateLevel + 1;
+                await _supabase.from('team_levels').update({ current_level: nextLevelIndex }).eq('team_id', teamId);
+                showNotificationToast(`🎉 Incredible! The entire ${teamId} Team advanced to Level ${nextLevelIndex}!`);
+                executeVictoryConfettiCelebration();
+                
+                if (badgeText === teamId) {
+                    currentTeamCollectiveLevel = nextLevelIndex;
+                }
+                renderTeamTrackDashboard();
+                buildMatrixInterfaceGrid();
+            }
+        }
+
+        async function fetchUserProgress() {
+            const { data: record } = await _supabase.from('user_progress').select('mastered_letters').eq('user_id', currentUser.id).maybeSingle();
+            if (record) {
+                masteredLetters = record.mastered_letters || [];
+            } else {
+                masteredLetters = [];
+            }
+        }
+
+        function renderUIProgressUpdates() {
+            const count = masteredLetters.length;
+            const textElement = document.getElementById("masteryRatioTextLabel");
+            if (textElement) {
+                textElement.innerText = `${count} / 34 Rows Mastered`;
+            }
+        }
+
+        function showNotificationToast(msg) {
+            const toast = document.getElementById("notificationToastAlert");
+            if (!toast) {
+                alert(msg);
+                return;
+            }
+            toast.innerText = msg;
+            toast.style.display = "block";
+            toast.style.opacity = "1";
+            
+            clearTimeout(window.toastTimerReference);
+            window.toastTimerReference = setTimeout(() => {
+                toast.style.opacity = "0";
+                setTimeout(() => { toast.style.display = "none"; }, 300);
+            }, 3500);
+        }
+
+        // --- --- 19. LOW-LEVEL SKETCHPAD CANVAS INTERFACE HANDLERS --- ---
+        function initSketchpadEngineSystem() {
+            canvas = document.getElementById("sketchpadCanvasComponent");
+            if (!canvas) return;
+            ctx = canvas.getContext("2d");
+
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            canvas.style.width = "100%";
+            canvas.style.height = "100%";
+
+            ctx.lineWidth = 4;
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            ctx.strokeStyle = "#ffffff";
+
+            let structuralDrawingFlag = false;
+
+            function extractCanvasCoordinateMatrix(e) {
+                const bRect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: clientX - bRect.left,
+                    y: clientY - bRect.top
+                };
+            }
+
+            canvas.onmousedown = (e) => {
+                structuralDrawingFlag = true;
+                const loc = extractCanvasCoordinateMatrix(e);
+                ctx.beginPath();
+                ctx.moveTo(loc.x, loc.y);
+            };
+
+            canvas.onmousemove = (e) => {
+                if (!structuralDrawingFlag) return;
+                e.preventDefault();
+                const loc = extractCanvasCoordinateMatrix(e);
+                ctx.lineTo(loc.x, loc.y);
+                ctx.stroke();
+            };
+
+            canvas.onmouseup = () => { structuralDrawingFlag = false; ctx.closePath(); };
+            canvas.onmouseleave = () => { structuralDrawingFlag = false; ctx.closePath(); };
+
+            canvas.addEventListener("touchstart", (e) => {
+                structuralDrawingFlag = true;
+                const loc = extractCanvasCoordinateMatrix(e);
+                ctx.beginPath();
+                ctx.moveTo(loc.x, loc.y);
+            }, { passive: false });
+
+            canvas.addEventListener("touchmove", (e) => {
+                if (!structuralDrawingFlag) return;
+                e.preventDefault();
+                const loc = extractCanvasCoordinateMatrix(e);
+                ctx.lineTo(loc.x, loc.y);
+                ctx.stroke();
+            }, { passive: false });
+
+            canvas.addEventListener("touchend", () => { structuralDrawingFlag = false; ctx.closePath(); });
+        }
+
+        // --- --- 20. CLIENT RUNTIME INITIALIZATION ENTRYPOINT --- ---
+        window.addEventListener("DOMContentLoaded", () => {
+            resetToGate();
+        });
