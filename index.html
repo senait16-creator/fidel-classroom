@@ -641,10 +641,40 @@ function resetToGate() {
     document.getElementById("onboardingGate").style.display = "flex";
 }
 
-function selectAuthFlow(flow) {
-    isSignUpMode = (flow === 'signup');
-    document.getElementById("onboardingGate").style.display = "none";
-    document.getElementById("credentialFields").style.display = "block";
+let currentAuthMode = 'login'; // or 'signup'
+
+function selectAuthFlow(mode) {
+    currentAuthMode = mode;
+    document.getElementById('onboardingGate').style.display = 'none';
+    document.getElementById('credentialFields').style.display = 'block';
+    document.getElementById('authSubtitle').innerText = mode === 'signup' ? 'Create a new account' : 'Welcome back!';
+    document.getElementById('mainAuthBtn').innerText = mode === 'signup' ? 'Create Account' : 'Log In';
+}
+
+async function handleAuth() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    
+    if (!email || !password) return showNotificationToast("Please fill in all fields.");
+
+    if (currentAuthMode === 'signup') {
+        const { data, error } = await _supabase.auth.signUp({ email, password });
+        if (error) return showNotificationToast(error.message);
+        showNotificationToast("Account created! You can now log in.");
+    } else {
+        const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+        if (error) return showNotificationToast("Login failed: " + error.message);
+        
+        currentUser = data.user;
+        // Check if they need to finish their profile
+        checkProfileCompletion(currentUser);
+    }
+}
+
+function resetToGate() {
+    document.getElementById('onboardingGate').style.display = 'flex';
+    document.getElementById('credentialFields').style.display = 'none';
+    document.getElementById('authSubtitle').innerText = 'Learn the Amharic Alphabet Together!';
 }
 
 async function handleAuth() {
