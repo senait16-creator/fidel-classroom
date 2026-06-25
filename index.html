@@ -434,6 +434,37 @@
             canvas.height = canvas.offsetHeight;
             ctx.lineWidth = 3; ctx.lineCap = "round"; ctx.strokeStyle = "#1e293b";
 
+           // Function to populate the dropdown
+function populateTeamSelect() {
+    const select = document.getElementById("profileTeamSelect");
+    
+    // Clear existing options
+    select.innerHTML = ""; 
+    
+    TEAMS.forEach(team => {
+        let opt = document.createElement("option");
+        opt.value = team; // This sets the value to "Red Team 🔴"
+        opt.innerHTML = team;
+        select.appendChild(opt);
+    });
+}
+            async function saveProfileData() {
+    // Get the exact string from the dropdown
+    const teamSelection = document.getElementById("profileTeamSelect").value;
+    
+    // ... rest of your validation ...
+
+    try {
+        const { error } = await _supabase.from('profiles').upsert({ 
+            id: currentUser.id, 
+            display_name: document.getElementById("displayName").value.trim(),
+            avatar_character: selectedAvatarSymbol,
+            team_color: teamSelection // This will now store "Red Team 🔴"
+        });
+        
+        // ...
+    }
+}
             function getCoordinates(e) {
                 const rect = canvas.getBoundingClientRect();
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
