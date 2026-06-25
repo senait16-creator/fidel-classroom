@@ -142,9 +142,26 @@
         <button class="btn-secondary" onclick="resetToGate()">← Back</button>
         <!-- Corner Profile Display -->
 <div id="cornerProfile" class="profile-corner-badge" onclick="openProfileModal()">
-    <span id="displayAvatarHeader">🦁</span>
+
     <span id="displayUserHeader">Student</span>
     <button class="btn-edit-small">Edit</button>
+</div>
+        <div id="profileModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <h2>Edit Profile</h2>
+        <input type="text" id="editNickname" placeholder="New Nickname">
+
+        <div class="avatar-grid">
+            <div class="avatar-option" onclick="selectAvatar('🦁', this)">🦁</div>
+            <div class="avatar-option" onclick="selectAvatar('🦅', this)">🦅</div>
+            <!-- ... add your other animals here ... -->
+        </div>
+
+        <select id="editTeamSelect"></select>
+
+        <button class="btn-primary" onclick="saveProfileChanges()">Save Changes</button>
+        <button class="btn-secondary" onclick="closeProfileModal()">Cancel</button>
+    </div>
 </div>
     </div>
 </div>
@@ -432,7 +449,32 @@ async function checkUserSession() {
         loadDashboard(profile);
     }
 }
+async function signUp(email, password) {
+    const { data, error } = await _supabase.auth.signUp({
+        email: email,
+        password: password,
+    });
 
+    if (error) {
+        console.error("Signup error:", error.message);
+    } else {
+        console.log("Check your email for confirmation!");
+    }
+}
+
+async function signIn(email, password) {
+    const { data, error } = await _supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+    });
+
+    if (error) {
+        console.error("Login error:", error.message);
+    } else {
+        // Once signed in, this triggers your profile check
+        checkUserProfile(data.user.id);
+    }
+}
      // --- UPDATED PROFILE FETCHING ---
 async function checkUserProfile(userId) {
     // We select specifically what we need from the database
