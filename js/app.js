@@ -135,3 +135,63 @@ document.addEventListener('DOMContentLoaded', () => {
     showScreen('authScreen');
     initSketchpad();
 });
+// --- PROFILE & UI FUNCTIONS ---
+
+function showNotificationToast(msg) {
+    const container = document.getElementById("toastContainer");
+    const element = document.createElement("div");
+    element.className = "toast-popup";
+    element.innerHTML = `<span>${msg}</span>`;
+    container.appendChild(element);
+    setTimeout(() => element.remove(), 3000);
+}
+
+async function saveProfileData() {
+    const nameInput = document.getElementById("displayName").value.trim();
+    const teamSelection = document.getElementById("profileTeamSelect").value; 
+    
+    if (!nameInput) return showNotificationToast("Please enter a nickname.");
+
+    try {
+        const { error } = await _supabase.from('profiles').upsert({ 
+            id: currentUser.id, 
+            display_name: nameInput, 
+            avatar_character: selectedAvatarSymbol,
+            team_color: teamSelection 
+        });
+        
+        if (error) throw error;
+        launchDashboard("student");
+    } catch (err) {
+        showNotificationToast("Database update error: " + err.message);
+    }
+}
+
+function launchDashboard(role) {
+    document.getElementById("authScreen").style.display = "none";
+    document.getElementById("profileSetupScreen").style.display = "none";
+    document.getElementById("adminViewSelectorGate").style.display = "none";
+    
+    if (role === "teacher") {
+        document.getElementById("teacherOnlyDashboard").style.display = "block";
+        document.getElementById("studentDashboard").style.display = "none";
+    } else {
+        document.getElementById("teacherOnlyDashboard").style.display = "none";
+        document.getElementById("studentDashboard").style.display = "block";
+        initSketchpadEngineSystem();
+        // Ensure renderFidelGrid() is defined elsewhere in your game.js or here
+        if (typeof renderFidelGrid === 'function') renderFidelGrid();
+    }
+}
+
+function populateTeamSelect() {
+    const select = document.getElementById("profileTeamSelect");
+    if (!select) return;
+    select.innerHTML = ""; 
+    CLASSROOM_COLORS.forEach(team => {
+        let opt = document.createElement("option");
+        opt.value = team;
+        opt.innerHTML = team;
+        select.appendChild(opt);
+    });
+}
