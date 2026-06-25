@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="am">
+<html lang="am"> 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -730,7 +731,6 @@ async function submitWorkForVerification(imageUrl) {
             element.classList.add('selected'); selectedAvatarSymbol = symbol;
         }
 
-     async function saveProfileData() {
     async function saveProfileData() {
     const nameInput = document.getElementById("displayName").value.trim();
     if (!nameInput) return showNotificationToast("Please enter a nickname.");
@@ -772,7 +772,7 @@ async function submitWorkForVerification(imageUrl) {
         document.getElementById("displayUserHeader").innerText = nameInput;
         document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
         document.getElementById("sidebarPodBadge").innerText = selectedColorTeam;
-        
+
         showNotificationToast("Welcome to the classroom!");
         launchDashboard("student");
     } catch (err) {
