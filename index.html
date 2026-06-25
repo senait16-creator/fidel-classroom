@@ -469,6 +469,8 @@ async function openProfileModal() {
 }
 
 async function saveProfileChanges() {
+    console.log("Attempting to save profile...");
+    
     const user = await getCurrentUserOrRedirect();
     if (!user) return;
 
@@ -476,6 +478,7 @@ async function saveProfileChanges() {
     const selectedEmoji = document.querySelector('.avatar-option.selected')?.innerText || '🦁';
     const newTeam = document.getElementById('editTeamSelect').value;
 
+    // 1. Run the update
     const { error } = await _supabase
         .from('profiles')
         .update({ 
@@ -485,16 +488,22 @@ async function saveProfileChanges() {
         })
         .eq('id', user.id);
 
-    if (!error) {
+    // 2. LOG the error if it exists
+    if (error) {
+        console.error("--- SUPABASE UPDATE ERROR ---");
+        console.error("Message:", error.message);
+        console.error("Details:", error.details);
+        console.error("Hint:", error.hint);
+        showNotificationToast("Error: " + error.message); // This shows the error on screen too
+    } else {
+        console.log("Profile updated successfully.");
+        // ... rest of your success logic
         const navAvatar = document.getElementById("navAvatar");
         if (navAvatar) navAvatar.innerText = selectedEmoji;
         showNotificationToast("Profile updated!");
         const modal = document.getElementById("profileModal");
         if (modal) modal.style.display = "none";
-        // Assuming loadTeamDashboard exists in your main code:
-        loadTeamDashboard(user); 
-    } else {
-        showNotificationToast("Error saving profile.");
+        if (typeof loadTeamDashboard === 'function') loadTeamDashboard(user);
     }
 }
 
