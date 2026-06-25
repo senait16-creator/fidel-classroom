@@ -1151,6 +1151,27 @@ async function checkMySubmissionStatus() {
         : `<div class="status-badge">No active submissions</div>`;
 }
 
+     async function loadTeacherRoster() {
+    // This fetches EVERYONE who has signed up
+    const { data: students, error } = await _supabase
+        .from('profiles')
+        .select('display_name, team_id, role');
+
+    if (error) {
+        console.error("Error loading roster:", error);
+        return;
+    }
+
+    // Now, put them into your table
+    const tableBody = document.getElementById("teacherRosterTableBody");
+    tableBody.innerHTML = students.map(s => `
+        <tr>
+            <td>${s.display_name || "New Student"}</td>
+            <td>${s.team_id || "Unassigned"}</td>
+            <td>${s.role}</td>
+        </tr>
+    `).join('');
+}
 // --- 21. TEAM MANAGEMENT ---
 async function loadTeamDashboard(user) {
     const { data: userProfile } = await _supabase
