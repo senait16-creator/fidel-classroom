@@ -196,3 +196,6 @@ function populateTeamSelect() {
     });
 }
 window.saveProfileData = saveProfileData;
+window.loadTeacherRoster = loadTeacherRoster;
+window.teacherAssignStudentToPod = teacherAssignStudentToPod;
+window.initTeacherDashboard = initTeacherDashboard;
