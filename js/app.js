@@ -157,7 +157,7 @@ async function saveProfileData() {
             id: currentUser.id, 
             display_name: nameInput, 
             avatar_character: selectedAvatarSymbol,
-            team_color: teamSelection 
+             
         });
         
         if (error) throw error;
