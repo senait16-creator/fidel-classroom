@@ -1228,6 +1228,11 @@ async function loadTeamDashboard(user) {
         renderCaptainInbox(); 
     }
 }
+     async function logout() {
+    await _supabase.auth.signOut();
+    // Redirect to the login gate
+    resetToGate();
+}
         </script>
 
 </body>
