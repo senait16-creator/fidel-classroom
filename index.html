@@ -483,6 +483,23 @@ function hideAllScreens() {
         if (el) el.style.display = "none";
     });
 }
+
+    // --- 6. UTILS & HELPERS ---
+function selectAuthFlow(type) {
+    isSignUpMode = (type === 'signup');
+    document.getElementById('onboardingGate').style.display = 'none';
+    document.getElementById('credentialFields').style.display = 'block';
+    document.getElementById('authSubtitle').innerText = isSignUpMode ? "Create a new account" : "Welcome back!";
+    document.getElementById('mainAuthBtn').innerText = isSignUpMode ? "Create Account" : "Log In";
+}
+
+function resetToGate() {
+    hideAllScreens(); 
+    document.getElementById('authScreen').style.display = 'block';
+    document.getElementById('onboardingGate').style.display = 'flex'; 
+    document.getElementById('credentialFields').style.display = 'none';
+    document.getElementById('authSubtitle').innerText = "Learn the Amharic Alphabet Together!";
+}
 // --- 8. ENGINE FUNCTIONS ---
 function initSketchpadEngineSystem() {
     canvas = document.getElementById("sketchpad");
