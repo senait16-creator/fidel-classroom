@@ -395,7 +395,7 @@
             id: currentUser.id, 
             display_name: nameInput, 
             avatar_character: selectedAvatarSymbol, 
-            pod_id: teamInput 
+            team_color: teamInput 
         });
         
         if (error) throw error;
@@ -603,7 +603,7 @@ async function renderCaptainInbox() {
 
         async function proceedFlowMap(user) {
             currentUser = user;
-            const { data: profile } = await _supabase.from('profiles').select('display_name, avatar_character, pod_id').eq('id', user.id).maybeSingle();
+            const { data: profile } = await _supabase.from('profiles').select('display_name, avatar_character, ').eq('id', user.id).maybeSingle();
 
             if (currentUser.email === ADMIN_EMAIL) {
                 document.getElementById("authScreen").style.display = "none";
@@ -615,7 +615,7 @@ async function renderCaptainInbox() {
                 selectedAvatarSymbol = profile.avatar_character;
                 document.getElementById("displayUserHeader").innerText = profile.display_name;
                 document.getElementById("displayAvatarHeader").innerText = profile.avatar_character;
-                document.getElementById("sidebarPodBadge").innerText = profile.pod_id || "No Team Assigned";
+                document.getElementById("sidebarPodBadge").innerText = profile.team_color || "No Team Assigned";
                 launchDashboard("student");
             } else {
                 document.getElementById("authScreen").style.display = "none";
@@ -694,7 +694,7 @@ async function submitWorkForVerification(imageUrl) {
             const tbody = document.getElementById("teacherRosterTableBody");
             tbody.innerHTML = '<tr><td colspan="3" style="color:#94a3b8; text-align:center;">Loading class roster...</td></tr>';
 
-            const { data: students } = await _supabase.from('profiles').select('id, display_name, avatar_character, pod_id');
+            const { data: students } = await _supabase.from('profiles').select('id, display_name, avatar_character, ');
             const { data: progress } = await _supabase.from('user_progress').select('user_id, mastered_letters');
 
             const progressMap = {};
@@ -708,7 +708,7 @@ async function submitWorkForVerification(imageUrl) {
 
             students.forEach(s => {
                 const masteredCount = (progressMap[s.id] || []).length;
-                const teamName = s.pod_id || '<span style="color:#94a3b8; font-style:italic;">None</span>';
+                const teamName = s.team_color || '<span style="color:#94a3b8; font-style:italic;">None</span>';
                 tbody.innerHTML += `
                     <tr>
                         <td style="font-weight:500;">${s.avatar_character || '🦁'} ${s.display_name}</td>
@@ -860,7 +860,7 @@ async function submitWorkForVerification(imageUrl) {
             showNotificationToast("Updating team assignment...");
             const { error } = await _supabase
                 .from('profiles')
-                .update({ pod_id: chosenColor })
+                .update({ team_color: chosenColor })
                 .eq('id', studentId);
 
             if (error) {
