@@ -427,6 +427,45 @@ async function checkUserSession() {
     }
 }
 
+     // --- UPDATED PROFILE FETCHING ---
+async function checkUserProfile(userId) {
+    // We select specifically what we need from the database
+    const { data: profile, error } = await _supabase
+        .from('profiles')
+        .select('display_name, avatar_character, progress_percent, team_id')
+        .eq('id', userId)
+        .single();
+
+    if (error || !profile) {
+        console.log("No profile found, redirecting to setup.");
+        hideAllScreens();
+        document.getElementById('profileSetupScreen').style.display = 'block';
+    } else {
+        // Update your global state with the remembered data
+        currentUser = profile;
+        
+        // Update the UI with remembered nickname and avatar
+        document.getElementById('displayUserHeader').innerText = profile.display_name;
+        document.getElementById('displayAvatarHeader').innerText = profile.avatar_character;
+        document.getElementById('progressText').innerText = `${profile.progress_percent || 0}% Completed`;
+        
+        // Load the dashboard
+        hideAllScreens();
+        document.getElementById('studentDashboard').style.display = 'block';
+    }
+}
+     function renderUserSidebar() {
+    if (!currentUser) return;
+    
+    // Update the Sidebar display with remembered values
+    document.getElementById("displayUserHeader").innerText = currentUser.display_name;
+    document.getElementById("displayAvatarHeader").innerText = currentUser.avatar_character;
+    document.getElementById("progressText").innerText = `${currentUser.progress_percent}% Completed`;
+    
+    // Update the progress bar width
+    const progressBar = document.getElementById("progressBar");
+    if (progressBar) progressBar.style.width = `${currentUser.progress_percent}%`;
+}
 async function getCurrentUserOrRedirect() {
     const { data: { user } } = await _supabase.auth.getUser();
     if (!user) { resetToGate(); return null; }
