@@ -125,20 +125,29 @@
     <div id="toastContainer"></div>
 
     <!-- Onboarding Panel Matrix -->
-    <div id="authScreen" class="app-card">
-        <h1 class="main-title">Fidel Classroom</h1>
-        <p class="subtitle" id="authSubtitle">Learn the Amharic Alphabet Together!</p>
-        <div id="onboardingGate" class="choice-container">
-            <button class="btn-filled-rectangle btn-signup-rect" onclick="selectAuthFlow('signup')">Sign Up</button>
-            <button class="btn-filled-rectangle btn-login-rect" onclick="selectAuthFlow('login')">Log In</button>
-        </div>
-        <div id="credentialFields" style="display: none;">
-            <input type="email" id="email" placeholder="Email Address">
-            <input type="password" id="password" placeholder="Password (at least 6 characters)">
-            <button class="btn-primary" id="mainAuthBtn" onclick="handleAuth()">Let's Go!</button>
-            <button class="btn-secondary" onclick="resetToGate()">← Back</button>
-        </div>
+   <div id="authScreen" class="app-card">
+    <h1 class="main-title">Fidel Classroom</h1>
+    <p class="subtitle" id="authSubtitle">Learn the Amharic Alphabet Together!</p>
+
+    <div id="onboardingGate" class="choice-container">
+        <button class="btn-filled-rectangle btn-signup-rect" onclick="selectAuthFlow('signup')">Sign Up</button>
+        <button class="btn-filled-rectangle btn-login-rect" onclick="selectAuthFlow('login')">Log In</button>
     </div>
+
+    <div id="credentialFields" style="display: none;">
+        <input type="email" id="email" placeholder="Email Address">
+        <input type="password" id="password" placeholder="Password (at least 6 characters)">
+
+        <button class="btn-primary" id="mainAuthBtn" onclick="handleAuth()">Let's Go!</button>
+        <button class="btn-secondary" onclick="resetToGate()">← Back</button>
+        <!-- Corner Profile Display -->
+<div id="cornerProfile" class="profile-corner-badge" onclick="openProfileModal()">
+    <span id="displayAvatarHeader">🦁</span>
+    <span id="displayUserHeader">Student</span>
+    <button class="btn-edit-small">Edit</button>
+</div>
+    </div>
+</div>
 
     <!-- Administrative Target Routing Gate -->
     <div id="adminViewSelectorGate" class="admin-gate-card">
@@ -312,13 +321,13 @@
         <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
     </div>
  <script>
-    // --- 1. CONFIGURATION ---
-    const SUPABASE_URL = "https://muisfipoyzkhznfdvnes.supabase.co"; 
-    const SUPABASE_KEY = "sb_publishable_VBiJZB8TVM2CSl54aDPP0A_4aDXWb5i";
-    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// --- 1. CONFIGURATION & CLIENT ---
+const SUPABASE_URL = "https://muisfipoyzkhznfdvnes.supabase.co"; 
+const SUPABASE_KEY = "sb_publishable_VBiJZB8TVM2CSl54aDPP0A_4aDXWb5i";
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const ADMIN_EMAIL = "senaitrichmond16@gmail.com";
-    const CLASSROOM_COLORS = ["Red Team 🔴", "Blue Team 🔵", "Green Team 🟢", "Yellow Team 🟡", "Purple Team 🟣"];
+const ADMIN_EMAIL = "senaitrichmond16@gmail.com";
+const CLASSROOM_COLORS = ["Red Team 🔴", "Blue Team 🔵", "Green Team 🟢", "Yellow Team 🟡", "Purple Team 🟣"];
 
     // --- 2. GLOBAL STATE ---
     let currentUser = null; 
@@ -334,7 +343,7 @@
     let gameModeScope = "all";
     let canvas, ctx, isDrawing = false;
 
-    // --- 3. DATA TABLES ---
+ // --- 3. DATA TABLES ---
     const vowelFrameworkLabels = ["ha", "hu", "hee", "ha", "hay", "hih", "ho"];
     const standardVowelSubscripts = ["-ä", "-u", "-ee", "-a", "-ay", "-ih", "-o"];
 
@@ -374,39 +383,157 @@
         {base:"ፈ", family:['ፈ','ፉ','ፊ','ፋ','ፌ','ፍ','ፎ'], prefix:"f"},
         {base:"ፐ", family:['ፐ','ፑ','ፒ','ፓ','ፔ','ፕ','ፖ'], prefix:"p"}
     ];
+   // --- 1. INITIALIZATION ---
+window.addEventListener('DOMContentLoaded', async () => {
+    // Force a clean slate to ensure they see the login screen first
+    await _supabase.auth.signOut(); 
+    resetToGate();
+});  
+// --- 2. AUTHENTICATION LOGIC ---
+async function handleAuth() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
 
-    // --- 4. PROFILE CHECK LOGIC ---
-    async function checkUserProfile(userId) {
-        const { data: profile } = await _supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', userId)
-            .single();
-
-        if (!profile) {
-            document.getElementById('authScreen').style.display = 'none';
-            document.getElementById('profileSetupScreen').style.display = 'block';
-        } else {
-            currentUser = profile;
-            loadDashboard(profile);
-        }
+    if (!email || !password) {
+        showNotificationToast("Please enter both email and password!");
+        return;
     }
 
-    // --- 5. INITIALIZATION ---
- window.addEventListener('DOMContentLoaded', async () => {
-    // 1. Get the session directly from Supabase
-    const { data: { session } } = await _supabase.auth.getSession();
+    let authResponse = isSignUpMode 
+        ? await _supabase.auth.signUp({ email, password })
+        : await _supabase.auth.signInWithPassword({ email, password });
 
-    if (session) {
-        // User is already logged in
-        checkUserProfile(session.user.id);
+    const { data, error } = authResponse;
+
+    if (error) {
+        console.error("Auth Error:", error.message);
+        showNotificationToast("Error: " + error.message);
     } else {
-        // No session, show the login gate
-        resetToGate();
+        showNotificationToast(isSignUpMode ? "Account created!" : "Welcome back!");
+        checkUserSession(); // Move to the router
     }
-});
+}
+     // --- 3. SESSION & PROFILE ROUTING ---
+async function checkUserSession() {
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (!session) { resetToGate(); return; }
 
-// --- 6. UTILS & HELPERS ---
+    const { data: profile } = await _supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+
+    if (!profile || !profile.display_name) {
+        hideAllScreens();
+        document.getElementById('profileSetupScreen').style.display = 'block';
+    } else {
+        currentUser = profile;
+        loadDashboard(profile);
+    }
+}
+
+     // --- UPDATED PROFILE FETCHING ---
+async function checkUserProfile(userId) {
+    // We select specifically what we need from the database
+    const { data: profile, error } = await _supabase
+        .from('profiles')
+        .select('display_name, avatar_character, progress_percent, team_id')
+        .eq('id', userId)
+        .single();
+
+    if (error || !profile) {
+        console.log("No profile found, redirecting to setup.");
+        hideAllScreens();
+        document.getElementById('profileSetupScreen').style.display = 'block';
+    } else {
+        // Update your global state with the remembered data
+        currentUser = profile;
+
+        // Update the UI with remembered nickname and avatar
+        document.getElementById('displayUserHeader').innerText = profile.display_name;
+        document.getElementById('displayAvatarHeader').innerText = profile.avatar_character;
+        document.getElementById('progressText').innerText = `${profile.progress_percent || 0}% Completed`;
+
+        // Load the dashboard
+        hideAllScreens();
+        document.getElementById('studentDashboard').style.display = 'block';
+    }
+}
+     function renderUserSidebar() {
+    if (!currentUser) return;
+
+    // Update the Sidebar display with remembered values
+    document.getElementById("displayUserHeader").innerText = currentUser.display_name;
+    document.getElementById("displayAvatarHeader").innerText = currentUser.avatar_character;
+    document.getElementById("progressText").innerText = `${currentUser.progress_percent}% Completed`;
+
+    // Update the progress bar width
+    const progressBar = document.getElementById("progressBar");
+    if (progressBar) progressBar.style.width = `${currentUser.progress_percent}%`;
+}
+async function getCurrentUserOrRedirect() {
+    const { data: { user } } = await _supabase.auth.getUser();
+    if (!user) { resetToGate(); return null; }
+    return user;
+}
+     // --- 4. UI INTERACTION ---
+async function saveProfileData() {
+    // 1. Get the current user
+    const user = await getCurrentUserOrRedirect();
+    if (!user) return;
+
+    // 2. Gather the inputs
+    const newName = document.getElementById("displayName").value;
+    const selectedEmoji = document.querySelector('.avatar-option.selected')?.innerText || '🦁';
+    const newTeam = document.getElementById('profileTeamSelect').value;
+
+    if (!newName) {
+        showNotificationToast("Please enter a nickname!");
+        return;
+    }
+
+    // 3. Update the database
+    const { error } = await _supabase
+        .from('profiles')
+        .update({ 
+            display_name: newName, 
+            avatar_character: selectedEmoji,
+            team_id: newTeam
+        })
+        .eq('id', user.id);
+
+    if (error) {
+        console.error("Update Error:", error);
+        showNotificationToast("Error saving profile: " + error.message);
+    } else {
+        showNotificationToast("Welcome to the classroom!");
+
+        // 4. Update the local user object and route to dashboard
+        currentUser = { display_name: newName, avatar_character: selectedEmoji, team_id: newTeam };
+
+        // Move to the dashboard
+        hideAllScreens();
+        document.getElementById('studentDashboard').style.display = 'block';
+
+        // Optional: refresh dashboard data if needed
+        if (typeof loadDashboard === 'function') loadDashboard(currentUser);
+    }
+}
+
+async function switchLeaderboard(type) {
+    const listMount = document.getElementById('leaderboardList');
+    if (!listMount) return;
+    listMount.innerHTML = "Loading...";
+
+    const table = type === 'individual' ? 'profiles' : 'teams';
+    const query = type === 'individual' ? 'display_name, avatar_character, progress_percent' : 'name, current_level';
+
+    const { data } = await _supabase.from(table).select(query);
+    listMount.innerHTML = data.map(item => `<div>${item.name || item.display_name}</div>`).join('');
+}
+
+    // --- 5. HELPERS ---
 function showNotificationToast(msg) {
     const container = document.getElementById("toastContainer");
     const element = document.createElement("div");
@@ -424,104 +551,22 @@ function hideAllScreens() {
     });
 }
 
-// THE GUARD: This ensures you never run database code without a verified user
-async function getCurrentUserOrRedirect() {
-    const { data: { user } } = await _supabase.auth.getUser();
-    if (!user) {
-        resetToGate(); 
-        return null;
-    }
-    return user;
+    // --- 6. UTILS & HELPERS ---
+function selectAuthFlow(type) {
+    isSignUpMode = (type === 'signup');
+    document.getElementById('onboardingGate').style.display = 'none';
+    document.getElementById('credentialFields').style.display = 'block';
+    document.getElementById('authSubtitle').innerText = isSignUpMode ? "Create a new account" : "Welcome back!";
+    document.getElementById('mainAuthBtn').innerText = isSignUpMode ? "Create Account" : "Log In";
 }
 
-// --- 7. UI INTERACTION FUNCTIONS ---
-async function switchLeaderboard(type) {
-    const listMount = document.getElementById('leaderboardList');
-    if (!listMount) return;
-    listMount.innerHTML = "Loading...";
-
-    if (type === 'individual') {
-        const { data: students } = await _supabase.from('profiles').select('display_name, avatar_character, progress_percent');
-        listMount.innerHTML = students.map(s => `
-            <div style="padding: 5px; border-bottom: 1px solid #eee;">
-                ${s.avatar_character} ${s.display_name} - ${s.progress_percent}%
-            </div>
-        `).join('');
-    } else if (type === 'team') {
-        const { data: teams } = await _supabase.from('teams').select('name, current_level');
-        listMount.innerHTML = teams.map(t => `
-            <div style="padding: 5px; border-bottom: 1px solid #eee;">
-                🦁 ${t.name} - Level ${t.current_level}
-            </div>
-        `).join('');
-    }
+function resetToGate() {
+    hideAllScreens(); 
+    document.getElementById('authScreen').style.display = 'block';
+    document.getElementById('onboardingGate').style.display = 'flex'; 
+    document.getElementById('credentialFields').style.display = 'none';
+    document.getElementById('authSubtitle').innerText = "Learn the Amharic Alphabet Together!";
 }
-
-async function openProfileModal() {
-    const modal = document.getElementById("profileModal");
-    if (modal) modal.style.display = "block";
-
-    const { data: teams } = await _supabase.from('teams').select('id, name');
-    const select = document.getElementById('editTeamSelect');
-    if (select && teams) {
-        select.innerHTML = teams.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
-    }
-}
-
-async function saveProfileChanges() {
-    console.log("Attempting to save profile...");
-    
-    const user = await getCurrentUserOrRedirect();
-    if (!user) return;
-
-    const newName = document.getElementById("editNickname").value;
-    const selectedEmoji = document.querySelector('.avatar-option.selected')?.innerText || '🦁';
-    const newTeam = document.getElementById('editTeamSelect').value;
-
-    // 1. Run the update
-    const { error } = await _supabase
-        .from('profiles')
-        .update({ 
-            display_name: newName, 
-            avatar_character: selectedEmoji,
-            team_id: newTeam
-        })
-        .eq('id', user.id);
-
-    if (!error) {
-    // 2. LOG the error if it exists
-    if (error) {
-        console.error("--- SUPABASE UPDATE ERROR ---");
-        console.error("Message:", error.message);
-        console.error("Details:", error.details);
-        console.error("Hint:", error.hint);
-        showNotificationToast("Error: " + error.message); // This shows the error on screen too
-    } else {
-        console.log("Profile updated successfully.");
-        // ... rest of your success logic
-        const navAvatar = document.getElementById("navAvatar");
-        if (navAvatar) navAvatar.innerText = selectedEmoji;
-        showNotificationToast("Profile updated!");
-        const modal = document.getElementById("profileModal");
-        if (modal) modal.style.display = "none";
-        // Assuming loadTeamDashboard exists in your main code:
-        loadTeamDashboard(user); 
-    } else {
-        showNotificationToast("Error saving profile.");
-        if (typeof loadTeamDashboard === 'function') loadTeamDashboard(user);
-    }
-}
-
-// --- 8. INITIALIZATION ---
-window.addEventListener('DOMContentLoaded', async () => {
-    const user = await getCurrentUserOrRedirect();
-    if (user) {
-        proceedFlowMap(user);
-    } else {
-        resetToGate();
-    }
-});
-
 // --- 8. ENGINE FUNCTIONS ---
 function initSketchpadEngineSystem() {
     canvas = document.getElementById("sketchpad");
@@ -1173,6 +1218,27 @@ async function checkMySubmissionStatus() {
         : `<div class="status-badge">No active submissions</div>`;
 }
 
+     async function loadTeacherRoster() {
+    // This fetches EVERYONE who has signed up
+    const { data: students, error } = await _supabase
+        .from('profiles')
+        .select('display_name, team_id, role');
+
+    if (error) {
+        console.error("Error loading roster:", error);
+        return;
+    }
+
+    // Now, put them into your table
+    const tableBody = document.getElementById("teacherRosterTableBody");
+    tableBody.innerHTML = students.map(s => `
+        <tr>
+            <td>${s.display_name || "New Student"}</td>
+            <td>${s.team_id || "Unassigned"}</td>
+            <td>${s.role}</td>
+        </tr>
+    `).join('');
+}
 // --- 21. TEAM MANAGEMENT ---
 async function loadTeamDashboard(user) {
     const { data: userProfile } = await _supabase
@@ -1206,6 +1272,11 @@ async function loadTeamDashboard(user) {
         mount.appendChild(inbox);
         renderCaptainInbox(); 
     }
+}
+     async function logout() {
+    await _supabase.auth.signOut();
+    // Redirect to the login gate
+    resetToGate();
 }
         </script>
 
