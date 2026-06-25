@@ -386,26 +386,25 @@
 
        async function saveProfileData() {
     const nameInput = document.getElementById("displayName").value.trim();
-    const teamInput = document.getElementById("profileTeamSelect").value;
+    // Ensure you have an element with this ID in your HTML
+    const teamSelection = document.getElementById("profileTeamSelect").value; 
     
     if (!nameInput) return showNotificationToast("Please enter a nickname.");
 
     try {
+        // This will now successfully write to the new column
         const { error } = await _supabase.from('profiles').upsert({ 
             id: currentUser.id, 
             display_name: nameInput, 
-            avatar_character: selectedAvatarSymbol, 
-            team_color: teamInput 
+            avatar_character: selectedAvatarSymbol,
+            team_color: teamSelection 
         });
         
         if (error) throw error;
 
-        // Immediately hide setup and show dashboard
-        document.getElementById("profileSetupScreen").style.display = "none";
-        launchDashboard("student"); 
-        showNotificationToast("Welcome to the classroom!");
+        launchDashboard("student");
     } catch (err) {
-        showNotificationToast("Error: " + err.message);
+        showNotificationToast("Database update error: " + err.message);
     }
 }
         function launchDashboard(role) {
