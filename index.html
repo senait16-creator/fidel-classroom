@@ -122,7 +122,22 @@
 <body>
     <canvas id="confettiCanvas"></canvas>
     <div id="toastContainer"></div>
+<div id="authScreen" class="app-card">
+        <h1 class="main-title">Fidel Classroom</h1>
+        <p class="subtitle" id="authSubtitle">Learn the Amharic Alphabet Together!</p>
+        
+        <div id="onboardingGate" class="choice-container">
+            <button class="btn-filled-rectangle btn-signup-rect" onclick="selectAuthFlow('signup')">Sign Up</button>
+            <button class="btn-filled-rectangle btn-login-rect" onclick="selectAuthFlow('login')">Log In</button>
+        </div>
 
+        <div id="credentialFields" style="display: none;">
+            <input type="email" id="email" placeholder="Email Address" required>
+            <input type="password" id="password" placeholder="Password (min 6 characters)" required>
+            <button class="btn-primary" id="mainAuthBtn" onclick="handleAuth()">Let's Go!</button>
+            <button class="btn-secondary" onclick="resetToGate()">← Back</button>
+        </div>
+    </div>
     <div id="authScreen" class="app-card">
         <h1 class="main-title">Fidel Classroom</h1>
         <p class="subtitle" id="authSubtitle">Learn the Amharic Alphabet Together!</p>
