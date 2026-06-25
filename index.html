@@ -384,6 +384,30 @@
             setTimeout(() => element.remove(), 3000);
         }
 
+       async function saveProfileData() {
+    const nameInput = document.getElementById("displayName").value.trim();
+    const teamInput = document.getElementById("profileTeamSelect").value;
+    
+    if (!nameInput) return showNotificationToast("Please enter a nickname.");
+
+    try {
+        const { error } = await _supabase.from('profiles').upsert({ 
+            id: currentUser.id, 
+            display_name: nameInput, 
+            avatar_character: selectedAvatarSymbol, 
+            pod_id: teamInput 
+        });
+        
+        if (error) throw error;
+
+        // Immediately hide setup and show dashboard
+        document.getElementById("profileSetupScreen").style.display = "none";
+        launchDashboard("student"); 
+        showNotificationToast("Welcome to the classroom!");
+    } catch (err) {
+        showNotificationToast("Error: " + err.message);
+    }
+}
         function launchDashboard(role) {
     // Hide all screens
     document.getElementById("authScreen").style.display = "none";
