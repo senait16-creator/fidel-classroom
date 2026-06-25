@@ -448,6 +448,15 @@
             canvas.addEventListener("touchstart", startDraw); canvas.addEventListener("touchmove", draw); window.addEventListener("touchend", stopDraw);
         }
 
+        function populateTeamSelect() {
+    const select = document.getElementById("profileTeamSelect");
+    CLASSROOM_COLORS.forEach(team => {
+        let opt = document.createElement("option");
+        opt.value = team;
+        opt.innerHTML = team;
+        select.appendChild(opt);
+    });
+}
         function clearSketchpadCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
 
         async function uploadSketchpadDrawingCanvasData() {
@@ -566,18 +575,31 @@ async function renderCaptainInbox() {
             document.getElementById("credentialFields").style.display = "block";
         }
 
-        async function handleAuth() {
-            const email = document.getElementById("email").value.trim();
-            const password = document.getElementById("password").value;
-            if (!email || !password) return showNotificationToast("Please fill in all boxes.");
+     async function handleAuth() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
 
-            const { data, error } = isSignUpMode 
-                ? await _supabase.auth.signUp({ email, password })
-                : await _supabase.auth.signInWithPassword({ email, password });
+    let { data, error } = isSignUpMode 
+        ? await _supabase.auth.signUp({ email, password })
+        : await _supabase.auth.signInWithPassword({ email, password });
 
-            if (error) return showNotificationToast(error.message);
-            if (data?.user) proceedFlowMap(data.user);
-        }
+    if (error) return showNotificationToast(error.message);
+
+    currentUser = data.user;
+    
+    // Check if profile exists
+    const { data: profile } = await _supabase.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
+    
+    if (profile) {
+        // User already set up, go to dashboard
+        launchDashboard(currentUser.email === ADMIN_EMAIL ? "teacher" : "student");
+    } else {
+        // New user, go to setup
+        document.getElementById("authScreen").style.display = "none";
+        document.getElementById("profileSetupScreen").style.display = "block";
+        populateTeamSelect(); // Function to add options to your dropdown
+    }
+}
 
         async function proceedFlowMap(user) {
             currentUser = user;
