@@ -366,16 +366,18 @@
     }
 
     // --- 5. INITIALIZATION ---
-    window.addEventListener('DOMContentLoaded', () => { 
-        // Logic to verify auth state and call checkUserProfile(userId)
-        _supabase.auth.onAuthStateChange((event, session) => {
-            if (session) {
-                checkUserProfile(session.user.id);
-            } else {
-                resetToGate();
-            }
-        });
-    });
+ window.addEventListener('DOMContentLoaded', async () => {
+    // 1. Get the session directly from Supabase
+    const { data: { session } } = await _supabase.auth.getSession();
+    
+    if (session) {
+        // User is already logged in
+        checkUserProfile(session.user.id);
+    } else {
+        // No session, show the login gate
+        resetToGate();
+    }
+});
 
     // --- 6. UTILS ---
     function showNotificationToast(msg) {
