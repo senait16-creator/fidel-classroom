@@ -195,3 +195,4 @@ function populateTeamSelect() {
         select.appendChild(opt);
     });
 }
+window.saveProfileData = saveProfileData;
