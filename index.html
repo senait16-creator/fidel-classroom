@@ -810,6 +810,27 @@ async function submitWorkForVerification(imageUrl) {
     }
 }
 
+       async function proceedFlowMap(user) {
+    currentUser = user;
+    
+    // Fetch profile AND progress in one combined fetch if possible, 
+    // or sequential as you have it now.
+    const { data: profile } = await _supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
+    const { data: progress } = await _supabase.from('user_progress').select('mastered_letters').eq('user_id', user.id).maybeSingle();
+
+    if (profile && profile.display_name) {
+        // Hydrate global state
+        selectedAvatarSymbol = profile.avatar_character;
+        masteredLetters = progress?.mastered_letters || [];
+        
+        // Update UI
+        document.getElementById("displayUserHeader").innerText = profile.display_name;
+        // ... (rest of your UI update logic)
+        launchDashboard("student");
+    } else {
+        // Show setup screen
+    }
+}
         async function teacherRefreshConfigurationDropdowns() {
             const { data: students } = await _supabase.from('profiles').select('id, display_name');
 
