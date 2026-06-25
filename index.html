@@ -4,237 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Fidel Classroom</title>
-
     <link rel="stylesheet" href="style.css">
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=Abyssinica+SIL&display=swap" rel="stylesheet">
 </head>
 <body>
-
-    <script type="module" src="js/app.js"></script>
-</body>
-</html>
-
-
-<script type="module" src="js/main.js"></script>
-</body>
     <canvas id="confettiCanvas"></canvas>
     <div id="toastContainer"></div>
 
-    <div id="authScreen" class="app-card">
-        </div>
-
-    <div id="studentDashboard">
-        </div>
-
-    <script type="module" src="js/main.js"></script>
-</body>
-
-    <canvas id="confettiCanvas"></canvas>
-    <div id="toastContainer"></div>
-
-    <!-- Onboarding Panel Matrix -->
     <div id="authScreen" class="app-card">
         <h1 class="main-title">Fidel Classroom</h1>
-        <p class="subtitle" id="authSubtitle">Learn the Amharic Alphabet Together!</p>
-        <div id="onboardingGate" class="choice-container">
-            <button class="btn-filled-rectangle btn-signup-rect" onclick="selectAuthFlow('signup')">Sign Up</button>
-            <button class="btn-filled-rectangle btn-login-rect" onclick="selectAuthFlow('login')">Log In</button>
         </div>
-        <div id="credentialFields" style="display: none;">
-            <input type="email" id="email" placeholder="Email Address">
-            <input type="password" id="password" placeholder="Password (at least 6 characters)">
-            <button class="btn-primary" id="mainAuthBtn" onclick="handleAuth()">Let's Go!</button>
-            <button class="btn-secondary" onclick="resetToGate()">← Back</button>
-        </div>
-    </div>
 
-    <!-- Administrative Target Routing Gate -->
     <div id="adminViewSelectorGate" class="admin-gate-card">
-        <h2 class="main-title" style="font-size:22px;">Welcome, Teacher!</h2>
-        <p class="subtitle">Where would you like to go first?</p>
-        <div style="display:flex; flex-direction:column; gap:10px; margin-top:16px;">
-            <button class="btn-primary" style="background:#475569;" onclick="routeAdminTerminalDirectly('teacher')">Go to Teacher Dashboard</button>
-            <button class="btn-primary" onclick="routeAdminTerminalDirectly('student')">Go to Student View</button>
         </div>
-    </div>
 
-    <!-- Custom Profile Struct Node -->
     <div id="profileSetupScreen" class="app-card" style="display: none;">
-        <h2 class="main-title" style="font-size: 22px;">Create Your Profile</h2>
-        <p class="subtitle">Pick a nickname and choose your color team!</p>
-        <input type="text" id="displayName" placeholder="Your Nickname">
-
+        <h2 class="main-title">Create Your Profile</h2>
         <div class="avatar-grid">
-            <div class="avatar-option selected" onclick="selectAvatar('🦁', this)">🦁</div>
+            <div class="avatar-option" onclick="selectAvatar('🦁', this)">🦁</div>
             <div class="avatar-option" onclick="selectAvatar('🦅', this)">🦅</div>
-            <div class="avatar-option" onclick="selectAvatar('🐆', this)">🐆</div>
-            <div class="avatar-option" onclick="selectAvatar('🦊', this)">🦊</div>
-            <div class="avatar-option" onclick="selectAvatar('🐘', this)">🐘</div>
-        </div>
-
-        <div style="text-align: left; margin-bottom: 16px;">
-            <label style="font-size: 13px; font-weight: 700; color: var(--neutral-dark);">Pick Your Color Team:</label>
-            <select id="profileTeamSelect"></select>
-        </div>
-
-        <button class="btn-primary" onclick="saveProfileData()">Join the Classroom</button>
-    </div>
-
-    <!-- Teacher Dashboard Module View -->
-    <div id="teacherOnlyDashboard">
-        <div class="workspace-title" style="margin-top:20px;">
-            <span>Teacher Hub</span>
-            <button class="btn-primary" style="width:auto; padding:8px 16px; font-size:13px;" onclick="switchAdminPanelsFromDashboard('student')">Switch to Student View →</button>
-        </div>
-
-        <!-- Live Roster Progress List -->
-        <div class="teacher-panel" style="margin-bottom: 20px;">
-            <h2 style="font-size: 18px; color: var(--neutral-dark); margin-bottom: 4px;">Student Roster & Progress</h2>
-            <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">See how everyone in your class is moving through the alphabet rows.</p>
-            <table class="teacher-roster-table">
-                <thead>
-                    <tr>
-                        <th>Student</th>
-                        <th>Team</th>
-                        <th>Progress Status</th>
-                    </tr>
-                </thead>
-                <tbody id="teacherRosterTableBody">
-                    <tr><td colspan="3" style="color:#94a3b8; text-align:center;">Loading class roster...</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="teacher-panel">
-            <h2 style="font-size: 18px; color: var(--neutral-dark); margin-bottom: 4px;">Manage Student Color Teams</h2>
-            <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">Reassign students to predecided classroom color tracks.</p>
-            <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); max-width: 500px;">
-                <select id="teacherStudentSelect"><option value="">Select Student...</option></select>
-                <select id="teacherPodSelect"><option value="">Select Color Team...</option></select>
-                <button class="btn-primary" onclick="teacherAssignStudentToPod()">Change Color Team</button>
             </div>
-        </div>
-        <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
-    </div>
-
-    <!-- Student Interface Core Matrix Layout Workspace -->
-    <div id="studentDashboard">
-        <div id="adminHeaderToggleBar" style="display:none; background:#f0fdfa; border:1px solid #ccfbf1; padding:10px 16px; border-radius:12px; margin-bottom:16px; justify-content:space-between; align-items:center;">
-            <span style="font-size:13px; font-weight:700; color:var(--brand-primary);">Teacher Access Mode Active</span>
-            <button class="btn-primary" style="width:auto; padding:6px 12px; font-size:11px;" onclick="switchAdminPanelsFromDashboard('teacher')">Back to Teacher Dashboard</button>
-        </div>
-        <div id="captainInboxMount"></div>
-        <div id="myStatusMount"></div>
-
-        <div class="dashboard-split-layout">
-            <div class="main-workspace-panel">
-
-                <div class="pod-card">
-                    <div class="pod-header"><span id="podTeamNameDisplay">Your Team</span></div>
-                    <div id="podTeammatesMount"></div>
-                </div>
-
-                <div class="workspace-title">
-                    <span id="workspaceDynamicHeader">Amharic Letter Board</span>
-                    <button id="gameActivationToggleBtn" class="btn-primary" style="width:auto; padding:8px 16px; font-size:13px;" onclick="openMatchingGameWorkspaceMode('all')">Matching Game Arena</button>
-                </div>
-
-                <!-- Core Grid Selection Array -->
-                <div id="viewFidelGrid" class="fidel-grid-3col"></div>
-
-                <!-- Touch Ergonomic Block Match Arena Module -->
-                <div id="gameWorkspace">
-                    <h2 id="gameWorkspaceTitle" style="font-size:22px; margin-bottom:4px;">Practice Arena</h2>
-                    <p class="subtitle" style="margin-bottom:12px;">Tap a letter and its matching English sound to clear them!</p>
-                    <div style="background:#f1f5f9; padding:6px 14px; border-radius:8px; display:inline-block; font-size:13px; font-weight:700; color:var(--brand-primary); margin-bottom:12px;">
-                        Current Streak: <span id="gameStreakValue">0</span>
-                    </div>
-
-                    <div class="matching-game-grid-blocks" id="ergonomicBlockGameMount"></div>
-
-                    <button id="gameExitActionBtn" class="btn-secondary" style="margin-top:10px;">← Close Game</button>
-                </div>
-
-                <!-- Micro-Classroom Isolation Node -->
-                <div id="isolatedFamilyClassroom">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-                        <h2 id="classroomFamilyTitle" style="font-size:22px;">Reviewing Row</h2>
-                        <button class="btn-primary" style="width:auto; padding:8px 14px; font-size:12px;" id="classroomRowGameBtn">Play Row Match</button>
-                    </div>
-                    <div class="classroom-header-strip">
-                        <div>-ä</div><div>-u</div><div>-ee</div><div>-a</div><div>-ay</div><div>-ih</div><div>-o</div>
-                    </div>
-                    <div class="classroom-row-giant" id="classroomGiantRowMount"></div>
-                    <div style="display:flex; flex-direction:column; gap:10px;">
-                        <div style="display:flex; gap:10px;">
-                            <button class="btn-primary" style="background:#475569; flex:1;" onclick="shuffleClassroomRowPhonetics()">Mix Up Sounds</button>
-                            <button id="classroomMasterBtn" class="btn-primary" style="background:#10b981; flex:1;" onclick="classroomMarkAsMasteredDirectly()">Got It! Mark as Mastered</button>
-                        </div>
-                        <button id="classroomUndoBtn" class="btn-secondary" style="color: #ef4444; font-weight:700; display:none;" onclick="classroomUnmasterLetterRow()">Oops, I didn't mean to master this yet. Keep practicing!</button>
-                    </div>
-
-                    <!-- Inline Functional Digital Ink Engine Segment Integration -->
-                    <div class="embedded-classroom-sketchpad">
-                        <h3 style="font-size:14px; font-weight:700; margin-bottom:4px; color:var(--neutral-dark);">Practice Writing Pad</h3>
-                        <p style="font-size:12px; color:#64748b; margin-bottom:10px;">Draw the characters below to share your writing with your team!</p>
-                        <canvas id="sketchpad" class="sketch-canvas-element"></canvas>
-                        <div class="sketchpad-actions-row">
-                            <button class="btn-primary" style="padding:6px 12px; font-size:12px; background:#64748b;" onclick="clearSketchpadCanvas()">Clear Pad</button>
-                            <button class="btn-primary" style="padding:6px 12px; font-size:12px;" onclick="uploadSketchpadDrawingCanvasData()">Share My Drawing</button>
-                        </div>
-                    </div>
-
-                    <button class="btn-secondary" style="margin-top:16px;" onclick="exitClassroomViewBackToGrid()">← Back to Letter Board</button>
-                </div>
-            </div>
-
-            <!-- Dashboard Analytics Sidebar Tracking Cluster -->
-            <div class="sidebar-sticky-panel">
-                <header>
-                    <div class="profile-clickable-trigger" onclick="openProfileEdit()" style="cursor: pointer;">
-        <div class="user-avatar-badge" id="displayAvatarHeader">🦁</div>
-                        <div>
-                            <h3 id="displayUserHeader" style="font-size:15px; font-weight:700;">Student Nickname</h3>
-                            <div id="sidebarPodBadge" style="font-size: 11px; color: var(--brand-primary); font-weight: 700; margin-top: 2px;">Your Team...</div>
-                            <span id="progressText" style="font-size:12px; color:#64748b; font-weight:500;">0% Completed</span>
-                        </div>
-                    </div>
-                    <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
-                </header>
-
-                <div class="collapsible-dropdown-container">
-                    <button class="dropdown-toggle-header" onclick="toggleDropdownElement('liveLeaderboardContent')">
-                        <span>Class Leaderboard</span><span>▼</span>
-                    </button>
-                    <div class="dropdown-content-pane" id="liveLeaderboardContent"></div>
-                </div>
-
-                <div class="collapsible-dropdown-container">
-                    <button class="dropdown-toggle-header" onclick="toggleDropdownElement('photoBoardContent')">
-                        <span>Shared Class Drawings</span><span>▼</span>
-                    </button>
-                    <div class="dropdown-content-pane open" id="photoBoardContent">
-                        <div class="feed-grid" id="disappearingArtGalleryFeed"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
-    </div>
-<body>
-    <canvas id="confettiCanvas"></canvas>
-    <div id="toastContainer"></div>
-
-    <div id="authScreen" class="app-card">
-        </div>
-
-    <div id="adminViewSelectorGate" class="admin-gate-card">
-        </div>
-
-    <div id="profileSetupScreen" class="app-card" style="display: none;">
         </div>
 
     <div id="teacherOnlyDashboard">
@@ -245,6 +33,7 @@
 
     <script type="module" src="js/main.js"></script>
 </body>
+</html>
     <script>
         const SUPABASE_URL = "https://muisfipoyzkhznfdvnes.supabase.co"; 
         const SUPABASE_KEY = "sb_publishable_VBiJZB8TVM2CSl54aDPP0A_4aDXWb5i";
