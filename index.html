@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<html lang="am"> 
 <html lang="am">
 <head>
     <meta charset="UTF-8">
@@ -526,6 +527,7 @@
         }
 async function submitWorkForVerification(imageUrl) {
     const { data: profile } = await _supabase.from('profiles').select('team_id').eq('id', currentUser.id).single();
+    
 
     await _supabase.from('work_submissions').insert({
         student_id: currentUser.id,
@@ -533,12 +535,14 @@ async function submitWorkForVerification(imageUrl) {
         image_url: imageUrl,
         status: 'pending'
     });
+    
 
     showNotificationToast("Work submitted to your Captain!");
 }
         async function approveStudentWork(submissionId) {
     // Only allow if current user is the Captain
     const { data: team } = await _supabase.from('teams').select('captain_id').eq('captain_id', currentUser.id).maybeSingle();
+    
 
     if (!team) {
         showNotificationToast("Only the Captain can approve work!");
@@ -730,12 +734,8 @@ async function submitWorkForVerification(imageUrl) {
             element.classList.add('selected'); selectedAvatarSymbol = symbol;
         }
 
-        async function saveProfileData() {
-            const nameInput = document.getElementById("displayName").value.trim();
-            if (!nameInput) return showNotificationToast("Please enter a nickname.");
-
-            let selectedColorTeam = document.getElementById("profileTeamSelect").value;
      async function saveProfileData() {
+    async function saveProfileData() {
     const nameInput = document.getElementById("displayName").value.trim();
     if (!nameInput) return showNotificationToast("Please enter a nickname.");
 
@@ -750,12 +750,6 @@ async function submitWorkForVerification(imageUrl) {
             pod_id: selectedColorTeam 
         });
 
-            await _supabase.from('profiles').upsert({ id: currentUser.id, display_name: nameInput, avatar_character: selectedAvatarSymbol, pod_id: selectedColorTeam });
-            document.getElementById("displayUserHeader").innerText = nameInput;
-            document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
-            document.getElementById("sidebarPodBadge").innerText = selectedColorTeam;
-            launchDashboard("student");
-        }
         if (profileError) throw profileError;
 
         // 2. Initialize Progress (if it doesn't exist)
@@ -771,6 +765,19 @@ async function submitWorkForVerification(imageUrl) {
         document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
         document.getElementById("sidebarPodBadge").innerText = selectedColorTeam;
         
+
+        showNotificationToast("Welcome to the classroom!");
+        launchDashboard("student");
+    } catch (err) {
+        showNotificationToast("Error saving profile: " + err.message);
+    }
+}
+
+        // 3. Update UI
+        document.getElementById("displayUserHeader").innerText = nameInput;
+        document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
+        document.getElementById("sidebarPodBadge").innerText = selectedColorTeam;
+
         showNotificationToast("Welcome to the classroom!");
         launchDashboard("student");
     } catch (err) {
