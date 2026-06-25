@@ -3,6 +3,14 @@ import { SUPABASE_URL } from './config.js';
 import { initSketchpad } from './game.js';
 import { handleAuth } from './auth.js';
 import { showScreen } from './ui.js';
+// js/app.js
+import { handleAuth, selectAuthFlow } from './auth.js';
+
+// This makes the functions available to your HTML buttons
+window.handleAuth = handleAuth;
+window.selectAuthFlow = selectAuthFlow;
+
+console.log("App initialized and modules loaded.");
 
 // When the app starts, show only the login screen
 document.addEventListener('DOMContentLoaded', () => {
