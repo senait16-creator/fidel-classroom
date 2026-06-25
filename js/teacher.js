@@ -15,3 +15,16 @@ async function loadTeacherRoster() {
         </tr>
     `).join('');
 }
+async function teacherAssignStudentToPod(studentId, newTeamColor) {
+    const { error } = await _supabase
+        .from('profiles')
+        .update({ team_color: newTeamColor })
+        .eq('id', studentId);
+
+    if (error) {
+        showNotificationToast("Failed to assign: " + error.message);
+    } else {
+        showNotificationToast("Team updated successfully!");
+        loadTeacherRoster(); // Refresh the list
+    }
+}
