@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<html lang="am"> 
 <html lang="am">
 <head>
     <meta charset="UTF-8">
@@ -527,7 +526,6 @@
         }
 async function submitWorkForVerification(imageUrl) {
     const { data: profile } = await _supabase.from('profiles').select('team_id').eq('id', currentUser.id).single();
-    
 
     await _supabase.from('work_submissions').insert({
         student_id: currentUser.id,
@@ -535,14 +533,12 @@ async function submitWorkForVerification(imageUrl) {
         image_url: imageUrl,
         status: 'pending'
     });
-    
 
     showNotificationToast("Work submitted to your Captain!");
 }
         async function approveStudentWork(submissionId) {
     // Only allow if current user is the Captain
     const { data: team } = await _supabase.from('teams').select('captain_id').eq('captain_id', currentUser.id).maybeSingle();
-    
 
     if (!team) {
         showNotificationToast("Only the Captain can approve work!");
@@ -764,7 +760,6 @@ async function submitWorkForVerification(imageUrl) {
         document.getElementById("displayUserHeader").innerText = nameInput;
         document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
         document.getElementById("sidebarPodBadge").innerText = selectedColorTeam;
-        
 
         showNotificationToast("Welcome to the classroom!");
         launchDashboard("student");
@@ -777,7 +772,7 @@ async function submitWorkForVerification(imageUrl) {
         document.getElementById("displayUserHeader").innerText = nameInput;
         document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
         document.getElementById("sidebarPodBadge").innerText = selectedColorTeam;
-
+        
         showNotificationToast("Welcome to the classroom!");
         launchDashboard("student");
     } catch (err) {
