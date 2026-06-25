@@ -5,6 +5,19 @@ import { handleAuth } from './auth.js';
 import { showScreen } from './ui.js';
 // js/app.js
 import { handleAuth, selectAuthFlow } from './auth.js';
+// js/app.js
+import { supabase } from './supabaseClient.js';
+import { updateAuthState } from './state.js';
+
+// This runs automatically whenever the user logs in or out
+supabase.auth.onAuthStateChange((event, session) => {
+    console.log("Auth event:", event);
+    updateAuthState(session?.user ?? null);
+});
+
+// Check status immediately on load
+const { data: { session } } = await supabase.auth.getSession();
+updateAuthState(session?.user ?? null);
 
 // This makes the functions available to your HTML buttons
 window.handleAuth = handleAuth;
