@@ -351,6 +351,32 @@ async function handleAuth() {
         checkUserSession(); 
     }
 }
+     async function checkUserSession() {
+    const { data: { session } } = await _supabase.auth.getSession();
+    
+    if (!session) {
+        console.log("No session found. Showing Auth Screen.");
+        showScreen('authScreen');
+        return;
+    }
+
+    // Fetch profile to decide where to go
+    const { data: profile } = await _supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+
+    console.log("Current Profile State:", profile); // <--- THIS WILL TELL YOU EVERYTHING
+
+    if (!profile || !profile.display_name) {
+        showScreen('profileSetupScreen');
+    } else if (profile.role === 'teacher') {
+        showScreen('adminViewSelectorGate');
+    } else {
+        showScreen('studentDashboard');
+    }
+}
     // --- 2. GLOBAL STATE ---
     let currentUser = null; 
     let masteredLetters = []; 
