@@ -730,18 +730,42 @@ async function submitWorkForVerification(imageUrl) {
             element.classList.add('selected'); selectedAvatarSymbol = symbol;
         }
 
-        async function saveProfileData() {
-            const nameInput = document.getElementById("displayName").value.trim();
-            if (!nameInput) return showNotificationToast("Please enter a nickname.");
+     async function saveProfileData() {
+    const nameInput = document.getElementById("displayName").value.trim();
+    if (!nameInput) return showNotificationToast("Please enter a nickname.");
 
-            let selectedColorTeam = document.getElementById("profileTeamSelect").value;
+    let selectedColorTeam = document.getElementById("profileTeamSelect").value;
 
-            await _supabase.from('profiles').upsert({ id: currentUser.id, display_name: nameInput, avatar_character: selectedAvatarSymbol, pod_id: selectedColorTeam });
-            document.getElementById("displayUserHeader").innerText = nameInput;
-            document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
-            document.getElementById("sidebarPodBadge").innerText = selectedColorTeam;
-            launchDashboard("student");
-        }
+    try {
+        // 1. Upsert Profile
+        const { error: profileError } = await _supabase.from('profiles').upsert({ 
+            id: currentUser.id, 
+            display_name: nameInput, 
+            avatar_character: selectedAvatarSymbol, 
+            pod_id: selectedColorTeam 
+        });
+
+        if (profileError) throw profileError;
+
+        // 2. Initialize Progress (if it doesn't exist)
+        const { error: progressError } = await _supabase.from('user_progress').upsert({ 
+            user_id: currentUser.id, 
+            mastered_letters: [] // Start empty
+        }, { onConflict: 'user_id' });
+
+        if (progressError) throw progressError;
+
+        // 3. Update UI
+        document.getElementById("displayUserHeader").innerText = nameInput;
+        document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
+        document.getElementById("sidebarPodBadge").innerText = selectedColorTeam;
+        
+        showNotificationToast("Welcome to the classroom!");
+        launchDashboard("student");
+    } catch (err) {
+        showNotificationToast("Error saving profile: " + err.message);
+    }
+}
 
         async function teacherRefreshConfigurationDropdowns() {
             const { data: students } = await _supabase.from('profiles').select('id, display_name');
