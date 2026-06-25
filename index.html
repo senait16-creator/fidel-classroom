@@ -25,10 +25,10 @@
         body { background-color: var(--neutral-light); color: var(--neutral-dark); padding: 24px; min-height: 100vh; }
 
         .app-card { max-width: 420px; width: 100%; margin: 60px auto; background: white; padding: 32px 24px; border-radius: var(--radius-standard); box-shadow: var(--shadow-premium); border: 1px solid var(--border-color); text-align: center; }
-        
+
         .main-title { font-size: 28px; font-weight: 700; color: var(--neutral-dark); letter-spacing: -0.5px; margin-bottom: 6px; }
         .subtitle { font-size: 14px; color: #64748b; margin-bottom: 24px; font-weight: 400; }
-        
+
         input, select { width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 15px; outline: none; background: #ffffff; transition: border-color 0.2s; }
         input:focus, select:focus { border-color: var(--brand-primary); }
 
@@ -36,7 +36,7 @@
         .btn-filled-rectangle { flex: 1; padding: 14px; font-size: 14px; font-weight: 700; border-radius: 10px; border: none; cursor: pointer; }
         .btn-signup-rect { background: var(--brand-primary); color: white; }
         .btn-login-rect { background: #334155; color: white; }
-        
+
         .btn-primary { background: var(--brand-primary); color: white; padding: 14px; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; transition: background-color 0.2s; }
         .btn-primary:hover { background: var(--brand-secondary); }
         .btn-secondary { background: transparent; color: #64748b; font-size: 13px; border: none; cursor: pointer; padding: 6px; font-weight: 500; }
@@ -57,9 +57,9 @@
         .teammate-info { display: flex; justify-content: space-between; font-size: 13px; font-weight: 500; color: #475569; margin-bottom: 4px; }
 
         .admin-gate-card { display: none; max-width: 450px; width: 100%; margin: 60px auto; background: white; border-radius: var(--radius-standard); padding: 28px; box-shadow: var(--shadow-premium); border: 1px solid var(--border-color); text-align: center; }
-        
+
         .teacher-panel { background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-standard); padding: 24px; box-shadow: var(--shadow-premium); margin-top: 20px; }
-        
+
         .teacher-roster-table { width: 100%; border-collapse: collapse; margin-top: 12px; text-align: left; }
         .teacher-roster-table th, .teacher-roster-table td { padding: 12px; border-bottom: 1px solid var(--border-color); font-size: 14px; }
         .teacher-roster-table th { background: #f8fafc; font-weight: 700; color: #475569; }
@@ -68,21 +68,21 @@
         .dropdown-toggle-header { width: 100%; background: #f8fafc; border: none; padding: 16px 20px; font-size: 15px; font-weight: 700; color: var(--neutral-dark); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .dropdown-content-pane { display: none; padding: 16px; background: white; border-top: 1px solid var(--border-color); flex-direction: column; gap: 8px; }
         .dropdown-content-pane.open { display: flex; }
-        
+
         .leaderboard-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #f8fafc; border-radius: 10px; }
         .leaderboard-row.current-user { border: 1px solid var(--brand-primary); background: #f0fdfa; }
         .player-info { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; }
         .player-score-badge { background: var(--brand-primary); color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; }
 
         .workspace-title { font-size: 22px; font-weight: 700; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
-        
+
         .fidel-grid-3col { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 12px; }
         .fidel-card { background: #fff; border: 1px solid var(--border-color); border-radius: 14px; padding: 20px 0; text-align: center; font-size: 28px; cursor: pointer; box-shadow: var(--shadow-premium); display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-family: 'Abyssinica SIL', serif; color: var(--neutral-dark); }
         .fidel-card:hover { transform: translateY(-1px); border-color: var(--brand-primary); box-shadow: 0 6px 20px rgba(15, 118, 110, 0.08); }
         .fidel-card.completed { background: #f0fdf4; border-color: #10b981; color: #10b981; }
-        
+
         #isolatedFamilyClassroom, #gameWorkspace { display: none; background: white; padding: 24px; border-radius: var(--radius-standard); box-shadow: var(--shadow-premium); border: 1px solid var(--border-color); text-align: center; }
-        
+
         .classroom-header-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; background: var(--neutral-dark); color: white; border-radius: 10px; padding: 10px 4px; font-size: 12px; font-weight: 500; margin-bottom: 12px; }
         .classroom-row-giant { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 24px; }
         .giant-char-card { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 16px 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
@@ -137,12 +137,12 @@
     <div id="credentialFields" style="display: none;">
         <input type="email" id="email" placeholder="Email Address">
         <input type="password" id="password" placeholder="Password (at least 6 characters)">
-        
+
         <button class="btn-primary" id="mainAuthBtn" onclick="handleAuth()">Let's Go!</button>
         <button class="btn-secondary" onclick="resetToGate()">← Back</button>
         <!-- Corner Profile Display -->
 <div id="cornerProfile" class="profile-corner-badge" onclick="openProfileModal()">
-   
+
     <span id="displayUserHeader">Student</span>
     <button class="btn-edit-small">Edit</button>
 </div>
@@ -150,7 +150,7 @@
     <div class="modal-content">
         <h2>Edit Profile</h2>
         <input type="text" id="editNickname" placeholder="New Nickname">
-        
+
         <div class="avatar-grid">
             <div class="avatar-option" onclick="selectAvatar('🦁', this)">🦁</div>
             <div class="avatar-option" onclick="selectAvatar('🦅', this)">🦅</div>
@@ -158,7 +158,7 @@
         </div>
 
         <select id="editTeamSelect"></select>
-        
+
         <button class="btn-primary" onclick="saveProfileChanges()">Save Changes</button>
         <button class="btn-secondary" onclick="closeProfileModal()">Cancel</button>
     </div>
@@ -181,7 +181,7 @@
         <h2 class="main-title" style="font-size: 22px;">Create Your Profile</h2>
         <p class="subtitle">Pick a nickname and choose your color team!</p>
         <input type="text" id="displayName" placeholder="Your Nickname">
-        
+
         <div class="avatar-grid">
             <div class="avatar-option selected" onclick="selectAvatar('🦁', this)">🦁</div>
             <div class="avatar-option" onclick="selectAvatar('🦅', this)">🦅</div>
@@ -204,7 +204,7 @@
             <span>Teacher Hub</span>
             <button class="btn-primary" style="width:auto; padding:8px 16px; font-size:13px;" onclick="switchAdminPanelsFromDashboard('student')">Switch to Student View →</button>
         </div>
-        
+
         <!-- Live Roster Progress List -->
         <div class="teacher-panel" style="margin-bottom: 20px;">
             <h2 style="font-size: 18px; color: var(--neutral-dark); margin-bottom: 4px;">Student Roster & Progress</h2>
@@ -244,7 +244,7 @@
 
         <div class="dashboard-split-layout">
             <div class="main-workspace-panel">
-                
+
                 <div class="pod-card">
                     <div class="pod-header"><span id="podTeamNameDisplay">Your Team</span></div>
                     <div id="podTeammatesMount"></div>
@@ -265,7 +265,7 @@
                     <div style="background:#f1f5f9; padding:6px 14px; border-radius:8px; display:inline-block; font-size:13px; font-weight:700; color:var(--brand-primary); margin-bottom:12px;">
                         Current Streak: <span id="gameStreakValue">0</span>
                     </div>
-                    
+
                     <div class="matching-game-grid-blocks" id="ergonomicBlockGameMount"></div>
 
                     <button id="gameExitActionBtn" class="btn-secondary" style="margin-top:10px;">← Close Game</button>
@@ -359,7 +359,7 @@ const CLASSROOM_COLORS = ["Red Team 🔴", "Blue Team 🔵", "Green Team 🟢", 
     let currentStreakScore = 0;
     let gameModeScope = "all";
     let canvas, ctx, isDrawing = false;
-     
+
  // --- 3. DATA TABLES ---
     const vowelFrameworkLabels = ["ha", "hu", "hee", "ha", "hay", "hih", "ho"];
     const standardVowelSubscripts = ["-ä", "-u", "-ee", "-a", "-ay", "-ih", "-o"];
@@ -430,6 +430,9 @@ async function handleAuth() {
         checkUserSession(); // Move to the router
     }
 }
+     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="your-main-script.js"></script>
+    
      // --- 3. SESSION & PROFILE ROUTING ---
 async function checkUserSession() {
     const { data: { session } } = await _supabase.auth.getSession();
@@ -449,7 +452,32 @@ async function checkUserSession() {
         loadDashboard(profile);
     }
 }
+async function signUp(email, password) {
+    const { data, error } = await _supabase.auth.signUp({
+        email: email,
+        password: password,
+    });
 
+    if (error) {
+        console.error("Signup error:", error.message);
+    } else {
+        console.log("Check your email for confirmation!");
+    }
+}
+
+async function signIn(email, password) {
+    const { data, error } = await _supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+    });
+
+    if (error) {
+        console.error("Login error:", error.message);
+    } else {
+        // Once signed in, this triggers your profile check
+        checkUserProfile(data.user.id);
+    }
+}
      // --- UPDATED PROFILE FETCHING ---
 async function checkUserProfile(userId) {
     // We select specifically what we need from the database
@@ -466,12 +494,12 @@ async function checkUserProfile(userId) {
     } else {
         // Update your global state with the remembered data
         currentUser = profile;
-        
+
         // Update the UI with remembered nickname and avatar
         document.getElementById('displayUserHeader').innerText = profile.display_name;
         document.getElementById('displayAvatarHeader').innerText = profile.avatar_character;
         document.getElementById('progressText').innerText = `${profile.progress_percent || 0}% Completed`;
-        
+
         // Load the dashboard
         hideAllScreens();
         document.getElementById('studentDashboard').style.display = 'block';
@@ -479,12 +507,12 @@ async function checkUserProfile(userId) {
 }
      function renderUserSidebar() {
     if (!currentUser) return;
-    
+
     // Update the Sidebar display with remembered values
     document.getElementById("displayUserHeader").innerText = currentUser.display_name;
     document.getElementById("displayAvatarHeader").innerText = currentUser.avatar_character;
     document.getElementById("progressText").innerText = `${currentUser.progress_percent}% Completed`;
-    
+
     // Update the progress bar width
     const progressBar = document.getElementById("progressBar");
     if (progressBar) progressBar.style.width = `${currentUser.progress_percent}%`;
@@ -525,14 +553,14 @@ async function saveProfileData() {
         showNotificationToast("Error saving profile: " + error.message);
     } else {
         showNotificationToast("Welcome to the classroom!");
-        
+
         // 4. Update the local user object and route to dashboard
         currentUser = { display_name: newName, avatar_character: selectedEmoji, team_id: newTeam };
-        
+
         // Move to the dashboard
         hideAllScreens();
         document.getElementById('studentDashboard').style.display = 'block';
-        
+
         // Optional: refresh dashboard data if needed
         if (typeof loadDashboard === 'function') loadDashboard(currentUser);
     }
@@ -545,7 +573,7 @@ async function switchLeaderboard(type) {
 
     const table = type === 'individual' ? 'profiles' : 'teams';
     const query = type === 'individual' ? 'display_name, avatar_character, progress_percent' : 'name, current_level';
-    
+
     const { data } = await _supabase.from(table).select(query);
     listMount.innerHTML = data.map(item => `<div>${item.name || item.display_name}</div>`).join('');
 }
@@ -615,7 +643,7 @@ async function uploadSketchpadDrawingCanvasData() {
     const emptyCheck = document.createElement("canvas");
     emptyCheck.width = canvas.width; 
     emptyCheck.height = canvas.height;
-    
+
     if (canvas.toDataURL() === emptyCheck.toDataURL()) {
         return showNotificationToast("Draw something before sharing!");
     }
@@ -689,9 +717,9 @@ async function checkMySubmissionStatus() {
 async function submitVerificationCounterBump(shareId, element) {
     const currentVal = parseInt(element.getAttribute('data-count') || "0");
     const updatedVal = currentVal + 1;
-    
+
     await _supabase.from('photo_shares').update({ meta_points: updatedVal }).eq('id', shareId);
-    
+
     element.setAttribute('data-count', updatedVal);
     element.innerHTML = `👍 Verified (${updatedVal})`;
     showNotificationToast("Marked as verified!");
@@ -703,7 +731,7 @@ function executeVictoryConfettiCelebration() {
     const confCtx = confCanvas.getContext("2d");
     confCanvas.width = window.innerWidth; 
     confCanvas.height = window.innerHeight;
-    
+
     let particles = [];
     const colors = ["#0f766e", "#0d9488", "#14b8a6", "#2563eb", "#334155"];
 
@@ -721,10 +749,10 @@ function executeVictoryConfettiCelebration() {
     function animateConfettiLoop() {
         if (particles.length === 0) return confCtx.clearRect(0,0,confCanvas.width,confCanvas.height);
         confCtx.clearRect(0, 0, confCanvas.width, confCanvas.height);
-        
+
         // Fixed: Use filter to remove particles to avoid skipping elements during iteration
         particles = particles.filter(p => p.y < confCanvas.height);
-        
+
         particles.forEach(p => {
             p.x += p.vx; p.y += p.vy; p.vy += 0.25; p.rotation += p.rSpeed;
             confCtx.save(); 
@@ -743,16 +771,16 @@ function executeVictoryConfettiCelebration() {
 async function handleAuth() {
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
-    
+
     if (!email || !password) return showNotificationToast("Please fill in all boxes.");
 
     // Using the global isSignUpMode variable to toggle between signup/signin
     const { data, error } = isSignUpMode 
         ? await _supabase.auth.signUp({ email, password })
         : await _supabase.auth.signInWithPassword({ email, password });
-        
+
     if (error) return showNotificationToast(error.message);
-    
+
     if (data?.user) {
         proceedFlowMap(data.user);
     }
@@ -761,7 +789,7 @@ async function handleAuth() {
 // --- THE NAVIGATION MAP ---
 async function proceedFlowMap(user) {
     currentUser = user;
-    
+
     // 1. Admin Check
     if (currentUser.email === ADMIN_EMAIL) {
         hideAllScreens();
@@ -775,7 +803,7 @@ async function proceedFlowMap(user) {
         .select('display_name, avatar_character, team_id')
         .eq('id', user.id)
         .maybeSingle();
-    
+
     // 3. New User or Missing Data? Send to Setup
     if (!profile || !profile.display_name) {
         hideAllScreens();
@@ -791,7 +819,7 @@ async function proceedFlowMap(user) {
     document.getElementById("displayAvatarHeader").innerText = profile.avatar_character;
     document.getElementById("sidebarPodBadge").innerText = profile.team_id || "No Team Assigned";
     document.getElementById("studentDashboard").style.display = "block";
-    
+
     // Refresh all data
     fetchUserProgress();
     renderLiveLeaderboard();
@@ -817,14 +845,14 @@ function populateTeamSetupDropdownOptions() {
 
 async function submitWorkForVerification(imageUrl) {
     const { data: profile } = await _supabase.from('profiles').select('team_id').eq('id', currentUser.id).single();
-    
+
     await _supabase.from('work_submissions').insert({
         student_id: currentUser.id,
         team_id: profile.team_id,
         image_url: imageUrl,
         status: 'pending'
     });
-    
+
     showNotificationToast("Work submitted to your Captain!");
 }
  // --- 6. DASHBOARD & FLOW MANAGER ---
@@ -842,7 +870,7 @@ function launchDashboard(viewMode) {
     } else {
         document.getElementById("studentDashboard").style.display = "block";
         document.getElementById("teacherOnlyDashboard").style.display = "none";
-        
+
         // Load data once
         fetchUserProgress();
         renderLiveLeaderboard();
@@ -859,7 +887,7 @@ async function approveStudentWork(submissionId) {
         .select('captain_id')
         .eq('captain_id', currentUser.id)
         .maybeSingle();
-    
+
     if (!team) {
         return showNotificationToast("Only the Captain can approve work!");
     }
@@ -875,7 +903,7 @@ async function approveStudentWork(submissionId) {
     if (error) return showNotificationToast("Could not approve work.");
 
     showNotificationToast("Work approved!");
-    
+
     // 3. Trigger level-up logic
     if (sub) {
         checkAndAdvanceTeamLevel(sub.team_id);
@@ -900,13 +928,13 @@ function switchAdminPanelsFromDashboard(targetPanel) {
 async function loadTeacherRosterData() {
     const tbody = document.getElementById("teacherRosterTableBody");
     tbody.innerHTML = '<tr><td colspan="3" style="color:#94a3b8; text-align:center;">Loading class roster...</td></tr>';
-    
+
     // Fetch both datasets concurrently
     const [ { data: students }, { data: progress } ] = await Promise.all([
         _supabase.from('profiles').select('id, display_name, avatar_character, pod_id'),
         _supabase.from('user_progress').select('user_id, mastered_letters')
     ]);
-    
+
     const progressMap = {};
     progress?.forEach(rec => { progressMap[rec.user_id] = rec.mastered_letters || []; });
 
@@ -945,7 +973,7 @@ async function checkAndAdvanceTeamLevel(teamId) {
         await _supabase.from('team_progress')
             .update({ current_level: (progress.current_level || 0) + 1 })
             .eq('team_id', teamId);
-            
+
         showNotificationToast("Team Mastery Achieved! Advancing to next level...");
     }
 } 
@@ -955,7 +983,7 @@ function openMatchingGameWorkspaceMode(scope) {
     document.getElementById("viewFidelGrid").style.display = "none";
     document.getElementById("isolatedFamilyClassroom").style.display = "none";
     document.getElementById("gameWorkspace").style.display = "block";
-    
+
     const exitBtn = document.getElementById("gameExitActionBtn");
     exitBtn.onclick = () => {
         document.getElementById("gameWorkspace").style.display = "none";
@@ -1066,7 +1094,7 @@ function selectAvatar(symbol, element) {
 async function teacherRefreshConfigurationDropdowns() {
     const sSelect = document.getElementById("teacherStudentSelect");
     const pSelect = document.getElementById("teacherPodSelect");
-    
+
     if (!sSelect || !pSelect) return;
 
     const { data: students } = await _supabase.from('profiles').select('id, display_name');
@@ -1081,7 +1109,7 @@ async function teacherRefreshConfigurationDropdowns() {
 function buildMatrixInterfaceGrid() {
     const container = document.getElementById("viewFidelGrid"); 
     container.innerHTML = "";
-    
+
     alphabetData.forEach(item => {
         const card = document.createElement('div');
         card.className = "fidel-card"; 
@@ -1099,12 +1127,12 @@ function launchIsolatedClassroomWorkspace(fidelObj) {
     activeSubscriptsData = (fidelObj.prefix === "h" || fidelObj.prefix === "ḥ") 
         ? vowelFrameworkLabels 
         : standardVowelSubscripts.map(sub => `${fidelObj.prefix}${sub}`);
-    
+
     document.getElementById("viewFidelGrid").style.display = "none";
     document.getElementById("isolatedFamilyClassroom").style.display = "block";
     document.getElementById("classroomFamilyTitle").innerText = `Reviewing Row: "${activeBaseFidel}"`;
     document.getElementById("classroomRowGameBtn").onclick = () => openMatchingGameWorkspaceMode(fidelObj);
-    
+
     // Toggle undo button based on mastery status
     document.getElementById("classroomUndoBtn").style.display = 
         masteredLetters.includes(activeBaseFidel) ? "block" : "none";
@@ -1122,7 +1150,7 @@ async function classroomMarkAsMasteredDirectly() {
             user_id: currentUser.id, 
             mastered_letters: masteredLetters 
         }, { onConflict: 'user_id' });
-        
+
         renderUIProgressUpdates();
         showNotificationToast(`Row "${activeBaseFidel}" saved!`);
         executeVictoryConfettiCelebration();
@@ -1134,7 +1162,7 @@ async function fetchUserProgress() {
         .select('mastered_letters')
         .eq('user_id', currentUser.id)
         .maybeSingle();
-        
+
     if (data?.mastered_letters) {
         masteredLetters = data.mastered_letters;
         renderUIProgressUpdates();
@@ -1147,7 +1175,7 @@ function renderUIProgressUpdates() {
         const isMastered = masteredLetters.includes(card.getAttribute('data-fidel'));
         card.classList.toggle('completed', isMastered);
     });
-    
+
     // Update Progress Bar
     const percent = Math.round((masteredLetters.length / 34) * 100);
     const bar = document.getElementById("progressBar");
@@ -1190,7 +1218,7 @@ async function fetchDisappearingImageCanvasBoard() {
 async function renderLiveLeaderboard() {
     const { data: profiles } = await _supabase.from('profiles').select('id, display_name, avatar_character');
     const { data: progressRecords } = await _supabase.from('user_progress').select('user_id, mastered_letters');
-    
+
     const progressMap = {}; 
     progressRecords?.forEach(rec => { progressMap[rec.user_id] = rec.mastered_letters || []; });
 
@@ -1203,7 +1231,7 @@ async function renderLiveLeaderboard() {
 
     const container = document.getElementById("liveLeaderboardContent"); 
     if (!container) return;
-    
+
     container.innerHTML = leaderList.slice(0, 5).map((player, idx) => {
         const isSelf = currentUser?.id === player.id;
         return `
