@@ -622,98 +622,60 @@ function executeVictoryConfettiCelebration() {
     animateConfettiLoop();
 }
 // --- 4. AUTH & NAVIGATION GATE ---
-function resetToGate() {
-    const screens = ["authScreen", "studentDashboard", "teacherOnlyDashboard", "adminViewSelectorGate", "profileSetupScreen"];
-    screens.forEach(s => document.getElementById(s).style.display = "none");
-    
-    document.getElementById("authScreen").style.display = "block";
-    document.getElementById("onboardingGate").style.display = "flex";
-}
-
-let currentAuthMode = 'login'; // or 'signup'
-
-function selectAuthFlow(mode) {
-    currentAuthMode = mode;
-    document.getElementById('onboardingGate').style.display = 'none';
-    document.getElementById('credentialFields').style.display = 'block';
-    document.getElementById('authSubtitle').innerText = mode === 'signup' ? 'Create a new account' : 'Welcome back!';
-    document.getElementById('mainAuthBtn').innerText = mode === 'signup' ? 'Create Account' : 'Log In';
-}
-
-async function handleAuth() {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    
-    if (!email || !password) return showNotificationToast("Please fill in all fields.");
-
-    if (currentAuthMode === 'signup') {
-        const { data, error } = await _supabase.auth.signUp({ email, password });
-        if (error) return showNotificationToast(error.message);
-        showNotificationToast("Account created! You can now log in.");
-    } else {
-        const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
-        if (error) return showNotificationToast("Login failed: " + error.message);
-        
-        currentUser = data.user;
-        // Check if they need to finish their profile
-        checkProfileCompletion(currentUser);
-    }
-}
-
-function resetToGate() {
-    document.getElementById('onboardingGate').style.display = 'flex';
-    document.getElementById('credentialFields').style.display = 'none';
-    document.getElementById('authSubtitle').innerText = 'Learn the Amharic Alphabet Together!';
-}
-
+// --- CENTRAL AUTH HANDLER ---
 async function handleAuth() {
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
+    
     if (!email || !password) return showNotificationToast("Please fill in all boxes.");
 
+    // Using the global isSignUpMode variable to toggle between signup/signin
     const { data, error } = isSignUpMode 
         ? await _supabase.auth.signUp({ email, password })
         : await _supabase.auth.signInWithPassword({ email, password });
         
     if (error) return showNotificationToast(error.message);
-    if (data?.user) proceedFlowMap(data.user);
+    
+    if (data?.user) {
+        proceedFlowMap(data.user);
+    }
 }
 
+// --- THE NAVIGATION MAP ---
 async function proceedFlowMap(user) {
     currentUser = user;
     
-    // Admin Check
+    // 1. Admin Check
     if (currentUser.email === ADMIN_EMAIL) {
-        document.getElementById("authScreen").style.display = "none";
+        hideAllScreens();
         document.getElementById("adminViewSelectorGate").style.display = "block";
         return;
     }
 
-    // Fetch Profile
+    // 2. Fetch Profile
     const { data: profile } = await _supabase
         .from('profiles')
-        .select('display_name, avatar_character, team_id') // Consistent team_id
+        .select('display_name, avatar_character, team_id')
         .eq('id', user.id)
         .maybeSingle();
     
-    // NEW LOGIC: If no profile, force to setup screen
+    // 3. New User or Missing Data? Send to Setup
     if (!profile || !profile.display_name) {
-        document.getElementById("authScreen").style.display = "none";
+        hideAllScreens();
         document.getElementById("profileSetupScreen").style.display = "block";
-        populateTeamSetupDropdownOptions(); // Trigger the dropdown fill
+        populateTeamSetupDropdownOptions();
         return;
     }
 
-    // RETURNING STUDENT
+    // 4. Returning Student: Set display data and show dashboard
+    hideAllScreens();
     selectedAvatarSymbol = profile.avatar_character;
     document.getElementById("displayUserHeader").innerText = profile.display_name;
     document.getElementById("displayAvatarHeader").innerText = profile.avatar_character;
     document.getElementById("sidebarPodBadge").innerText = profile.team_id || "No Team Assigned";
-    
-    document.getElementById("authScreen").style.display = "none";
     document.getElementById("studentDashboard").style.display = "block";
     
-    // Load student data
+    // Refresh all data
     fetchUserProgress();
     renderLiveLeaderboard();
     fetchDisappearingImageCanvasBoard();
@@ -722,6 +684,14 @@ async function proceedFlowMap(user) {
     buildMatrixInterfaceGrid();
 }
 
+// --- HELPER TO CLEAN THE UI ---
+function hideAllScreens() {
+    const screens = ["authScreen", "studentDashboard", "teacherOnlyDashboard", "adminViewSelectorGate", "profileSetupScreen"];
+    screens.forEach(s => {
+        const el = document.getElementById(s);
+        if (el) el.style.display = "none";
+    });
+}
 // --- 5. WORKFLOW HELPERS ---
 function populateTeamSetupDropdownOptions() {
     const selectElement = document.getElementById("profileTeamSelect");
