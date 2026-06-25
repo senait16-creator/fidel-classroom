@@ -433,24 +433,46 @@ async function getCurrentUserOrRedirect() {
     return user;
 }
      // --- 4. UI INTERACTION ---
-async function saveProfileChanges() {
+async function saveProfileData() {
+    // 1. Get the current user
     const user = await getCurrentUserOrRedirect();
     if (!user) return;
 
-    const newName = document.getElementById("editNickname").value;
+    // 2. Gather the inputs
+    const newName = document.getElementById("displayName").value;
     const selectedEmoji = document.querySelector('.avatar-option.selected')?.innerText || '🦁';
-    const newTeam = document.getElementById('editTeamSelect').value;
+    const newTeam = document.getElementById('profileTeamSelect').value;
 
-    const { error } = await _supabase.from('profiles')
-        .update({ display_name: newName, avatar_character: selectedEmoji, team_id: newTeam })
+    if (!newName) {
+        showNotificationToast("Please enter a nickname!");
+        return;
+    }
+
+    // 3. Update the database
+    const { error } = await _supabase
+        .from('profiles')
+        .update({ 
+            display_name: newName, 
+            avatar_character: selectedEmoji,
+            team_id: newTeam
+        })
         .eq('id', user.id);
 
     if (error) {
-        showNotificationToast("Error: " + error.message);
+        console.error("Update Error:", error);
+        showNotificationToast("Error saving profile: " + error.message);
     } else {
-        showNotificationToast("Profile updated!");
-        document.getElementById("profileModal").style.display = "none";
-        if (typeof loadTeamDashboard === 'function') loadTeamDashboard(user);
+        showNotificationToast("Welcome to the classroom!");
+        
+        // 4. Update the local user object and route to dashboard
+        currentUser = { display_name: newName, avatar_character: selectedEmoji, team_id: newTeam };
+        
+        // Move to the dashboard
+        hideAllScreens();
+        document.getElementById('studentDashboard').style.display = 'block';
+        
+        // Optional: refresh dashboard data if needed
+        if (typeof loadDashboard === 'function') loadDashboard(currentUser);
     }
 }
 
