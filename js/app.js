@@ -355,10 +355,26 @@ async function uploadSketchpadDrawingCanvasData() {
     }, "image/png");
 }
 
+// --- MASTER BROWSER BRIDGE ---
+window.handleAuth = handleAuth;
+window.selectAuthFlow = selectAuthFlow;
+window.resetToGate = resetToGate;
 window.saveProfileData = saveProfileData;
+window.routeAdminTerminalDirectly = routeAdminTerminalDirectly;
+window.switchAdminPanelsFromDashboard = switchAdminPanelsFromDashboard;
 window.loadTeacherRoster = loadTeacherRoster;
 window.teacherAssignStudentToPod = teacherAssignStudentToPod;
 window.initTeacherDashboard = initTeacherDashboard;
-window.handleAuth = handleAuth;
 window.submitWorkForVerification = submitWorkForVerification;
-window.approveStudentWork = approveStudentWork; // (Ensure you have this function defined)
+window.approveStudentWork = approveStudentWork;
+
+window.logout = async () => {
+    await _supabase.auth.signOut();
+    location.reload();
+};
+
+window.selectAvatar = (symbol, element) => {
+    selectedAvatarSymbol = symbol;
+    document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+    element.classList.add('selected');
+};
