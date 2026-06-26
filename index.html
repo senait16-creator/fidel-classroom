@@ -104,6 +104,18 @@
             </table>
         </div>
 
+        <div class="teacher-panel" style="margin-bottom: 20px;">
+            <h2 style="font-size: 18px; color: var(--neutral-dark); margin-bottom: 4px;">Pending Writing Submissions</h2>
+            <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">Review handwriting samples students have submitted for Fidel Challenge.</p>
+            <div id="teacherWritingQueueMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
+        </div>
+
+        <div class="teacher-panel" style="margin-bottom: 20px;">
+            <h2 style="font-size: 18px; color: var(--neutral-dark); margin-bottom: 4px;">Team Level Progress</h2>
+            <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">See which teams are ready for their live quiz, and advance them once they pass.</p>
+            <div id="teacherTeamProgressMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
+        </div>
+
         <div class="teacher-panel">
             <h2 style="font-size: 18px; color: var(--neutral-dark); margin-bottom: 4px;">Manage Student Color Teams</h2>
             <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">Reassign students to predecided classroom color tracks.</p>
@@ -287,9 +299,48 @@
             <strong>Get a streak of 20 in a row</strong> to pass this letter's matching game. Miss one, and your streak goes back to zero — so take your time!
         </div>
 
-        <div style="display:flex; gap:10px; margin-bottom: 24px;">
+        <div style="display:flex; gap:10px; margin-bottom: 12px;">
             <button id="challengeDetailPlayBtn" class="btn-primary" style="flex:1;">🎮 Play Matching Game</button>
             <button id="challengeDetailFlashcardBtn" class="btn-primary" style="flex:1; background:#475569;">🗂️ Self-Study Flashcards</button>
+        </div>
+
+        <button id="challengeDetailWritingBtn" class="btn-primary" style="width:100%; background:#7c3aed; margin-bottom: 16px;">✍️ Submit Your Writing</button>
+
+        <div id="challengeWritingStatusBox" style="display:none;"></div>
+    </div>
+
+    <!-- Writing submission screen — student chooses photo upload OR sketchpad,
+         submits for captain/teacher review. Top-level for the same reason
+         as gameWorkspace and flashcardScreen: avoids being trapped inside a
+         hidden parent. -->
+    <div id="writingSubmitScreen" style="display: none; max-width: 600px; margin: 40px auto; padding: 0 16px;">
+        <div class="workspace-title">
+            <span id="writingSubmitTitle">Submit Writing</span>
+            <button class="btn-secondary" id="writingSubmitCloseBtn">← Back</button>
+        </div>
+
+        <div id="writingRejectionNote" style="display:none; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; padding:12px 16px; border-radius:12px; margin-bottom:16px; font-size:13px; text-align:left;"></div>
+
+        <div class="mode-option" style="margin-bottom:12px;" id="writingChoiceUploadCard">
+            <div class="mode-option-icon">📷</div>
+            <div class="mode-option-title">Upload a Photo</div>
+            <div class="mode-option-desc">Take a picture of your handwriting on paper</div>
+        </div>
+        <div class="mode-option" id="writingChoiceSketchCard">
+            <div class="mode-option-icon">✏️</div>
+            <div class="mode-option-title">Draw on Sketchpad</div>
+            <div class="mode-option-desc">Write directly here using your finger or mouse</div>
+        </div>
+
+        <input type="file" id="writingPhotoInput" accept="image/*" capture="environment" style="display:none;">
+
+        <!-- Sketchpad sub-area, shown only when that option is chosen -->
+        <div id="writingSketchpadArea" style="display:none; margin-top:16px;">
+            <canvas id="writingSketchpad" class="sketch-canvas-element" style="height:220px;"></canvas>
+            <div class="sketchpad-actions-row">
+                <button class="btn-primary" style="padding:6px 12px; font-size:12px; background:#64748b;" id="writingSketchClearBtn">Clear</button>
+                <button class="btn-primary" style="padding:6px 12px; font-size:12px;" id="writingSketchSubmitBtn">Submit Drawing</button>
+            </div>
         </div>
     </div>
 
