@@ -539,7 +539,7 @@ async function saveProfileData() {
     }
 
     // --- Add a loading state here ---
-    const saveBtn = event.target; // Assuming the button triggered this
+    const saveBtn = event.target; 
     saveBtn.disabled = true;
     saveBtn.innerText = "Saving...";
 
