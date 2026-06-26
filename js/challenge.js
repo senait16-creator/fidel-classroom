@@ -59,42 +59,69 @@ async function fetchChallengeLevels() {
     return challengeLevelsCache;
 }
 
-// Determines the student's team's current level. For now (before team
-// progression logic exists) this always returns 1, so every team sees
-// Level 1 unlocked and everything else locked — matches "Level 1 with 12
-// levels locked" from the original ask. Will be replaced once
-// team_level_status / teams.current_level is actually being updated.
-async function getTeamCurrentLevel() {
-    if (!currentProfile?.team_id) return 1;
+// Fetches the student's team row (name, current_level, streak_count).
+// Falls back to sensible defaults if no team is assigned yet, so the board
+// still renders something reasonable rather than breaking.
+async function getTeamBoardInfo() {
+    if (!currentProfile?.team_id) {
+        return { name: "No Team Yet", current_level: 1, streak_count: 0 };
+    }
 
     const { data: team, error } = await _supabase
         .from('teams')
-        .select('current_level')
+        .select('name, current_level, streak_count')
         .eq('id', currentProfile.team_id)
         .maybeSingle();
 
-    if (error || !team) return 1;
-    return team.current_level || 1;
+    if (error || !team) {
+        return { name: "No Team Yet", current_level: 1, streak_count: 0 };
+    }
+
+    return {
+        name: team.name || "Your Team",
+        current_level: team.current_level || 1,
+        streak_count: team.streak_count || 0
+    };
+}
+
+function renderChallengeBoardHeader(team, totalLevels) {
+    document.getElementById("challengeBoardTeamName").innerText = team.name;
+    document.getElementById("challengeBoardTeamSub").innerText = `Level ${team.current_level} of ${totalLevels}`;
+    document.getElementById("challengeBoardStreakValue").innerText = team.streak_count;
+
+    const percent = Math.min(100, Math.round(((team.current_level - 1) / totalLevels) * 100));
+    document.getElementById("challengeBoardProgressFill").style.width = `${percent}%`;
+
+    const swatch = document.getElementById("challengeBoardTeamSwatch");
+    if (team.name && team.name.includes("Red")) swatch.style.background = "#ef4444";
+    else if (team.name && team.name.includes("Blue")) swatch.style.background = "#3b82f6";
+    else if (team.name && team.name.includes("Green")) swatch.style.background = "#10b981";
+    else if (team.name && team.name.includes("Yellow")) swatch.style.background = "#f59e0b";
+    else swatch.style.background = "var(--brand-primary)";
 }
 
 async function renderChallengeLevelsView() {
     const container = document.getElementById("challengeLevelsGrid");
     container.innerHTML = `<p style="color:#94a3b8;">Loading levels...</p>`;
 
-    const [levels, teamCurrentLevel] = await Promise.all([
+    const [levels, team] = await Promise.all([
         fetchChallengeLevels(),
-        getTeamCurrentLevel()
+        getTeamBoardInfo()
     ]);
+
+    renderChallengeBoardHeader(team, levels.length || 12);
 
     container.innerHTML = "";
 
     levels.forEach(level => {
         const card = document.createElement('div');
-        const isUnlocked = level.level_number <= teamCurrentLevel;
-        const isCurrent = level.level_number === teamCurrentLevel;
+        const isCompleted = level.level_number < team.current_level;
+        const isCurrent = level.level_number === team.current_level;
+        const isUnlocked = level.level_number <= team.current_level;
         const isCapstone = level.level_number === 12;
 
-        card.className = `challenge-level-card ${isUnlocked ? 'unlocked' : 'locked'} ${isCurrent ? 'current' : ''}`;
+        const stateClass = isCompleted ? 'completed' : (isUnlocked ? 'unlocked' : 'locked');
+        card.className = `challenge-level-card ${stateClass} ${isCurrent ? 'current' : ''}`;
 
         const familiesPreview = (level.letter_families || []).join(' ');
         const badgeContent = isUnlocked ? level.level_number : '🔒';
