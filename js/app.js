@@ -793,7 +793,6 @@ async function loadTeamDashboard(user) {
         mount.appendChild(inboxMount);
         renderCaptainInbox(); 
     }
-} 
 
 window.handleAuth = handleAuth;
 window.selectAuthFlow = selectAuthFlow;
