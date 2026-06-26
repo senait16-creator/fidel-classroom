@@ -283,6 +283,40 @@
         <div id="challengeFamilyGrid" class="challenge-family-grid"></div>
     </div>
 
+    <!-- Fidel Challenge: Family Detail (giant letters, matching game launch, flashcards) -->
+    <div id="challengeFamilyDetailScreen" style="display: none; max-width: 700px; margin: 40px auto; padding: 0 16px;">
+        <div class="workspace-title">
+            <span id="challengeFamilyDetailTitle">Family</span>
+            <button class="btn-secondary" onclick="exitChallengeFamilyDetail()">← Back to Families</button>
+        </div>
+
+        <div id="challengeFamilyDetailGiantRow" class="classroom-row-giant"></div>
+
+        <div class="challenge-streak-rule-banner">
+            <strong>Get a streak of 20 in a row</strong> to pass this letter's matching game. Miss one, and your streak goes back to zero — so take your time!
+        </div>
+
+        <div style="display:flex; gap:10px; margin-bottom: 24px;">
+            <button id="challengeDetailPlayBtn" class="btn-primary" style="flex:1;">🎮 Play Matching Game</button>
+            <button id="challengeDetailFlashcardBtn" class="btn-primary" style="flex:1; background:#475569;">🗂️ Self-Study Flashcards</button>
+        </div>
+
+        <!-- Flashcard self-study mode -->
+        <div id="challengeFlashcardArea" style="display:none;">
+            <div class="flashcard-stage">
+                <div class="flashcard" id="challengeFlashcard">
+                    <div class="flashcard-face flashcard-front" id="challengeFlashcardFront"></div>
+                    <div class="flashcard-face flashcard-back" id="challengeFlashcardBack"></div>
+                </div>
+            </div>
+            <p class="subtitle" style="margin-top:10px;">Tap the card to flip it. Try to say the sound before you flip!</p>
+            <div style="display:flex; gap:10px; justify-content:center; margin-top:10px;">
+                <button class="btn-secondary" id="challengeFlashcardPrevBtn">← Previous</button>
+                <button class="btn-secondary" id="challengeFlashcardNextBtn">Next →</button>
+            </div>
+        </div>
+    </div>
+
     <script src="js/app.js" defer></script>
     <script src="js/challenge.js" defer></script>
 </body>
