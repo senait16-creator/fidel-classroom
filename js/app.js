@@ -119,6 +119,11 @@ window.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('sendResetLinkBtn')?.addEventListener('click', sendPasswordResetLink);
     document.getElementById('saveNewPasswordBtn')?.addEventListener('click', saveNewPassword);
 
+    document.getElementById('captainTeamSelect')?.addEventListener('change', (e) => {
+        populateCaptainStudentDropdown(e.target.value);
+    });
+    document.getElementById('setCaptainBtn')?.addEventListener('click', setTeamCaptain);
+
     // Supabase redirects back here with type=recovery in the URL after the
     // user clicks the reset link in their email, and briefly authenticates
     // them via that link's token so they can set a new password. The
@@ -532,6 +537,8 @@ function launchDashboard(viewMode) {
         teacherRefreshConfigurationDropdowns();
         loadTeacherWritingQueue();
         loadTeacherTeamProgress();
+        populateCaptainTeamDropdown();
+        loadCurrentCaptains();
     } else {
         document.getElementById("studentDashboard").style.display = "block";
         fetchUserProgress();
@@ -628,6 +635,88 @@ async function teacherAssignStudentToPod() {
 
     await loadTeacherRosterData();
     await teacherRefreshConfigurationDropdowns();
+}
+
+// ---------------------------------------------------------------------------
+// Captain assignment
+// ---------------------------------------------------------------------------
+
+async function populateCaptainTeamDropdown() {
+    const { data: teams } = await _supabase.from('teams').select('id, name').order('name');
+    const select = document.getElementById('captainTeamSelect');
+    select.innerHTML = '<option value="">Select Team...</option>';
+    (teams || []).forEach(t => { select.innerHTML += `<option value="${t.id}">${t.name}</option>`; });
+}
+
+// Only shows students who are actually ON the selected team — a captain
+// has to be a member of the team they're captaining, so the dropdown is
+// filtered rather than listing every student in the class.
+async function populateCaptainStudentDropdown(teamId) {
+    const studentSelect = document.getElementById('captainStudentSelect');
+
+    if (!teamId) {
+        studentSelect.innerHTML = '<option value="">Select Team First...</option>';
+        studentSelect.disabled = true;
+        return;
+    }
+
+    const { data: members } = await _supabase
+        .from('profiles')
+        .select('id, nickname')
+        .eq('team_id', teamId)
+        .order('nickname');
+
+    studentSelect.disabled = false;
+    studentSelect.innerHTML = '<option value="">Select Student...</option>';
+    (members || []).forEach(m => { studentSelect.innerHTML += `<option value="${m.id}">${m.nickname}</option>`; });
+}
+
+async function setTeamCaptain() {
+    const teamId = document.getElementById('captainTeamSelect').value;
+    const studentId = document.getElementById('captainStudentSelect').value;
+    const studentLabel = document.getElementById('captainStudentSelect').selectedOptions[0]?.text;
+
+    if (!teamId || !studentId) {
+        return showNotificationToast("Please pick both a team and a student.");
+    }
+
+    showNotificationToast("Setting captain...");
+
+    const { error } = await _supabase
+        .from('teams')
+        .update({ captain_id: studentId })
+        .eq('id', teamId);
+
+    if (error) {
+        console.error("Failed to set captain:", error);
+        return showNotificationToast("Failed: " + error.message);
+    }
+
+    showNotificationToast(`${studentLabel} is now the captain! 👑`);
+    await loadCurrentCaptains();
+}
+
+async function loadCurrentCaptains() {
+    const mount = document.getElementById('currentCaptainsMount');
+    if (!mount) return;
+
+    const { data: teams } = await _supabase
+        .from('teams')
+        .select('id, name, captain_id, profiles!teams_captain_id_fkey(nickname, avatar)')
+        .order('name');
+
+    mount.innerHTML = '';
+    (teams || []).forEach(team => {
+        if (!team.captain_id) return;
+        const row = document.createElement('div');
+        row.className = 'current-captain-row';
+        row.innerHTML = `<span>${team.name}</span><strong>👑 ${team.profiles?.avatar || '🦁'} ${team.profiles?.nickname || 'Unknown'}</strong>`;
+        mount.appendChild(row);
+    });
+
+    if (!mount.innerHTML) {
+        mount.innerHTML = '<p style="color:#94a3b8; font-size:12px;">No captains assigned yet.</p>';
+    }
 }
 
 // ---------------------------------------------------------------------------
