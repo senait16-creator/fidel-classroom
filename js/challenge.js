@@ -7,6 +7,9 @@
 // STREAK_THRESHOLD is defined in app.js (loads first) and shared here.
 
 let challengeLevelsCache = null; // loaded once from challenge_levels, reused across views
+let activeChallengeLevel = null; // the level object currently being viewed in the family picker
+let activeChallengeFamilyObj = null; // the family object currently being viewed in the detail screen
+let activeChallengeFamilyLevel = null; // the level number that family belongs to
 
 // -----------------------------------------------------------------------------
 // Mode select
@@ -152,8 +155,6 @@ async function renderChallengeLevelsView() {
 // progress (streak passed / writing passed) once that data exists.
 // -----------------------------------------------------------------------------
 
-let activeChallengeLevel = null; // the level object currently being viewed in the family picker
-
 async function openChallengeFamilyPicker(level) {
     activeChallengeLevel = level;
 
@@ -167,8 +168,17 @@ async function openChallengeFamilyPicker(level) {
 // from app.js's openMatchingGameWorkspaceMode exit handler).
 async function returnToChallengeFamilyPicker() {
     document.getElementById("gameWorkspace").style.display = "none";
-    document.getElementById("challengeFamilyScreen").style.display = "block";
-    await renderChallengeFamilyPicker();
+
+    // Return to the detail screen the game was launched from (giant letters +
+    // play/flashcard buttons), not all the way back out to the picker grid —
+    // matches how the student got here in the first place.
+    if (activeChallengeFamilyObj) {
+        document.getElementById("challengeFamilyDetailScreen").style.display = "block";
+        renderChallengeFamilyDetailGiantRow(activeChallengeFamilyObj);
+    } else {
+        document.getElementById("challengeFamilyScreen").style.display = "block";
+        await renderChallengeFamilyPicker();
+    }
 }
 
 function exitChallengeFamilyPicker() {
@@ -204,14 +214,18 @@ async function renderChallengeFamilyPicker() {
 
     container.innerHTML = "";
 
-    (level.letter_families || []).forEach(baseLetter => {
+    const positionLabels = ["1st", "2nd", "3rd"];
+
+    (level.letter_families || []).forEach((baseLetter, idx) => {
         const progress = progressByLetter[baseLetter] || { best_streak: 0, streak_passed: false, writing_passed: false };
         const fidelObj = alphabetData.find(item => item.base === baseLetter);
+        const posClass = `pos-${idx + 1}`; // 1st family = green, 2nd = yellow, 3rd = red, consistent every level
 
         const card = document.createElement('div');
-        card.className = `challenge-family-card ${progress.streak_passed && progress.writing_passed ? 'mastered' : ''}`;
+        card.className = `challenge-family-card ${posClass} ${progress.streak_passed && progress.writing_passed ? 'mastered' : ''}`;
 
         card.innerHTML = `
+            <span class="challenge-family-position-tag">${positionLabels[idx] || `#${idx + 1}`}</span>
             <div class="challenge-family-letter">${baseLetter}</div>
             <div class="challenge-family-progress-row">
                 <span class="challenge-family-pill ${progress.streak_passed ? 'done' : ''}">
@@ -223,7 +237,7 @@ async function renderChallengeFamilyPicker() {
             </div>
         `;
 
-        card.onclick = () => launchChallengeStreakGame(fidelObj, level.level_number);
+        card.onclick = () => openChallengeFamilyDetail(fidelObj, level.level_number);
         container.appendChild(card);
     });
 }
@@ -268,8 +282,94 @@ function launchChallengeStreakGame(fidelObj, levelNumber) {
         }
     };
 
+    document.getElementById("challengeFamilyDetailScreen").style.display = "none";
     document.getElementById("challengeFamilyScreen").style.display = "none";
     openMatchingGameWorkspaceMode(fidelObj);
+}
+
+// -----------------------------------------------------------------------------
+// Family detail screen — giant letter display, launch point for the
+// matching game (with streak rules explained) and the flashcard self-study
+// mode. Shown after clicking a family card in the picker.
+// -----------------------------------------------------------------------------
+
+const vowelSoundLabels = ["-ä", "-u", "-ee", "-a", "-ay", "-ih", "-o"]; // matches standardVowelSubscripts in app.js
+
+function openChallengeFamilyDetail(fidelObj, levelNumber) {
+    activeChallengeFamilyObj = fidelObj;
+    activeChallengeFamilyLevel = levelNumber;
+
+    document.getElementById("challengeFamilyScreen").style.display = "none";
+    document.getElementById("challengeFamilyDetailScreen").style.display = "block";
+    document.getElementById("challengeFamilyDetailTitle").innerText = `Family: "${fidelObj.base}"`;
+    document.getElementById("challengeFlashcardArea").style.display = "none";
+
+    renderChallengeFamilyDetailGiantRow(fidelObj);
+
+    document.getElementById("challengeDetailPlayBtn").onclick = () => launchChallengeStreakGame(fidelObj, levelNumber);
+    document.getElementById("challengeDetailFlashcardBtn").onclick = () => openChallengeFlashcards(fidelObj);
+}
+
+function exitChallengeFamilyDetail() {
+    document.getElementById("challengeFamilyDetailScreen").style.display = "none";
+    document.getElementById("challengeFamilyScreen").style.display = "block";
+}
+
+function renderChallengeFamilyDetailGiantRow(fidelObj) {
+    const mount = document.getElementById("challengeFamilyDetailGiantRow");
+    mount.innerHTML = "";
+
+    const subs = (fidelObj.prefix === "h" || fidelObj.prefix === "ḥ")
+        ? ["ha", "hu", "hee", "ha", "hay", "hih", "ho"]
+        : vowelSoundLabels.map(sub => `${fidelObj.prefix}${sub}`);
+
+    fidelObj.family.forEach((char, idx) => {
+        const card = document.createElement('div');
+        card.className = "giant-char-card";
+        card.innerHTML = `<div class="letter">${char}</div><div class="sub">${subs[idx]}</div>`;
+        mount.appendChild(card);
+    });
+}
+
+// -----------------------------------------------------------------------------
+// Flashcard self-study mode — flip-to-reveal quiz over the active family's
+// 7 vowel forms. Pure self-study: no streak tracking, no database writes.
+// -----------------------------------------------------------------------------
+
+let flashcardIndex = 0;
+let flashcardDeck = [];
+
+function openChallengeFlashcards(fidelObj) {
+    const subs = (fidelObj.prefix === "h" || fidelObj.prefix === "ḥ")
+        ? ["ha", "hu", "hee", "ha", "hay", "hih", "ho"]
+        : vowelSoundLabels.map(sub => `${fidelObj.prefix}${sub}`);
+
+    flashcardDeck = fidelObj.family.map((char, idx) => ({ char, sound: subs[idx] }));
+    flashcardIndex = 0;
+
+    document.getElementById("challengeFlashcardArea").style.display = "block";
+    renderFlashcard();
+
+    const card = document.getElementById("challengeFlashcard");
+    card.onclick = () => card.classList.toggle("flipped");
+
+    document.getElementById("challengeFlashcardNextBtn").onclick = () => {
+        flashcardIndex = (flashcardIndex + 1) % flashcardDeck.length;
+        renderFlashcard();
+    };
+    document.getElementById("challengeFlashcardPrevBtn").onclick = () => {
+        flashcardIndex = (flashcardIndex - 1 + flashcardDeck.length) % flashcardDeck.length;
+        renderFlashcard();
+    };
+}
+
+function renderFlashcard() {
+    const card = document.getElementById("challengeFlashcard");
+    card.classList.remove("flipped");
+
+    const entry = flashcardDeck[flashcardIndex];
+    document.getElementById("challengeFlashcardFront").innerText = entry.char;
+    document.getElementById("challengeFlashcardBack").innerText = entry.sound;
 }
 
 // -----------------------------------------------------------------------------
@@ -284,3 +384,4 @@ window.openChallengeFamilyPicker = openChallengeFamilyPicker;
 window.exitChallengeFamilyPicker = exitChallengeFamilyPicker;
 window.returnToChallengeFamilyPicker = returnToChallengeFamilyPicker;
 window.launchChallengeStreakGame = launchChallengeStreakGame;
+window.exitChallengeFamilyDetail = exitChallengeFamilyDetail;
