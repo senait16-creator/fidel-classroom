@@ -736,14 +736,20 @@ function toggleDropdownElement(elementId) {
             document.getElementById("progressText").innerText = `${percent}% Complete`;
         }
 
-        async function renderLiveLeaderboard() {
-            const { data: profiles } = await _supabase.from('profiles').select('id, display_name, avatar_character');
-            const { data: progressRecords } = await _supabase.from('user_progress').select('user_id, mastered_letters');
-            const progressMap = {}; progressRecords.forEach(rec => { progressMap[rec.user_id] = rec.mastered_letters || []; });
+      async function renderLiveLeaderboard() {
+    // Select new column names
+    const { data: profiles } = await _supabase.from('profiles').select('id, nickname, avatar');
+    const { data: progressRecords } = await _supabase.from('user_progress').select('user_id, mastered_letters');
+    
+    const progressMap = {}; 
+    progressRecords.forEach(rec => { progressMap[rec.user_id] = rec.mastered_letters || []; });
 
-            let leaderList = profiles.map(p => ({
-                id: p.id, name: p.display_name, avatar: p.avatar_character || '🦁', percentage: Math.round(((progressMap[p.id] || []).length / 34) * 100)
-            })).sort((a, b) => b.percentage - a.percentage);
+    let leaderList = profiles.map(p => ({
+        id: p.id, 
+        name: p.nickname, // New column
+        avatar: p.avatar || '🦁', // New column
+        percentage: Math.round(((progressMap[p.id] || []).length / 34) * 100)
+    })).sort((a, b) => b.percentage - a.percentage);
 
             const container = document.getElementById("liveLeaderboardContent"); container.innerHTML = "";
             leaderList.slice(0, 5).forEach((player, idx) => {
