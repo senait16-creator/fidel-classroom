@@ -191,10 +191,34 @@
         /* Fidel Challenge: family picker                                   */
         /* ---------------------------------------------------------------- */
         .challenge-family-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
-        .challenge-family-card { background: white; border: 1px solid var(--border-color); border-radius: var(--radius-standard); padding: 20px 16px; text-align: center; box-shadow: var(--shadow-premium); cursor: pointer; transition: all 0.2s; }
+        .challenge-family-card { background: white; border: 1px solid var(--border-color); border-radius: var(--radius-standard); padding: 20px 16px; text-align: center; box-shadow: var(--shadow-premium); cursor: pointer; transition: all 0.2s; border-left: 6px solid var(--border-color); }
         .challenge-family-card:hover { transform: translateY(-2px); border-color: var(--brand-primary); }
         .challenge-family-card.mastered { border-color: #10b981; background: #f0fdf4; }
+
+        /* Position-in-level color coding: 1st family green, 2nd yellow, 3rd red.
+           Applied consistently across every level. */
+        .challenge-family-card.pos-1 { border-left-color: #22c55e; }
+        .challenge-family-card.pos-2 { border-left-color: #eab308; }
+        .challenge-family-card.pos-3 { border-left-color: #ef4444; }
+        .challenge-family-card.pos-1 .challenge-family-position-tag { color: #15803d; background: #dcfce7; }
+        .challenge-family-card.pos-2 .challenge-family-position-tag { color: #a16207; background: #fef9c3; }
+        .challenge-family-card.pos-3 .challenge-family-position-tag { color: #b91c1c; background: #fee2e2; }
+        .challenge-family-position-tag { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 8px; margin-bottom: 8px; }
+
         .challenge-family-letter { font-size: 40px; font-family: 'Abyssinica SIL', serif; color: var(--neutral-dark); margin-bottom: 10px; }
         .challenge-family-progress-row { display: flex; flex-direction: column; gap: 6px; }
         .challenge-family-pill { font-size: 11px; font-weight: 700; color: #64748b; background: #f1f5f9; border-radius: 8px; padding: 4px 10px; }
         .challenge-family-pill.done { color: #047857; background: #d1fae5; }
+
+        /* ---------------------------------------------------------------- */
+        /* Fidel Challenge: family detail (giant letters, game, flashcards) */
+        /* ---------------------------------------------------------------- */
+        .challenge-streak-rule-banner { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 12px; padding: 12px 16px; font-size: 13px; color: #9a3412; margin-bottom: 18px; text-align: left; }
+
+        .flashcard-stage { display: flex; justify-content: center; margin: 20px 0; }
+        .flashcard { width: 220px; height: 220px; position: relative; perspective: 1000px; cursor: pointer; }
+        .flashcard.flipped .flashcard-front { transform: rotateY(180deg); }
+        .flashcard.flipped .flashcard-back { transform: rotateY(0deg); }
+        .flashcard-face { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-standard); box-shadow: var(--shadow-premium); border: 1px solid var(--border-color); backface-visibility: hidden; transition: transform 0.5s; font-weight: 700; }
+        .flashcard-front { background: white; font-size: 72px; font-family: 'Abyssinica SIL', serif; color: var(--neutral-dark); transform: rotateY(0deg); }
+        .flashcard-back { background: var(--brand-primary); color: white; font-size: 28px; transform: rotateY(-180deg); }
