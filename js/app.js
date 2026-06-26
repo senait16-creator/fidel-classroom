@@ -146,6 +146,82 @@ function showNotificationToast(msg) {
     setTimeout(() => element.remove(), 3000);
 }
 
+// --- AUTHENTICATION & FLOW ---
+async function handleAuth() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    let { data, error } = isSignUpMode 
+        ? await _supabase.auth.signUp({ email, password })
+        : await _supabase.auth.signInWithPassword({ email, password });
+
+    if (error) return showNotificationToast(error.message);
+
+    currentUser = data.user;
+    
+    const { data: profile } = await _supabase.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
+    
+    if (profile) {
+        launchDashboard(currentUser.email === ADMIN_EMAIL ? "teacher" : "student");
+    } else {
+        document.getElementById("authScreen").style.display = "none";
+        document.getElementById("profileSetupScreen").style.display = "block";
+        populateTeamSetupDropdownOptions();
+    }
+}
+
+async function proceedFlowMap(user) {
+    currentUser = user;
+    const { data: profile } = await _supabase.from('profiles').select('display_name, avatar_character, team_color').eq('id', user.id).maybeSingle();
+
+    if (currentUser.email === ADMIN_EMAIL) {
+        document.getElementById("authScreen").style.display = "none";
+        document.getElementById("adminViewSelectorGate").style.display = "block";
+        return;
+    }
+
+    if (profile && profile.display_name) {
+        selectedAvatarSymbol = profile.avatar_character;
+        document.getElementById("displayUserHeader").innerText = profile.display_name;
+        document.getElementById("displayAvatarHeader").innerText = profile.avatar_character;
+        document.getElementById("sidebarPodBadge").innerText = profile.team_color || "No Team Assigned";
+        launchDashboard("student");
+    } else {
+        document.getElementById("authScreen").style.display = "none";
+        document.getElementById("profileSetupScreen").style.display = "block";
+        populateTeamSetupDropdownOptions();
+    }
+}
+
+// --- TEACHER & SUBMISSION LOGIC ---
+async function loadTeacherRosterData() {
+    const tbody = document.getElementById("teacherRosterTableBody");
+    if (!tbody) return;
+    
+    tbody.innerHTML = '<tr><td colspan="3">Loading...</td></tr>';
+    const { data: students } = await _supabase.from('profiles').select('id, display_name, avatar_character, team_color');
+    const { data: progress } = await _supabase.from('user_progress').select('user_id, mastered_letters');
+
+    const progressMap = {};
+    progress?.forEach(rec => { progressMap[rec.user_id] = rec.mastered_letters || []; });
+
+    tbody.innerHTML = '';
+    students?.forEach(s => {
+        const masteredCount = (progressMap[s.id] || []).length;
+        tbody.innerHTML += `<tr><td>${s.avatar_character} ${s.display_name}</td><td>${s.team_color}</td><td>${masteredCount} complete</td></tr>`;
+    });
+}
+
+async function submitWorkForVerification(imageUrl) {
+    const { data: profile } = await _supabase.from('profiles').select('team_id').eq('id', currentUser.id).single();
+    await _supabase.from('work_submissions').insert({
+        student_id: currentUser.id,
+        team_id: profile.team_id,
+        image_url: imageUrl,
+        status: 'pending'
+    });
+    showNotificationToast("Work submitted to your Captain!");
+}
 async function saveProfileData() {
     const nameInput = document.getElementById("displayName").value.trim();
     const teamSelection = document.getElementById("profileTeamSelect").value; 
