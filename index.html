@@ -222,6 +222,16 @@
                         <div class="feed-grid" id="disappearingArtGalleryFeed"></div>
                     </div>
                 </div>
+
+                <div class="collapsible-dropdown-container">
+                    <button class="dropdown-toggle-header" onclick="toggleDropdownElement('teamLevelProgressContent')">
+                        <span>🏆 Team Level Progress</span><span>▼</span>
+                    </button>
+                    <div class="dropdown-content-pane open" id="teamLevelProgressContent">
+                        <p style="font-size:12px; color:#64748b; margin-bottom:10px;">See which teams are ready for their live quiz with the teacher.</p>
+                        <div id="studentTeamProgressMount"><p style="color:#94a3b8; font-size:12px;">Loading...</p></div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
