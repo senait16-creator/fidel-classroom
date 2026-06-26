@@ -1331,9 +1331,36 @@ async function fetchDisappearingImageCanvasBoard() {
         const item = document.createElement('div');
         item.className = "feed-item";
         const initialCount = share.meta_points || 0;
-        item.innerHTML = `<img src="${share.image_url}"><div class="feed-meta"><div class="feed-meta-row"><strong>${share.profiles?.avatar || '🦁'} ${share.profiles?.nickname || 'User'}</strong><span style="color:#ef4444;">${hoursLeft}h left</span></div><div class="feed-meta-row" style="margin-top:4px;"><button class="verify-badge-btn" data-count="${initialCount}" onclick="submitVerificationCounterBump('${share.id}', this)">👍 Verify Form (${initialCount})</button></div></div>`;
+        const isOwner = currentUser && share.user_id === currentUser.id;
+        const deleteBtn = isOwner
+            ? `<button class="verify-badge-btn" style="color:#ef4444; border-color:#fecaca;" onclick="deleteSharedDrawing('${share.id}', '${share.image_url}')">🗑️ Delete</button>`
+            : '';
+        item.innerHTML = `<img src="${share.image_url}"><div class="feed-meta"><div class="feed-meta-row"><strong>${share.profiles?.avatar || '🦁'} ${share.profiles?.nickname || 'User'}</strong><span style="color:#ef4444;">${hoursLeft}h left</span></div><div class="feed-meta-row" style="margin-top:4px; gap:6px;"><button class="verify-badge-btn" data-count="${initialCount}" onclick="submitVerificationCounterBump('${share.id}', this)">👍 Verify Form (${initialCount})</button>${deleteBtn}</div></div>`;
         container.appendChild(item);
     });
+}
+
+async function deleteSharedDrawing(shareId, imageUrl) {
+    if (!confirm("Delete this drawing? This can't be undone.")) return;
+
+    // Extract the storage path from the public URL so we can remove the
+    // actual file, not just the database row pointing to it.
+    const pathMatch = imageUrl.match(/art_shares\/(.+)$/);
+    const storagePath = pathMatch ? pathMatch[1] : null;
+
+    const { error: dbError } = await _supabase.from('photo_shares').delete().eq('id', shareId);
+    if (dbError) {
+        console.error("Failed to delete photo_shares row:", dbError);
+        return showNotificationToast("Couldn't delete: " + dbError.message);
+    }
+
+    if (storagePath) {
+        const { error: storageError } = await _supabase.storage.from('art_shares').remove([storagePath]);
+        if (storageError) console.error("Failed to delete storage file (row already removed):", storageError);
+    }
+
+    showNotificationToast("Drawing deleted.");
+    await fetchDisappearingImageCanvasBoard();
 }
 
 // ---------------------------------------------------------------------------
@@ -1474,4 +1501,5 @@ window.exitClassroomViewBackToGrid = exitClassroomViewBackToGrid;
 window.openProfileEdit = openProfileEdit;
 window.toggleDropdownElement = toggleDropdownElement;
 window.submitVerificationCounterBump = submitVerificationCounterBump;
+window.deleteSharedDrawing = deleteSharedDrawing;
 window.approveStudentWork = approveStudentWork;
