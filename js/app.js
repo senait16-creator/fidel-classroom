@@ -570,15 +570,9 @@ async function saveProfileData() {
     
     launchDashboard("student");
 
-
     // UI Updates
     document.getElementById("displayUserHeader").innerText = nameInput;
     document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
-    
-    // Update the badge text and apply the color styling
-    const teamBadge = document.getElementById("sidebarPodBadge");
-    teamBadge.innerText = selectedColorTeam;
-    teamBadge.style.color = selectedColorTeam; // Optional: visually reflects the team
     
     launchDashboard("student");
 
