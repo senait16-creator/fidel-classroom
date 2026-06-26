@@ -528,29 +528,47 @@ async function submitWorkForVerification(imageUrl) {
             element.classList.add('selected'); selectedAvatarSymbol = symbol;
         }
 
-       async function saveProfileData() {
+async function saveProfileData() {
     const nameInput = document.getElementById("displayName").value.trim();
     if (!nameInput) return showNotificationToast("Please enter a nickname.");
 
-    // This now grabs the color (e.g., "Red", "Blue") instead of a pod ID
     let selectedColorTeam = document.getElementById("profileTeamSelect").value;
-    
+    if (!selectedColorTeam || selectedColorTeam === "") {
+        return showNotificationToast("Please select a color team!");
+    }
+
+    // --- Add a loading state here ---
+    const saveBtn = event.target; // Assuming the button triggered this
+    saveBtn.disabled = true;
+    saveBtn.innerText = "Saving...";
+
     const { data: { user } } = await _supabase.auth.getUser();
 
-    // Use the new columns: nickname, avatar, and team_color
     const { error } = await _supabase
         .from('profiles')
         .upsert({ 
             id: user.id, 
             nickname: nameInput,
             avatar: selectedAvatarSymbol,
-            team_color: selectedColorTeam // Updated from pod_id
+            team_color: selectedColorTeam 
         });
 
     if (error) {
+        saveBtn.disabled = false;
+        saveBtn.innerText = "Join the Classroom";
         console.error("Save Error:", error);
         return showNotificationToast("Error: " + error.message);
     }
+
+    // --- Continue with UI updates and navigation ---
+    document.getElementById("displayUserHeader").innerText = nameInput;
+    document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
+    const teamBadge = document.getElementById("sidebarPodBadge");
+    teamBadge.innerText = selectedColorTeam;
+    teamBadge.style.color = selectedColorTeam;
+    
+    launchDashboard("student");
+}
 
     // UI Updates
     document.getElementById("displayUserHeader").innerText = nameInput;
