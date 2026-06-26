@@ -146,9 +146,10 @@
 
         .challenge-level-card { position: relative; background: white; border: 1px solid var(--border-color); border-radius: var(--radius-standard); padding: 24px 14px 18px; text-align: center; box-shadow: var(--shadow-premium); transition: all 0.2s; overflow: hidden; }
 
-        .challenge-level-card.locked { background: #f8fafc; cursor: not-allowed; }
+        .challenge-level-card.locked { background: #f1f5f9; border: 2px dashed #cbd5e1; }
         .challenge-level-card.locked .challenge-level-families,
-        .challenge-level-card.locked .challenge-level-title { opacity: 0.45; }
+        .challenge-level-card.locked .challenge-level-title { opacity: 0.5; }
+        .challenge-level-card.locked .challenge-level-number-badge { background: #cbd5e1; color: #64748b; }
 
         .challenge-level-card.unlocked { cursor: pointer; }
         .challenge-level-card.unlocked:hover { transform: translateY(-3px); border-color: var(--brand-primary); box-shadow: 0 8px 24px rgba(15, 118, 110, 0.12); }
