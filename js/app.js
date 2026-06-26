@@ -96,6 +96,16 @@ window.addEventListener('DOMContentLoaded', async () => {
     const authBtn = document.getElementById('auth-btn');
     if (authBtn) authBtn.addEventListener('click', handleAuth);
 
+    const studyAllBtn = document.getElementById('studyAllFlashcardsBtn');
+    if (studyAllBtn) {
+        studyAllBtn.addEventListener('click', () => {
+            openFlashcardStudy(buildFlashcardDeckForFullAlphabet(), "All Letters", () => {
+                document.getElementById("studentDashboard").style.display = "block";
+            });
+            document.getElementById("studentDashboard").style.display = "none";
+        });
+    }
+
     // Every page load starts fresh at the login screen. Explicitly sign out
     // (not just skip the check) so any stale/broken token left in
     // localStorage from a previous session is fully cleared — a lingering
@@ -591,6 +601,12 @@ function launchIsolatedClassroomWorkspace(fidelObj) {
     document.getElementById("classroomFamilyTitle").innerText = `Reviewing Row: "${activeBaseFidel}"`;
 
     document.getElementById("classroomRowGameBtn").onclick = () => openMatchingGameWorkspaceMode(fidelObj);
+    document.getElementById("classroomFlashcardBtn").onclick = () => {
+        openFlashcardStudy(buildFlashcardDeckForFamily(fidelObj), `"${fidelObj.base}" Family`, () => {
+            document.getElementById("isolatedFamilyClassroom").style.display = "block";
+        });
+        document.getElementById("isolatedFamilyClassroom").style.display = "none";
+    };
 
     const undoBtn = document.getElementById("classroomUndoBtn");
     undoBtn.style.display = masteredLetters.includes(activeBaseFidel) ? "block" : "none";
@@ -774,6 +790,78 @@ function checkBlockGameCompletionState() {
         showNotificationToast("You cleared the board! Starting next round...");
         setTimeout(generateNewGameRoundData, 1000);
     }
+}
+
+// ---------------------------------------------------------------------------
+// Flashcard self-study (shared engine)
+// Used by: Practice mode's single-row screen, Fidel Challenge's family
+// detail screen, and the full-alphabet "Study All Letters" button. Pure
+// self-study — no streak tracking, no database writes, just a flip-to-
+// reveal quiz. The screen is a single top-level element (#flashcardScreen)
+// so it isn't trapped invisible inside whichever parent happens to be
+// hidden, the same lesson learned from the #gameWorkspace nesting bug.
+// ---------------------------------------------------------------------------
+
+let flashcardDeck = [];
+let flashcardIndex = 0;
+let flashcardCloseCallback = null;
+
+function buildFlashcardDeckForFamily(fidelObj) {
+    const subs = (fidelObj.prefix === "h" || fidelObj.prefix === "ḥ")
+        ? vowelFrameworkLabels
+        : standardVowelSubscripts.map(sub => `${fidelObj.prefix}${sub}`);
+
+    return fidelObj.family.map((char, idx) => ({ char, sound: subs[idx] }));
+}
+
+// Builds one big deck covering every letter in every family — used by the
+// "Study All Letters" button on the main dashboard.
+function buildFlashcardDeckForFullAlphabet() {
+    let deck = [];
+    alphabetData.forEach(fidelObj => {
+        deck = deck.concat(buildFlashcardDeckForFamily(fidelObj));
+    });
+    return deck;
+}
+
+function openFlashcardStudy(deck, title, onClose) {
+    flashcardDeck = deck;
+    flashcardIndex = 0;
+    flashcardCloseCallback = onClose || null;
+
+    document.getElementById("flashcardScreenTitle").innerText = `🗂️ ${title}`;
+    document.getElementById("flashcardScreen").style.display = "block";
+    renderFlashcard();
+
+    const card = document.getElementById("flashcardEl");
+    card.onclick = () => card.classList.toggle("flipped");
+
+    document.getElementById("flashcardNextBtn").onclick = () => {
+        flashcardIndex = (flashcardIndex + 1) % flashcardDeck.length;
+        renderFlashcard();
+    };
+    document.getElementById("flashcardPrevBtn").onclick = () => {
+        flashcardIndex = (flashcardIndex - 1 + flashcardDeck.length) % flashcardDeck.length;
+        renderFlashcard();
+    };
+    document.getElementById("flashcardCloseBtn").onclick = closeFlashcardStudy;
+}
+
+function closeFlashcardStudy() {
+    document.getElementById("flashcardScreen").style.display = "none";
+    if (flashcardCloseCallback) flashcardCloseCallback();
+}
+
+function renderFlashcard() {
+    const card = document.getElementById("flashcardEl");
+    card.classList.remove("flipped");
+
+    const entry = flashcardDeck[flashcardIndex];
+    document.getElementById("flashcardFront").innerText = entry.char;
+    document.getElementById("flashcardBack").innerText = entry.sound;
+
+    const label = document.getElementById("flashcardProgressLabel");
+    if (label) label.innerText = `Card ${flashcardIndex + 1} of ${flashcardDeck.length}`;
 }
 
 // ---------------------------------------------------------------------------
