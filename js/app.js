@@ -516,23 +516,23 @@ async function submitWorkForVerification(imageUrl) {
             element.classList.add('selected'); selectedAvatarSymbol = symbol;
         }
 
-        async function saveProfileData() {
+       async function saveProfileData() {
     const nameInput = document.getElementById("displayName").value.trim();
     if (!nameInput) return showNotificationToast("Please enter a nickname.");
 
+    // This now grabs the color (e.g., "Red", "Blue") instead of a pod ID
     let selectedColorTeam = document.getElementById("profileTeamSelect").value;
     
-    // Make sure you have the user ID from Supabase Auth
     const { data: { user } } = await _supabase.auth.getUser();
 
-    // Use the column names exactly as they exist in your 'profiles' table
+    // Use the new columns: nickname, avatar, and team_color
     const { error } = await _supabase
         .from('profiles')
         .upsert({ 
             id: user.id, 
-            nickname: nameInput,             // Changed from display_name
-            avatar: selectedAvatarSymbol,    // Changed from avatar_character
-            pod_id: selectedColorTeam 
+            nickname: nameInput,
+            avatar: selectedAvatarSymbol,
+            team_color: selectedColorTeam // Updated from pod_id
         });
 
     if (error) {
@@ -543,11 +543,14 @@ async function submitWorkForVerification(imageUrl) {
     // UI Updates
     document.getElementById("displayUserHeader").innerText = nameInput;
     document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
-    document.getElementById("sidebarPodBadge").innerText = selectedColorTeam;
+    
+    // Update the badge text and apply the color styling
+    const teamBadge = document.getElementById("sidebarPodBadge");
+    teamBadge.innerText = selectedColorTeam;
+    teamBadge.style.color = selectedColorTeam; // Optional: visually reflects the team
     
     launchDashboard("student");
 }
-
         async function teacherRefreshConfigurationDropdowns() {
             const { data: students } = await _supabase.from('profiles').select('id, display_name');
 
