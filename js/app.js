@@ -815,4 +815,3 @@ window.toggleDropdownElement = toggleDropdownElement;
 
 document.getElementById("displayUserHeader").innerText = nameInput;
 document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
-
