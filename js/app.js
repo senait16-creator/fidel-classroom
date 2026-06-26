@@ -484,7 +484,7 @@ async function loadTeacherRosterData() {
 
     const { data: students } = await _supabase
         .from('profiles')
-        .select('id, nickname, avatar, email, team_id, is_admin, teams(name)')
+        .select('id, nickname, avatar, email, team_id, is_admin, teams!profiles_team_id_fkey(name)')
         .order('nickname', { ascending: true });
 
     const { data: progress } = await _supabase
@@ -936,7 +936,7 @@ async function fetchDisappearingImageCanvasBoard() {
 async function loadTeamDashboard(user) {
     const { data: userProfile } = await _supabase
         .from('profiles')
-        .select('team_id, nickname, teams(name)')
+        .select('team_id, nickname, teams!profiles_team_id_fkey(name)')
         .eq('id', user.id)
         .single();
 
