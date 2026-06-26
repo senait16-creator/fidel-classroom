@@ -4,6 +4,12 @@ const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const ADMIN_EMAIL = "senaitrichmond16@gmail.com";
 
+// Shared with challenge.js — the matching-game streak required to mark a
+// letter family as mastered in Fidel Challenge mode. See reasoning in
+// fidel_challenge_schema.sql: high enough that guessing won't get a student
+// through, low enough that one mis-tap doesn't erase several minutes of work.
+const STREAK_THRESHOLD = 20;
+
 // Teams used for random/balanced assignment + display.
 // Keep these labels in sync with whatever you show in the UI elsewhere.
 const TEAMS = ["Red Team 🔴", "Blue Team 🔵", "Green Team 🟢", "Yellow Team 🟡"];
@@ -22,6 +28,13 @@ let activeGamePairs = [];
 let selectedGameTokenId = null;
 let currentStreakScore = 0;
 let gameModeScope = "all";
+
+// Set by challenge.js right before launching the shared matching game in
+// Challenge mode. null = normal Practice-mode play (no persistence, no
+// gating). When set, it looks like:
+//   { baseLetter: 'ሀ', levelNumber: 1, onStreakPassed: async () => {...} }
+// Cleared back to null whenever the player exits the game workspace.
+let activeChallengeContext = null;
 
 let canvas, ctx, isDrawing = false;
 
@@ -595,7 +608,18 @@ function openMatchingGameWorkspaceMode(scope) {
     document.getElementById("gameWorkspace").style.display = "block";
 
     const exitBtn = document.getElementById("gameExitActionBtn");
-    if (scope === "all") {
+
+    if (activeChallengeContext) {
+        // Challenge mode: exit always returns to the family picker, regardless
+        // of whether this was launched from "all" or a specific row, since
+        // Challenge mode never uses "all" — it's always one family at a time.
+        document.getElementById("gameWorkspaceTitle").innerText = `Challenge: Row "${scope.base}"`;
+        exitBtn.onclick = () => {
+            document.getElementById("gameWorkspace").style.display = "none";
+            activeChallengeContext = null;
+            if (typeof returnToChallengeFamilyPicker === "function") returnToChallengeFamilyPicker();
+        };
+    } else if (scope === "all") {
         document.getElementById("gameWorkspaceTitle").innerText = "Game Arena: All Letters";
         exitBtn.onclick = () => {
             document.getElementById("gameWorkspace").style.display = "none";
@@ -681,6 +705,17 @@ function selectBlockTokenTrackElement(element, index) {
             showNotificationToast("Match found!");
             selectedGameTokenId = null;
             checkBlockGameCompletionState();
+
+            // Challenge mode: report every new best streak, and fire the
+            // pass callback the moment the threshold is reached. Casual
+            // Practice-mode play (activeChallengeContext === null) is
+            // completely unaffected by this block.
+            if (activeChallengeContext) {
+                activeChallengeContext.onStreakUpdate?.(currentStreakScore);
+                if (currentStreakScore >= STREAK_THRESHOLD) {
+                    activeChallengeContext.onStreakPassed?.(currentStreakScore);
+                }
+            }
         } else {
             currentStreakScore = 0;
             document.getElementById("gameStreakValue").innerText = currentStreakScore;
