@@ -47,8 +47,26 @@
                 <input type="password" id="password" name="password" autocomplete="current-password">
 
                 <button id="auth-btn">Let's Go!</button>
+                <button id="forgotPasswordBtn" class="btn-secondary" style="margin-top:8px;">Forgot password?</button>
             </div>
         </div>
+    </div>
+
+    <!-- Forgot password: enter email, get a reset link -->
+    <div id="forgotPasswordScreen" class="app-card" style="display: none;">
+        <h2 class="main-title" style="font-size: 22px;">Reset your password</h2>
+        <p class="subtitle">Enter your email and we'll send you a reset link.</p>
+        <input type="email" id="resetEmail" placeholder="Email address">
+        <button id="sendResetLinkBtn" class="btn-primary">Send Reset Link</button>
+        <button id="backToLoginFromForgotBtn" class="btn-secondary" style="margin-top:8px;">← Back to Log In</button>
+    </div>
+
+    <!-- Shown after clicking the reset link in their email -->
+    <div id="newPasswordScreen" class="app-card" style="display: none;">
+        <h2 class="main-title" style="font-size: 22px;">Set a new password</h2>
+        <p class="subtitle">Enter a new password for your account.</p>
+        <input type="password" id="newPasswordInput" placeholder="New password">
+        <button id="saveNewPasswordBtn" class="btn-primary">Save New Password</button>
     </div>
 
     <!-- Administrative Target Routing Gate -->
