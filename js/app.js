@@ -272,20 +272,30 @@ async function renderCaptainInbox() {
 
         async function proceedFlowMap(user) {
             currentUser = user;
-            const { data: profile } = await _supabase.from('profiles').select('display_name, avatar_character, pod_id').eq('id', user.id).maybeSingle();
-
+const { data: profile } = await _supabase
+    .from('profiles')
+    .select('nickname, avatar, team_color') // Updated column names
+    .eq('id', user.id)
+    .maybeSingle();
+               
             if (currentUser.email === ADMIN_EMAIL) {
                 document.getElementById("authScreen").style.display = "none";
                 document.getElementById("adminViewSelectorGate").style.display = "block";
                 return;
             }
 
-            if (profile && profile.display_name) {
-                selectedAvatarSymbol = profile.avatar_character;
-                document.getElementById("displayUserHeader").innerText = profile.display_name;
-                document.getElementById("displayAvatarHeader").innerText = profile.avatar_character;
-                document.getElementById("sidebarPodBadge").innerText = profile.pod_id || "No Team Assigned";
-                launchDashboard("student");
+            if (profile && profile.nickname) {
+    selectedAvatarSymbol = profile.avatar; // Updated name
+    document.getElementById("displayUserHeader").innerText = profile.nickname;
+    document.getElementById("displayAvatarHeader").innerText = profile.avatar;
+                   
+                   const teamDisplay = document.getElementById("sidebarPodBadge");
+    teamDisplay.innerText = profile.team_color !== 'unassigned' ? profile.team_color : "No Team Assigned";
+                   
+                   teamDisplay.style.color = profile.team_color; 
+    
+    launchDashboard("student");
+                   
             } else {
                 document.getElementById("authScreen").style.display = "none";
                 document.getElementById("profileSetupScreen").style.display = "block";
