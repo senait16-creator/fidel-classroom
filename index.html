@@ -137,6 +137,7 @@
                     <span id="workspaceDynamicHeader">Amharic Letter Board</span>
                     <div style="display:flex; gap:8px;">
                         <button id="gameActivationToggleBtn" class="btn-primary" style="width:auto; padding:8px 16px; font-size:13px;" onclick="openMatchingGameWorkspaceMode('all')">Matching Game Arena</button>
+                        <button id="studyAllFlashcardsBtn" class="btn-secondary" style="width:auto; padding:8px 16px; font-size:13px; border:1px solid var(--border-color);">🗂️ Study All Letters</button>
                         <button id="challengeEntryBtn" class="btn-primary" style="width:auto; padding:8px 16px; font-size:13px; background:#475569;" onclick="enterModeSelect()">🏆 Fidel Challenge</button>
                     </div>
                 </div>
@@ -144,24 +145,14 @@
                 <!-- Core Grid Selection Array -->
                 <div id="viewFidelGrid" class="fidel-grid-3col"></div>
 
-                <!-- Touch Ergonomic Block Match Arena Module -->
-                <div id="gameWorkspace">
-                    <h2 id="gameWorkspaceTitle" style="font-size:22px; margin-bottom:4px;">Practice Arena</h2>
-                    <p class="subtitle" style="margin-bottom:12px;">Tap a letter and its matching English sound to clear them!</p>
-                    <div style="background:#f1f5f9; padding:6px 14px; border-radius:8px; display:inline-block; font-size:13px; font-weight:700; color:var(--brand-primary); margin-bottom:12px;">
-                        Current Streak: <span id="gameStreakValue">0</span>
-                    </div>
-
-                    <div class="matching-game-grid-blocks" id="ergonomicBlockGameMount"></div>
-
-                    <button id="gameExitActionBtn" class="btn-secondary" style="margin-top:10px;">← Close Game</button>
-                </div>
-
                 <!-- Micro-Classroom Isolation Node -->
                 <div id="isolatedFamilyClassroom">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; gap:8px;">
                         <h2 id="classroomFamilyTitle" style="font-size:22px;">Reviewing Row</h2>
-                        <button class="btn-primary" style="width:auto; padding:8px 14px; font-size:12px;" id="classroomRowGameBtn">Play Row Match</button>
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn-secondary" style="width:auto; padding:8px 14px; font-size:12px; border:1px solid var(--border-color);" id="classroomFlashcardBtn">🗂️ Flashcards</button>
+                            <button class="btn-primary" style="width:auto; padding:8px 14px; font-size:12px;" id="classroomRowGameBtn">Play Row Match</button>
+                        </div>
                     </div>
                     <div class="classroom-header-strip">
                         <div>-ä</div><div>-u</div><div>-ee</div><div>-a</div><div>-ay</div><div>-ih</div><div>-o</div>
@@ -300,21 +291,45 @@
             <button id="challengeDetailPlayBtn" class="btn-primary" style="flex:1;">🎮 Play Matching Game</button>
             <button id="challengeDetailFlashcardBtn" class="btn-primary" style="flex:1; background:#475569;">🗂️ Self-Study Flashcards</button>
         </div>
+    </div>
 
-        <!-- Flashcard self-study mode -->
-        <div id="challengeFlashcardArea" style="display:none;">
-            <div class="flashcard-stage">
-                <div class="flashcard" id="challengeFlashcard">
-                    <div class="flashcard-face flashcard-front" id="challengeFlashcardFront"></div>
-                    <div class="flashcard-face flashcard-back" id="challengeFlashcardBack"></div>
-                </div>
-            </div>
-            <p class="subtitle" style="margin-top:10px;">Tap the card to flip it. Try to say the sound before you flip!</p>
-            <div style="display:flex; gap:10px; justify-content:center; margin-top:10px;">
-                <button class="btn-secondary" id="challengeFlashcardPrevBtn">← Previous</button>
-                <button class="btn-secondary" id="challengeFlashcardNextBtn">Next →</button>
+    <!-- Shared flashcard study screen — top-level so it works the same way
+         whether launched from Fidel Challenge's family detail screen,
+         Practice mode's single-row screen, or the full-alphabet study mode.
+         Generic IDs (not "challenge"-prefixed) since it's shared across all three. -->
+    <div id="flashcardScreen" style="display: none; max-width: 500px; margin: 40px auto; padding: 0 16px; text-align:center;">
+        <div class="workspace-title">
+            <span id="flashcardScreenTitle">Flashcards</span>
+            <button class="btn-secondary" id="flashcardCloseBtn">✕ Close</button>
+        </div>
+        <div class="flashcard-stage">
+            <div class="flashcard" id="flashcardEl">
+                <div class="flashcard-face flashcard-front" id="flashcardFront"></div>
+                <div class="flashcard-face flashcard-back" id="flashcardBack"></div>
             </div>
         </div>
+        <p class="subtitle" style="margin-top:10px;">Tap the card to flip it. Try to say the sound before you flip!</p>
+        <p class="subtitle" id="flashcardProgressLabel" style="margin-top:-8px; font-weight:700;"></p>
+        <div style="display:flex; gap:10px; justify-content:center; margin-top:10px;">
+            <button class="btn-secondary" id="flashcardPrevBtn">← Previous</button>
+            <button class="btn-secondary" id="flashcardNextBtn">Next →</button>
+        </div>
+    </div>
+
+    <!-- Touch Ergonomic Block Match Arena Module — top-level so it can be
+         shown from either Practice mode (inside studentDashboard) or
+         Fidel Challenge mode (a separate top-level screen) without being
+         trapped invisible inside whichever parent happens to be hidden. -->
+    <div id="gameWorkspace">
+        <h2 id="gameWorkspaceTitle" style="font-size:22px; margin-bottom:4px;">Practice Arena</h2>
+        <p class="subtitle" style="margin-bottom:12px;">Tap a letter and its matching English sound to clear them!</p>
+        <div style="background:#f1f5f9; padding:6px 14px; border-radius:8px; display:inline-block; font-size:13px; font-weight:700; color:var(--brand-primary); margin-bottom:12px;">
+            Current Streak: <span id="gameStreakValue">0</span>
+        </div>
+
+        <div class="matching-game-grid-blocks" id="ergonomicBlockGameMount"></div>
+
+        <button id="gameExitActionBtn" class="btn-secondary" style="margin-top:10px;">← Close Game</button>
     </div>
 
     <script src="js/app.js" defer></script>
