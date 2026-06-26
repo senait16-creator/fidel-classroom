@@ -110,12 +110,53 @@
         .bottom-banner { position: fixed; bottom: 20px; left: 24px; right: 24px; background: var(--neutral-dark); padding: 14px 20px; border-radius: var(--radius-standard); display: flex; justify-content: space-between; align-items: center; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 1252px; margin: 0 auto; }
         .logout-btn { background: transparent; color: white; border: none; font-size: 14px; font-weight: 500; cursor: pointer; }
 
-        .challenge-levels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px; margin-top: 20px; }
-        .challenge-level-card { background: white; border: 1px solid var(--border-color); border-radius: var(--radius-standard); padding: 20px 12px; text-align: center; box-shadow: var(--shadow-premium); transition: all 0.2s; }
-        .challenge-level-card.locked { opacity: 0.5; background: #f8fafc; cursor: not-allowed; }
+        /* ---------------------------------------------------------------- */
+        /* Fidel Challenge: mode select                                     */
+        /* ---------------------------------------------------------------- */
+        #modeSelectScreen .btn-primary,
+        #modeSelectScreen .btn-secondary { display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .mode-option { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 22px 16px; border-radius: var(--radius-standard); border: 1px solid var(--border-color); background: white; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-premium); text-align: center; }
+        .mode-option:hover { transform: translateY(-2px); border-color: var(--brand-primary); }
+        .mode-option-icon { font-size: 32px; margin-bottom: 4px; }
+        .mode-option-title { font-size: 16px; font-weight: 700; color: var(--neutral-dark); }
+        .mode-option-desc { font-size: 12px; color: #64748b; }
+        .mode-option.challenge-variant { background: linear-gradient(135deg, #f0fdfa, white); border-color: #5eead4; }
+
+        /* ---------------------------------------------------------------- */
+        /* Fidel Challenge: level map                                       */
+        /* ---------------------------------------------------------------- */
+        .challenge-levels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 18px; margin-top: 20px; }
+
+        .challenge-level-card { position: relative; background: white; border: 1px solid var(--border-color); border-radius: var(--radius-standard); padding: 24px 14px 18px; text-align: center; box-shadow: var(--shadow-premium); transition: all 0.2s; overflow: hidden; }
+
+        .challenge-level-card.locked { background: #f8fafc; cursor: not-allowed; }
+        .challenge-level-card.locked .challenge-level-families,
+        .challenge-level-card.locked .challenge-level-title { opacity: 0.45; }
+
         .challenge-level-card.unlocked { cursor: pointer; }
-        .challenge-level-card.unlocked:hover { transform: translateY(-2px); border-color: var(--brand-primary); }
-        .challenge-level-card.current { border-color: var(--brand-primary); background: #f0fdfa; box-shadow: 0 0 0 2px var(--brand-primary); }
-        .challenge-level-number { font-size: 28px; font-weight: 700; color: var(--neutral-dark); margin-bottom: 6px; }
-        .challenge-level-title { font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 4px; }
-        .challenge-level-families { font-size: 18px; font-family: 'Abyssinica SIL', serif; color: var(--brand-primary); }
+        .challenge-level-card.unlocked:hover { transform: translateY(-3px); border-color: var(--brand-primary); box-shadow: 0 8px 24px rgba(15, 118, 110, 0.12); }
+
+        .challenge-level-card.current { border-color: var(--brand-primary); background: #f0fdfa; }
+        .challenge-level-card.current::before {
+            content: "CURRENT";
+            position: absolute; top: 0; left: 0; right: 0;
+            background: var(--brand-primary); color: white;
+            font-size: 9px; font-weight: 700; letter-spacing: 0.6px;
+            padding: 3px 0;
+        }
+        .challenge-level-card.current { padding-top: 32px; }
+
+        .challenge-level-number-badge {
+            width: 44px; height: 44px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 10px; font-size: 18px; font-weight: 700;
+            background: #f1f5f9; color: var(--neutral-dark);
+        }
+        .challenge-level-card.unlocked .challenge-level-number-badge { background: var(--brand-primary); color: white; }
+        .challenge-level-card.locked .challenge-level-number-badge { background: #e2e8f0; color: #94a3b8; font-size: 20px; }
+
+        .challenge-level-title { font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 6px; }
+        .challenge-level-families { font-size: 20px; font-family: 'Abyssinica SIL', serif; color: var(--neutral-dark); letter-spacing: 2px; }
+        .challenge-level-card.unlocked .challenge-level-families { color: var(--brand-primary); }
+
+        .challenge-capstone-badge { display: inline-block; margin-top: 6px; font-size: 10px; font-weight: 700; color: #b45309; background: #fef3c7; padding: 2px 8px; border-radius: 8px; }
