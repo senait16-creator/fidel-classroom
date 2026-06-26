@@ -96,16 +96,13 @@ window.addEventListener('DOMContentLoaded', async () => {
     const authBtn = document.getElementById('auth-btn');
     if (authBtn) authBtn.addEventListener('click', handleAuth);
 
-    // Supabase persists the session in localStorage by default, so a page
-    // refresh doesn't actually log the user out — it just never checked.
-    // Restore that session here instead of always falling back to the gate.
-    const { data: { session } } = await _supabase.auth.getSession();
-
-    if (session?.user) {
-        await proceedFlowMap(session.user);
-    } else {
-        resetToGate();
-    }
+    // Every page load starts fresh at the login screen. Explicitly sign out
+    // (not just skip the check) so any stale/broken token left in
+    // localStorage from a previous session is fully cleared — a lingering
+    // bad token was a likely cause of persistent 403s that didn't match
+    // what the RLS policies should have allowed.
+    await _supabase.auth.signOut();
+    resetToGate();
 });
 
 // ---------------------------------------------------------------------------
@@ -297,7 +294,8 @@ async function applyProfileToHeader(profile) {
     }
 }
 
-function logout() {
+async function logout() {
+    await _supabase.auth.signOut();
     currentUser = null;
     currentProfile = null;
     resetToGate();
