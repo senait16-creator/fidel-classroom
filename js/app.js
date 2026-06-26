@@ -679,3 +679,6 @@ async function loadTeamDashboard(user) {
     }
 }
         function logout() { resetToGate(); }
+
+window.handleAuth = handleAuth;
+window.selectAuthFlow = selectAuthFlow;
