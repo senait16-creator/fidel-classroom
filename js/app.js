@@ -106,6 +106,31 @@ window.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    document.getElementById('forgotPasswordBtn')?.addEventListener('click', () => {
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('forgotPasswordScreen').style.display = 'block';
+    });
+
+    document.getElementById('backToLoginFromForgotBtn')?.addEventListener('click', () => {
+        document.getElementById('forgotPasswordScreen').style.display = 'none';
+        resetToGate();
+    });
+
+    document.getElementById('sendResetLinkBtn')?.addEventListener('click', sendPasswordResetLink);
+    document.getElementById('saveNewPasswordBtn')?.addEventListener('click', saveNewPassword);
+
+    // Supabase redirects back here with type=recovery in the URL after the
+    // user clicks the reset link in their email, and briefly authenticates
+    // them via that link's token so they can set a new password. The
+    // unconditional signOut() below would kill that session immediately —
+    // so check for this case FIRST and skip sign-out/reset-to-gate if so.
+    const isPasswordRecovery = window.location.hash.includes('type=recovery');
+    if (isPasswordRecovery) {
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('newPasswordScreen').style.display = 'block';
+        return;
+    }
+
     // Every page load starts fresh at the login screen. Explicitly sign out
     // (not just skip the check) so any stale/broken token left in
     // localStorage from a previous session is fully cleared — a lingering
@@ -308,6 +333,47 @@ async function logout() {
     await _supabase.auth.signOut();
     currentUser = null;
     currentProfile = null;
+    resetToGate();
+}
+
+// ---------------------------------------------------------------------------
+// Password reset — kept deliberately simple: Supabase handles the actual
+// token generation, email sending, and link expiry. We just trigger it and
+// provide a screen for the user to set their new password once they return.
+// ---------------------------------------------------------------------------
+
+async function sendPasswordResetLink() {
+    const email = document.getElementById('resetEmail').value.trim();
+    if (!email) return showNotificationToast("Enter your email first.");
+
+    const { error } = await _supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + window.location.pathname
+    });
+
+    if (error) {
+        console.error("Password reset request failed:", error);
+        return showNotificationToast("Couldn't send reset link: " + error.message);
+    }
+
+    showNotificationToast("Check your email for a reset link!");
+}
+
+async function saveNewPassword() {
+    const newPassword = document.getElementById('newPasswordInput').value;
+    if (!newPassword || newPassword.length < 6) {
+        return showNotificationToast("Password must be at least 6 characters.");
+    }
+
+    const { error } = await _supabase.auth.updateUser({ password: newPassword });
+
+    if (error) {
+        console.error("Password update failed:", error);
+        return showNotificationToast("Couldn't update password: " + error.message);
+    }
+
+    showNotificationToast("Password updated! Please log in.");
+    await _supabase.auth.signOut();
+    document.getElementById('newPasswordScreen').style.display = 'none';
     resetToGate();
 }
 
