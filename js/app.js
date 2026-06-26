@@ -682,3 +682,19 @@ async function loadTeamDashboard(user) {
 
 window.handleAuth = handleAuth;
 window.selectAuthFlow = selectAuthFlow;
+window.resetToGate = resetToGate;
+window.routeAdminTerminalDirectly = routeAdminTerminalDirectly;
+window.selectAvatar = selectAvatar;
+window.saveProfileData = saveProfileData;
+window.switchAdminPanelsFromDashboard = switchAdminPanelsFromDashboard;
+window.teacherAssignStudentToPod = teacherAssignStudentToPod;
+window.logout = logout;
+window.openMatchingGameWorkspaceMode = openMatchingGameWorkspaceMode;
+window.shuffleClassroomRowPhonetics = shuffleClassroomRowPhonetics;
+window.classroomMarkAsMasteredDirectly = classroomMarkAsMasteredDirectly;
+window.classroomUnmasterLetterRow = classroomUnmasterLetterRow;
+window.clearSketchpadCanvas = clearSketchpadCanvas;
+window.uploadSketchpadDrawingCanvasData = uploadSketchpadDrawingCanvasData;
+window.exitClassroomViewBackToGrid = exitClassroomViewBackToGrid;
+window.openProfileEdit = openProfileEdit;
+window.toggleDropdownElement = toggleDropdownElement;
