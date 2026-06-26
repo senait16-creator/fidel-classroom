@@ -116,9 +116,13 @@
         .dropdown-content-pane { display: none; padding: 16px; background: white; border-top: 1px solid var(--border-color); flex-direction: column; gap: 8px; }
         .dropdown-content-pane.open { display: flex; }
 
-        .leaderboard-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #f8fafc; border-radius: 10px; }
+        .leaderboard-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #f8fafc; border-radius: 10px; margin-bottom: 6px; }
         .leaderboard-row.current-user { border: 1px solid var(--brand-primary); background: #f0fdfa; }
+        .leaderboard-row.top-five { background: #fffbeb; }
+        .leaderboard-row.top-five.current-user { background: #f0fdfa; border-color: var(--brand-primary); }
+        .leaderboard-row.top-five .leaderboard-rank { color: #b45309; font-weight: 700; }
         .player-info { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; }
+        .leaderboard-rank { color: #94a3b8; font-weight: 500; min-width: 22px; }
         .player-score-badge { background: var(--brand-primary); color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; }
 
         .workspace-title { font-size: 22px; font-weight: 700; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
