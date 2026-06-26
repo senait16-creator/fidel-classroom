@@ -16,7 +16,19 @@ import { handleAuth, selectAuthFlow } from './auth.js';
 import { initSketchpad } from './game.js';
 import { showScreen } from './ui.js';
 
+// Import Supabase
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const SUPABASE_URL = "YOUR_SUPABASE_URL"; 
+const SUPABASE_KEY = "YOUR_SUPABASE_KEY";
+const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Define these at the top of your app.js so they are globally available
+let isSignUpMode = false;
+let currentUser = null;
+
 const ADMIN_EMAIL = "your-teacher-email@example.com";
+
 
 // This runs automatically whenever the user logs in or out
 supabase.auth.onAuthStateChange((event, session) => {
@@ -137,6 +149,34 @@ document.addEventListener('DOMContentLoaded', () => {
     initSketchpad();
 });
 // --- PROFILE & UI FUNCTIONS ---
+
+// The function called by your HTML button
+async function handleAuth() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    let { data, error } = isSignUpMode 
+        ? await _supabase.auth.signUp({ email, password })
+        : await _supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+        alert("Auth Error: " + error.message);
+        return;
+    }
+    
+    // Proceed if successful
+    if (data.user) proceedFlowMap(data.user);
+}
+
+function selectAuthFlow(flow) {
+    isSignUpMode = (flow === 'signup');
+    document.getElementById("onboardingGate").style.display = "none";
+    document.getElementById("credentialFields").style.display = "block";
+}
+
+// THE BRIDGE: This makes them visible to the HTML buttons
+window.handleAuth = handleAuth;
+window.selectAuthFlow = selectAuthFlow;
 
 function showNotificationToast(msg) {
     const container = document.getElementById("toastContainer");
