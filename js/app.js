@@ -819,3 +819,4 @@ window.uploadSketchpadDrawingCanvasData = uploadSketchpadDrawingCanvasData;
 window.exitClassroomViewBackToGrid = exitClassroomViewBackToGrid;
 window.openProfileEdit = openProfileEdit;
 window.toggleDropdownElement = toggleDropdownElement;
+
