@@ -532,22 +532,25 @@ async function submitWorkForVerification(imageUrl) {
             element.classList.add('selected'); selectedAvatarSymbol = symbol;
         }
 
-async function saveProfileData() {
+async function saveProfileData(event) {
+    // 1. Get references and values
     const nameInput = document.getElementById("displayName").value.trim();
-    if (!nameInput) return showNotificationToast("Please enter a nickname.");
+    const teamSelect = document.getElementById("profileTeamSelect");
+    const selectedColorTeam = teamSelect.value;
+    const saveBtn = event.target;
 
-    let selectedColorTeam = document.getElementById("profileTeamSelect").value;
+    // 2. Validate input
+    if (!nameInput) return showNotificationToast("Please enter a nickname.");
     if (!selectedColorTeam || selectedColorTeam === "") {
         return showNotificationToast("Please select a color team!");
     }
 
-    // --- Add a loading state here ---
-    const saveBtn = event.target; 
+    // 3. UI feedback
     saveBtn.disabled = true;
     saveBtn.innerText = "Saving...";
 
+    // 4. Save to Supabase
     const { data: { user } } = await _supabase.auth.getUser();
-
     const { error } = await _supabase
         .from('profiles')
         .upsert({ 
@@ -564,14 +567,18 @@ async function saveProfileData() {
         return showNotificationToast("Error: " + error.message);
     }
 
-    // --- Continue with UI updates and navigation ---
+    // 5. Success: Update UI and load dashboard
     document.getElementById("displayUserHeader").innerText = nameInput;
     document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
+    
     const teamBadge = document.getElementById("sidebarPodBadge");
     teamBadge.innerText = selectedColorTeam;
     teamBadge.style.color = selectedColorTeam;
     
+    // Hide setup screen and move to dashboard
+    document.getElementById("profileSetupScreen").style.display = "none";
     launchDashboard("student");
+}
 
     // UI Updates
     document.getElementById("displayUserHeader").innerText = nameInput;
@@ -791,16 +798,6 @@ function toggleDropdownElement(elementId) {
     }
 }
 
-       async function saveProfileData() {
-    // ... all your existing code to save to Supabase ...
-
-    // After the save is successful, update the UI here:
-    document.getElementById("displayUserHeader").innerText = nameInput;
-    document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
-    
-    // ... then call your dashboard ...
-    launchDashboard("student");
-}
 window.handleAuth = handleAuth;
 window.selectAuthFlow = selectAuthFlow;
 window.resetToGate = resetToGate;
