@@ -61,9 +61,19 @@
             <div class="avatar-option" onclick="selectAvatar('🐘', this)">🐘</div>
         </div>
 
-        <div style="text-align: left; margin-bottom: 16px;">
-            <label style="font-size: 13px; font-weight: 700; color: var(--neutral-dark);">Pick Your Color Team:</label>
-            <select id="profileTeamSelect"></select>
+        <div style="text-align: left; margin-bottom: 16px;" id="teamChoiceSection">
+            <label style="font-size: 13px; font-weight: 700; color: var(--neutral-dark); display:block; margin-bottom:8px;">How do you want to learn?</label>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:500; cursor:pointer;">
+                    <input type="radio" name="teamChoice" value="team" checked style="width:auto; margin:0;">
+                    Join a team and compete in Fidel Challenge
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:500; cursor:pointer;">
+                    <input type="radio" name="teamChoice" value="solo" style="width:auto; margin:0;">
+                    Practice solo for now
+                </label>
+            </div>
+            <select id="profileTeamSelect" style="display:none;"></select>
         </div>
 
         <button class="btn-primary" onclick="saveProfileData(event)">Join the Classroom</button>
