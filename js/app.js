@@ -593,29 +593,34 @@ async function saveProfileData() {
             CLASSROOM_COLORS.forEach(color => { pSelect.innerHTML += `<option value="${color}">${color}</option>`; });
         }
 
-        async function teacherAssignStudentToPod() {
-            const studentId = document.getElementById("teacherStudentSelect").value;
-            const chosenColor = document.getElementById("teacherPodSelect").value;
+       async function teacherAssignStudentToPod() {
+    const studentId = document.getElementById("teacherStudentSelect").value;
+    const chosenColor = document.getElementById("teacherPodSelect").value;
 
-            if (!studentId || !chosenColor) return showNotificationToast("Please pick both a student and a team color.");
+    if (!studentId || !chosenColor) {
+        return showNotificationToast("Please pick both a student and a team color.");
+    }
 
-            showNotificationToast("Updating team assignment...");
-            const { error } = await _supabase
-                .from('profiles')
-                .update({ pod_id: chosenColor })
-                .eq('id', studentId);
+    showNotificationToast("Updating team assignment...");
+    
+    const { error } = await _supabase
+        .from('profiles')
+        .update({ team_color: chosenColor }) 
+        .eq('id', studentId);
 
-            if (error) {
-                console.error("Error moving student:", error);
-                return showNotificationToast("Failed to move student: " + error.message);
-            }
+    if (error) {
+        console.error("Error moving student:", error);
+        return showNotificationToast("Failed to move student: " + error.message);
+    }
 
-            showNotificationToast(`Student assigned to ${chosenColor}!`);
-            await loadTeacherRosterData();
-            await teacherRefreshConfigurationDropdowns();
-        }
-
-        function toggleDropdownElement(elementId) {
+    showNotificationToast(`Student assigned to ${chosenColor}!`);
+    
+    // Refresh the UI to reflect the change
+    await loadTeacherRosterData();
+    await teacherRefreshConfigurationDropdowns();
+}
+        
+function toggleDropdownElement(elementId) {
             document.getElementById(elementId).classList.toggle('open');
         }
 
