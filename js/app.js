@@ -369,34 +369,46 @@ async function submitWorkForVerification(imageUrl) {
         }
         }
 
-        async function loadTeacherRosterData() {
-            const tbody = document.getElementById("teacherRosterTableBody");
-            tbody.innerHTML = '<tr><td colspan="3" style="color:#94a3b8; text-align:center;">Loading class roster...</td></tr>';
+      async function loadTeacherRosterData() {
+    const tbody = document.getElementById("teacherRosterTableBody");
+    tbody.innerHTML = '<tr><td colspan="3" style="color:#94a3b8; text-align:center;">Loading class roster...</td></tr>';
 
-            const { data: students } = await _supabase.from('profiles').select('id, display_name, avatar_character, pod_id');
-            const { data: progress } = await _supabase.from('user_progress').select('user_id, mastered_letters');
+    // 1. Updated: Use 'nickname', 'avatar', and 'team_color'
+    const { data: students } = await _supabase
+        .from('profiles')
+        .select('id, nickname, avatar, team_color'); 
+        
+    const { data: progress } = await _supabase
+        .from('user_progress')
+        .select('user_id, mastered_letters');
 
-            const progressMap = {};
-            progress?.forEach(rec => { progressMap[rec.user_id] = rec.mastered_letters || []; });
+    const progressMap = {};
+    progress?.forEach(rec => { progressMap[rec.user_id] = rec.mastered_letters || []; });
 
-            tbody.innerHTML = '';
-            if(!students || students.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="3" style="color:#94a3b8; text-align:center;">No students registered yet.</td></tr>';
-                return;
-            }
+    tbody.innerHTML = '';
+    if(!students || students.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="color:#94a3b8; text-align:center;">No students registered yet.</td></tr>';
+        return;
+    }
 
-            students.forEach(s => {
-                const masteredCount = (progressMap[s.id] || []).length;
-                const teamName = s.pod_id || '<span style="color:#94a3b8; font-style:italic;">None</span>';
-                tbody.innerHTML += `
-                    <tr>
-                        <td style="font-weight:500;">${s.avatar_character || '🦁'} ${s.display_name}</td>
-                        <td>${teamName}</td>
-                        <td><strong>${masteredCount} / 34 rows</strong> complete</td>
-                    </tr>
-                `;
-            });
-        }
+    students.forEach(s => {
+        const masteredCount = (progressMap[s.id] || []).length;
+        
+        // 2. Updated: Use 'team_color', handle 'unassigned'
+        const teamDisplay = (s.team_color && s.team_color !== 'unassigned') 
+            ? `<span style="color:${s.team_color}; font-weight:700;">${s.team_color}</span>` 
+            : '<span style="color:#94a3b8; font-style:italic;">Unassigned</span>';
+
+        // 3. Updated: Use 'nickname' and 'avatar'
+        tbody.innerHTML += `
+            <tr>
+                <td style="font-weight:500;">${s.avatar || '🦁'} ${s.nickname}</td>
+                <td>${teamDisplay}</td>
+                <td><strong>${masteredCount} / 34 rows</strong> complete</td>
+            </tr>
+        `;
+    });
+}
 
         function openMatchingGameWorkspaceMode(scope) {
             gameModeScope = scope;
