@@ -566,10 +566,6 @@ async function saveProfileData(event) {
         console.error("Save Error:", error);
         return showNotificationToast("Error: " + error.message);
     }
-
-    // 5. Success: Update UI and load dashboard
-    document.getElementById("displayUserHeader").innerText = nameInput;
-    document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
     
     const teamBadge = document.getElementById("sidebarPodBadge");
     teamBadge.innerText = selectedColorTeam;
