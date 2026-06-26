@@ -90,10 +90,18 @@
         .progress-container { width: 100%; background: #e2e8f0; border-radius: 8px; height: 8px; overflow: hidden; margin-top: 12px; }
         .progress-bar { height: 100%; width: 0%; background: #10b981; transition: width 0.4s ease; }
 
-        .pod-card { background: white; border: 1px solid var(--border-color); border-radius: var(--radius-standard); padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow-premium); }
-        .pod-header { font-size: 18px; font-weight: 700; color: var(--neutral-dark); margin-bottom: 14px; }
-        .teammate-row { margin-bottom: 10px; }
-        .teammate-info { display: flex; justify-content: space-between; font-size: 13px; font-weight: 500; color: #475569; margin-bottom: 4px; }
+        .pod-card { background: white; border: 1px solid var(--border-color); border-radius: var(--radius-standard); padding: 16px 20px; margin-bottom: 20px; box-shadow: var(--shadow-premium); }
+        .pod-header-row { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .pod-header-left { display: flex; align-items: center; gap: 12px; }
+        .pod-color-swatch { width: 14px; height: 14px; border-radius: 50%; background: var(--brand-primary); flex-shrink: 0; }
+        .pod-team-name { display: block; font-size: 16px; font-weight: 700; color: var(--neutral-dark); }
+        .pod-team-amharic { display: block; font-size: 12px; color: #64748b; font-family: 'Abyssinica SIL', serif; margin-top: 1px; }
+        .pod-toggle-btn { background: none; border: none; font-size: 12px; color: #94a3b8; cursor: pointer; padding: 6px; transition: transform 0.2s; }
+        .pod-toggle-btn.open { transform: rotate(180deg); }
+        .pod-teammates-list { display: none; flex-direction: column; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border-color); }
+        .pod-teammates-list.open { display: flex; }
+        .pod-solo-message { font-size: 12px; color: #0d9488; background: #f0fdfa; border-radius: 10px; padding: 10px 12px; margin-top: 4px; }
+        .teammate-row { font-size: 13px; font-weight: 500; color: #475569; }
 
         .admin-gate-card { display: none; max-width: 450px; width: 100%; margin: 60px auto; background: white; border-radius: var(--radius-standard); padding: 28px; box-shadow: var(--shadow-premium); border: 1px solid var(--border-color); text-align: center; }
 
@@ -114,6 +122,18 @@
         .player-score-badge { background: var(--brand-primary); color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; }
 
         .workspace-title { font-size: 22px; font-weight: 700; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+
+        .workspace-header-block { margin-bottom: 18px; }
+        .workspace-title-main { font-size: 22px; font-weight: 700; color: var(--neutral-dark); }
+        .workspace-title-sub { font-size: 13px; color: #64748b; font-family: 'Abyssinica SIL', serif; margin-top: 2px; margin-bottom: 14px; }
+        .workspace-action-row { display: flex; gap: 8px; flex-wrap: wrap; }
+        .workspace-action-btn { flex: 1 1 auto; min-width: 140px; padding: 10px 14px; font-size: 13px; font-weight: 700; border-radius: 12px; border: 1px solid var(--border-color); background: white; color: var(--neutral-dark); cursor: pointer; box-shadow: var(--shadow-premium); transition: all 0.2s; text-align: center; }
+        .workspace-action-btn:hover { transform: translateY(-1px); border-color: var(--brand-primary); }
+        .workspace-action-btn.challenge-variant { background: #475569; color: white; border-color: #475569; }
+
+        @media (max-width: 640px) {
+            .workspace-action-btn { min-width: 100%; }
+        }
 
         .fidel-grid-3col { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 12px; }
         .fidel-card { background: #fff; border: 1px solid var(--border-color); border-radius: 14px; padding: 20px 0; text-align: center; font-size: 28px; cursor: pointer; box-shadow: var(--shadow-premium); display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-family: 'Abyssinica SIL', serif; color: var(--neutral-dark); }
