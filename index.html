@@ -157,6 +157,17 @@
                 <button class="btn-primary" onclick="teacherAssignStudentToPod()">Change Color Team</button>
             </div>
         </div>
+
+        <div class="teacher-panel" style="margin-bottom: 20px;">
+            <h2 style="font-size: 18px; color: var(--neutral-dark); margin-bottom: 4px;">👑 Assign Team Captain</h2>
+            <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">Pick a team, then choose which of its members is the captain. The captain reviews their teammates' writing submissions.</p>
+            <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); max-width: 500px;">
+                <select id="captainTeamSelect"><option value="">Select Team...</option></select>
+                <select id="captainStudentSelect" disabled><option value="">Select Team First...</option></select>
+                <button class="btn-primary" id="setCaptainBtn">Set as Captain</button>
+            </div>
+            <div id="currentCaptainsMount" style="margin-top:14px;"></div>
+        </div>
         <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
     </div>
 
