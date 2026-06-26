@@ -1407,9 +1407,20 @@ async function renderLiveLeaderboard() {
 
     const container = document.getElementById("liveLeaderboardContent");
     container.innerHTML = "";
-    leaderList.slice(0, 5).forEach((player, idx) => {
+
+    if (leaderList.length === 0) {
+        container.innerHTML = `<p style="font-size:12px; color:#94a3b8;">No one's started practicing yet!</p>`;
+        return;
+    }
+
+    leaderList.forEach((player, idx) => {
         const isSelf = currentUser && player.id === currentUser.id;
-        container.innerHTML += `<div class="leaderboard-row ${isSelf ? 'current-user' : ''}"><div class="player-info"><span>#${idx + 1}</span><span>${player.avatar}</span><span>${player.name} ${isSelf ? '(You)' : ''}</span></div><span class="player-score-badge">${player.percentage}%</span></div>`;
+        const isTopFive = idx < 5;
+        const rowClasses = ['leaderboard-row'];
+        if (isSelf) rowClasses.push('current-user');
+        if (isTopFive) rowClasses.push('top-five');
+
+        container.innerHTML += `<div class="${rowClasses.join(' ')}"><div class="player-info"><span class="leaderboard-rank">#${idx + 1}</span><span>${player.avatar}</span><span>${player.name} ${isSelf ? '(You)' : ''}</span></div><span class="player-score-badge">${player.percentage}%</span></div>`;
     });
 }
 
