@@ -215,12 +215,20 @@
     </div>
 
     <!-- Fidel Challenge: Mode Select -->
-    <div id="modeSelectScreen" class="app-card" style="display: none;">
+    <div id="modeSelectScreen" class="app-card" style="max-width: 480px; display: none;">
         <h2 class="main-title" style="font-size: 22px;">Choose Your Path</h2>
         <p class="subtitle">Practice on your own, or compete with your team!</p>
-        <div style="display:flex; flex-direction:column; gap:12px;">
-            <button class="btn-primary" onclick="chooseModePractice()">📖 Practice the Fidel</button>
-            <button class="btn-primary" style="background:#475569;" onclick="chooseModeChallenge()">🏆 Fidel Challenge</button>
+        <div style="display:flex; flex-direction:column; gap:14px;">
+            <div class="mode-option" onclick="chooseModePractice()">
+                <div class="mode-option-icon">📖</div>
+                <div class="mode-option-title">Practice the Fidel</div>
+                <div class="mode-option-desc">Free play — explore any letter, no pressure</div>
+            </div>
+            <div class="mode-option challenge-variant" onclick="chooseModeChallenge()">
+                <div class="mode-option-icon">🏆</div>
+                <div class="mode-option-title">Fidel Challenge</div>
+                <div class="mode-option-desc">Team competition — level up together</div>
+            </div>
         </div>
         <button class="btn-secondary" style="margin-top:16px;" onclick="chooseModePractice()">← Back to Dashboard</button>
     </div>
