@@ -125,7 +125,10 @@
 
                 <div class="workspace-title">
                     <span id="workspaceDynamicHeader">Amharic Letter Board</span>
-                    <button id="gameActivationToggleBtn" class="btn-primary" style="width:auto; padding:8px 16px; font-size:13px;" onclick="openMatchingGameWorkspaceMode('all')">Matching Game Arena</button>
+                    <div style="display:flex; gap:8px;">
+                        <button id="gameActivationToggleBtn" class="btn-primary" style="width:auto; padding:8px 16px; font-size:13px;" onclick="openMatchingGameWorkspaceMode('all')">Matching Game Arena</button>
+                        <button id="challengeEntryBtn" class="btn-primary" style="width:auto; padding:8px 16px; font-size:13px; background:#475569;" onclick="enterModeSelect()">🏆 Fidel Challenge</button>
+                    </div>
                 </div>
 
                 <!-- Core Grid Selection Array -->
@@ -211,6 +214,27 @@
         <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
     </div>
 
+    <!-- Fidel Challenge: Mode Select -->
+    <div id="modeSelectScreen" class="app-card" style="display: none;">
+        <h2 class="main-title" style="font-size: 22px;">Choose Your Path</h2>
+        <p class="subtitle">Practice on your own, or compete with your team!</p>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+            <button class="btn-primary" onclick="chooseModePractice()">📖 Practice the Fidel</button>
+            <button class="btn-primary" style="background:#475569;" onclick="chooseModeChallenge()">🏆 Fidel Challenge</button>
+        </div>
+        <button class="btn-secondary" style="margin-top:16px;" onclick="chooseModePractice()">← Back to Dashboard</button>
+    </div>
+
+    <!-- Fidel Challenge: Levels Overview -->
+    <div id="challengeLevelsScreen" style="display: none; max-width: 900px; margin: 40px auto; padding: 0 16px;">
+        <div class="workspace-title">
+            <span>🏆 Fidel Challenge</span>
+            <button class="btn-secondary" onclick="exitChallengeBackToDashboard()">← Back to Dashboard</button>
+        </div>
+        <div id="challengeLevelsGrid" class="challenge-levels-grid"></div>
+    </div>
+
     <script src="js/app.js" defer></script>
+    <script src="js/challenge.js" defer></script>
 </body>
 </html>
