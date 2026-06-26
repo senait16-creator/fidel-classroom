@@ -302,12 +302,16 @@ function openChallengeFamilyDetail(fidelObj, levelNumber) {
     document.getElementById("challengeFamilyScreen").style.display = "none";
     document.getElementById("challengeFamilyDetailScreen").style.display = "block";
     document.getElementById("challengeFamilyDetailTitle").innerText = `Family: "${fidelObj.base}"`;
-    document.getElementById("challengeFlashcardArea").style.display = "none";
 
     renderChallengeFamilyDetailGiantRow(fidelObj);
 
     document.getElementById("challengeDetailPlayBtn").onclick = () => launchChallengeStreakGame(fidelObj, levelNumber);
-    document.getElementById("challengeDetailFlashcardBtn").onclick = () => openChallengeFlashcards(fidelObj);
+    document.getElementById("challengeDetailFlashcardBtn").onclick = () => {
+        openFlashcardStudy(buildFlashcardDeckForFamily(fidelObj), `"${fidelObj.base}" Family`, () => {
+            document.getElementById("challengeFamilyDetailScreen").style.display = "block";
+        });
+        document.getElementById("challengeFamilyDetailScreen").style.display = "none";
+    };
 }
 
 function exitChallengeFamilyDetail() {
@@ -329,47 +333,6 @@ function renderChallengeFamilyDetailGiantRow(fidelObj) {
         card.innerHTML = `<div class="letter">${char}</div><div class="sub">${subs[idx]}</div>`;
         mount.appendChild(card);
     });
-}
-
-// -----------------------------------------------------------------------------
-// Flashcard self-study mode — flip-to-reveal quiz over the active family's
-// 7 vowel forms. Pure self-study: no streak tracking, no database writes.
-// -----------------------------------------------------------------------------
-
-let flashcardIndex = 0;
-let flashcardDeck = [];
-
-function openChallengeFlashcards(fidelObj) {
-    const subs = (fidelObj.prefix === "h" || fidelObj.prefix === "ḥ")
-        ? ["ha", "hu", "hee", "ha", "hay", "hih", "ho"]
-        : vowelSoundLabels.map(sub => `${fidelObj.prefix}${sub}`);
-
-    flashcardDeck = fidelObj.family.map((char, idx) => ({ char, sound: subs[idx] }));
-    flashcardIndex = 0;
-
-    document.getElementById("challengeFlashcardArea").style.display = "block";
-    renderFlashcard();
-
-    const card = document.getElementById("challengeFlashcard");
-    card.onclick = () => card.classList.toggle("flipped");
-
-    document.getElementById("challengeFlashcardNextBtn").onclick = () => {
-        flashcardIndex = (flashcardIndex + 1) % flashcardDeck.length;
-        renderFlashcard();
-    };
-    document.getElementById("challengeFlashcardPrevBtn").onclick = () => {
-        flashcardIndex = (flashcardIndex - 1 + flashcardDeck.length) % flashcardDeck.length;
-        renderFlashcard();
-    };
-}
-
-function renderFlashcard() {
-    const card = document.getElementById("challengeFlashcard");
-    card.classList.remove("flipped");
-
-    const entry = flashcardDeck[flashcardIndex];
-    document.getElementById("challengeFlashcardFront").innerText = entry.char;
-    document.getElementById("challengeFlashcardBack").innerText = entry.sound;
 }
 
 // -----------------------------------------------------------------------------
