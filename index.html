@@ -263,6 +263,16 @@
         <div id="challengeLevelsGrid" class="challenge-levels-grid"></div>
     </div>
 
+    <!-- Fidel Challenge: Family Picker (shown after clicking an unlocked level) -->
+    <div id="challengeFamilyScreen" style="display: none; max-width: 700px; margin: 40px auto; padding: 0 16px;">
+        <div class="workspace-title">
+            <span id="challengeFamilyTitle">Level</span>
+            <button class="btn-secondary" onclick="exitChallengeFamilyPicker()">← Back to Levels</button>
+        </div>
+        <p class="subtitle" style="text-align:left; margin-bottom: 16px;">Pick a letter family to practice. Get a streak of 20 in the matching game, then submit your writing for approval.</p>
+        <div id="challengeFamilyGrid" class="challenge-family-grid"></div>
+    </div>
+
     <script src="js/app.js" defer></script>
     <script src="js/challenge.js" defer></script>
 </body>
