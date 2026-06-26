@@ -58,7 +58,22 @@
             resetToGate(); 
         });
 
-        function showNotificationToast(msg) {
+       const TEAMS = ['Red', 'Blue', 'Green', 'Yellow'];
+
+async function assignNextTeam() {
+    // 1. Get current counts
+    const { data: students } = await _supabase.from('profiles').select('team_color');
+    
+    // 2. Count current assignments
+    const counts = { 'Red': 0, 'Blue': 0, 'Green': 0, 'Yellow': 0 };
+    students.forEach(s => { if(counts[s.team_color] !== undefined) counts[s.team_color]++; });
+
+    // 3. Find the team with the minimum count (keeps it balanced!)
+    const nextTeam = TEAMS.reduce((a, b) => counts[a] <= counts[b] ? a : b);
+    
+    return nextTeam;
+}
+function showNotificationToast(msg) {
             const container = document.getElementById("toastContainer");
             const element = document.createElement("div");
             element.className = "toast-popup";
