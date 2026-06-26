@@ -569,7 +569,7 @@ async function saveProfileData() {
     teamBadge.style.color = selectedColorTeam;
     
     launchDashboard("student");
-}
+
 
     // UI Updates
     document.getElementById("displayUserHeader").innerText = nameInput;
