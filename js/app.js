@@ -75,6 +75,10 @@ async function assignNextTeam() {
     return nextTeam;
 }
 
+document.getElementById('loginBtn').addEventListener('click', () => {
+    selectAuthFlow('login');
+});
+
 async function changeStudentTeam(studentId, newColor) {
     const { error } = await _supabase
         .from('profiles')
