@@ -814,4 +814,6 @@ window.exitClassroomViewBackToGrid = exitClassroomViewBackToGrid;
 window.openProfileEdit = openProfileEdit;
 window.toggleDropdownElement = toggleDropdownElement;
 
+document.getElementById("displayUserHeader").innerText = nameInput;
+document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
 
