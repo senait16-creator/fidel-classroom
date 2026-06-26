@@ -753,14 +753,14 @@ function toggleDropdownElement(elementId) {
         }
 // Add this to your main script to fetch and display the team status
 async function loadTeamDashboard(user) {
-    // 1. Get the user's team info
+    // 1. Get the user's team info - Update columns
     const { data: userProfile } = await _supabase
         .from('profiles')
-        .select('team_id, role')
+        .select('team_color, nickname') // Use the new columns
         .eq('id', user.id)
         .single();
 
-    if (!userProfile?.team_id) {
+    if (!userProfile?.team_color) {
         document.getElementById("podTeammatesMount").innerHTML = "<p>No Team Assigned</p>";
         return;
     }
@@ -768,24 +768,24 @@ async function loadTeamDashboard(user) {
     // 2. Fetch all members of this specific team
     const { data: members } = await _supabase
         .from('profiles')
-        .select('display_name, avatar_character, role')
-        .eq('team_id', userProfile.team_id);
+        .select('nickname, avatar, team_color') // Use new columns
+        .eq('team_color', userProfile.team_color);
 
     // 3. Render the Team Board
     const mount = document.getElementById("podTeammatesMount");
-    mount.innerHTML = `<h4>Your Team Roster</h4>`;
+    mount.innerHTML = `<h4>Team: <span style="color:${userProfile.team_color}">${userProfile.team_color}</span></h4>`;
 
     members.forEach(member => {
         const row = document.createElement('div');
         row.className = "teammate-row";
         row.innerHTML = `
             <div class="teammate-info">
-                <span>${member.avatar_character || '🦁'} ${member.display_name}</span>
-                <span style="font-size: 0.8em; color: #64748b;">${member.role === 'captain' ? '👑 Captain' : 'Student'}</span>
+                <span>${member.avatar || '🦁'} ${member.nickname}</span>
             </div>
         `;
         mount.appendChild(row);
     });
+}
 
     // --- NEW: SHOW LOGIC FOR CAPTAIN ---
     if (userProfile.role === 'captain') {
@@ -815,3 +815,4 @@ window.uploadSketchpadDrawingCanvasData = uploadSketchpadDrawingCanvasData;
 window.exitClassroomViewBackToGrid = exitClassroomViewBackToGrid;
 window.openProfileEdit = openProfileEdit;
 window.toggleDropdownElement = toggleDropdownElement;
+
