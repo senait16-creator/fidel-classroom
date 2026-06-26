@@ -274,12 +274,27 @@ async function handleAuth() {
     const password = document.getElementById("password").value;
     if (!email || !password) return showNotificationToast("Please fill in all boxes.");
 
+    showNotificationToast(isSignUpMode ? "Creating your account..." : "Logging in...");
+
     const { data, error } = isSignUpMode
         ? await _supabase.auth.signUp({ email, password })
         : await _supabase.auth.signInWithPassword({ email, password });
 
-    if (error) return showNotificationToast(error.message);
-    if (data?.user) proceedFlowMap(data.user);
+    if (error) {
+        console.error("Auth error:", error);
+        return showNotificationToast(error.message);
+    }
+
+    if (data?.user) {
+        await proceedFlowMap(data.user);
+    } else {
+        // Previously silent dead end: no error, but also no usable user —
+        // can happen if email confirmation is required and the response
+        // shape doesn't include an active session yet. Surface it instead
+        // of doing nothing visible.
+        console.warn("Auth returned no error but no user object:", data);
+        showNotificationToast("Account created! Check your email to confirm, then log in.");
+    }
 }
 
 async function proceedFlowMap(user) {
