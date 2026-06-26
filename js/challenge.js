@@ -304,11 +304,19 @@ function openChallengeFamilyDetail(fidelObj, levelNumber) {
     document.getElementById("challengeFamilyDetailTitle").innerText = `Family: "${fidelObj.base}"`;
 
     renderChallengeFamilyDetailGiantRow(fidelObj);
+    renderWritingStatusForFamily(fidelObj.base);
 
     document.getElementById("challengeDetailPlayBtn").onclick = () => launchChallengeStreakGame(fidelObj, levelNumber);
     document.getElementById("challengeDetailFlashcardBtn").onclick = () => {
         openFlashcardStudy(buildFlashcardDeckForFamily(fidelObj), `"${fidelObj.base}" Family`, () => {
             document.getElementById("challengeFamilyDetailScreen").style.display = "block";
+        });
+        document.getElementById("challengeFamilyDetailScreen").style.display = "none";
+    };
+    document.getElementById("challengeDetailWritingBtn").onclick = () => {
+        openWritingSubmitScreen(fidelObj.base, () => {
+            document.getElementById("challengeFamilyDetailScreen").style.display = "block";
+            renderWritingStatusForFamily(fidelObj.base);
         });
         document.getElementById("challengeFamilyDetailScreen").style.display = "none";
     };
