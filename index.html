@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="am">
 <head>
@@ -12,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=Abyssinica+SIL&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<link rel="stylesheet" href="style.css"> 
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -26,16 +24,18 @@
         <div id="onboardingGate" class="choice-container">
             <button class="btn-filled-rectangle btn-signup-rect" onclick="selectAuthFlow('signup')">Sign Up</button>
             <button class="btn-filled-rectangle btn-login-rect" onclick="selectAuthFlow('login')">Log In</button>
+        </div>
+        <div id="credentialFields" style="display: none;">
+            <!-- Label and Input are now siblings, correctly linked by 'for' and 'id' -->
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" autocomplete="email">
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" autocomplete="current-password">
+
             <button id="auth-btn">Let's Go!</button>
         </div>
-      <div id="credentialFields" style="display: none;">
-    <!-- Label and Input are now siblings, correctly linked by 'for' and 'id' -->
-    <label for="email">Email Address</label>
-    <input type="email" id="email" name="email" autocomplete="email">
-
-    <label for="password">Password</label>
-    <input type="password" id="password" name="password" autocomplete="current-password">
-
+    </div>
 
     <!-- Administrative Target Routing Gate -->
     <div id="adminViewSelectorGate" class="admin-gate-card">
@@ -65,8 +65,8 @@
             <label style="font-size: 13px; font-weight: 700; color: var(--neutral-dark);">Pick Your Color Team:</label>
             <select id="profileTeamSelect"></select>
         </div>
- 
-        <button class="btn-primary" onclick="saveProfileData()">Join the Classroom</button>
+
+        <button class="btn-primary" onclick="saveProfileData(event)">Join the Classroom</button>
     </div>
 
     <!-- Teacher Dashboard Module View -->
@@ -181,7 +181,7 @@
             <div class="sidebar-sticky-panel">
                 <header>
                     <div class="profile-clickable-trigger" onclick="openProfileEdit()" style="cursor: pointer;">
-        <div class="user-avatar-badge" id="displayAvatarHeader">🦁</div>
+                        <div class="user-avatar-badge" id="displayAvatarHeader">🦁</div>
                         <div>
                             <h3 id="displayUserHeader" style="font-size:15px; font-weight:700;">Student Nickname</h3>
                             <div id="sidebarPodBadge" style="font-size: 11px; color: var(--brand-primary); font-weight: 700; margin-top: 2px;">Your Team...</div>
@@ -211,8 +211,6 @@
         <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
     </div>
 
-
-    <script src="app.js"></script>
-</body>
+    <script src="js/app.js" defer></script>
 </body>
 </html>
