@@ -1,6 +1,7 @@
        const SUPABASE_URL = "https://muisfipoyzkhznfdvnes.supabase.co"; 
         const SUPABASE_KEY = "sb_publishable_VBiJZB8TVM2CSl54aDPP0A_4aDXWb5i";
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+console.log("App script is loading...");
 
         const ADMIN_EMAIL = "senaitrichmond16@gmail.com";
         const CLASSROOM_COLORS = ["Red Team 🔴", "Blue Team 🔵", "Green Team 🟢", "Yellow Team 🟡", "Purple Team 🟣"];
@@ -759,10 +760,9 @@ function toggleDropdownElement(elementId) {
         }
 // Add this to your main script to fetch and display the team status
 async function loadTeamDashboard(user) {
-    // 1. Get the user's team info - Update columns
     const { data: userProfile } = await _supabase
         .from('profiles')
-        .select('team_color, nickname') // Use the new columns
+        .select('team_color, nickname, role') // Make sure 'role' is selected
         .eq('id', user.id)
         .single();
 
@@ -771,37 +771,29 @@ async function loadTeamDashboard(user) {
         return;
     }
 
-    // 2. Fetch all members of this specific team
     const { data: members } = await _supabase
         .from('profiles')
-        .select('nickname, avatar, team_color') // Use new columns
+        .select('nickname, avatar, team_color')
         .eq('team_color', userProfile.team_color);
 
-    // 3. Render the Team Board
     const mount = document.getElementById("podTeammatesMount");
     mount.innerHTML = `<h4>Team: <span style="color:${userProfile.team_color}">${userProfile.team_color}</span></h4>`;
 
     members.forEach(member => {
         const row = document.createElement('div');
         row.className = "teammate-row";
-        row.innerHTML = `
-            <div class="teammate-info">
-                <span>${member.avatar || '🦁'} ${member.nickname}</span>
-            </div>
-        `;
+        row.innerHTML = `<span>${member.avatar || '🦁'} ${member.nickname}</span>`;
         mount.appendChild(row);
     });
-}
 
-    // --- NEW: SHOW LOGIC FOR CAPTAIN ---
+    // --- LOGIC IS NOW INSIDE THE FUNCTION ---
     if (userProfile.role === 'captain') {
         const inboxMount = document.createElement('div');
         inboxMount.id = 'captainInboxMount';
-        mount.appendChild(inboxMount); // Attach inbox below the roster
-        renderCaptainInbox();          // Call the function to fetch & show submissions
+        mount.appendChild(inboxMount);
+        renderCaptainInbox(); 
     }
-}
-        function logout() { resetToGate(); }
+} 
 
 window.handleAuth = handleAuth;
 window.selectAuthFlow = selectAuthFlow;
@@ -821,4 +813,5 @@ window.uploadSketchpadDrawingCanvasData = uploadSketchpadDrawingCanvasData;
 window.exitClassroomViewBackToGrid = exitClassroomViewBackToGrid;
 window.openProfileEdit = openProfileEdit;
 window.toggleDropdownElement = toggleDropdownElement;
+
 
