@@ -27,6 +27,10 @@ function chooseModePractice() {
 }
 
 async function chooseModeChallenge() {
+    if (!currentProfile?.team_id) {
+        showNotificationToast("Fidel Challenge is a team competition — join a team in your profile to play!");
+        return;
+    }
     document.getElementById("modeSelectScreen").style.display = "none";
     document.getElementById("challengeLevelsScreen").style.display = "block";
     await renderChallengeLevelsView();
@@ -97,6 +101,7 @@ function renderChallengeBoardHeader(team, totalLevels) {
     else if (team.name && team.name.includes("Blue")) swatch.style.background = "#3b82f6";
     else if (team.name && team.name.includes("Green")) swatch.style.background = "#10b981";
     else if (team.name && team.name.includes("Yellow")) swatch.style.background = "#f59e0b";
+    else if (team.name && team.name.includes("Purple")) swatch.style.background = "#a855f7";
     else swatch.style.background = "var(--brand-primary)";
 }
 
