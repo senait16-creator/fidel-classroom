@@ -464,6 +464,8 @@ function launchDashboard(viewMode) {
         document.getElementById("teacherOnlyDashboard").style.display = "block";
         loadTeacherRosterData();
         teacherRefreshConfigurationDropdowns();
+        loadTeacherWritingQueue();
+        loadTeacherTeamProgress();
     } else {
         document.getElementById("studentDashboard").style.display = "block";
         fetchUserProgress();
@@ -559,6 +561,243 @@ async function teacherAssignStudentToPod() {
 
     await loadTeacherRosterData();
     await teacherRefreshConfigurationDropdowns();
+}
+
+// ---------------------------------------------------------------------------
+// Writing submission review queue (teacher/captain approval)
+// ---------------------------------------------------------------------------
+
+async function loadTeacherWritingQueue() {
+    const mount = document.getElementById("teacherWritingQueueMount");
+    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
+
+    const { data: submissions, error } = await _supabase
+        .from('writing_submissions')
+        .select('id, base_letter, image_url, status, submitted_at, student_id, profiles!writing_submissions_student_id_fkey(nickname, avatar)')
+        .eq('status', 'pending')
+        .order('submitted_at', { ascending: true });
+
+    if (error) {
+        console.error("Failed to load writing queue:", error);
+        mount.innerHTML = `<p style="color:#ef4444; font-size:13px;">Couldn't load submissions: ${error.message}</p>`;
+        return;
+    }
+
+    if (!submissions || submissions.length === 0) {
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No pending submissions — all caught up!</p>`;
+        return;
+    }
+
+    mount.innerHTML = "";
+    submissions.forEach(sub => {
+        const card = document.createElement('div');
+        card.className = "teacher-submission-card";
+        card.innerHTML = `
+            <img src="${sub.image_url}" alt="Writing sample">
+            <div class="teacher-submission-meta">
+                <strong>${sub.profiles?.avatar || '🦁'} ${sub.profiles?.nickname || 'Student'}</strong>
+                <span class="letter">${sub.base_letter}</span>
+                <div class="teacher-submission-actions">
+                    <button class="btn-approve" data-id="${sub.id}" data-student="${sub.student_id}" data-letter="${sub.base_letter}">✓ Approve</button>
+                    <button class="btn-reject" data-id="${sub.id}">✗ Reject</button>
+                </div>
+                <input type="text" class="teacher-reject-note-input" placeholder="Optional note for rejection..." style="display:none;">
+            </div>
+        `;
+
+        const approveBtn = card.querySelector('.btn-approve');
+        const rejectBtn = card.querySelector('.btn-reject');
+        const noteInput = card.querySelector('.teacher-reject-note-input');
+
+        approveBtn.onclick = () => approveWritingSubmission(sub.id, sub.student_id, sub.base_letter);
+
+        rejectBtn.onclick = () => {
+            if (noteInput.style.display === "none") {
+                noteInput.style.display = "block";
+                rejectBtn.innerText = "Confirm Reject";
+            } else {
+                rejectWritingSubmission(sub.id, noteInput.value.trim());
+            }
+        };
+
+        mount.appendChild(card);
+    });
+}
+
+async function approveWritingSubmission(submissionId, studentId, baseLetter) {
+    showNotificationToast("Approving...");
+
+    const { error: subError } = await _supabase
+        .from('writing_submissions')
+        .update({ status: 'approved', reviewed_by: currentUser.id, reviewed_at: new Date().toISOString() })
+        .eq('id', submissionId);
+
+    if (subError) {
+        console.error("Failed to approve submission:", subError);
+        return showNotificationToast("Approval failed: " + subError.message);
+    }
+
+    // Flip writing_passed on the student's family progress row, and mark
+    // completed_at if the streak gate is also already passed.
+    const { data: progressRow } = await _supabase
+        .from('student_family_progress')
+        .select('streak_passed')
+        .eq('student_id', studentId)
+        .eq('base_letter', baseLetter)
+        .maybeSingle();
+
+    const updatePayload = { writing_passed: true };
+    if (progressRow?.streak_passed) updatePayload.completed_at = new Date().toISOString();
+
+    const { error: progressError } = await _supabase
+        .from('student_family_progress')
+        .update(updatePayload)
+        .eq('student_id', studentId)
+        .eq('base_letter', baseLetter);
+
+    if (progressError) console.error("Failed to update family progress:", progressError);
+
+    showNotificationToast("Submission approved! ✓");
+    await loadTeacherWritingQueue();
+    await checkAndUpdateTeamLevelCompletion(studentId);
+}
+
+async function rejectWritingSubmission(submissionId, note) {
+    showNotificationToast("Rejecting submission...");
+
+    const { error } = await _supabase
+        .from('writing_submissions')
+        .update({
+            status: 'rejected',
+            reviewed_by: currentUser.id,
+            reviewed_at: new Date().toISOString(),
+            reviewer_note: note || null
+        })
+        .eq('id', submissionId);
+
+    if (error) {
+        console.error("Failed to reject submission:", error);
+        return showNotificationToast("Reject failed: " + error.message);
+    }
+
+    showNotificationToast("Submission rejected — student can resubmit.");
+    await loadTeacherWritingQueue();
+}
+
+// ---------------------------------------------------------------------------
+// Team level progress + advancement
+// ---------------------------------------------------------------------------
+
+// After any approval, check whether the approved student's whole team has
+// now cleared every family in their current level — if so, flag the team
+// as ready for the live quiz on the teacher dashboard.
+async function checkAndUpdateTeamLevelCompletion(studentId) {
+    const { data: student } = await _supabase.from('profiles').select('team_id').eq('id', studentId).maybeSingle();
+    if (!student?.team_id) return;
+
+    const { data: team } = await _supabase.from('teams').select('id, current_level').eq('id', student.team_id).maybeSingle();
+    if (!team) return;
+
+    const { data: level } = await _supabase.from('challenge_levels').select('letter_families').eq('level_number', team.current_level).maybeSingle();
+    if (!level) return;
+
+    const { data: members } = await _supabase.from('profiles').select('id').eq('team_id', team.id);
+    const memberIds = (members || []).map(m => m.id);
+    if (memberIds.length === 0) return;
+
+    const { data: progressRows } = await _supabase
+        .from('student_family_progress')
+        .select('student_id, base_letter, streak_passed, writing_passed')
+        .in('student_id', memberIds)
+        .eq('level_number', team.current_level);
+
+    const allCleared = memberIds.every(memberId =>
+        (level.letter_families || []).every(letter => {
+            const row = (progressRows || []).find(r => r.student_id === memberId && r.base_letter === letter);
+            return row?.streak_passed && row?.writing_passed;
+        })
+    );
+
+    if (allCleared) {
+        await _supabase.from('team_level_status').upsert({
+            team_id: team.id,
+            level_number: team.current_level,
+            all_members_cleared: true,
+            all_members_cleared_at: new Date().toISOString()
+        }, { onConflict: 'team_id,level_number' });
+
+        await loadTeacherTeamProgress();
+    }
+}
+
+async function loadTeacherTeamProgress() {
+    const mount = document.getElementById("teacherTeamProgressMount");
+    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
+
+    const { data: teams } = await _supabase.from('teams').select('id, name, current_level, streak_count').order('name');
+    if (!teams || teams.length === 0) {
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No teams yet.</p>`;
+        return;
+    }
+
+    const { data: statusRows } = await _supabase.from('team_level_status').select('team_id, level_number, all_members_cleared, live_quiz_passed');
+
+    mount.innerHTML = "";
+    teams.forEach(team => {
+        const status = (statusRows || []).find(s => s.team_id === team.id && s.level_number === team.current_level);
+        const isReady = status?.all_members_cleared && !status?.live_quiz_passed;
+
+        const row = document.createElement('div');
+        row.className = `teacher-team-row ${isReady ? 'ready' : ''}`;
+        row.innerHTML = `
+            <div class="teacher-team-row-info">
+                <strong>${team.name}</strong>
+                <span>Level ${team.current_level} • Streak: ${team.streak_count || 0}${isReady ? ' • Ready for live quiz! 🎉' : ''}</span>
+            </div>
+            <button class="btn-advance" ${isReady ? '' : 'disabled'}>Mark Quiz Passed & Advance</button>
+        `;
+
+        row.querySelector('.btn-advance').onclick = () => advanceTeamLevel(team.id, team.current_level);
+        mount.appendChild(row);
+    });
+}
+
+async function advanceTeamLevel(teamId, currentLevel) {
+    showNotificationToast("Advancing team...");
+
+    const { error: statusError } = await _supabase
+        .from('team_level_status')
+        .update({ live_quiz_passed: true, live_quiz_passed_at: new Date().toISOString() })
+        .eq('team_id', teamId)
+        .eq('level_number', currentLevel);
+
+    if (statusError) {
+        console.error("Failed to mark live quiz passed:", statusError);
+        return showNotificationToast("Failed: " + statusError.message);
+    }
+
+    // streak_count tracks consecutive levels advanced — increment it here.
+    // It only resets to zero via the separate "stuck team" detector (not yet
+    // built) if too much time passes without an advance, not on advance itself.
+    const { data: teamRow } = await _supabase.from('teams').select('streak_count').eq('id', teamId).maybeSingle();
+    const newStreak = (teamRow?.streak_count || 0) + 1;
+
+    const { error: teamError } = await _supabase
+        .from('teams')
+        .update({
+            current_level: currentLevel + 1,
+            streak_count: newStreak,
+            last_advanced_at: new Date().toISOString()
+        })
+        .eq('id', teamId);
+
+    if (teamError) {
+        console.error("Failed to advance team:", teamError);
+        return showNotificationToast("Failed: " + teamError.message);
+    }
+
+    showNotificationToast("Team advanced to the next level! 🎉");
+    await loadTeacherTeamProgress();
 }
 
 // ---------------------------------------------------------------------------
@@ -863,6 +1102,174 @@ function renderFlashcard() {
 
     const label = document.getElementById("flashcardProgressLabel");
     if (label) label.innerText = `Card ${flashcardIndex + 1} of ${flashcardDeck.length}`;
+}
+
+// ---------------------------------------------------------------------------
+// Writing submission (Fidel Challenge)
+// Student picks photo upload OR sketchpad, submits a writing sample for a
+// specific letter family, captain/teacher reviews it. Separate from the
+// existing photo_shares social feed and its sketchpad — this writes to
+// writing_submissions, scoped to one base_letter, with approve/reject status.
+// ---------------------------------------------------------------------------
+
+let writingSubmitContext = null; // { baseLetter, onSubmitted }
+let writingSketchCtx = null;
+let writingSketchDrawing = false;
+
+function openWritingSubmitScreen(baseLetter, onClose) {
+    writingSubmitContext = { baseLetter, onClose };
+
+    document.getElementById("writingSubmitTitle").innerText = `Submit Writing: "${baseLetter}"`;
+    document.getElementById("writingSubmitScreen").style.display = "block";
+    document.getElementById("writingSketchpadArea").style.display = "none";
+    document.getElementById("writingRejectionNote").style.display = "none";
+    document.querySelectorAll('#writingSubmitScreen .mode-option').forEach(el => el.classList.remove('selected'));
+
+    document.getElementById("writingChoiceUploadCard").onclick = () => {
+        document.getElementById("writingPhotoInput").click();
+    };
+    document.getElementById("writingChoiceSketchCard").onclick = () => {
+        document.querySelectorAll('#writingSubmitScreen .mode-option').forEach(el => el.classList.remove('selected'));
+        document.getElementById("writingChoiceSketchCard").classList.add('selected');
+        document.getElementById("writingSketchpadArea").style.display = "block";
+        setTimeout(initWritingSketchpad, 50);
+    };
+
+    const photoInput = document.getElementById("writingPhotoInput");
+    photoInput.value = "";
+    photoInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            document.getElementById("writingChoiceUploadCard").classList.add('selected');
+            submitWritingPhoto(file);
+        }
+    };
+
+    document.getElementById("writingSketchClearBtn").onclick = clearWritingSketchpad;
+    document.getElementById("writingSketchSubmitBtn").onclick = submitWritingSketch;
+
+    document.getElementById("writingSubmitCloseBtn").onclick = closeWritingSubmitScreen;
+}
+
+function closeWritingSubmitScreen() {
+    document.getElementById("writingSubmitScreen").style.display = "none";
+    if (writingSubmitContext?.onClose) writingSubmitContext.onClose();
+}
+
+function initWritingSketchpad() {
+    const canvas = document.getElementById("writingSketchpad");
+    if (!canvas) return;
+    writingSketchCtx = canvas.getContext("2d");
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    writingSketchCtx.lineWidth = 3;
+    writingSketchCtx.lineCap = "round";
+    writingSketchCtx.strokeStyle = "#1e293b";
+
+    function getCoords(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: clientX - rect.left, y: clientY - rect.top };
+    }
+    function start(e) { writingSketchDrawing = true; writingSketchCtx.beginPath(); const c = getCoords(e); writingSketchCtx.moveTo(c.x, c.y); }
+    function draw(e) { if (!writingSketchDrawing) return; const c = getCoords(e); writingSketchCtx.lineTo(c.x, c.y); writingSketchCtx.stroke(); }
+    function stop() { writingSketchDrawing = false; }
+
+    canvas.addEventListener("mousedown", start);
+    canvas.addEventListener("mousemove", draw);
+    window.addEventListener("mouseup", stop);
+    canvas.addEventListener("touchstart", start);
+    canvas.addEventListener("touchmove", draw);
+    window.addEventListener("touchend", stop);
+}
+
+function clearWritingSketchpad() {
+    const canvas = document.getElementById("writingSketchpad");
+    if (writingSketchCtx && canvas) writingSketchCtx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+async function submitWritingPhoto(file) {
+    showNotificationToast("Uploading your photo...");
+    const storagePath = `writing-${currentUser.id}-${writingSubmitContext.baseLetter}-${Date.now()}.png`;
+
+    const { error: uploadError } = await _supabase.storage.from('art_shares').upload(storagePath, file, { contentType: file.type });
+    if (uploadError) {
+        console.error("Writing photo upload failed:", uploadError);
+        return showNotificationToast("Upload failed: " + uploadError.message);
+    }
+
+    const { data: urlData } = _supabase.storage.from('art_shares').getPublicUrl(storagePath);
+    await finalizeWritingSubmission(urlData.publicUrl);
+}
+
+async function submitWritingSketch() {
+    const canvas = document.getElementById("writingSketchpad");
+    const emptyCheck = document.createElement("canvas");
+    emptyCheck.width = canvas.width;
+    emptyCheck.height = canvas.height;
+    if (canvas.toDataURL() === emptyCheck.toDataURL()) {
+        return showNotificationToast("Draw something before submitting!");
+    }
+
+    showNotificationToast("Submitting your drawing...");
+    canvas.toBlob(async (blob) => {
+        const storagePath = `writing-${currentUser.id}-${writingSubmitContext.baseLetter}-${Date.now()}.png`;
+        const { error: uploadError } = await _supabase.storage.from('art_shares').upload(storagePath, blob, { contentType: 'image/png' });
+        if (uploadError) {
+            console.error("Writing sketch upload failed:", uploadError);
+            return showNotificationToast("Upload failed: " + uploadError.message);
+        }
+        const { data: urlData } = _supabase.storage.from('art_shares').getPublicUrl(storagePath);
+        await finalizeWritingSubmission(urlData.publicUrl);
+    }, "image/png");
+}
+
+async function finalizeWritingSubmission(imageUrl) {
+    const { error } = await _supabase.from('writing_submissions').insert({
+        student_id: currentUser.id,
+        base_letter: writingSubmitContext.baseLetter,
+        image_url: imageUrl,
+        status: 'pending'
+    });
+
+    if (error) {
+        console.error("Failed to save writing submission:", error);
+        return showNotificationToast("Couldn't submit: " + error.message);
+    }
+
+    showNotificationToast("Submitted! Your captain will review it soon. 🎉");
+    closeWritingSubmitScreen();
+}
+
+// Fetches and renders the latest writing submission status for a family,
+// shown on the family detail screen so a student knows where they stand.
+async function renderWritingStatusForFamily(baseLetter) {
+    const box = document.getElementById("challengeWritingStatusBox");
+
+    const { data: submissions } = await _supabase
+        .from('writing_submissions')
+        .select('status, reviewer_note, submitted_at')
+        .eq('student_id', currentUser.id)
+        .eq('base_letter', baseLetter)
+        .order('submitted_at', { ascending: false })
+        .limit(1);
+
+    const latest = submissions?.[0];
+
+    if (!latest) {
+        box.style.display = "none";
+        return;
+    }
+
+    box.style.display = "block";
+    if (latest.status === 'approved') {
+        box.innerHTML = `<div class="challenge-writing-status approved">✓ Your writing for "${baseLetter}" was approved!</div>`;
+    } else if (latest.status === 'rejected') {
+        box.innerHTML = `<div class="challenge-writing-status rejected">✗ Your writing needs another try.${latest.reviewer_note ? ' Note: ' + latest.reviewer_note : ''}</div>`;
+    } else {
+        box.innerHTML = `<div class="challenge-writing-status pending">⏳ Waiting for your captain to review your submission.</div>`;
+    }
 }
 
 // ---------------------------------------------------------------------------
