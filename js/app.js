@@ -246,6 +246,7 @@ async function proceedFlowMap(user) {
 
     if (profile && profile.nickname) {
         selectedAvatarSymbol = profile.avatar || "🦁";
+        document.getElementById("authScreen").style.display = "none";
         applyProfileToHeader(profile);
         launchDashboard("student");
     } else {
