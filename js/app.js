@@ -11,3 +11,6 @@ const SUPABASE_KEY = "sb_publishable_VBiJZB8TVM2CSl54aDPP0A_4aDXWb5i";
 export const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 console.log("Supabase Client initialized successfully.");
+
+//Everything under this
+
