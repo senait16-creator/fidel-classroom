@@ -16,6 +16,7 @@ import { handleAuth, selectAuthFlow } from './auth.js';
 import { initSketchpad } from './game.js';
 import { showScreen } from './ui.js';
 
+const ADMIN_EMAIL = "your-teacher-email@example.com";
 
 // This runs automatically whenever the user logs in or out
 supabase.auth.onAuthStateChange((event, session) => {
