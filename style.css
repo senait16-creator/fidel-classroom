@@ -111,6 +111,23 @@
         .logout-btn { background: transparent; color: white; border: none; font-size: 14px; font-weight: 500; cursor: pointer; }
 
         /* ---------------------------------------------------------------- */
+        /* Fidel Challenge: board header                                    */
+        /* ---------------------------------------------------------------- */
+        .challenge-board-header { background: white; border: 1px solid var(--border-color); border-radius: var(--radius-standard); padding: 20px 24px; box-shadow: var(--shadow-premium); margin-top: 16px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+        .challenge-board-team { display: flex; align-items: center; gap: 12px; }
+        .challenge-board-team-swatch { width: 14px; height: 14px; border-radius: 50%; background: var(--brand-primary); flex-shrink: 0; }
+        .challenge-board-team-name { font-size: 16px; font-weight: 700; color: var(--neutral-dark); }
+        .challenge-board-team-sub { font-size: 12px; color: #64748b; margin-top: 2px; }
+
+        .challenge-board-streak { display: flex; align-items: center; gap: 8px; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 12px; padding: 8px 14px; }
+        .challenge-board-streak-icon { font-size: 18px; }
+        .challenge-board-streak-value { font-size: 15px; font-weight: 700; color: #c2410c; }
+        .challenge-board-streak-label { font-size: 11px; color: #c2410c; opacity: 0.8; }
+
+        .challenge-board-progress-track { width: 100%; height: 8px; background: #e2e8f0; border-radius: 8px; overflow: hidden; margin-top: 14px; }
+        .challenge-board-progress-fill { height: 100%; background: linear-gradient(90deg, var(--brand-primary), #5eead4); border-radius: 8px; transition: width 0.5s ease; }
+
+        /* ---------------------------------------------------------------- */
         /* Fidel Challenge: mode select                                     */
         /* ---------------------------------------------------------------- */
         #modeSelectScreen .btn-primary,
@@ -125,7 +142,7 @@
         /* ---------------------------------------------------------------- */
         /* Fidel Challenge: level map                                       */
         /* ---------------------------------------------------------------- */
-        .challenge-levels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 18px; margin-top: 20px; }
+        .challenge-levels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 18px; margin-top: 20px; position: relative; }
 
         .challenge-level-card { position: relative; background: white; border: 1px solid var(--border-color); border-radius: var(--radius-standard); padding: 24px 14px 18px; text-align: center; box-shadow: var(--shadow-premium); transition: all 0.2s; overflow: hidden; }
 
@@ -135,6 +152,14 @@
 
         .challenge-level-card.unlocked { cursor: pointer; }
         .challenge-level-card.unlocked:hover { transform: translateY(-3px); border-color: var(--brand-primary); box-shadow: 0 8px 24px rgba(15, 118, 110, 0.12); }
+
+        .challenge-level-card.completed { border-color: #10b981; }
+        .challenge-level-card.completed .challenge-level-number-badge { background: #10b981; }
+        .challenge-level-card.completed::after {
+            content: "✓";
+            position: absolute; top: 8px; right: 10px;
+            color: #10b981; font-size: 16px; font-weight: 700;
+        }
 
         .challenge-level-card.current { border-color: var(--brand-primary); background: #f0fdfa; }
         .challenge-level-card.current::before {
