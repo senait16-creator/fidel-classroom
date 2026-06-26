@@ -483,7 +483,7 @@ async function loadTeacherRosterData() {
 
     const { data: students } = await _supabase
         .from('profiles')
-        .select('id, nickname, avatar, team_id, is_admin, teams(name)')
+        .select('id, nickname, avatar, email, team_id, is_admin, teams(name)')
         .order('nickname', { ascending: true });
 
     const { data: progress } = await _supabase
@@ -512,7 +512,7 @@ async function loadTeacherRosterData() {
 
         tbody.innerHTML += `
             <tr>
-                <td style="font-weight:500;">${s.avatar || '🦁'} ${s.nickname}</td>
+                <td style="font-weight:500;">${s.avatar || '🦁'} ${s.nickname}<br><span style="font-size:11px; color:#94a3b8; font-weight:400;">${s.email || ''}</span></td>
                 <td>${teamDisplay}</td>
                 <td><strong>${masteredCount} / 34 rows</strong> complete</td>
             </tr>
@@ -884,7 +884,7 @@ function renderUIProgressUpdates() {
 }
 
 async function renderLiveLeaderboard() {
-    const { data: profiles } = await _supabase.from('profiles').select('id, nickname, avatar');
+    const { data: profiles } = await _supabase.from('public_profiles').select('id, nickname, avatar');
     const { data: progressRecords } = await _supabase.from('user_progress').select('user_id, mastered_letters');
 
     const progressMap = {};
@@ -949,7 +949,7 @@ async function loadTeamDashboard(user) {
     const teamName = userProfile.teams?.name || "Your Team";
 
     const { data: members } = await _supabase
-        .from('profiles')
+        .from('public_profiles')
         .select('nickname, avatar, team_id')
         .eq('team_id', userProfile.team_id);
 
