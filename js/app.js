@@ -473,7 +473,8 @@ async function loadTeacherRosterData() {
 
     const { data: students } = await _supabase
         .from('profiles')
-        .select('id, nickname, avatar, team_id, teams(name)');
+        .select('id, nickname, avatar, team_id, is_admin, teams(name)')
+        .order('nickname', { ascending: true });
 
     const { data: progress } = await _supabase
         .from('user_progress')
@@ -483,17 +484,21 @@ async function loadTeacherRosterData() {
     progress?.forEach(rec => { progressMap[rec.user_id] = rec.mastered_letters || []; });
 
     tbody.innerHTML = '';
-    if (!students || students.length === 0) {
+
+    // Don't list the admin account itself as a "student" in the roster.
+    const realStudents = (students || []).filter(s => !s.is_admin);
+
+    if (realStudents.length === 0) {
         tbody.innerHTML = '<tr><td colspan="3" style="color:#94a3b8; text-align:center;">No students registered yet.</td></tr>';
         return;
     }
 
-    students.forEach(s => {
+    realStudents.forEach(s => {
         const masteredCount = (progressMap[s.id] || []).length;
         const teamName = s.teams?.name;
         const teamDisplay = teamName
             ? `<span style="font-weight:700;">${teamName}</span>`
-            : '<span style="color:#94a3b8; font-style:italic;">Unassigned</span>';
+            : '<span style="color:#0d9488; font-style:italic;">Practicing Solo</span>';
 
         tbody.innerHTML += `
             <tr>
