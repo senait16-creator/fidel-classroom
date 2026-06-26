@@ -195,6 +195,90 @@ function populateTeamSelect() {
         select.appendChild(opt);
     });
 }
+
+// --- DASHBOARD & NAVIGATION ---
+function launchDashboard(role) {
+    document.getElementById("authScreen").style.display = "none";
+    document.getElementById("profileSetupScreen").style.display = "none";
+    document.getElementById("adminViewSelectorGate").style.display = "none";
+    
+    if (role === "teacher") {
+        document.getElementById("teacherOnlyDashboard").style.display = "block";
+        document.getElementById("studentDashboard").style.display = "none";
+    } else {
+        document.getElementById("teacherOnlyDashboard").style.display = "none";
+        document.getElementById("studentDashboard").style.display = "block";
+        initSketchpadEngineSystem();
+        if (typeof renderFidelGrid === 'function') renderFidelGrid();
+    }
+}
+
+// --- SKETCHPAD ENGINE ---
+function initSketchpadEngineSystem() {
+    canvas = document.getElementById("sketchpad");
+    if (!canvas) return;
+    ctx = canvas.getContext("2d");
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    ctx.lineWidth = 3; 
+    ctx.lineCap = "round"; 
+    ctx.strokeStyle = "#1e293b";
+
+    // Only add event listeners once
+    canvas.addEventListener("mousedown", startDraw); 
+    canvas.addEventListener("mousemove", draw); 
+    window.addEventListener("mouseup", stopDraw);
+    canvas.addEventListener("touchstart", startDraw); 
+    canvas.addEventListener("touchmove", draw); 
+    window.addEventListener("touchend", stopDraw);
+}
+
+function getCoordinates(e) {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: clientX - rect.left, y: clientY - rect.top };
+}
+
+function startDraw(e) { isDrawing = true; ctx.beginPath(); const coords = getCoordinates(e); ctx.moveTo(coords.x, coords.y); }
+function draw(e) { if (!isDrawing) return; const coords = getCoordinates(e); ctx.lineTo(coords.x, coords.y); ctx.stroke(); }
+function stopDraw() { isDrawing = false; }
+function clearSketchpadCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+
+// --- DATA HANDLING ---
+function populateTeamSelect() {
+    const select = document.getElementById("profileTeamSelect");
+    if(!select) return;
+    select.innerHTML = "";
+    CLASSROOM_COLORS.forEach(team => {
+        let opt = document.createElement("option");
+        opt.value = team;
+        opt.innerHTML = team;
+        select.appendChild(opt);
+    });
+}
+
+async function uploadSketchpadDrawingCanvasData() {
+    const emptyCheck = document.createElement("canvas");
+    emptyCheck.width = canvas.width; emptyCheck.height = canvas.height;
+    if (canvas.toDataURL() === emptyCheck.toDataURL()) return showNotificationToast("Draw something before sharing!");
+
+    showNotificationToast("Uploading your drawing...");
+    canvas.toBlob(async (blob) => {
+        const storagePath = `canvas-${Date.now()}.png`;
+        const { data: uploadData, error: uploadError } = await _supabase.storage.from('art_shares').upload(storagePath, blob, { contentType: 'image/png' });
+        if (uploadError) return showNotificationToast(uploadError.message);
+
+        const { data: urlData } = _supabase.storage.from('art_shares').getPublicUrl(storagePath);
+        const expirationTimestamp = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+        await _supabase.from('photo_shares').insert({ user_id: currentUser.id, image_url: urlData.publicUrl, expires_at: expirationTimestamp, meta_points: 0 });
+        clearSketchpadCanvas();
+        showNotificationToast("Drawing shared to the class board!");
+        if(typeof fetchDisappearingImageCanvasBoard === 'function') fetchDisappearingImageCanvasBoard();
+    }, "image/png");
+}
+
 window.saveProfileData = saveProfileData;
 window.loadTeacherRoster = loadTeacherRoster;
 window.teacherAssignStudentToPod = teacherAssignStudentToPod;
