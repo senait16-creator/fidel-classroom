@@ -19,6 +19,9 @@
         <div id="onboardingGate" class="choice-container">
             <button class="btn-filled-rectangle btn-signup-rect" onclick="selectAuthFlow('signup')">Sign Up</button>
             <button class="btn-filled-rectangle btn-login-rect" onclick="selectAuthFlow('login')">Log In</button>
+            <button onclick="selectAuthFlow('signup')">Sign Up</button>
+<button onclick="handleAuth()">Submit Login</button>
+            
         </div>
         <div id="credentialFields" style="display: none;">
             <input type="email" id="email" placeholder="Email Address">
