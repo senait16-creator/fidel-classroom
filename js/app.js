@@ -359,3 +359,6 @@ window.saveProfileData = saveProfileData;
 window.loadTeacherRoster = loadTeacherRoster;
 window.teacherAssignStudentToPod = teacherAssignStudentToPod;
 window.initTeacherDashboard = initTeacherDashboard;
+window.handleAuth = handleAuth;
+window.submitWorkForVerification = submitWorkForVerification;
+window.approveStudentWork = approveStudentWork; // (Ensure you have this function defined)
