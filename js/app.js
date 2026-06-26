@@ -579,13 +579,6 @@ async function saveProfileData(event) {
     document.getElementById("profileSetupScreen").style.display = "none";
     launchDashboard("student");
 }
-
-    // UI Updates
-    document.getElementById("displayUserHeader").innerText = nameInput;
-    document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
-    
-    launchDashboard("student");
-
         async function teacherRefreshConfigurationDropdowns() {
             const { data: students } = await _supabase.from('profiles').select('id, display_name');
 
