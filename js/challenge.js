@@ -92,15 +92,18 @@ async function renderChallengeLevelsView() {
         const card = document.createElement('div');
         const isUnlocked = level.level_number <= teamCurrentLevel;
         const isCurrent = level.level_number === teamCurrentLevel;
+        const isCapstone = level.level_number === 12;
 
         card.className = `challenge-level-card ${isUnlocked ? 'unlocked' : 'locked'} ${isCurrent ? 'current' : ''}`;
 
         const familiesPreview = (level.letter_families || []).join(' ');
+        const badgeContent = isUnlocked ? level.level_number : '🔒';
 
         card.innerHTML = `
-            <div class="challenge-level-number">${isUnlocked ? level.level_number : '🔒'}</div>
+            <div class="challenge-level-number-badge">${badgeContent}</div>
             <div class="challenge-level-title">${level.title || `Level ${level.level_number}`}</div>
             <div class="challenge-level-families">${familiesPreview}</div>
+            ${isCapstone ? '<div class="challenge-capstone-badge">⭐ Capstone</div>' : ''}
         `;
 
         if (isUnlocked) {
