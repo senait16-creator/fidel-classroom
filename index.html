@@ -28,20 +28,16 @@
             <button class="btn-filled-rectangle btn-login-rect" onclick="selectAuthFlow('login')">Log In</button>
             <button id="auth-btn">Let's Go!</button>
         </div>
-       <div id="credentialFields" style="display: none;">
-  <label>
- <label for="email">Email Address</label>
-<input type="email" id="email" name="email" autocomplete="email">
-      
-</label>
-    
+      <div id="credentialFields" style="display: none;">
+    <!-- Label and Input are now siblings, correctly linked by 'for' and 'id' -->
+    <label for="email">Email Address</label>
+    <input type="email" id="email" name="email" autocomplete="email">
+
     <label for="password">Password</label>
-    <input type="password" id="password" name="password" autocomplete="current-password" placeholder="Password (at least 6 characters)">
-    <button id="loginBtn">Log In</button>
-    <button class="btn-primary" id="mainAuthBtn" onclick="handleAuth()">Let's Go!</button>
-    <button class="btn-secondary" onclick="resetToGate()">← Back</button>
-</div>
-    </div>
+    <input type="password" id="password" name="password" autocomplete="current-password">
+    
+    <!-- This button is now the main driver -->
+    <button id="auth-btn" class="btn-primary">Let's Go!</button>
 
     <!-- Administrative Target Routing Gate -->
     <div id="adminViewSelectorGate" class="admin-gate-card">
