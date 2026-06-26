@@ -368,6 +368,7 @@ async function saveProfileData(event) {
 
     const payload = {
         id: user.id,
+        email: user.email,
         nickname: nameInput,
         avatar: selectedAvatarSymbol
     };
