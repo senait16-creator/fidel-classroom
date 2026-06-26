@@ -1,6 +1,7 @@
 // 1. IMPORT ONLY THE NECESSARY MODULES
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
+
 // 2. CONFIGURE THE CONNECTION
 // Keep your URL and Key at the very top so they are easy to find
 const SUPABASE_URL = "https://muisfipoyzkhznfdvnes.supabase.co"; 
@@ -14,3 +15,8 @@ console.log("Supabase Client initialized successfully.");
 
 //Everything under this
 
+let currentUser = null;
+let isSignUpMode = true;
+
+window.handleAuth = handleAuth;
+window.selectAuthFlow = selectAuthFlow;
