@@ -581,7 +581,7 @@ async function saveProfileData() {
     teamBadge.style.color = selectedColorTeam; // Optional: visually reflects the team
     
     launchDashboard("student");
-}
+
         async function teacherRefreshConfigurationDropdowns() {
             const { data: students } = await _supabase.from('profiles').select('id, display_name');
 
