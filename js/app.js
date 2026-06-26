@@ -147,28 +147,7 @@ function showNotificationToast(msg) {
 }
 
 // --- AUTHENTICATION & FLOW ---
-async function handleAuth() {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
 
-    let { data, error } = isSignUpMode 
-        ? await _supabase.auth.signUp({ email, password })
-        : await _supabase.auth.signInWithPassword({ email, password });
-
-    if (error) return showNotificationToast(error.message);
-
-    currentUser = data.user;
-    
-    const { data: profile } = await _supabase.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
-    
-    if (profile) {
-        launchDashboard(currentUser.email === ADMIN_EMAIL ? "teacher" : "student");
-    } else {
-        document.getElementById("authScreen").style.display = "none";
-        document.getElementById("profileSetupScreen").style.display = "block";
-        populateTeamSetupDropdownOptions();
-    }
-}
 
 async function proceedFlowMap(user) {
     currentUser = user;
