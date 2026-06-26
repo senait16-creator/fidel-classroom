@@ -15,7 +15,7 @@ const STREAK_THRESHOLD = 20;
 const TEAMS = ["Red Team 🔴", "Blue Team 🔵", "Green Team 🟢", "Yellow Team 🟡"];
 
 let currentUser = null;
-let currentProfile = null; // cached profile row: { id, email, nickname, avatar, team_color, is_admin, ... }
+let currentProfile = null; // cached profile row: { id, email, nickname, avatar, team_id, is_admin, ... }
 let masteredLetters = [];
 let activeBaseFidel = null;
 let activeFamilyArrayData = [];
@@ -245,7 +245,7 @@ async function proceedFlowMap(user) {
     currentUser = user;
     const { data: profile } = await _supabase
         .from('profiles')
-        .select('id, email, nickname, avatar, team_color, is_admin')
+        .select('id, email, nickname, avatar, team_id, is_admin')
         .eq('id', user.id)
         .maybeSingle();
 
@@ -260,7 +260,7 @@ async function proceedFlowMap(user) {
     if (profile && profile.nickname) {
         selectedAvatarSymbol = profile.avatar || "🦁";
         document.getElementById("authScreen").style.display = "none";
-        applyProfileToHeader(profile);
+        await applyProfileToHeader(profile);
         launchDashboard("student");
     } else {
         // First-time setup: nickname + avatar only. Team is assigned automatically.
@@ -271,17 +271,25 @@ async function proceedFlowMap(user) {
     }
 }
 
-function applyProfileToHeader(profile) {
+// Looks up the team name via team_id (the single source of team identity —
+// shared by Practice mode's sidebar and Fidel Challenge's board header).
+async function fetchTeamName(teamId) {
+    if (!teamId) return null;
+    const { data: team } = await _supabase.from('teams').select('name').eq('id', teamId).maybeSingle();
+    return team?.name || null;
+}
+
+async function applyProfileToHeader(profile) {
     document.getElementById("displayUserHeader").innerText = profile.nickname;
     document.getElementById("displayAvatarHeader").innerText = profile.avatar || "🦁";
 
     const teamDisplay = document.getElementById("sidebarPodBadge");
-    if (profile.team_color) {
-        teamDisplay.innerText = profile.team_color;
-        teamDisplay.style.color = profile.team_color.startsWith('#') ? profile.team_color : '';
+    const teamName = await fetchTeamName(profile.team_id);
+
+    if (teamName) {
+        teamDisplay.innerText = teamName;
     } else {
         teamDisplay.innerText = "No Team Assigned";
-        teamDisplay.style.color = '';
     }
 }
 
@@ -353,7 +361,7 @@ async function saveProfileData(event) {
     // Only assign a team the FIRST time a profile is created.
     // Edits to nickname/avatar should never reshuffle an existing team.
     if (!isEditingProfile) {
-        payload.team_color = await assignNextTeam();
+        payload.team_id = await assignNextTeam();
     }
 
     const { error } = await _supabase.from('profiles').upsert(payload);
@@ -367,12 +375,12 @@ async function saveProfileData(event) {
     // Refresh local cache of the profile
     const { data: refreshedProfile } = await _supabase
         .from('profiles')
-        .select('id, email, nickname, avatar, team_color, is_admin')
+        .select('id, email, nickname, avatar, team_id, is_admin')
         .eq('id', user.id)
         .maybeSingle();
     currentProfile = refreshedProfile || currentProfile;
 
-    if (currentProfile) applyProfileToHeader(currentProfile);
+    if (currentProfile) await applyProfileToHeader(currentProfile);
 
     document.getElementById("profileSetupScreen").style.display = "none";
 
@@ -386,15 +394,39 @@ async function saveProfileData(event) {
     if (saveBtn) { saveBtn.disabled = false; saveBtn.innerText = "Save Changes"; }
 }
 
-// Assigns whichever team currently has the fewest students, so teams stay balanced.
+// Ensures a `teams` row exists for each name in TEAMS (creating any that are
+// missing), then returns the id of whichever team currently has the fewest
+// members — so signups stay balanced. This is the single source of team
+// identity: Practice mode and Fidel Challenge both read from this same
+// `teams` table via profiles.team_id, rather than each having their own
+// notion of "team."
 async function assignNextTeam() {
-    const { data: students } = await _supabase.from('profiles').select('team_color');
+    const { data: existingTeams } = await _supabase.from('teams').select('id, name');
+    const teamsByName = {};
+    (existingTeams || []).forEach(t => { teamsByName[t.name] = t.id; });
 
+    // Create any missing team rows (first-run case, or a new name added to TEAMS).
+    const missingNames = TEAMS.filter(name => !teamsByName[name]);
+    if (missingNames.length > 0) {
+        const { data: created, error } = await _supabase
+            .from('teams')
+            .insert(missingNames.map(name => ({ name })))
+            .select('id, name');
+        if (error) {
+            console.error("Failed to create team rows:", error);
+        } else {
+            (created || []).forEach(t => { teamsByName[t.name] = t.id; });
+        }
+    }
+
+    // Count current membership per team via profiles.team_id.
+    const { data: students } = await _supabase.from('profiles').select('team_id');
     const counts = {};
-    TEAMS.forEach(t => { counts[t] = 0; });
-    (students || []).forEach(s => { if (s.team_color && counts[s.team_color] !== undefined) counts[s.team_color]++; });
+    Object.values(teamsByName).forEach(id => { counts[id] = 0; });
+    (students || []).forEach(s => { if (s.team_id && counts[s.team_id] !== undefined) counts[s.team_id]++; });
 
-    return TEAMS.reduce((a, b) => (counts[a] <= counts[b] ? a : b));
+    const teamIds = Object.values(teamsByName);
+    return teamIds.reduce((a, b) => (counts[a] <= counts[b] ? a : b));
 }
 
 // ---------------------------------------------------------------------------
@@ -441,7 +473,7 @@ async function loadTeacherRosterData() {
 
     const { data: students } = await _supabase
         .from('profiles')
-        .select('id, nickname, avatar, team_color');
+        .select('id, nickname, avatar, team_id, teams(name)');
 
     const { data: progress } = await _supabase
         .from('user_progress')
@@ -458,8 +490,9 @@ async function loadTeacherRosterData() {
 
     students.forEach(s => {
         const masteredCount = (progressMap[s.id] || []).length;
-        const teamDisplay = s.team_color
-            ? `<span style="font-weight:700;">${s.team_color}</span>`
+        const teamName = s.teams?.name;
+        const teamDisplay = teamName
+            ? `<span style="font-weight:700;">${teamName}</span>`
             : '<span style="color:#94a3b8; font-style:italic;">Unassigned</span>';
 
         tbody.innerHTML += `
@@ -479,16 +512,18 @@ async function teacherRefreshConfigurationDropdowns() {
     sSelect.innerHTML = '<option value="">Select Student...</option>';
     students?.forEach(s => { sSelect.innerHTML += `<option value="${s.id}">${s.nickname}</option>`; });
 
+    const { data: teamRows } = await _supabase.from('teams').select('id, name').order('name');
     const pSelect = document.getElementById("teacherPodSelect");
     pSelect.innerHTML = '<option value="">Select Color Team...</option>';
-    TEAMS.forEach(color => { pSelect.innerHTML += `<option value="${color}">${color}</option>`; });
+    (teamRows || []).forEach(t => { pSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`; });
 }
 
 async function teacherAssignStudentToPod() {
     const studentId = document.getElementById("teacherStudentSelect").value;
-    const chosenColor = document.getElementById("teacherPodSelect").value;
+    const chosenTeamId = document.getElementById("teacherPodSelect").value;
+    const chosenTeamLabel = document.getElementById("teacherPodSelect").selectedOptions[0]?.text;
 
-    if (!studentId || !chosenColor) {
+    if (!studentId || !chosenTeamId) {
         return showNotificationToast("Please pick both a student and a team color.");
     }
 
@@ -496,7 +531,7 @@ async function teacherAssignStudentToPod() {
 
     const { error } = await _supabase
         .from('profiles')
-        .update({ team_color: chosenColor })
+        .update({ team_id: chosenTeamId })
         .eq('id', studentId);
 
     if (error) {
@@ -504,7 +539,7 @@ async function teacherAssignStudentToPod() {
         return showNotificationToast("Failed to move student: " + error.message);
     }
 
-    showNotificationToast(`Student assigned to ${chosenColor}!`);
+    showNotificationToast(`Student assigned to ${chosenTeamLabel}!`);
 
     await loadTeacherRosterData();
     await teacherRefreshConfigurationDropdowns();
@@ -807,23 +842,25 @@ async function fetchDisappearingImageCanvasBoard() {
 async function loadTeamDashboard(user) {
     const { data: userProfile } = await _supabase
         .from('profiles')
-        .select('team_color, nickname')
+        .select('team_id, nickname, teams(name)')
         .eq('id', user.id)
         .single();
 
     const mount = document.getElementById("podTeammatesMount");
 
-    if (!userProfile?.team_color) {
+    if (!userProfile?.team_id) {
         mount.innerHTML = "<p>No Team Assigned</p>";
         return;
     }
 
+    const teamName = userProfile.teams?.name || "Your Team";
+
     const { data: members } = await _supabase
         .from('profiles')
-        .select('nickname, avatar, team_color')
-        .eq('team_color', userProfile.team_color);
+        .select('nickname, avatar, team_id')
+        .eq('team_id', userProfile.team_id);
 
-    mount.innerHTML = `<h4>Team: <span>${userProfile.team_color}</span></h4>`;
+    mount.innerHTML = `<h4>Team: <span>${teamName}</span></h4>`;
 
     (members || []).forEach(member => {
         const row = document.createElement('div');
@@ -833,7 +870,7 @@ async function loadTeamDashboard(user) {
     });
 
     const teamNameEl = document.getElementById("podTeamNameDisplay");
-    if (teamNameEl) teamNameEl.innerText = userProfile.team_color;
+    if (teamNameEl) teamNameEl.innerText = teamName;
 }
 
 // ---------------------------------------------------------------------------
