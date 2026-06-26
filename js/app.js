@@ -1,20 +1,15 @@
 // 1. All your IMPORTS go at the very top
 import { SUPABASE_URL } from './config.js';
 import { initSketchpad } from './game.js';
-import { handleAuth } from './auth.js';
+import { handleAuth, selectAuthFlow } from './auth.js';
 import { showScreen } from './ui.js';
 // js/app.js
-import { handleAuth, selectAuthFlow } from './auth.js';
 // js/app.js
 import { supabase } from './supabaseClient.js';
 import { updateAuthState } from './state.js';
 // 1. All your IMPORTS go at the very top
-import { SUPABASE_URL } from './config.js';
 import { supabase } from './supabaseClient.js';
 import { updateAuthState } from './state.js';
-import { handleAuth, selectAuthFlow } from './auth.js';
-import { initSketchpad } from './game.js';
-import { showScreen } from './ui.js';
 
 // Import Supabase
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
