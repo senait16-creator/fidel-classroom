@@ -69,9 +69,7 @@ const alphabetData = [
 // Boot
 // ---------------------------------------------------------------------------
 
-window.addEventListener('DOMContentLoaded', () => {
-    resetToGate();
-
+window.addEventListener('DOMContentLoaded', async () => {
     // NOTE: the login button in index.html already has onclick="selectAuthFlow('login')"
     // wired inline, and there is no #loginBtn element in the page. Do NOT add a
     // getElementById('loginBtn') listener here — that element does not exist and
@@ -80,6 +78,17 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const authBtn = document.getElementById('auth-btn');
     if (authBtn) authBtn.addEventListener('click', handleAuth);
+
+    // Supabase persists the session in localStorage by default, so a page
+    // refresh doesn't actually log the user out — it just never checked.
+    // Restore that session here instead of always falling back to the gate.
+    const { data: { session } } = await _supabase.auth.getSession();
+
+    if (session?.user) {
+        await proceedFlowMap(session.user);
+    } else {
+        resetToGate();
+    }
 });
 
 // ---------------------------------------------------------------------------
