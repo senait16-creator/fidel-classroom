@@ -12,7 +12,11 @@ const STREAK_THRESHOLD = 20;
 
 // Teams used for random/balanced assignment + display.
 // Keep these labels in sync with whatever you show in the UI elsewhere.
-const TEAMS = ["Red Team 🔴", "Blue Team 🔵", "Green Team 🟢", "Yellow Team 🟡"];
+// NOTE: no longer used directly by any function — team membership now reads
+// live from the `teams` table (see assignNextTeam, teacherRefreshConfigurationDropdowns).
+// Kept only as a record of which teams exist; update via precreate_teams.sql
+// in Supabase, not by editing this array.
+const TEAMS = ["Red Team 🔴", "Blue Team 🔵", "Green Team 🟢", "Yellow Team 🟡", "Purple Team 🟣"];
 
 let currentUser = null;
 let currentProfile = null; // cached profile row: { id, email, nickname, avatar, team_id, is_admin, ... }
@@ -289,7 +293,7 @@ async function applyProfileToHeader(profile) {
     if (teamName) {
         teamDisplay.innerText = teamName;
     } else {
-        teamDisplay.innerText = "No Team Assigned";
+        teamDisplay.innerText = "Practicing Solo";
     }
 }
 
@@ -313,11 +317,13 @@ function prefillProfileSetupScreen(profile) {
         opt.classList.toggle('selected', opt.innerText.trim() === defaultAvatar);
     });
 
-    // Team is teacher-controlled / auto-assigned, never picked by the student here.
-    const teamRow = document.getElementById("profileTeamSelect");
-    if (teamRow) {
-        const wrapper = teamRow.closest('div') || teamRow;
-        wrapper.style.display = "none";
+    // The team-vs-solo choice only applies at first signup. Once a student
+    // has a profile, switching between team and solo is a bigger decision
+    // than a quick nickname/avatar edit, so this section is hidden entirely
+    // when editing an existing profile.
+    const teamChoiceSection = document.getElementById("teamChoiceSection");
+    if (teamChoiceSection) {
+        teamChoiceSection.style.display = isEditingProfile ? "none" : "block";
     }
 
     const saveBtn = document.querySelector('#profileSetupScreen .btn-primary');
@@ -358,10 +364,12 @@ async function saveProfileData(event) {
         avatar: selectedAvatarSymbol
     };
 
-    // Only assign a team the FIRST time a profile is created.
+    // Only assign a team the FIRST time a profile is created, and only if
+    // the student opted into team competition rather than solo practice.
     // Edits to nickname/avatar should never reshuffle an existing team.
     if (!isEditingProfile) {
-        payload.team_id = await assignNextTeam();
+        const wantsTeam = document.querySelector('input[name="teamChoice"]:checked')?.value !== 'solo';
+        payload.team_id = wantsTeam ? await assignNextTeam() : null;
     }
 
     const { error } = await _supabase.from('profiles').upsert(payload);
@@ -394,38 +402,32 @@ async function saveProfileData(event) {
     if (saveBtn) { saveBtn.disabled = false; saveBtn.innerText = "Save Changes"; }
 }
 
-// Ensures a `teams` row exists for each name in TEAMS (creating any that are
-// missing), then returns the id of whichever team currently has the fewest
-// members — so signups stay balanced. This is the single source of team
-// identity: Practice mode and Fidel Challenge both read from this same
-// `teams` table via profiles.team_id, rather than each having their own
-// notion of "team."
+// Picks whichever existing team has the fewest members, so signups stay
+// balanced. This is the single source of team identity: Practice mode and
+// Fidel Challenge both read from this same `teams` table via
+// profiles.team_id, rather than each having their own notion of "team."
+//
+// NOTE: this function only ever SELECTs from teams, never INSERTs — team
+// rows are created once via precreate_teams.sql, not on-the-fly during
+// signup. Only the admin is allowed to insert into teams per RLS, so a
+// student signing up would get a 403 if this tried to create a missing team.
 async function assignNextTeam() {
     const { data: existingTeams } = await _supabase.from('teams').select('id, name');
-    const teamsByName = {};
-    (existingTeams || []).forEach(t => { teamsByName[t.name] = t.id; });
 
-    // Create any missing team rows (first-run case, or a new name added to TEAMS).
-    const missingNames = TEAMS.filter(name => !teamsByName[name]);
-    if (missingNames.length > 0) {
-        const { data: created, error } = await _supabase
-            .from('teams')
-            .insert(missingNames.map(name => ({ name })))
-            .select('id, name');
-        if (error) {
-            console.error("Failed to create team rows:", error);
-        } else {
-            (created || []).forEach(t => { teamsByName[t.name] = t.id; });
-        }
+    if (!existingTeams || existingTeams.length === 0) {
+        console.error("No teams exist yet — run precreate_teams.sql in Supabase first.");
+        showNotificationToast("No teams set up yet — ask your teacher to add teams.");
+        return null;
     }
+
+    const teamIds = existingTeams.map(t => t.id);
 
     // Count current membership per team via profiles.team_id.
     const { data: students } = await _supabase.from('profiles').select('team_id');
     const counts = {};
-    Object.values(teamsByName).forEach(id => { counts[id] = 0; });
+    teamIds.forEach(id => { counts[id] = 0; });
     (students || []).forEach(s => { if (s.team_id && counts[s.team_id] !== undefined) counts[s.team_id]++; });
 
-    const teamIds = Object.values(teamsByName);
     return teamIds.reduce((a, b) => (counts[a] <= counts[b] ? a : b));
 }
 
@@ -849,7 +851,7 @@ async function loadTeamDashboard(user) {
     const mount = document.getElementById("podTeammatesMount");
 
     if (!userProfile?.team_id) {
-        mount.innerHTML = "<p>No Team Assigned</p>";
+        mount.innerHTML = "<p>You're practicing solo — no team chat here, but you can still use Practice mode anytime!</p>";
         return;
     }
 
