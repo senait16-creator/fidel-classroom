@@ -1401,6 +1401,24 @@ async function deleteSharedDrawing(shareId, imageUrl) {
 // Team roster sidebar
 // ---------------------------------------------------------------------------
 
+// Maps a team name to its display color and the Amharic word for that
+// color, so the team card can show "ሰማያዊ" (semayawi) next to Blue Team,
+// reinforcing real vocabulary rather than just decoration.
+function getTeamColorInfo(teamName) {
+    if (!teamName) return { hex: 'var(--brand-primary)', amharic: '' };
+    if (teamName.includes('Red')) return { hex: '#ef4444', amharic: 'ቀይ' };
+    if (teamName.includes('Yellow')) return { hex: '#f59e0b', amharic: 'ቢጫ' };
+    if (teamName.includes('Green')) return { hex: '#22c55e', amharic: 'አረንጓዴ' };
+    if (teamName.includes('Blue')) return { hex: '#3b82f6', amharic: 'ሰማያዊ' };
+    if (teamName.includes('Purple')) return { hex: '#a855f7', amharic: 'ሐምራዊ' };
+    return { hex: 'var(--brand-primary)', amharic: '' };
+}
+
+function togglePodTeammates() {
+    document.getElementById("podTeammatesMount").classList.toggle("open");
+    document.getElementById("podToggleBtn").classList.toggle("open");
+}
+
 async function loadTeamDashboard(user) {
     const { data: userProfile } = await _supabase
         .from('profiles')
@@ -1409,30 +1427,43 @@ async function loadTeamDashboard(user) {
         .single();
 
     const mount = document.getElementById("podTeammatesMount");
+    const swatch = document.getElementById("podColorSwatch");
+    const amharicEl = document.getElementById("podTeamAmharic");
+    const headerRow = document.getElementById("podHeaderRow");
+    const toggleBtn = document.getElementById("podToggleBtn");
 
     if (!userProfile?.team_id) {
-        mount.innerHTML = "<p>You're practicing solo — no team chat here, but you can still use Practice mode anytime!</p>";
+        document.getElementById("podTeamNameDisplay").innerText = "Practicing Solo";
+        if (amharicEl) amharicEl.innerText = "";
+        if (swatch) swatch.style.background = "var(--brand-primary)";
+        if (toggleBtn) toggleBtn.style.display = "none";
+        headerRow.onclick = null;
+        mount.classList.add("open");
+        mount.innerHTML = `<p class="pod-solo-message">You're practicing solo — no team chat here, but you can still use Practice mode anytime!</p>`;
         return;
     }
 
     const teamName = userProfile.teams?.name || "Your Team";
+    const colorInfo = getTeamColorInfo(teamName);
+
+    document.getElementById("podTeamNameDisplay").innerText = teamName;
+    if (amharicEl) amharicEl.innerText = colorInfo.amharic;
+    if (swatch) swatch.style.background = colorInfo.hex;
+    if (toggleBtn) toggleBtn.style.display = "block";
+    headerRow.onclick = togglePodTeammates;
 
     const { data: members } = await _supabase
         .from('public_profiles')
         .select('nickname, avatar, team_id')
         .eq('team_id', userProfile.team_id);
 
-    mount.innerHTML = `<h4>Team: <span>${teamName}</span></h4>`;
-
+    mount.innerHTML = "";
     (members || []).forEach(member => {
         const row = document.createElement('div');
         row.className = "teammate-row";
         row.innerHTML = `<span>${member.avatar || '🦁'} ${member.nickname}</span>`;
         mount.appendChild(row);
     });
-
-    const teamNameEl = document.getElementById("podTeamNameDisplay");
-    if (teamNameEl) teamNameEl.innerText = teamName;
 }
 
 // ---------------------------------------------------------------------------
