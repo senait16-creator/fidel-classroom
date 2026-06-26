@@ -794,6 +794,16 @@ function toggleDropdownElement(elementId) {
     }
 }
 
+       async function saveProfileData() {
+    // ... all your existing code to save to Supabase ...
+
+    // After the save is successful, update the UI here:
+    document.getElementById("displayUserHeader").innerText = nameInput;
+    document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
+    
+    // ... then call your dashboard ...
+    launchDashboard("student");
+}
 window.handleAuth = handleAuth;
 window.selectAuthFlow = selectAuthFlow;
 window.resetToGate = resetToGate;
@@ -812,6 +822,3 @@ window.uploadSketchpadDrawingCanvasData = uploadSketchpadDrawingCanvasData;
 window.exitClassroomViewBackToGrid = exitClassroomViewBackToGrid;
 window.openProfileEdit = openProfileEdit;
 window.toggleDropdownElement = toggleDropdownElement;
-
-document.getElementById("displayUserHeader").innerText = nameInput;
-document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
