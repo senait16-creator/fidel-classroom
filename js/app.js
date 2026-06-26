@@ -457,17 +457,36 @@ async function submitWorkForVerification(imageUrl) {
         }
 
         async function saveProfileData() {
-            const nameInput = document.getElementById("displayName").value.trim();
-            if (!nameInput) return showNotificationToast("Please enter a nickname.");
+    const nameInput = document.getElementById("displayName").value.trim();
+    if (!nameInput) return showNotificationToast("Please enter a nickname.");
 
-            let selectedColorTeam = document.getElementById("profileTeamSelect").value;
+    let selectedColorTeam = document.getElementById("profileTeamSelect").value;
+    
+    // Make sure you have the user ID from Supabase Auth
+    const { data: { user } } = await _supabase.auth.getUser();
 
-            await _supabase.from('profiles').upsert({ id: currentUser.id, display_name: nameInput, avatar_character: selectedAvatarSymbol, pod_id: selectedColorTeam });
-            document.getElementById("displayUserHeader").innerText = nameInput;
-            document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
-            document.getElementById("sidebarPodBadge").innerText = selectedColorTeam;
-            launchDashboard("student");
-        }
+    // Use the column names exactly as they exist in your 'profiles' table
+    const { error } = await _supabase
+        .from('profiles')
+        .upsert({ 
+            id: user.id, 
+            nickname: nameInput,             // Changed from display_name
+            avatar: selectedAvatarSymbol,    // Changed from avatar_character
+            pod_id: selectedColorTeam 
+        });
+
+    if (error) {
+        console.error("Save Error:", error);
+        return showNotificationToast("Error: " + error.message);
+    }
+
+    // UI Updates
+    document.getElementById("displayUserHeader").innerText = nameInput;
+    document.getElementById("displayAvatarHeader").innerText = selectedAvatarSymbol;
+    document.getElementById("sidebarPodBadge").innerText = selectedColorTeam;
+    
+    launchDashboard("student");
+}
 
         async function teacherRefreshConfigurationDropdowns() {
             const { data: students } = await _supabase.from('profiles').select('id, display_name');
