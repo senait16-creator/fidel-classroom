@@ -473,6 +473,7 @@ function launchDashboard(viewMode) {
         fetchDisappearingImageCanvasBoard();
         loadTeamDashboard(currentUser);
         buildMatrixInterfaceGrid();
+        renderStudentTeamProgress();
     }
 }
 
@@ -758,6 +759,39 @@ async function loadTeacherTeamProgress() {
         `;
 
         row.querySelector('.btn-advance').onclick = () => advanceTeamLevel(team.id, team.current_level);
+        mount.appendChild(row);
+    });
+}
+
+// Read-only version of the team progress panel, shown to every student on
+// the main dashboard — same underlying data (teams + team_level_status,
+// both broadly readable per existing RLS policies), but no advance button,
+// since marking a live quiz passed is teacher-only.
+async function renderStudentTeamProgress() {
+    const mount = document.getElementById("studentTeamProgressMount");
+    if (!mount) return;
+    mount.innerHTML = `<p style="color:#94a3b8; font-size:12px;">Loading...</p>`;
+
+    const { data: teams } = await _supabase.from('teams').select('id, name, current_level, streak_count').order('name');
+    if (!teams || teams.length === 0) {
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:12px;">No teams yet.</p>`;
+        return;
+    }
+
+    const { data: statusRows } = await _supabase.from('team_level_status').select('team_id, level_number, all_members_cleared, live_quiz_passed');
+
+    mount.innerHTML = "";
+    teams.forEach(team => {
+        const status = (statusRows || []).find(s => s.team_id === team.id && s.level_number === team.current_level);
+        const isReady = status?.all_members_cleared && !status?.live_quiz_passed;
+        const isOwnTeam = currentProfile?.team_id === team.id;
+
+        const row = document.createElement('div');
+        row.className = `student-team-row ${isReady ? 'ready' : ''}`;
+        row.innerHTML = `
+            <span class="student-team-row-name">${team.name}${isOwnTeam ? ' (You)' : ''}</span>
+            <span class="student-team-row-level">Level ${team.current_level} • 🔥${team.streak_count || 0}${isReady ? ' • Ready! 🎉' : ''}</span>
+        `;
         mount.appendChild(row);
     });
 }
