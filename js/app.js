@@ -759,10 +759,10 @@ function toggleDropdownElement(elementId) {
             });
         }
 // Add this to your main script to fetch and display the team status
-async function loadTeamDashboard(user) {
+ async function loadTeamDashboard(user) {
     const { data: userProfile } = await _supabase
         .from('profiles')
-        .select('team_color, nickname, role') // Make sure 'role' is selected
+        .select('team_color, nickname, role')
         .eq('id', user.id)
         .single();
 
@@ -786,13 +786,13 @@ async function loadTeamDashboard(user) {
         mount.appendChild(row);
     });
 
-    // --- LOGIC IS NOW INSIDE THE FUNCTION ---
     if (userProfile.role === 'captain') {
         const inboxMount = document.createElement('div');
         inboxMount.id = 'captainInboxMount';
         mount.appendChild(inboxMount);
         renderCaptainInbox(); 
     }
+}
 
 window.handleAuth = handleAuth;
 window.selectAuthFlow = selectAuthFlow;
