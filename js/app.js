@@ -73,6 +73,41 @@ async function assignNextTeam() {
     
     return nextTeam;
 }
+
+async function changeStudentTeam(studentId, newColor) {
+    const { error } = await _supabase
+        .from('profiles')
+        .update({ team_color: newColor })
+        .eq('id', studentId);
+
+    if (error) {
+        console.error("Assignment failed:", error);
+    } else {
+        alert("Student team updated successfully!");
+        refreshRoster(); // Refresh the teacher's table view
+    }
+}
+
+async function checkAdminStatus() {
+    const { data: { user } } = await _supabase.auth.getUser();
+    
+    const { data: profile } = await _supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', user.id)
+        .single();
+
+    if (profile && profile.is_admin) {
+        // Show the teacher dashboard and hide the student one
+        document.getElementById('teacherOnlyDashboard').style.display = 'block';
+        document.getElementById('adminHeaderToggleBar').style.display = 'flex';
+    } else {
+        // Hide teacher panels for regular students
+        document.getElementById('teacherOnlyDashboard').style.display = 'none';
+        document.getElementById('adminHeaderToggleBar').style.display = 'none';
+    }
+}
+
 function showNotificationToast(msg) {
             const container = document.getElementById("toastContainer");
             const element = document.createElement("div");
