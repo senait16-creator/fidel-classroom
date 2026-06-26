@@ -185,3 +185,15 @@
         .challenge-level-card.unlocked .challenge-level-families { color: var(--brand-primary); }
 
         .challenge-capstone-badge { display: inline-block; margin-top: 6px; font-size: 10px; font-weight: 700; color: #b45309; background: #fef3c7; padding: 2px 8px; border-radius: 8px; }
+
+        /* ---------------------------------------------------------------- */
+        /* Fidel Challenge: family picker                                   */
+        /* ---------------------------------------------------------------- */
+        .challenge-family-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+        .challenge-family-card { background: white; border: 1px solid var(--border-color); border-radius: var(--radius-standard); padding: 20px 16px; text-align: center; box-shadow: var(--shadow-premium); cursor: pointer; transition: all 0.2s; }
+        .challenge-family-card:hover { transform: translateY(-2px); border-color: var(--brand-primary); }
+        .challenge-family-card.mastered { border-color: #10b981; background: #f0fdf4; }
+        .challenge-family-letter { font-size: 40px; font-family: 'Abyssinica SIL', serif; color: var(--neutral-dark); margin-bottom: 10px; }
+        .challenge-family-progress-row { display: flex; flex-direction: column; gap: 6px; }
+        .challenge-family-pill { font-size: 11px; font-weight: 700; color: #64748b; background: #f1f5f9; border-radius: 8px; padding: 4px 10px; }
+        .challenge-family-pill.done { color: #047857; background: #d1fae5; }
