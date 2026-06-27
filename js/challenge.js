@@ -19,6 +19,7 @@ let activeChallengeFamilyLevel = null; // the level number that family belongs t
 // placed next to (or instead of) the existing "Matching Game Arena" button.
 function enterModeSelect() {
     document.getElementById("studentDashboard").style.display = "none";
+    document.getElementById("readingLevelsScreen").style.display = "none";
     document.getElementById("modeSelectScreen").style.display = "block";
 }
 
@@ -39,9 +40,15 @@ async function chooseModeChallenge() {
     await renderChallengeLevelsView();
 }
 
+function chooseModeReading() {
+    document.getElementById("modeSelectScreen").style.display = "none";
+    document.getElementById("readingLevelsScreen").style.display = "block";
+    if (typeof renderReadingLevelsList === "function") renderReadingLevelsList();
+}
+
 function exitChallengeBackToDashboard() {
     document.getElementById("challengeLevelsScreen").style.display = "none";
-    document.getElementById("studentDashboard").style.display = "block";
+    enterModeSelect();
 }
 
 // -----------------------------------------------------------------------------
