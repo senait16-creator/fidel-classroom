@@ -330,7 +330,7 @@ async function proceedFlowMap(user) {
         selectedAvatarSymbol = profile.avatar || "🦁";
         document.getElementById("authScreen").style.display = "none";
         await applyProfileToHeader(profile);
-        launchDashboard("student");
+        enterModeSelect();
     } else {
         // First-time setup: nickname + avatar only. Team is assigned automatically.
         isEditingProfile = false;
@@ -504,7 +504,7 @@ async function saveProfileData(event) {
         showNotificationToast("Profile updated!");
         launchDashboard("student");
     } else {
-        launchDashboard("student");
+        enterModeSelect();
     }
 
     if (saveBtn) { saveBtn.disabled = false; saveBtn.innerText = "Save Changes"; }
