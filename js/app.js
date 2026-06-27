@@ -261,12 +261,43 @@ function resetToGate() {
     document.getElementById("studentDashboard").style.display = "none";
     document.getElementById("teacherOnlyDashboard").style.display = "none";
     document.getElementById("adminViewSelectorGate").style.display = "none";
+
+    const emailField = document.getElementById("email");
+    const passwordField = document.getElementById("password");
+    if (emailField) emailField.value = "";
+    if (passwordField) passwordField.value = "";
 }
 
 function selectAuthFlow(flow) {
     isSignUpMode = (flow === 'signup');
     document.getElementById("onboardingGate").style.display = "none";
     document.getElementById("credentialFields").style.display = "block";
+    updateAuthModeLabels();
+}
+
+// Lets someone flip between Sign Up and Log In without leaving the
+// credentials screen — previously the only way to change their mind was a
+// full page refresh, since there was no way back to the gate once a mode
+// was chosen.
+function switchAuthFlow() {
+    isSignUpMode = !isSignUpMode;
+    updateAuthModeLabels();
+}
+
+function updateAuthModeLabels() {
+    const modeLabel = document.getElementById("credentialFieldsModeLabel");
+    const switchPrompt = document.getElementById("switchModePrompt");
+    const switchBtn = document.getElementById("switchModeBtn");
+
+    if (isSignUpMode) {
+        modeLabel.innerText = "Sign Up";
+        switchPrompt.innerText = "Already have an account?";
+        switchBtn.innerText = "Log In";
+    } else {
+        modeLabel.innerText = "Log In";
+        switchPrompt.innerText = "New here?";
+        switchBtn.innerText = "Sign Up";
+    }
 }
 
 async function handleAuth() {
@@ -1751,6 +1782,7 @@ async function checkMySubmissionStatus() {
 
 window.handleAuth = handleAuth;
 window.selectAuthFlow = selectAuthFlow;
+window.switchAuthFlow = switchAuthFlow;
 window.resetToGate = resetToGate;
 window.routeAdminTerminalDirectly = routeAdminTerminalDirectly;
 window.selectAvatar = selectAvatar;
