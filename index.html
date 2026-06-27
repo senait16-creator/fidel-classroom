@@ -296,7 +296,7 @@
     <!-- Fidel Challenge: Mode Select -->
     <div id="modeSelectScreen" class="app-card" style="max-width: 480px; display: none;">
         <h2 class="main-title" style="font-size: 22px;">Choose Your Path</h2>
-        <p class="subtitle">Practice on your own, or compete with your team!</p>
+        <p class="subtitle">Practice on your own, compete with your team, or advance to reading!</p>
         <div style="display:flex; flex-direction:column; gap:14px;">
             <div class="mode-option" onclick="chooseModePractice()">
                 <div class="mode-option-icon">📖</div>
@@ -308,8 +308,12 @@
                 <div class="mode-option-title">Fidel Challenge</div>
                 <div class="mode-option-desc">Team competition — level up together</div>
             </div>
+            <div class="mode-option" style="background: linear-gradient(135deg, #f0f9ff, white); border-color: #7dd3fc;" onclick="chooseModeReading()">
+                <div class="mode-option-icon">📘</div>
+                <div class="mode-option-title">Advance to Reading</div>
+                <div class="mode-option-desc">Already know the Fidel? Start reading real Amharic</div>
+            </div>
         </div>
-        <button class="btn-secondary" style="margin-top:16px;" onclick="chooseModePractice()">← Back to Dashboard</button>
     </div>
 
     <!-- Fidel Challenge: Levels Overview -->
