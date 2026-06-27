@@ -120,53 +120,78 @@
 
         <!-- Live Roster Progress List -->
         <div class="teacher-panel" style="margin-bottom: 20px;">
-            <h2 style="font-size: 18px; color: var(--neutral-dark); margin-bottom: 4px;">Student Roster & Progress</h2>
-            <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">See how everyone in your class is moving through the alphabet rows.</p>
-            <table class="teacher-roster-table">
-                <thead>
-                    <tr>
-                        <th>Student</th>
-                        <th>Team</th>
-                        <th>Progress Status</th>
-                    </tr>
-                </thead>
-                <tbody id="teacherRosterTableBody">
-                    <tr><td colspan="3" style="color:#94a3b8; text-align:center;">Loading class roster...</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="teacher-panel" style="margin-bottom: 20px;">
-            <h2 style="font-size: 18px; color: var(--neutral-dark); margin-bottom: 4px;">Pending Writing Submissions</h2>
-            <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">Review handwriting samples students have submitted for Fidel Challenge.</p>
-            <div id="teacherWritingQueueMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
-        </div>
-
-        <div class="teacher-panel" style="margin-bottom: 20px;">
-            <h2 style="font-size: 18px; color: var(--neutral-dark); margin-bottom: 4px;">Team Level Progress</h2>
-            <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">See which teams are ready for their live quiz, and advance them once they pass.</p>
-            <div id="teacherTeamProgressMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
-        </div>
-
-        <div class="teacher-panel">
-            <h2 style="font-size: 18px; color: var(--neutral-dark); margin-bottom: 4px;">Manage Student Color Teams</h2>
-            <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">Reassign students to predecided classroom color tracks.</p>
-            <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); max-width: 500px;">
-                <select id="teacherStudentSelect"><option value="">Select Student...</option></select>
-                <select id="teacherPodSelect"><option value="">Select Color Team...</option></select>
-                <button class="btn-primary" onclick="teacherAssignStudentToPod()">Change Color Team</button>
+            <div class="teacher-panel-header" onclick="toggleTeacherPanel('rosterPanelBody', this)">
+                <h2 style="font-size: 18px; color: var(--neutral-dark);">Student Roster &amp; Progress</h2>
+                <button class="teacher-panel-toggle">▼</button>
+            </div>
+            <div class="teacher-panel-body" id="rosterPanelBody">
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">See how everyone in your class is moving through the alphabet rows.</p>
+                <table class="teacher-roster-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Team</th>
+                            <th>Progress Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teacherRosterTableBody">
+                        <tr><td colspan="3" style="color:#94a3b8; text-align:center;">Loading class roster...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
         <div class="teacher-panel" style="margin-bottom: 20px;">
-            <h2 style="font-size: 18px; color: var(--neutral-dark); margin-bottom: 4px;">👑 Assign Team Captain</h2>
-            <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">Pick a team, then choose which of its members is the captain. The captain reviews their teammates' writing submissions.</p>
-            <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); max-width: 500px;">
-                <select id="captainTeamSelect"><option value="">Select Team...</option></select>
-                <select id="captainStudentSelect" disabled><option value="">Select Team First...</option></select>
-                <button class="btn-primary" id="setCaptainBtn">Set as Captain</button>
+            <div class="teacher-panel-header" onclick="toggleTeacherPanel('writingQueuePanelBody', this)">
+                <h2 style="font-size: 18px; color: var(--neutral-dark);">Pending Writing Submissions</h2>
+                <button class="teacher-panel-toggle">▼</button>
             </div>
-            <div id="currentCaptainsMount" style="margin-top:14px;"></div>
+            <div class="teacher-panel-body" id="writingQueuePanelBody">
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">Review handwriting samples students have submitted for Fidel Challenge.</p>
+                <div id="teacherWritingQueueMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
+            </div>
+        </div>
+
+        <div class="teacher-panel" style="margin-bottom: 20px;">
+            <div class="teacher-panel-header" onclick="toggleTeacherPanel('teamProgressPanelBody', this)">
+                <h2 style="font-size: 18px; color: var(--neutral-dark);">Team Level Progress</h2>
+                <button class="teacher-panel-toggle">▼</button>
+            </div>
+            <div class="teacher-panel-body" id="teamProgressPanelBody">
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">See which teams are ready for their live quiz, and advance them once they pass.</p>
+                <div id="teacherTeamProgressMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
+            </div>
+        </div>
+
+        <div class="teacher-panel" style="margin-bottom: 20px;">
+            <div class="teacher-panel-header" onclick="toggleTeacherPanel('manageTeamsPanelBody', this)">
+                <h2 style="font-size: 18px; color: var(--neutral-dark);">Manage Student Color Teams</h2>
+                <button class="teacher-panel-toggle collapsed">▼</button>
+            </div>
+            <div class="teacher-panel-body collapsed" id="manageTeamsPanelBody">
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">Reassign students to predecided classroom color tracks.</p>
+                <div class="teacher-control-group" style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); max-width: 500px;">
+                    <select id="teacherStudentSelect"><option value="">Select Student...</option></select>
+                    <select id="teacherPodSelect"><option value="">Select Color Team...</option></select>
+                    <button class="btn-primary" onclick="teacherAssignStudentToPod()">Change Color Team</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="teacher-panel" style="margin-bottom: 20px;">
+            <div class="teacher-panel-header" onclick="toggleTeacherPanel('captainPanelBody', this)">
+                <h2 style="font-size: 18px; color: var(--neutral-dark);">👑 Assign Team Captain</h2>
+                <button class="teacher-panel-toggle collapsed">▼</button>
+            </div>
+            <div class="teacher-panel-body collapsed" id="captainPanelBody">
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">Pick a team, then choose which of its members is the captain. The captain reviews their teammates' writing submissions.</p>
+                <div class="teacher-control-group" style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); max-width: 500px;">
+                    <select id="captainTeamSelect"><option value="">Select Team...</option></select>
+                    <select id="captainStudentSelect" disabled><option value="">Select Team First...</option></select>
+                    <button class="btn-primary" id="setCaptainBtn">Set as Captain</button>
+                </div>
+                <div id="currentCaptainsMount" style="margin-top:14px;"></div>
+            </div>
         </div>
         <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
     </div>
