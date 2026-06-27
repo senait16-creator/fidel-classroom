@@ -280,30 +280,43 @@ async function handleAuth() {
         ? await _supabase.auth.signUp({ email, password })
         : await _supabase.auth.signInWithPassword({ email, password });
 
+    console.log("Auth response:", { data, error });
+
     if (error) {
         console.error("Auth error:", error);
         return showNotificationToast(error.message);
     }
 
-    if (data?.user) {
+    // A user object can exist even when email confirmation is required and
+    // there's no active session yet — checking data.user alone was the gap.
+    // Without a real session, the next step (querying profiles) has no
+    // valid auth.uid() to match against and silently stalls. Check for an
+    // actual session explicitly before proceeding.
+    if (data?.session && data?.user) {
         await proceedFlowMap(data.user);
-    } else {
-        // Previously silent dead end: no error, but also no usable user —
-        // can happen if email confirmation is required and the response
-        // shape doesn't include an active session yet. Surface it instead
-        // of doing nothing visible.
-        console.warn("Auth returned no error but no user object:", data);
+    } else if (data?.user && !data?.session) {
+        console.warn("User created but no session — email confirmation likely required:", data);
         showNotificationToast("Account created! Check your email to confirm, then log in.");
+        resetToGate();
+    } else {
+        console.warn("Auth returned no error but no usable user/session:", data);
+        showNotificationToast("Something went wrong creating your account. Please try again.");
+        resetToGate();
     }
 }
 
 async function proceedFlowMap(user) {
     currentUser = user;
-    const { data: profile } = await _supabase
+    const { data: profile, error: profileError } = await _supabase
         .from('profiles')
         .select('id, email, nickname, avatar, team_id, is_admin')
         .eq('id', user.id)
         .maybeSingle();
+
+    if (profileError) {
+        console.error("Failed to load profile after auth:", profileError);
+        showNotificationToast("Couldn't load your profile: " + profileError.message);
+    }
 
     currentProfile = profile || null;
 
