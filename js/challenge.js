@@ -20,14 +20,25 @@ let activeChallengeFamilyLevel = null; // the level number that family belongs t
 function enterModeSelect() {
     document.getElementById("studentDashboard").style.display = "none";
     document.getElementById("readingLevelsScreen").style.display = "none";
+    document.getElementById("challengeLevelsScreen").style.display = "none";
+    document.getElementById("challengeFamilyScreen").style.display = "none";
+    document.getElementById("challengeFamilyDetailScreen").style.display = "none";
     document.getElementById("modeSelectScreen").style.display = "block";
 }
 
 function chooseModePractice() {
     // "Practice the Fidel" = exactly what already exists today. No gating,
     // no team dependency, doesn't touch challenge tables at all.
+    //
+    // Reuses launchDashboard("student") (defined in app.js) rather than
+    // duplicating its population logic here — chooseModePractice is now a
+    // real entry point into the dashboard (reached from mode-select), not
+    // just a visibility toggle, so it needs the same setup launchDashboard
+    // already does. Keeping one source of truth avoids the two drifting
+    // out of sync the way they briefly did (grid/leaderboard/team-progress
+    // staying empty when this function only toggled display).
     document.getElementById("modeSelectScreen").style.display = "none";
-    document.getElementById("studentDashboard").style.display = "block";
+    launchDashboard("student");
 }
 
 async function chooseModeChallenge() {
