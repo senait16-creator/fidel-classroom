@@ -205,6 +205,7 @@
                     <div class="workspace-action-row">
                         <button id="gameActivationToggleBtn" class="workspace-action-btn" onclick="openMatchingGameWorkspaceMode('all')">🎮 Matching Game</button>
                         <button id="studyAllFlashcardsBtn" class="workspace-action-btn">🗂️ Study All Letters</button>
+                        <button id="readingPathEntryBtn" class="workspace-action-btn" style="background:#0369a1; color:white; border-color:#0369a1;" onclick="enterReadingPath()">📖 Reading Path</button>
                         <button id="challengeEntryBtn" class="workspace-action-btn challenge-variant" onclick="enterModeSelect()">🏆 Fidel Challenge</button>
                     </div>
                 </div>
@@ -448,7 +449,27 @@
         <button id="gameExitActionBtn" class="btn-secondary" style="margin-top:10px;">← Close Game</button>
     </div>
 
+    <!-- Reading Path: Levels List -->
+    <div id="readingLevelsScreen" style="display: none; max-width: 900px; margin: 40px auto; padding: 0 16px;">
+        <div class="workspace-title">
+            <span>📖 Reading Path</span>
+            <button class="btn-secondary" onclick="exitReadingPath()">← Back to Dashboard</button>
+        </div>
+        <p class="subtitle" style="text-align:left; margin-bottom:16px;">You know the Fidel — now learn to read, translate, and understand real Amharic sentences. Levels unlock one at a time, at your own pace.</p>
+        <div id="readingLevelsGrid" class="challenge-levels-grid"></div>
+    </div>
+
+    <!-- Reading Path: Level Detail (sequential read -> translate -> grammar) -->
+    <div id="readingLevelDetailScreen" style="display: none; max-width: 600px; margin: 40px auto; padding: 0 16px;">
+        <div class="workspace-title">
+            <span id="readingLevelDetailTitle">Level</span>
+            <button class="btn-secondary" onclick="exitReadingLevelDetail()">← Back to Levels</button>
+        </div>
+        <div id="readingStepContent"></div>
+    </div>
+
     <script src="js/app.js" defer></script>
+    <script src="js/reading.js" defer></script>
     <script src="js/challenge.js" defer></script>
 </body>
 </html>
