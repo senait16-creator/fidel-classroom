@@ -1172,9 +1172,15 @@ function openMatchingGameWorkspaceMode(scope) {
             if (typeof returnToChallengeFamilyPicker === "function") returnToChallengeFamilyPicker();
         };
     } else if (scope === "all") {
+        // Launched from the main Practice dashboard's "Matching Game" button.
+        // Hide the WHOLE dashboard (header, pod card, sidebar) — not just the
+        // grid sub-section — so this is genuinely full-screen, not a partial
+        // state where the game appears underneath leftover dashboard chrome.
+        document.getElementById("studentDashboard").style.display = "none";
         document.getElementById("gameWorkspaceTitle").innerText = "Game Arena: All Letters";
         exitBtn.onclick = () => {
             document.getElementById("gameWorkspace").style.display = "none";
+            document.getElementById("studentDashboard").style.display = "block";
             document.getElementById("viewFidelGrid").style.display = "grid";
         };
     } else {
