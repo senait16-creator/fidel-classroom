@@ -617,9 +617,9 @@ async function loadTeacherRosterData() {
 
         tbody.innerHTML += `
             <tr>
-                <td style="font-weight:500;">${s.avatar || '🦁'} ${s.nickname}<br><span style="font-size:11px; color:#94a3b8; font-weight:400;">${s.email || ''}</span></td>
-                <td>${teamDisplay}</td>
-                <td><strong>${masteredCount} / 34 rows</strong> complete</td>
+                <td data-label="Student" style="font-weight:500;">${s.avatar || '🦁'} ${s.nickname}<br><span style="font-size:11px; color:#94a3b8; font-weight:400;">${s.email || ''}</span></td>
+                <td data-label="Team">${teamDisplay}</td>
+                <td data-label="Progress"><strong>${masteredCount} / 34 rows</strong> complete</td>
             </tr>
         `;
     });
@@ -1023,6 +1023,14 @@ async function advanceTeamLevel(teamId, currentLevel) {
 
 function toggleDropdownElement(elementId) {
     document.getElementById(elementId).classList.toggle('open');
+}
+
+// Collapses/expands a teacher dashboard panel — same idea as the student
+// sidebar's collapsible dropdowns, applied here so the teacher view isn't
+// one long uninterrupted scroll of 5 full panels on a phone.
+function toggleTeacherPanel(bodyId, headerEl) {
+    document.getElementById(bodyId).classList.toggle('collapsed');
+    headerEl.querySelector('.teacher-panel-toggle')?.classList.toggle('collapsed');
 }
 
 // ---------------------------------------------------------------------------
