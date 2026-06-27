@@ -16,6 +16,7 @@ let activeReadingLevel = null;
 // -----------------------------------------------------------------------------
 
 function enterReadingPath() {
+    document.getElementById("modeSelectScreen").style.display = "none";
     document.getElementById("studentDashboard").style.display = "none";
     document.getElementById("readingLevelsScreen").style.display = "block";
     renderReadingLevelsList();
@@ -23,7 +24,11 @@ function enterReadingPath() {
 
 function exitReadingPath() {
     document.getElementById("readingLevelsScreen").style.display = "none";
-    document.getElementById("studentDashboard").style.display = "block";
+    if (typeof enterModeSelect === "function") {
+        enterModeSelect();
+    } else {
+        document.getElementById("studentDashboard").style.display = "block";
+    }
 }
 
 // -----------------------------------------------------------------------------
