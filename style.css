@@ -356,6 +356,8 @@
         .reading-grammar-note strong { font-size: 13px; color: #0369a1; display: block; margin-bottom: 6px; }
         .reading-grammar-note p { font-size: 13px; color: #475569; line-height: 1.6; }
 
+        .reading-item-label { font-size: 12px; font-weight: 700; color: #0369a1; text-align: left; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.4px; }
+
         .student-team-row { display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-radius:10px; background:#f8fafc; margin-bottom:8px; font-size:12px; }
         .student-team-row.ready { background:#fffbeb; border:1px solid #fde68a; }
         .student-team-row-name { font-weight:700; }
