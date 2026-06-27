@@ -111,6 +111,31 @@
         .teacher-roster-table th, .teacher-roster-table td { padding: 12px; border-bottom: 1px solid var(--border-color); font-size: 14px; }
         .teacher-roster-table th { background: #f8fafc; font-weight: 700; color: #475569; }
 
+        .teacher-panel-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .teacher-panel-header h2 { margin-bottom: 0 !important; }
+        .teacher-panel-toggle { background: none; border: none; font-size: 13px; color: #94a3b8; transition: transform 0.2s; flex-shrink: 0; padding: 6px; }
+        .teacher-panel-toggle.collapsed { transform: rotate(-90deg); }
+        .teacher-panel-body { margin-top: 4px; }
+        .teacher-panel-body.collapsed { display: none; }
+
+        @media (max-width: 640px) {
+            .teacher-panel { padding: 16px; }
+
+            /* Reflow the roster table into stacked cards instead of squishing
+               3 columns into a narrow viewport — each row becomes a labeled
+               mini-card, fully readable without horizontal scrolling. */
+            .teacher-roster-table thead { display: none; }
+            .teacher-roster-table, .teacher-roster-table tbody, .teacher-roster-table tr, .teacher-roster-table td { display: block; width: 100%; }
+            .teacher-roster-table tr { border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 10px; padding: 10px 12px; }
+            .teacher-roster-table td { border-bottom: none; padding: 4px 0; font-size: 13px; }
+            .teacher-roster-table td::before { content: attr(data-label); display: block; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 2px; }
+
+            /* Stack side-by-side dropdowns/buttons instead of cramming them
+               into one row on a narrow screen. */
+            .teacher-control-group { display: flex; flex-direction: column; gap: 8px; }
+            .teacher-control-group select, .teacher-control-group button { width: 100%; }
+        }
+
         .collapsible-dropdown-container { background: white; border-radius: var(--radius-standard); box-shadow: var(--shadow-premium); border: 1px solid var(--border-color); overflow: hidden; margin-bottom: 20px; }
         .dropdown-toggle-header { width: 100%; background: #f8fafc; border: none; padding: 16px 20px; font-size: 15px; font-weight: 700; color: var(--neutral-dark); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .dropdown-content-pane { display: none; padding: 16px; background: white; border-top: 1px solid var(--border-color); flex-direction: column; gap: 8px; }
