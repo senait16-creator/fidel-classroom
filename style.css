@@ -76,6 +76,12 @@
         #auth-btn { background: var(--brand-primary); color: white; padding: 14px; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 8px; transition: background-color 0.2s; }
         #auth-btn:hover { background: var(--brand-secondary); }
 
+        .auth-back-btn { background: none; border: none; font-size: 13px; font-weight: 700; color: #64748b; cursor: pointer; padding: 4px 0; }
+        .auth-back-btn:hover { color: var(--brand-primary); }
+
+        .auth-switch-mode-text { font-size: 13px; color: #64748b; text-align: center; margin-top: 12px; }
+        .auth-switch-mode-link { background: none; border: none; font-size: 13px; font-weight: 700; color: var(--brand-primary); cursor: pointer; padding: 0 0 0 4px; text-decoration: underline; }
+
         .btn-primary { background: var(--brand-primary); color: white; padding: 14px; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; transition: background-color 0.2s; }
         .btn-primary:hover { background: var(--brand-secondary); }
         .btn-secondary { background: transparent; color: #64748b; font-size: 13px; border: none; cursor: pointer; padding: 6px; font-weight: 500; }
