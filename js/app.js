@@ -635,7 +635,7 @@ async function loadTeacherRosterData() {
     const realStudents = (students || []).filter(s => !s.is_admin);
 
     if (realStudents.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" style="color:#94a3b8; text-align:center;">No students registered yet.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" style="color:#94a3b8; text-align:center;">No students registered yet.</td></tr>';
         return;
     }
 
@@ -646,14 +646,50 @@ async function loadTeacherRosterData() {
             ? `<span style="font-weight:700;">${teamName}</span>`
             : '<span style="color:#0d9488; font-style:italic;">Practicing Solo</span>';
 
+        // Only show the removal action for students currently ON a team —
+        // someone already solo has nothing to remove. This is a reversible,
+        // safe action (sets team_id to null) — NOT account deletion, which
+        // can't be done securely from browser JS (requires Supabase's
+        // service-role key, which must never be exposed client-side).
+        const actionButton = teamName
+            ? `<button class="btn-secondary" style="font-size:11px; padding:6px 10px; color:#ef4444; border:1px solid #fecaca;" onclick="removeStudentFromTeam('${s.id}', '${s.nickname.replace(/'/g, "\\'")}')">Remove from Team</button>`
+            : '<span style="font-size:11px; color:#cbd5e1;">—</span>';
+
         tbody.innerHTML += `
             <tr>
                 <td data-label="Student" style="font-weight:500;">${s.avatar || '🦁'} ${s.nickname}<br><span style="font-size:11px; color:#94a3b8; font-weight:400;">${s.email || ''}</span></td>
                 <td data-label="Team">${teamDisplay}</td>
                 <td data-label="Progress"><strong>${masteredCount} / 34 rows</strong> complete</td>
+                <td data-label="Action">${actionButton}</td>
             </tr>
         `;
     });
+}
+
+// Removes a student from their current team, setting them to "Practicing
+// Solo" — they keep their account, their progress, and can rejoin a team
+// later (via teacherAssignStudentToPod). This is the safe, reversible
+// action; true account deletion is intentionally not built here since it
+// requires Supabase's secret service-role key, which cannot be used from
+// browser-side JavaScript without exposing it to anyone who opens dev tools.
+async function removeStudentFromTeam(studentId, nickname) {
+    if (!confirm(`Remove ${nickname} from their team? They'll switch to "Practicing Solo" and can be reassigned later.`)) return;
+
+    showNotificationToast("Removing from team...");
+
+    const { error } = await _supabase
+        .from('profiles')
+        .update({ team_id: null })
+        .eq('id', studentId);
+
+    if (error) {
+        console.error("Failed to remove student from team:", error);
+        return showNotificationToast("Failed: " + error.message);
+    }
+
+    showNotificationToast(`${nickname} is now Practicing Solo.`);
+    await loadTeacherRosterData();
+    await teacherRefreshConfigurationDropdowns();
 }
 
 async function teacherRefreshConfigurationDropdowns() {
@@ -1795,6 +1831,7 @@ window.selectAvatar = selectAvatar;
 window.saveProfileData = saveProfileData;
 window.switchAdminPanelsFromDashboard = switchAdminPanelsFromDashboard;
 window.teacherAssignStudentToPod = teacherAssignStudentToPod;
+window.removeStudentFromTeam = removeStudentFromTeam;
 window.logout = logout;
 window.openMatchingGameWorkspaceMode = openMatchingGameWorkspaceMode;
 window.shuffleClassroomRowPhonetics = shuffleClassroomRowPhonetics;
