@@ -24,6 +24,12 @@ function enterModeSelect() {
     document.getElementById("challengeFamilyScreen").style.display = "none";
     document.getElementById("challengeFamilyDetailScreen").style.display = "none";
     document.getElementById("modeSelectScreen").style.display = "block";
+
+    const isCaptain = !!currentProfile?.is_captain;
+    const banner = document.getElementById("captainModeSelectBanner");
+    const captainOption = document.getElementById("modeSelectCaptainOption");
+    if (banner) banner.style.display = isCaptain ? "block" : "none";
+    if (captainOption) captainOption.style.display = isCaptain ? "block" : "none";
 }
 
 function chooseModePractice() {
@@ -238,25 +244,70 @@ async function loadCaptainTeamProgress() {
 
     const { data: progressRows } = await _supabase
         .from('student_family_progress')
-        .select('student_id, base_letter, streak_passed, writing_passed')
+        .select('student_id, base_letter, streak_passed, writing_passed, best_streak')
         .in('student_id', members.map(m => m.id))
         .eq('level_number', team?.current_level || 1);
+
+    const { data: submissions } = await _supabase
+        .from('writing_submissions')
+        .select('student_id, base_letter, image_url, status, submitted_at')
+        .in('student_id', members.map(m => m.id))
+        .order('submitted_at', { ascending: false });
 
     mount.innerHTML = "";
     members.forEach(member => {
         const row = document.createElement('div');
-        row.className = 'team-member-row';
+        row.className = 'captain-member-card';
 
         if (member.is_captain) {
-            row.innerHTML = `<span>${member.avatar || '🦁'} ${member.nickname} (you)</span><span class="team-member-progress" style="color:#b45309;">👑 Captain</span>`;
-        } else {
-            const clearedCount = (level?.letter_families || []).filter(letter => {
-                const r = (progressRows || []).find(pr => pr.student_id === member.id && pr.base_letter === letter);
-                return r?.streak_passed && r?.writing_passed;
-            }).length;
-            row.innerHTML = `<span>${member.avatar || '🦁'} ${member.nickname}</span><span class="team-member-progress">${clearedCount} / ${familyCount} families cleared</span>`;
+            row.innerHTML = `
+                <div class="captain-member-header">
+                    <span>${member.avatar || '🦁'} ${member.nickname} (you)</span>
+                    <span class="team-member-progress" style="color:#b45309;">👑 Captain</span>
+                </div>
+            `;
+            mount.appendChild(row);
+            return;
         }
 
+        const familyDetails = (level?.letter_families || []).map(letter => {
+            const progress = (progressRows || []).find(r => r.student_id === member.id && r.base_letter === letter);
+            // Most recent submission for this student+letter, of any status —
+            // gives the captain a thumbnail to glance at even if it's still
+            // pending or was already approved, not just while it's in the queue.
+            const latestSubmission = (submissions || []).find(s => s.student_id === member.id && s.base_letter === letter);
+
+            const streak = progress?.best_streak || 0;
+            const streakDone = !!progress?.streak_passed;
+            const writingDone = !!progress?.writing_passed;
+
+            return `
+                <div class="captain-family-detail">
+                    <span class="captain-family-letter">${letter}</span>
+                    <div class="captain-family-meta">
+                        <span class="${streakDone ? 'captain-stat-done' : ''}">🔥 ${streak}/20</span>
+                        <span class="${writingDone ? 'captain-stat-done' : ''}">${writingDone ? '✓ Approved' : (latestSubmission ? '⏳ Pending' : '— No submission')}</span>
+                    </div>
+                    ${latestSubmission ? `<img src="${latestSubmission.image_url}" class="captain-family-thumb" alt="${member.nickname}'s writing for ${letter}">` : ''}
+                </div>
+            `;
+        }).join('');
+
+        const clearedCount = (level?.letter_families || []).filter(letter => {
+            const r = (progressRows || []).find(pr => pr.student_id === member.id && pr.base_letter === letter);
+            return r?.streak_passed && r?.writing_passed;
+        }).length;
+
+        row.innerHTML = `
+            <div class="captain-member-header" onclick="this.parentElement.querySelector('.captain-member-details').classList.toggle('open'); this.querySelector('.captain-member-toggle').classList.toggle('collapsed');">
+                <span>${member.avatar || '🦁'} ${member.nickname}</span>
+                <span style="display:flex; align-items:center; gap:8px;">
+                    <span class="team-member-progress">${clearedCount} / ${familyCount} cleared</span>
+                    <span class="captain-member-toggle collapsed">▼</span>
+                </span>
+            </div>
+            <div class="captain-member-details">${familyDetails}</div>
+        `;
         mount.appendChild(row);
     });
 }
