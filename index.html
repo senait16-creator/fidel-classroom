@@ -333,9 +333,18 @@
 
     <!-- Fidel Challenge: Mode Select -->
     <div id="modeSelectScreen" class="app-card" style="max-width: 480px; display: none;">
+        <div id="captainModeSelectBanner" style="display:none; background: linear-gradient(135deg, #fffbeb, white); border: 1px solid #fde68a; border-radius: var(--radius-standard); padding: 14px 16px; margin-bottom: 16px; text-align: center;">
+            <p style="font-size:16px; font-weight:700; color:#92400e; margin-bottom:2px;">👑 You're a Captain!</p>
+            <p style="font-size:13px; color:#b45309;">Help lead your team to victory!</p>
+        </div>
         <h2 class="main-title" style="font-size: 22px;">Choose Your Path</h2>
         <p class="subtitle">Practice on your own, compete with your team, or advance to reading!</p>
         <div style="display:flex; flex-direction:column; gap:14px;">
+            <div class="mode-option" id="modeSelectCaptainOption" style="display:none; background: linear-gradient(135deg, #fffbeb, white); border-color: #fde68a;" onclick="enterCaptainDashboard()">
+                <div class="mode-option-icon">👑</div>
+                <div class="mode-option-title">Captain Dashboard</div>
+                <div class="mode-option-desc">Review your team's submissions and progress</div>
+            </div>
             <div class="mode-option" onclick="chooseModePractice()">
                 <div class="mode-option-icon">📖</div>
                 <div class="mode-option-title">Practice the Fidel</div>
