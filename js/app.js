@@ -340,7 +340,7 @@ async function proceedFlowMap(user) {
     currentUser = user;
     const { data: profile, error: profileError } = await _supabase
         .from('profiles')
-        .select('id, email, nickname, avatar, team_id, is_admin')
+        .select('id, email, nickname, avatar, team_id, is_admin, is_captain')
         .eq('id', user.id)
         .maybeSingle();
 
@@ -522,7 +522,7 @@ async function saveProfileData(event) {
     // Refresh local cache of the profile
     const { data: refreshedProfile } = await _supabase
         .from('profiles')
-        .select('id, email, nickname, avatar, team_id, is_admin')
+        .select('id, email, nickname, avatar, team_id, is_admin, is_captain')
         .eq('id', user.id)
         .maybeSingle();
     currentProfile = refreshedProfile || currentProfile;
