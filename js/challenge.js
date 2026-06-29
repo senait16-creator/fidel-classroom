@@ -1,668 +1,397 @@
-// =============================================================================
-// FIDEL CHALLENGE — challenge.js
-// Loads AFTER app.js. Relies on globals already defined there:
-//   _supabase, currentUser, currentProfile, showNotificationToast, alphabetData
-// =============================================================================
+:root {
+            --brand-primary: #0f766e; 
+            --brand-secondary: #0d9488;
+            --neutral-dark: #1e293b;
+            --neutral-light: #f8fafc;
+            --border-color: #e2e8f0;
+            --shadow-premium: 0 4px 20px rgba(15, 23, 42, 0.04);
+            --radius-standard: 16px;
 
-// STREAK_THRESHOLD is defined in app.js (loads first) and shared here.
-
-let challengeLevelsCache = null; // loaded once from challenge_levels, reused across views
-let activeChallengeLevel = null; // the level object currently being viewed in the family picker
-let activeChallengeFamilyObj = null; // the family object currently being viewed in the detail screen
-let activeChallengeFamilyLevel = null; // the level number that family belongs to
-
-// -----------------------------------------------------------------------------
-// Mode select
-// -----------------------------------------------------------------------------
-
-// Called from the student dashboard — e.g. a new "Fidel Challenge" button
-// placed next to (or instead of) the existing "Matching Game Arena" button.
-function enterModeSelect() {
-    document.getElementById("studentDashboard").style.display = "none";
-    document.getElementById("readingLevelsScreen").style.display = "none";
-    document.getElementById("challengeLevelsScreen").style.display = "none";
-    document.getElementById("challengeFamilyScreen").style.display = "none";
-    document.getElementById("challengeFamilyDetailScreen").style.display = "none";
-    document.getElementById("modeSelectScreen").style.display = "block";
-
-    const isCaptain = !!currentProfile?.is_captain;
-    const banner = document.getElementById("captainModeSelectBanner");
-    const captainOption = document.getElementById("modeSelectCaptainOption");
-    if (banner) banner.style.display = isCaptain ? "block" : "none";
-    if (captainOption) captainOption.style.display = isCaptain ? "block" : "none";
-}
-
-function chooseModePractice() {
-    // "Practice the Fidel" = exactly what already exists today. No gating,
-    // no team dependency, doesn't touch challenge tables at all.
-    //
-    // Reuses launchDashboard("student") (defined in app.js) rather than
-    // duplicating its population logic here — chooseModePractice is now a
-    // real entry point into the dashboard (reached from mode-select), not
-    // just a visibility toggle, so it needs the same setup launchDashboard
-    // already does. Keeping one source of truth avoids the two drifting
-    // out of sync the way they briefly did (grid/leaderboard/team-progress
-    // staying empty when this function only toggled display).
-    document.getElementById("modeSelectScreen").style.display = "none";
-    launchDashboard("student");
-}
-
-// -----------------------------------------------------------------------------
-// Captain Dashboard — scoped review screen for a team's captain. Shows ONLY
-// their own team's pending submissions and member progress, enforced both
-// by these queries (filtered to their team_id) AND by RLS at the database
-// level (is_captain_of_student()), so this isn't just a UI-level scoping.
-// -----------------------------------------------------------------------------
-
-function enterCaptainDashboard() {
-    document.getElementById("studentDashboard").style.display = "none";
-    document.getElementById("captainDashboardScreen").style.display = "block";
-    loadCaptainWritingQueue();
-    loadCaptainTeamProgress();
-}
-
-function exitCaptainDashboard() {
-    document.getElementById("captainDashboardScreen").style.display = "none";
-    document.getElementById("studentDashboard").style.display = "block";
-}
-
-async function loadCaptainWritingQueue() {
-    const mount = document.getElementById("captainWritingQueueMount");
-    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
-
-    if (!currentProfile?.team_id) {
-        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">You're not assigned to a team.</p>`;
-        return;
-    }
-
-    // Get this captain's team members first, then filter submissions to
-    // just those students — the RLS policy also enforces this server-side,
-    // but filtering here too keeps the query itself scoped and efficient.
-    const { data: members } = await _supabase
-        .from('profiles')
-        .select('id')
-        .eq('team_id', currentProfile.team_id);
-
-    const memberIds = (members || []).map(m => m.id);
-    if (memberIds.length === 0) {
-        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No teammates yet.</p>`;
-        return;
-    }
-
-    const { data: submissions, error } = await _supabase
-        .from('writing_submissions')
-        .select('id, base_letter, image_url, status, submitted_at, student_id, profiles!writing_submissions_student_id_fkey(nickname, avatar)')
-        .in('student_id', memberIds)
-        .eq('status', 'pending')
-        .order('submitted_at', { ascending: true });
-
-    if (error) {
-        console.error("Failed to load captain's writing queue:", error);
-        mount.innerHTML = `<p style="color:#ef4444; font-size:13px;">Couldn't load submissions: ${error.message}</p>`;
-        return;
-    }
-
-    if (!submissions || submissions.length === 0) {
-        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No pending submissions from your team — all caught up!</p>`;
-        return;
-    }
-
-    mount.innerHTML = "";
-    submissions.forEach(sub => {
-        const card = document.createElement('div');
-        card.className = "teacher-submission-card";
-        card.innerHTML = `
-            <img src="${sub.image_url}" alt="Writing sample">
-            <div class="teacher-submission-meta">
-                <strong>${sub.profiles?.avatar || '🦁'} ${sub.profiles?.nickname || 'Student'}</strong>
-                <span class="letter">${sub.base_letter}</span>
-                <div class="teacher-submission-actions">
-                    <button class="btn-approve">✓ Approve</button>
-                    <button class="btn-reject">✗ Reject</button>
-                </div>
-                <input type="text" class="teacher-reject-note-input" placeholder="Optional note for rejection..." style="display:none;">
-            </div>
-        `;
-
-        const approveBtn = card.querySelector('.btn-approve');
-        const rejectBtn = card.querySelector('.btn-reject');
-        const noteInput = card.querySelector('.teacher-reject-note-input');
-
-        approveBtn.onclick = () => captainApproveSubmission(sub.id, sub.student_id, sub.base_letter);
-
-        rejectBtn.onclick = () => {
-            if (noteInput.style.display === "none") {
-                noteInput.style.display = "block";
-                rejectBtn.innerText = "Confirm Reject";
-            } else {
-                captainRejectSubmission(sub.id, noteInput.value.trim());
-            }
-        };
-
-        mount.appendChild(card);
-    });
-}
-
-async function captainApproveSubmission(submissionId, studentId, baseLetter) {
-    showNotificationToast("Approving...");
-
-    const { error: subError } = await _supabase
-        .from('writing_submissions')
-        .update({ status: 'approved', reviewed_by: currentUser.id, reviewed_at: new Date().toISOString() })
-        .eq('id', submissionId);
-
-    if (subError) {
-        console.error("Captain approval failed:", subError);
-        return showNotificationToast("Approval failed: " + subError.message);
-    }
-
-    const { data: progressRow } = await _supabase
-        .from('student_family_progress')
-        .select('streak_passed')
-        .eq('student_id', studentId)
-        .eq('base_letter', baseLetter)
-        .maybeSingle();
-
-    const updatePayload = { writing_passed: true };
-    if (progressRow?.streak_passed) updatePayload.completed_at = new Date().toISOString();
-
-    const { error: progressError } = await _supabase
-        .from('student_family_progress')
-        .update(updatePayload)
-        .eq('student_id', studentId)
-        .eq('base_letter', baseLetter);
-
-    if (progressError) console.error("Failed to update family progress:", progressError);
-
-    showNotificationToast("Submission approved! ✓");
-    await loadCaptainWritingQueue();
-    await loadCaptainTeamProgress();
-
-    // Same team-completion check the teacher's approval triggers — a
-    // captain's approval should be equally capable of unlocking the next
-    // level for their team, not just the admin's.
-    if (typeof checkAndUpdateTeamLevelCompletion === "function") {
-        await checkAndUpdateTeamLevelCompletion(studentId);
-    }
-}
-
-async function captainRejectSubmission(submissionId, note) {
-    showNotificationToast("Rejecting submission...");
-
-    const { error } = await _supabase
-        .from('writing_submissions')
-        .update({
-            status: 'rejected',
-            reviewed_by: currentUser.id,
-            reviewed_at: new Date().toISOString(),
-            reviewer_note: note || null
-        })
-        .eq('id', submissionId);
-
-    if (error) {
-        console.error("Captain rejection failed:", error);
-        return showNotificationToast("Reject failed: " + error.message);
-    }
-
-    showNotificationToast("Submission rejected — student can resubmit.");
-    await loadCaptainWritingQueue();
-}
-
-async function loadCaptainTeamProgress() {
-    const mount = document.getElementById("captainTeamProgressMount");
-    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
-
-    if (!currentProfile?.team_id) {
-        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">You're not assigned to a team.</p>`;
-        return;
-    }
-
-    const { data: team } = await _supabase
-        .from('teams')
-        .select('current_level')
-        .eq('id', currentProfile.team_id)
-        .maybeSingle();
-
-    const { data: members } = await _supabase
-        .from('profiles')
-        .select('id, nickname, avatar, is_captain')
-        .eq('team_id', currentProfile.team_id)
-        .order('nickname');
-
-    if (!members || members.length === 0) {
-        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No teammates yet.</p>`;
-        return;
-    }
-
-    const { data: level } = await _supabase
-        .from('challenge_levels')
-        .select('letter_families')
-        .eq('level_number', team?.current_level || 1)
-        .maybeSingle();
-
-    const familyCount = (level?.letter_families || []).length;
-
-    const { data: progressRows } = await _supabase
-        .from('student_family_progress')
-        .select('student_id, base_letter, streak_passed, writing_passed, best_streak')
-        .in('student_id', members.map(m => m.id))
-        .eq('level_number', team?.current_level || 1);
-
-    const { data: submissions } = await _supabase
-        .from('writing_submissions')
-        .select('student_id, base_letter, image_url, status, submitted_at')
-        .in('student_id', members.map(m => m.id))
-        .order('submitted_at', { ascending: false });
-
-    mount.innerHTML = "";
-    members.forEach(member => {
-        const row = document.createElement('div');
-        row.className = 'captain-member-card';
-
-        if (member.is_captain) {
-            row.innerHTML = `
-                <div class="captain-member-header">
-                    <span>${member.avatar || '🦁'} ${member.nickname} (you)</span>
-                    <span class="team-member-progress" style="color:#b45309;">👑 Captain</span>
-                </div>
-            `;
-            mount.appendChild(row);
-            return;
+            --team-red: #ef4444;
+            --team-yellow: #f59e0b;
+            --team-green: #22c55e;
+            --team-blue: #3b82f6;
         }
 
-        const familyDetails = (level?.letter_families || []).map(letter => {
-            const progress = (progressRows || []).find(r => r.student_id === member.id && r.base_letter === letter);
-            // Most recent submission for this student+letter, of any status —
-            // gives the captain a thumbnail to glance at even if it's still
-            // pending or was already approved, not just while it's in the queue.
-            const latestSubmission = (submissions || []).find(s => s.student_id === member.id && s.base_letter === letter);
+        * { box-sizing: border-box; font-family: 'Ubuntu', 'Abyssinica SIL', serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--neutral-light); color: var(--neutral-dark); padding: 24px; min-height: 100vh; }
 
-            const streak = progress?.best_streak || 0;
-            const streakDone = !!progress?.streak_passed;
-            const writingDone = !!progress?.writing_passed;
+        .app-card { max-width: 420px; width: 100%; margin: 60px auto; background: white; padding: 36px 28px; border-radius: var(--radius-standard); box-shadow: 0 20px 50px rgba(15, 23, 42, 0.18); border: none; text-align: center; position: relative; z-index: 2; }
 
-            return `
-                <div class="captain-family-detail">
-                    <span class="captain-family-letter">${letter}</span>
-                    <div class="captain-family-meta">
-                        <span class="${streakDone ? 'captain-stat-done' : ''}">🔥 ${streak}/20</span>
-                        <span class="${writingDone ? 'captain-stat-done' : ''}">${writingDone ? '✓ Approved' : (latestSubmission ? '⏳ Pending' : '— No submission')}</span>
-                    </div>
-                    ${latestSubmission ? `<img src="${latestSubmission.image_url}" class="captain-family-thumb" alt="${member.nickname}'s writing for ${letter}">` : ''}
-                </div>
-            `;
-        }).join('');
-
-        const clearedCount = (level?.letter_families || []).filter(letter => {
-            const r = (progressRows || []).find(pr => pr.student_id === member.id && pr.base_letter === letter);
-            return r?.streak_passed && r?.writing_passed;
-        }).length;
-
-        row.innerHTML = `
-            <div class="captain-member-header" onclick="this.parentElement.querySelector('.captain-member-details').classList.toggle('open'); this.querySelector('.captain-member-toggle').classList.toggle('collapsed');">
-                <span>${member.avatar || '🦁'} ${member.nickname}</span>
-                <span style="display:flex; align-items:center; gap:8px;">
-                    <span class="team-member-progress">${clearedCount} / ${familyCount} cleared</span>
-                    <span class="captain-member-toggle collapsed">▼</span>
-                </span>
-            </div>
-            <div class="captain-member-details">${familyDetails}</div>
-        `;
-        mount.appendChild(row);
-    });
-}
-
-async function chooseModeChallenge() {
-    if (!currentProfile?.team_id) {
-        showNotificationToast("Fidel Challenge is a team competition — join a team in your profile to play!");
-        return;
-    }
-    document.getElementById("modeSelectScreen").style.display = "none";
-    document.getElementById("challengeLevelsScreen").style.display = "block";
-    await renderChallengeLevelsView();
-}
-
-function chooseModeReading() {
-    document.getElementById("modeSelectScreen").style.display = "none";
-    document.getElementById("readingLevelsScreen").style.display = "block";
-    if (typeof renderReadingLevelsList === "function") renderReadingLevelsList();
-}
-
-function exitChallengeBackToDashboard() {
-    document.getElementById("challengeLevelsScreen").style.display = "none";
-    enterModeSelect();
-}
-
-// -----------------------------------------------------------------------------
-// Locked levels view (static for now — no gameplay wired up yet)
-// -----------------------------------------------------------------------------
-
-async function fetchChallengeLevels() {
-    if (challengeLevelsCache) return challengeLevelsCache;
-
-    const { data, error } = await _supabase
-        .from('challenge_levels')
-        .select('level_number, letter_families, title')
-        .order('level_number', { ascending: true });
-
-    if (error) {
-        console.error("Failed to load challenge levels:", error);
-        showNotificationToast("Couldn't load Fidel Challenge levels.");
-        return [];
-    }
-
-    challengeLevelsCache = data || [];
-    return challengeLevelsCache;
-}
-
-// Fetches the student's team row (name, current_level, streak_count).
-// Falls back to sensible defaults if no team is assigned yet, so the board
-// still renders something reasonable rather than breaking.
-async function getTeamBoardInfo() {
-    if (!currentProfile?.team_id) {
-        return { name: "No Team Yet", current_level: 1, streak_count: 0 };
-    }
-
-    const { data: team, error } = await _supabase
-        .from('teams')
-        .select('name, current_level, streak_count')
-        .eq('id', currentProfile.team_id)
-        .maybeSingle();
-
-    if (error || !team) {
-        return { name: "No Team Yet", current_level: 1, streak_count: 0 };
-    }
-
-    return {
-        name: team.name || "Your Team",
-        current_level: team.current_level || 1,
-        streak_count: team.streak_count || 0
-    };
-}
-
-function renderChallengeBoardHeader(team, totalLevels) {
-    document.getElementById("challengeBoardTeamName").innerText = team.name;
-    document.getElementById("challengeBoardTeamSub").innerText = `Level ${team.current_level} of ${totalLevels}`;
-    document.getElementById("challengeBoardStreakValue").innerText = team.streak_count;
-
-    const percent = Math.min(100, Math.round(((team.current_level - 1) / totalLevels) * 100));
-    document.getElementById("challengeBoardProgressFill").style.width = `${percent}%`;
-
-    const swatch = document.getElementById("challengeBoardTeamSwatch");
-    if (team.name && team.name.includes("Red")) swatch.style.background = "#ef4444";
-    else if (team.name && team.name.includes("Blue")) swatch.style.background = "#3b82f6";
-    else if (team.name && team.name.includes("Green")) swatch.style.background = "#10b981";
-    else if (team.name && team.name.includes("Yellow")) swatch.style.background = "#f59e0b";
-    else if (team.name && team.name.includes("Purple")) swatch.style.background = "#a855f7";
-    else swatch.style.background = "var(--brand-primary)";
-}
-
-async function renderChallengeLevelsView() {
-    const container = document.getElementById("challengeLevelsGrid");
-    container.innerHTML = `<p style="color:#94a3b8;">Loading levels...</p>`;
-
-    const [levels, team] = await Promise.all([
-        fetchChallengeLevels(),
-        getTeamBoardInfo()
-    ]);
-
-    renderChallengeBoardHeader(team, levels.length || 12);
-
-    container.innerHTML = "";
-
-    levels.forEach(level => {
-        const card = document.createElement('div');
-        const isCompleted = level.level_number < team.current_level;
-        const isCurrent = level.level_number === team.current_level;
-        const isUnlocked = level.level_number <= team.current_level;
-        const isCapstone = level.level_number === 12;
-
-        const stateClass = isCompleted ? 'completed' : (isUnlocked ? 'unlocked' : 'locked');
-        card.className = `challenge-level-card ${stateClass} ${isCurrent ? 'current' : ''}`;
-
-        const familiesPreview = (level.letter_families || []).join(' ');
-        const badgeContent = isUnlocked ? level.level_number : '🔒';
-
-        card.innerHTML = `
-            <div class="challenge-level-number-badge">${badgeContent}</div>
-            <div class="challenge-level-title">${level.title || `Level ${level.level_number}`}</div>
-            <div class="challenge-level-families">${familiesPreview}</div>
-            ${isCapstone ? '<div class="challenge-capstone-badge">⭐ Capstone</div>' : ''}
-        `;
-
-        if (isUnlocked) {
-            card.onclick = () => openChallengeFamilyPicker(level);
+        .auth-decorative-bg {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            overflow: hidden;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0f766e 0%, #0d9488 35%, #0891b2 70%, #0369a1 100%);
         }
 
-        container.appendChild(card);
-    });
-}
-
-// -----------------------------------------------------------------------------
-// Family picker — shown after clicking an unlocked level. Lets the student
-// choose which of the level's families to drill next, and shows per-family
-// progress (streak passed / writing passed) once that data exists.
-// -----------------------------------------------------------------------------
-
-async function openChallengeFamilyPicker(level) {
-    activeChallengeLevel = level;
-
-    document.getElementById("challengeLevelsScreen").style.display = "none";
-    document.getElementById("challengeFamilyScreen").style.display = "block";
-
-    await renderChallengeFamilyPicker();
-}
-
-// Re-shown when exiting the matching game while in Challenge mode (hooked
-// from app.js's openMatchingGameWorkspaceMode exit handler).
-async function returnToChallengeFamilyPicker() {
-    document.getElementById("gameWorkspace").style.display = "none";
-
-    // Return to the detail screen the game was launched from (giant letters +
-    // play/flashcard buttons), not all the way back out to the picker grid —
-    // matches how the student got here in the first place.
-    if (activeChallengeFamilyObj) {
-        document.getElementById("challengeFamilyDetailScreen").style.display = "block";
-        renderChallengeFamilyDetailGiantRow(activeChallengeFamilyObj);
-    } else {
-        document.getElementById("challengeFamilyScreen").style.display = "block";
-        await renderChallengeFamilyPicker();
-    }
-}
-
-function exitChallengeFamilyPicker() {
-    document.getElementById("challengeFamilyScreen").style.display = "none";
-    document.getElementById("challengeLevelsScreen").style.display = "block";
-    renderChallengeLevelsView();
-}
-
-async function fetchStudentFamilyProgressForLevel(levelNumber) {
-    const { data, error } = await _supabase
-        .from('student_family_progress')
-        .select('base_letter, best_streak, streak_passed, writing_passed, completed_at')
-        .eq('student_id', currentUser.id)
-        .eq('level_number', levelNumber);
-
-    if (error) {
-        console.error("Failed to load family progress:", error);
-        return [];
-    }
-    return data || [];
-}
-
-async function renderChallengeFamilyPicker() {
-    const level = activeChallengeLevel;
-    document.getElementById("challengeFamilyTitle").innerText = level.title || `Level ${level.level_number}`;
-
-    const container = document.getElementById("challengeFamilyGrid");
-    container.innerHTML = `<p style="color:#94a3b8;">Loading...</p>`;
-
-    const progressRows = await fetchStudentFamilyProgressForLevel(level.level_number);
-    const progressByLetter = {};
-    progressRows.forEach(row => { progressByLetter[row.base_letter] = row; });
-
-    container.innerHTML = "";
-
-    const positionLabels = ["1st", "2nd", "3rd"];
-
-    (level.letter_families || []).forEach((baseLetter, idx) => {
-        const progress = progressByLetter[baseLetter] || { best_streak: 0, streak_passed: false, writing_passed: false };
-        const fidelObj = alphabetData.find(item => item.base === baseLetter);
-        const posClass = `pos-${idx + 1}`; // 1st family = green, 2nd = yellow, 3rd = red, consistent every level
-
-        const card = document.createElement('div');
-        card.className = `challenge-family-card ${posClass} ${progress.streak_passed && progress.writing_passed ? 'mastered' : ''}`;
-
-        card.innerHTML = `
-            <span class="challenge-family-position-tag">${positionLabels[idx] || `#${idx + 1}`}</span>
-            <div class="challenge-family-letter">${baseLetter}</div>
-            <div class="challenge-family-progress-row">
-                <span class="challenge-family-pill ${progress.streak_passed ? 'done' : ''}">
-                    ${progress.streak_passed ? '✓' : ''} Streak ${progress.best_streak}/${STREAK_THRESHOLD}
-                </span>
-                <span class="challenge-family-pill ${progress.writing_passed ? 'done' : ''}">
-                    ${progress.writing_passed ? '✓ Writing approved' : 'Writing pending'}
-                </span>
-            </div>
-        `;
-
-        card.onclick = () => openChallengeFamilyDetail(fidelObj, level.level_number);
-        container.appendChild(card);
-    });
-}
-
-// -----------------------------------------------------------------------------
-// Streak game launcher — sets activeChallengeContext, then reuses the
-// existing shared matching game from app.js unchanged.
-// -----------------------------------------------------------------------------
-
-async function recordStreakProgress(baseLetter, levelNumber, bestStreak, passed) {
-    const payload = {
-        student_id: currentUser.id,
-        base_letter: baseLetter,
-        level_number: levelNumber,
-        best_streak: bestStreak,
-        streak_passed: passed
-    };
-
-    const { error } = await _supabase
-        .from('student_family_progress')
-        .upsert(payload, { onConflict: 'student_id,base_letter' });
-
-    if (error) console.error("Failed to save streak progress:", error);
-}
-
-function launchChallengeStreakGame(fidelObj, levelNumber) {
-    let bestStreakThisSession = 0;
-
-    activeChallengeContext = {
-        baseLetter: fidelObj.base,
-        levelNumber: levelNumber,
-        onStreakUpdate: (currentStreak) => {
-            if (currentStreak > bestStreakThisSession) {
-                bestStreakThisSession = currentStreak;
-                recordStreakProgress(fidelObj.base, levelNumber, bestStreakThisSession, false);
-            }
-        },
-        onStreakPassed: async (finalStreak) => {
-            await recordStreakProgress(fidelObj.base, levelNumber, finalStreak, true);
-            showNotificationToast(`🎉 Streak of ${STREAK_THRESHOLD}! "${fidelObj.base}" matching mastered!`);
-            executeVictoryConfettiCelebration();
+        .bg-letter {
+            position: absolute;
+            font-family: 'Abyssinica SIL', serif;
+            color: white;
+            opacity: 0.14;
+            user-select: none;
+            pointer-events: none;
+            z-index: 1;
+            line-height: 1;
         }
-    };
+        .letter-1 { font-size: 260px; top: -50px; left: -40px; }
+        .letter-2 { font-size: 190px; top: 6%; right: -30px; }
+        .letter-3 { font-size: 220px; bottom: -60px; left: 2%; }
+        .letter-4 { font-size: 180px; bottom: 4%; right: 4%; }
+        .letter-5 { font-size: 130px; top: 36%; left: -20px; }
+        .letter-6 { font-size: 150px; top: 2%; left: 36%; }
+        .letter-7 { font-size: 120px; bottom: 26%; right: -20px; }
+        .letter-8 { font-size: 160px; top: 58%; right: 28%; }
 
-    document.getElementById("challengeFamilyDetailScreen").style.display = "none";
-    document.getElementById("challengeFamilyScreen").style.display = "none";
-    openMatchingGameWorkspaceMode(fidelObj);
-}
+        @media (max-width: 640px) {
+            .bg-letter { opacity: 0.12; }
+            .letter-2, .letter-4, .letter-7 { display: none; }
+            .app-card { margin: 0; }
+        }
 
-// -----------------------------------------------------------------------------
-// Family detail screen — giant letter display, launch point for the
-// matching game (with streak rules explained) and the flashcard self-study
-// mode. Shown after clicking a family card in the picker.
-// -----------------------------------------------------------------------------
+        .main-title { font-size: 30px; font-weight: 800; color: var(--brand-primary); letter-spacing: -0.5px; margin-bottom: 6px; }
 
-const vowelSoundLabels = ["-ä", "-u", "-ee", "-a", "-ay", "-ih", "-o"]; // matches standardVowelSubscripts in app.js
+        .team-dot-accent { display: flex; justify-content: center; gap: 6px; margin-bottom: 14px; }
+        .team-dot-accent span { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .team-dot-accent .dot-red { background: var(--team-red); }
+        .team-dot-accent .dot-yellow { background: var(--team-yellow); }
+        .team-dot-accent .dot-green { background: var(--team-green); }
+        .team-dot-accent .dot-blue { background: var(--team-blue); }
+        .subtitle { font-size: 14px; color: #64748b; margin-bottom: 24px; font-weight: 400; }
 
-function openChallengeFamilyDetail(fidelObj, levelNumber) {
-    activeChallengeFamilyObj = fidelObj;
-    activeChallengeFamilyLevel = levelNumber;
+        input, select { width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 15px; outline: none; background: #ffffff; transition: border-color 0.2s; }
+        input:focus, select:focus { border-color: var(--brand-primary); }
 
-    document.getElementById("challengeFamilyScreen").style.display = "none";
-    document.getElementById("challengeFamilyDetailScreen").style.display = "block";
-    document.getElementById("challengeFamilyDetailTitle").innerText = `Family: "${fidelObj.base}"`;
+        .choice-container { display: flex; gap: 12px; margin-bottom: 12px; }
+        .btn-filled-rectangle { flex: 1; padding: 14px; font-size: 14px; font-weight: 700; border-radius: 10px; border: none; cursor: pointer; }
+        .btn-signup-rect { background: var(--brand-primary); color: white; }
+        .btn-login-rect { background: #334155; color: white; }
 
-    renderChallengeFamilyDetailGiantRow(fidelObj);
+        #credentialFields { text-align: left; }
+        #credentialFields label { display: block; font-size: 13px; font-weight: 700; color: var(--neutral-dark); margin-bottom: 6px; }
+        #auth-btn { background: var(--brand-primary); color: white; padding: 14px; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 8px; transition: background-color 0.2s; }
+        #auth-btn:hover { background: var(--brand-secondary); }
 
-    // Captains already know Amharic and aren't required to play through
-    // the gates themselves — they're here to lead their team, not compete.
-    // Show the letters for reference, but skip the streak/writing
-    // requirements entirely rather than making them complete busywork
-    // that proves nothing about a skill they already have.
-    if (currentProfile?.is_captain) {
-        document.getElementById("challengeDetailPlayBtn").style.display = "none";
-        document.getElementById("challengeDetailFlashcardBtn").style.display = "none";
-        document.getElementById("challengeDetailWritingBtn").style.display = "none";
-        const box = document.getElementById("challengeWritingStatusBox");
-        box.style.display = "block";
-        box.innerHTML = `<div class="challenge-writing-status approved">👑 As team captain, you're exempt from this challenge — focus on reviewing your team's submissions instead!</div>`;
-        return;
-    }
+        .auth-back-btn { background: none; border: none; font-size: 13px; font-weight: 700; color: #64748b; cursor: pointer; padding: 4px 0; }
+        .auth-back-btn:hover { color: var(--brand-primary); }
 
-    document.getElementById("challengeDetailPlayBtn").style.display = "flex";
-    document.getElementById("challengeDetailFlashcardBtn").style.display = "flex";
-    document.getElementById("challengeDetailWritingBtn").style.display = "block";
-    renderWritingStatusForFamily(fidelObj.base);
+        .auth-switch-mode-text { font-size: 13px; color: #64748b; text-align: center; margin-top: 12px; }
+        .auth-switch-mode-link { background: none; border: none; font-size: 13px; font-weight: 700; color: var(--brand-primary); cursor: pointer; padding: 0 0 0 4px; text-decoration: underline; }
 
-    document.getElementById("challengeDetailPlayBtn").onclick = () => launchChallengeStreakGame(fidelObj, levelNumber);
-    document.getElementById("challengeDetailFlashcardBtn").onclick = () => {
-        openFlashcardStudy(buildFlashcardDeckForFamily(fidelObj), `"${fidelObj.base}" Family`, () => {
-            document.getElementById("challengeFamilyDetailScreen").style.display = "block";
-        });
-        document.getElementById("challengeFamilyDetailScreen").style.display = "none";
-    };
-    document.getElementById("challengeDetailWritingBtn").onclick = () => {
-        openWritingSubmitScreen(fidelObj.base, () => {
-            document.getElementById("challengeFamilyDetailScreen").style.display = "block";
-            renderWritingStatusForFamily(fidelObj.base);
-        });
-        document.getElementById("challengeFamilyDetailScreen").style.display = "none";
-    };
-}
+        .btn-primary { background: var(--brand-primary); color: white; padding: 14px; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; transition: background-color 0.2s; }
+        .btn-primary:hover { background: var(--brand-secondary); }
+        .btn-secondary { background: transparent; color: #64748b; font-size: 13px; border: none; cursor: pointer; padding: 6px; font-weight: 500; }
 
-function exitChallengeFamilyDetail() {
-    document.getElementById("challengeFamilyDetailScreen").style.display = "none";
-    document.getElementById("challengeFamilyScreen").style.display = "block";
-}
+        #studentDashboard, #teacherOnlyDashboard { display: none; max-width: 1300px; margin: 0 auto; width: 100%; }
+        .dashboard-split-layout { display: grid; grid-template-columns: 1fr 360px; gap: 24px; align-items: start; }
+        @media (max-width: 1024px) { .dashboard-split-layout { grid-template-columns: 1fr; } } 
 
-function renderChallengeFamilyDetailGiantRow(fidelObj) {
-    const mount = document.getElementById("challengeFamilyDetailGiantRow");
-    mount.innerHTML = "";
+        header { background: white; padding: 20px; border-radius: var(--radius-standard); box-shadow: var(--shadow-premium); border: 1px solid var(--border-color); margin-bottom: 20px; }
+        .profile-clickable-trigger { display: flex; align-items: center; gap: 12px; }
+        .user-avatar-badge { width: 48px; height: 48px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        .progress-container { width: 100%; background: #e2e8f0; border-radius: 8px; height: 8px; overflow: hidden; margin-top: 12px; }
+        .progress-bar { height: 100%; width: 0%; background: #10b981; transition: width 0.4s ease; }
 
-    const subs = (fidelObj.prefix === "h" || fidelObj.prefix === "ḥ")
-        ? ["ha", "hu", "hee", "ha", "hay", "hih", "ho"]
-        : vowelSoundLabels.map(sub => `${fidelObj.prefix}${sub}`);
+        .pod-card { background: white; border: 1px solid var(--border-color); border-radius: var(--radius-standard); padding: 16px 20px; margin-bottom: 20px; box-shadow: var(--shadow-premium); }
+        .pod-header-row { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .pod-header-left { display: flex; align-items: center; gap: 12px; }
+        .pod-color-swatch { width: 14px; height: 14px; border-radius: 50%; background: var(--brand-primary); flex-shrink: 0; }
+        .pod-team-name { display: block; font-size: 16px; font-weight: 700; color: var(--neutral-dark); }
+        .pod-team-amharic { display: block; font-size: 12px; color: #64748b; font-family: 'Abyssinica SIL', serif; margin-top: 1px; }
+        .pod-toggle-btn { background: none; border: none; font-size: 12px; color: #94a3b8; cursor: pointer; padding: 6px; transition: transform 0.2s; }
+        .pod-toggle-btn.open { transform: rotate(180deg); }
+        .pod-teammates-list { display: none; flex-direction: column; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border-color); }
+        .pod-teammates-list.open { display: flex; }
+        .pod-solo-message { font-size: 12px; color: #0d9488; background: #f0fdfa; border-radius: 10px; padding: 10px 12px; margin-top: 4px; }
+        .teammate-row { font-size: 13px; font-weight: 500; color: #475569; }
 
-    fidelObj.family.forEach((char, idx) => {
-        const card = document.createElement('div');
-        card.className = "giant-char-card";
-        card.innerHTML = `<div class="letter">${char}</div><div class="sub">${subs[idx]}</div>`;
-        mount.appendChild(card);
-    });
-}
+        .admin-gate-card { display: none; max-width: 450px; width: 100%; margin: 60px auto; background: white; border-radius: var(--radius-standard); padding: 28px; box-shadow: var(--shadow-premium); border: 1px solid var(--border-color); text-align: center; }
 
-// -----------------------------------------------------------------------------
-// Expose functions used via inline onclick="" handlers in index.html
-// -----------------------------------------------------------------------------
+        .teacher-panel { background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-standard); padding: 24px; box-shadow: var(--shadow-premium); margin-top: 20px; }
 
-window.enterModeSelect = enterModeSelect;
-window.chooseModePractice = chooseModePractice;
-window.chooseModeChallenge = chooseModeChallenge;
-window.exitChallengeBackToDashboard = exitChallengeBackToDashboard;
-window.openChallengeFamilyPicker = openChallengeFamilyPicker;
-window.exitChallengeFamilyPicker = exitChallengeFamilyPicker;
-window.returnToChallengeFamilyPicker = returnToChallengeFamilyPicker;
-window.launchChallengeStreakGame = launchChallengeStreakGame;
-window.exitChallengeFamilyDetail = exitChallengeFamilyDetail;
-window.enterCaptainDashboard = enterCaptainDashboard;
-window.exitCaptainDashboard = exitCaptainDashboard;
+        .teacher-roster-table { width: 100%; border-collapse: collapse; margin-top: 12px; text-align: left; }
+        .teacher-roster-table th, .teacher-roster-table td { padding: 12px; border-bottom: 1px solid var(--border-color); font-size: 14px; }
+        .teacher-roster-table th { background: #f8fafc; font-weight: 700; color: #475569; }
+
+        .teacher-panel-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .teacher-panel-header h2 { margin-bottom: 0 !important; }
+        .teacher-panel-toggle { background: none; border: none; font-size: 13px; color: #94a3b8; transition: transform 0.2s; flex-shrink: 0; padding: 6px; }
+        .teacher-panel-toggle.collapsed { transform: rotate(-90deg); }
+        .teacher-panel-body { margin-top: 4px; }
+        .teacher-panel-body.collapsed { display: none; }
+
+        @media (max-width: 640px) {
+            .teacher-panel { padding: 16px; }
+
+            /* Reflow the roster table into stacked cards instead of squishing
+               3 columns into a narrow viewport — each row becomes a labeled
+               mini-card, fully readable without horizontal scrolling. */
+            .teacher-roster-table thead { display: none; }
+            .teacher-roster-table, .teacher-roster-table tbody, .teacher-roster-table tr, .teacher-roster-table td { display: block; width: 100%; }
+            .teacher-roster-table tr { border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 10px; padding: 10px 12px; }
+            .teacher-roster-table td { border-bottom: none; padding: 4px 0; font-size: 13px; }
+            .teacher-roster-table td::before { content: attr(data-label); display: block; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 2px; }
+
+            /* Stack side-by-side dropdowns/buttons instead of cramming them
+               into one row on a narrow screen. */
+            .teacher-control-group { display: flex; flex-direction: column; gap: 8px; }
+            .teacher-control-group select, .teacher-control-group button { width: 100%; }
+        }
+
+        .collapsible-dropdown-container { background: white; border-radius: var(--radius-standard); box-shadow: var(--shadow-premium); border: 1px solid var(--border-color); overflow: hidden; margin-bottom: 20px; }
+        .dropdown-toggle-header { width: 100%; background: #f8fafc; border: none; padding: 16px 20px; font-size: 15px; font-weight: 700; color: var(--neutral-dark); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .dropdown-content-pane { display: none; padding: 16px; background: white; border-top: 1px solid var(--border-color); flex-direction: column; gap: 8px; }
+        .dropdown-content-pane.open { display: flex; }
+
+        .leaderboard-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #f8fafc; border-radius: 10px; margin-bottom: 6px; }
+        .leaderboard-row.current-user { border: 1px solid var(--brand-primary); background: #f0fdfa; }
+        .leaderboard-row.top-five { background: #fffbeb; }
+        .leaderboard-row.top-five.current-user { background: #f0fdfa; border-color: var(--brand-primary); }
+        .leaderboard-row.top-five .leaderboard-rank { color: #b45309; font-weight: 700; }
+        .player-info { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; }
+        .leaderboard-rank { color: #94a3b8; font-weight: 500; min-width: 22px; }
+        .player-score-badge { background: var(--brand-primary); color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+
+        .workspace-title { font-size: 22px; font-weight: 700; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+
+        .workspace-header-block { margin-bottom: 18px; }
+        .workspace-title-main { font-size: 22px; font-weight: 700; color: var(--neutral-dark); }
+        .workspace-title-sub { font-size: 13px; color: #64748b; font-family: 'Abyssinica SIL', serif; margin-top: 2px; margin-bottom: 14px; }
+        .workspace-action-row { display: flex; gap: 8px; flex-wrap: wrap; }
+        .workspace-action-btn { flex: 1 1 auto; min-width: 140px; padding: 10px 14px; font-size: 13px; font-weight: 700; border-radius: 12px; border: 1px solid var(--border-color); background: white; color: var(--neutral-dark); cursor: pointer; box-shadow: var(--shadow-premium); transition: all 0.2s; text-align: center; }
+        .workspace-action-btn:hover { transform: translateY(-1px); border-color: var(--brand-primary); }
+        .workspace-action-btn.challenge-variant { background: #475569; color: white; border-color: #475569; }
+
+        @media (max-width: 640px) {
+            .workspace-action-btn { min-width: 100%; }
+        }
+
+        .fidel-grid-3col { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 12px; }
+        .fidel-card { background: #fff; border: 1px solid var(--border-color); border-radius: 14px; padding: 20px 0; text-align: center; font-size: 28px; cursor: pointer; box-shadow: var(--shadow-premium); display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-family: 'Abyssinica SIL', serif; color: var(--neutral-dark); }
+        .fidel-card:hover { transform: translateY(-1px); border-color: var(--brand-primary); box-shadow: 0 6px 20px rgba(15, 118, 110, 0.08); }
+        .fidel-card.completed { background: #f0fdf4; border-color: #10b981; color: #10b981; }
+
+        #isolatedFamilyClassroom, #gameWorkspace { display: none; background: white; padding: 24px; border-radius: var(--radius-standard); box-shadow: var(--shadow-premium); border: 1px solid var(--border-color); text-align: center; }
+        #gameWorkspace { max-width: 700px; margin: 24px auto; }
+
+        .classroom-header-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; background: var(--neutral-dark); color: white; border-radius: 10px; padding: 10px 4px; font-size: 12px; font-weight: 500; margin-bottom: 12px; }
+        .classroom-row-giant { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 24px; }
+        .giant-char-card { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 16px 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .giant-char-card .letter { font-size: 32px; color: var(--neutral-dark); font-family: 'Abyssinica SIL', serif; margin-bottom: 4px; }
+        .giant-char-card .sub { font-size: 13px; color: #64748b; font-weight: 500; }
+
+        .matching-game-grid-blocks { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 20px 0; }
+        .game-interactive-token { background: white; border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px 12px; font-size: 18px; font-weight: 500; cursor: pointer; text-align: center; transition: all 0.2s; box-shadow: var(--shadow-premium); min-height: 70px; display: flex; align-items: center; justify-content: center; }
+        .game-interactive-token:hover { border-color: var(--brand-primary); background-color: #fafafa; }
+        .game-interactive-token.active-selected { border-color: var(--brand-primary); background: #f0fdfa; color: var(--brand-primary); font-weight: 700; box-shadow: 0 0 0 2px var(--brand-primary); }
+        .game-interactive-token.resolved-pair { background: #f0fdf4; border-color: #10b981; color: #10b981; opacity: 0.5; pointer-events: none; }
+
+        .embedded-classroom-sketchpad { background: #f8fafc; border: 1px solid var(--border-color); padding: 16px; border-radius: 14px; margin-top: 24px; text-align: left; }
+        .sketch-canvas-element { background: white; border: 1px dashed #cbd5e1; border-radius: 8px; width: 100%; height: 140px; cursor: crosshair; display: block; touch-action: none; }
+        .sketchpad-actions-row { display: flex; gap: 8px; margin-top: 10px; }
+
+        .feed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-top: 12px; }
+        .feed-item { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+        .feed-item img { width: 100%; height: 110px; object-fit: cover; display: block; background: white; border-bottom: 1px solid var(--border-color); }
+        .feed-meta { padding: 8px; font-size: 11px; color: #64748b; display: flex; flex-direction: column; gap: 4px; }
+        .feed-meta-row { display: flex; justify-content: space-between; align-items: center; }
+        .verify-badge-btn { background: white; border: 1px solid #cbd5e1; border-radius: 6px; padding: 2px 6px; cursor: pointer; font-size: 10px; font-weight: 700; color: var(--neutral-dark); display: flex; align-items: center; gap: 3px; }
+        .verify-badge-btn:hover { border-color: var(--brand-primary); background: #f0fdfa; }
+
+        .avatar-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 16px; }
+        .avatar-option { font-size: 24px; padding: 8px; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; }
+        .avatar-option.selected { border-color: var(--brand-primary); background: #f0fdfa; }
+
+        #toastContainer { position: fixed; bottom: 90px; right: 24px; display: flex; flex-direction: column; gap: 8px; z-index: 9999; pointer-events: none; }
+        .toast-popup { background: var(--neutral-dark); color: white; padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 6px; }
+
+        #confettiCanvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 99999; }
+        .bottom-banner { position: fixed; bottom: 20px; left: 24px; right: 24px; background: var(--neutral-dark); padding: 14px 20px; border-radius: var(--radius-standard); display: flex; justify-content: space-between; align-items: center; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 1252px; margin: 0 auto; }
+        .logout-btn { background: transparent; color: white; border: none; font-size: 14px; font-weight: 500; cursor: pointer; }
+
+        /* ---------------------------------------------------------------- */
+        /* Fidel Challenge: board header                                    */
+        /* ---------------------------------------------------------------- */
+        .challenge-board-header { background: white; border: 1px solid var(--border-color); border-radius: var(--radius-standard); padding: 20px 24px; box-shadow: var(--shadow-premium); margin-top: 16px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+        .challenge-board-team { display: flex; align-items: center; gap: 12px; }
+        .challenge-board-team-swatch { width: 14px; height: 14px; border-radius: 50%; background: var(--brand-primary); flex-shrink: 0; }
+        .challenge-board-team-name { font-size: 16px; font-weight: 700; color: var(--neutral-dark); }
+        .challenge-board-team-sub { font-size: 12px; color: #64748b; margin-top: 2px; }
+
+        .challenge-board-streak { display: flex; align-items: center; gap: 8px; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 12px; padding: 8px 14px; }
+        .challenge-board-streak-icon { font-size: 18px; }
+        .challenge-board-streak-value { font-size: 15px; font-weight: 700; color: #c2410c; }
+        .challenge-board-streak-label { font-size: 11px; color: #c2410c; opacity: 0.8; }
+
+        .challenge-board-progress-track { width: 100%; height: 8px; background: #e2e8f0; border-radius: 8px; overflow: hidden; margin-top: 14px; }
+        .challenge-board-progress-fill { height: 100%; background: linear-gradient(90deg, var(--brand-primary), #5eead4); border-radius: 8px; transition: width 0.5s ease; }
+
+        /* ---------------------------------------------------------------- */
+        /* Fidel Challenge: mode select                                     */
+        /* ---------------------------------------------------------------- */
+        #modeSelectScreen .btn-primary,
+        #modeSelectScreen .btn-secondary { display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .mode-option { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 22px 16px; border-radius: var(--radius-standard); border: 1px solid var(--border-color); background: white; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-premium); text-align: center; }
+        .mode-option:hover { transform: translateY(-2px); border-color: var(--brand-primary); }
+        .mode-select-greeting { font-size: 22px; font-weight: 700; color: var(--brand-secondary); font-family: 'Abyssinica SIL', serif; margin-bottom: 4px; }
+        .mode-option-amharic { font-size: 14px; font-weight: 700; color: var(--brand-primary); font-family: 'Abyssinica SIL', serif; opacity: 0.7; margin-bottom: 2px; }
+        .mode-option-icon { font-size: 32px; margin-bottom: 4px; }
+        .mode-option-title { font-size: 16px; font-weight: 700; color: var(--neutral-dark); }
+        .mode-option-desc { font-size: 12px; color: #64748b; }
+        .mode-option.challenge-variant { background: linear-gradient(135deg, #f0fdfa, white); border-color: #5eead4; }
+
+        /* ---------------------------------------------------------------- */
+        /* Fidel Challenge: level map                                       */
+        /* ---------------------------------------------------------------- */
+        .challenge-levels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 18px; margin-top: 20px; position: relative; }
+
+        .challenge-level-card { position: relative; background: white; border: 1px solid var(--border-color); border-radius: var(--radius-standard); padding: 24px 14px 18px; text-align: center; box-shadow: var(--shadow-premium); transition: all 0.2s; overflow: hidden; }
+
+        .challenge-level-card.locked { background: #f1f5f9; border: 2px dashed #cbd5e1; }
+        .challenge-level-card.locked .challenge-level-families,
+        .challenge-level-card.locked .challenge-level-title { opacity: 0.5; }
+        .challenge-level-card.locked .challenge-level-number-badge { background: #cbd5e1; color: #64748b; }
+
+        .challenge-level-card.unlocked { cursor: pointer; }
+        .challenge-level-card.unlocked:hover { transform: translateY(-3px); border-color: var(--brand-primary); box-shadow: 0 8px 24px rgba(15, 118, 110, 0.12); }
+
+        .challenge-level-card.completed { border-color: #10b981; }
+        .challenge-level-card.completed .challenge-level-number-badge { background: #10b981; }
+        .challenge-level-card.completed::after {
+            content: "✓";
+            position: absolute; top: 8px; right: 10px;
+            color: #10b981; font-size: 16px; font-weight: 700;
+        }
+
+        .challenge-level-card.current { border-color: var(--brand-primary); background: #f0fdfa; }
+        .challenge-level-card.current::before {
+            content: "CURRENT";
+            position: absolute; top: 0; left: 0; right: 0;
+            background: var(--brand-primary); color: white;
+            font-size: 9px; font-weight: 700; letter-spacing: 0.6px;
+            padding: 3px 0;
+        }
+        .challenge-level-card.current { padding-top: 32px; }
+
+        .challenge-level-number-badge {
+            width: 44px; height: 44px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 10px; font-size: 18px; font-weight: 700;
+            background: #f1f5f9; color: var(--neutral-dark);
+        }
+        .challenge-level-card.unlocked .challenge-level-number-badge { background: var(--brand-primary); color: white; }
+        .challenge-level-card.locked .challenge-level-number-badge { background: #e2e8f0; color: #94a3b8; font-size: 20px; }
+
+        .challenge-level-title { font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 6px; }
+        .challenge-level-families { font-size: 20px; font-family: 'Abyssinica SIL', serif; color: var(--neutral-dark); letter-spacing: 2px; }
+        .challenge-level-card.unlocked .challenge-level-families { color: var(--brand-primary); }
+
+        .challenge-capstone-badge { display: inline-block; margin-top: 6px; font-size: 10px; font-weight: 700; color: #b45309; background: #fef3c7; padding: 2px 8px; border-radius: 8px; }
+
+        /* ---------------------------------------------------------------- */
+        /* Fidel Challenge: family picker                                   */
+        /* ---------------------------------------------------------------- */
+        .challenge-family-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+        .challenge-family-card { background: white; border: 1px solid var(--border-color); border-radius: var(--radius-standard); padding: 20px 16px; text-align: center; box-shadow: var(--shadow-premium); cursor: pointer; transition: all 0.2s; border-left: 6px solid var(--border-color); }
+        .challenge-family-card:hover { transform: translateY(-2px); border-color: var(--brand-primary); }
+        .challenge-family-card.mastered { border-color: #10b981; background: #f0fdf4; }
+
+        /* Position-in-level color coding: 1st family green, 2nd yellow, 3rd red.
+           Applied consistently across every level. */
+        .challenge-family-card.pos-1 { border-left-color: #22c55e; }
+        .challenge-family-card.pos-2 { border-left-color: #eab308; }
+        .challenge-family-card.pos-3 { border-left-color: #ef4444; }
+        .challenge-family-card.pos-1 .challenge-family-position-tag { color: #15803d; background: #dcfce7; }
+        .challenge-family-card.pos-2 .challenge-family-position-tag { color: #a16207; background: #fef9c3; }
+        .challenge-family-card.pos-3 .challenge-family-position-tag { color: #b91c1c; background: #fee2e2; }
+        .challenge-family-position-tag { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 8px; margin-bottom: 8px; }
+
+        .challenge-family-letter { font-size: 40px; font-family: 'Abyssinica SIL', serif; color: var(--neutral-dark); margin-bottom: 10px; }
+        .challenge-family-progress-row { display: flex; flex-direction: column; gap: 6px; }
+        .challenge-family-pill { font-size: 11px; font-weight: 700; color: #64748b; background: #f1f5f9; border-radius: 8px; padding: 4px 10px; }
+        .challenge-family-pill.done { color: #047857; background: #d1fae5; }
+
+        /* ---------------------------------------------------------------- */
+        /* Fidel Challenge: family detail (giant letters, game, flashcards) */
+        /* ---------------------------------------------------------------- */
+        .challenge-streak-rule-banner { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 12px; padding: 12px 16px; font-size: 13px; color: #9a3412; margin-bottom: 18px; text-align: left; }
+
+        .challenge-writing-status { border-radius: 12px; padding: 12px 16px; font-size: 13px; text-align: left; margin-top: 4px; }
+        .challenge-writing-status.pending { background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; }
+        .challenge-writing-status.approved { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+        .challenge-writing-status.rejected { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+
+        .mode-option.selected { border-color: var(--brand-primary); background: #f0fdfa; }
+
+        .teacher-submission-card { display:flex; gap:14px; align-items:flex-start; padding:14px; border:1px solid var(--border-color); border-radius:12px; margin-bottom:12px; background:#fafafa; }
+        .teacher-submission-card img { width:100px; height:100px; object-fit:cover; border-radius:8px; border:1px solid var(--border-color); background:white; }
+        .teacher-submission-meta { flex:1; }
+        .teacher-submission-meta strong { font-size:14px; }
+        .teacher-submission-meta .letter { font-size:24px; font-family:'Abyssinica SIL', serif; margin-left:6px; }
+        .teacher-submission-actions { display:flex; gap:8px; margin-top:10px; }
+        .teacher-submission-actions button { padding:6px 14px; font-size:12px; border-radius:8px; border:none; cursor:pointer; font-weight:700; }
+        .btn-approve { background:#dcfce7; color:#166534; }
+        .btn-reject { background:#fee2e2; color:#991b1b; }
+        .teacher-reject-note-input { width:100%; margin-top:8px; padding:8px; font-size:12px; border:1px solid var(--border-color); border-radius:8px; }
+
+        .teacher-team-row { display:flex; justify-content:space-between; align-items:center; padding:12px 14px; border:1px solid var(--border-color); border-radius:12px; margin-bottom:10px; }
+        .teacher-team-row.ready { border-color:#fbbf24; background:#fffbeb; }
+        .teacher-team-row-info strong { font-size:14px; }
+        .teacher-team-row-info span { font-size:12px; color:#64748b; display:block; margin-top:2px; }
+        .btn-advance { background:var(--brand-primary); color:white; padding:8px 16px; font-size:12px; border-radius:8px; border:none; cursor:pointer; font-weight:700; }
+        .btn-advance:disabled { background:#cbd5e1; cursor:not-allowed; }
+
+        .teacher-team-row-wrapper { margin-bottom: 10px; }
+        .team-members-toggle { background: none; border: none; font-size: 11px; color: #94a3b8; cursor: pointer; padding: 6px; transition: transform 0.2s; }
+        .team-members-toggle.collapsed { transform: rotate(-90deg); }
+        .team-members-list { display: none; flex-direction: column; gap: 6px; padding: 10px 14px; background: #f8fafc; border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 12px 12px; margin-top: -10px; }
+        .team-members-list.open { display: flex; }
+        .team-member-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 4px 0; }
+        .team-member-progress { color: #64748b; font-weight: 600; }
+
+        .captain-member-card { border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 10px; overflow: hidden; }
+        .captain-member-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; font-size: 13px; font-weight: 600; cursor: pointer; background: #fafafa; }
+        .captain-member-toggle { font-size: 11px; color: #94a3b8; transition: transform 0.2s; }
+        .captain-member-toggle.collapsed { transform: rotate(-90deg); }
+        .captain-member-details { display: none; flex-direction: column; gap: 10px; padding: 12px 14px; }
+        .captain-member-details.open { display: flex; }
+        .captain-family-detail { display: flex; align-items: center; gap: 10px; padding: 8px; background: #f8fafc; border-radius: 10px; }
+        .captain-family-letter { font-size: 24px; font-family: 'Abyssinica SIL', serif; width: 34px; text-align: center; flex-shrink: 0; }
+        .captain-family-meta { display: flex; flex-direction: column; gap: 2px; font-size: 11px; color: #64748b; flex: 1; }
+        .captain-stat-done { color: #10b981; font-weight: 700; }
+        .captain-family-thumb { width: 44px; height: 44px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color); flex-shrink: 0; }
+
+        .current-captain-row { display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; margin-bottom:6px; font-size:13px; }
+        .current-captain-row strong { color:#92400e; }
+
+        /* ---------------------------------------------------------------- */
+        /* Reading Path                                                      */
+        /* ---------------------------------------------------------------- */
+        .reading-passage-card { background: white; border: 1px solid var(--border-color); border-radius: var(--radius-standard); padding: 28px 20px; box-shadow: var(--shadow-premium); margin-bottom: 16px; text-align: center; }
+        .reading-passage-amharic { font-size: 28px; font-family: 'Abyssinica SIL', serif; color: var(--neutral-dark); line-height: 1.6; }
+        .reading-passage-translation { font-size: 14px; color: #0369a1; font-style: italic; margin-top: 10px; }
+        .reading-grammar-note { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; text-align: left; }
+        .reading-grammar-note strong { font-size: 13px; color: #0369a1; display: block; margin-bottom: 6px; }
+        .reading-grammar-note p { font-size: 13px; color: #475569; line-height: 1.6; }
+
+        .reading-item-label { font-size: 12px; font-weight: 700; color: #0369a1; text-align: left; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.4px; }
+
+        .student-team-row { display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-radius:10px; background:#f8fafc; margin-bottom:8px; font-size:12px; }
+        .student-team-row.ready { background:#fffbeb; border:1px solid #fde68a; }
+        .student-team-row-name { font-weight:700; }
+        .student-team-row-level { color:#64748b; }
+        .student-team-row.ready .student-team-row-level { color:#b45309; font-weight:700; }
+
+        #flashcardScreen { display: none; }
+        .flashcard-stage { display: flex; justify-content: center; margin: 20px 0; }
+        .flashcard { width: 220px; height: 220px; position: relative; perspective: 1000px; cursor: pointer; }
+        .flashcard.flipped .flashcard-front { transform: rotateY(180deg); }
+        .flashcard.flipped .flashcard-back { transform: rotateY(0deg); }
+        .flashcard-face { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-standard); box-shadow: var(--shadow-premium); border: 1px solid var(--border-color); backface-visibility: hidden; transition: transform 0.5s; font-weight: 700; }
+        .flashcard-front { background: white; font-size: 72px; font-family: 'Abyssinica SIL', serif; color: var(--neutral-dark); transform: rotateY(0deg); }
+        .flashcard-back { background: var(--brand-primary); color: white; font-size: 28px; transform: rotateY(-180deg); }
