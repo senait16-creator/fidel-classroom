@@ -177,6 +177,22 @@ async function setTeamCaptain() {
 
     showNotificationToast("Setting captain...");
 
+    // If this team already has a different captain, clear THEIR is_captain
+    // flag first — otherwise a replaced captain would stay permanently
+    // exempt from Fidel Challenge even after losing the role.
+    const { data: existingTeam } = await _supabase
+        .from('teams')
+        .select('captain_id')
+        .eq('id', teamId)
+        .maybeSingle();
+
+    if (existingTeam?.captain_id && existingTeam.captain_id !== studentId) {
+        await _supabase
+            .from('profiles')
+            .update({ is_captain: false })
+            .eq('id', existingTeam.captain_id);
+    }
+
     const { error } = await _supabase
         .from('teams')
         .update({ captain_id: studentId })
@@ -186,6 +202,17 @@ async function setTeamCaptain() {
         console.error("Failed to set captain:", error);
         return showNotificationToast("Failed: " + error.message);
     }
+
+    // Mark the new captain's own profile as exempt from Fidel Challenge
+    // gates — teams.captain_id alone only tells us which team has a
+    // captain, not whether THIS person should skip the streak/writing
+    // requirements, which is what profiles.is_captain is for.
+    const { error: flagError } = await _supabase
+        .from('profiles')
+        .update({ is_captain: true })
+        .eq('id', studentId);
+
+    if (flagError) console.error("Failed to set is_captain flag:", flagError);
 
     showNotificationToast(`${studentLabel} is now the captain! 👑`);
     await loadCurrentCaptains();
@@ -352,8 +379,14 @@ async function checkAndUpdateTeamLevelCompletion(studentId) {
     const { data: level } = await _supabase.from('challenge_levels').select('letter_families').eq('level_number', team.current_level).maybeSingle();
     if (!level) return;
 
-    const { data: members } = await _supabase.from('profiles').select('id').eq('team_id', team.id);
-    const memberIds = (members || []).map(m => m.id);
+    // Captains are exempt from Fidel Challenge gates entirely (they already
+    // know Amharic — their job is leading the team, not racing through
+    // levels), so they're excluded from the "did everyone clear every
+    // family" check. Without this, a team with a captain could never
+    // advance, since the captain would never have student_family_progress
+    // rows to begin with.
+    const { data: members } = await _supabase.from('profiles').select('id, is_captain').eq('team_id', team.id);
+    const memberIds = (members || []).filter(m => !m.is_captain).map(m => m.id);
     if (memberIds.length === 0) return;
 
     const { data: progressRows } = await _supabase
@@ -443,7 +476,7 @@ async function loadTeamMembersForRoster(teamId, currentLevel, mountEl) {
 
     const { data: members } = await _supabase
         .from('profiles')
-        .select('id, nickname, avatar')
+        .select('id, nickname, avatar, is_captain')
         .eq('team_id', teamId)
         .order('nickname');
 
@@ -468,17 +501,26 @@ async function loadTeamMembersForRoster(teamId, currentLevel, mountEl) {
 
     mountEl.innerHTML = "";
     members.forEach(member => {
-        const clearedCount = (level?.letter_families || []).filter(letter => {
-            const row = (progressRows || []).find(r => r.student_id === member.id && r.base_letter === letter);
-            return row?.streak_passed && row?.writing_passed;
-        }).length;
-
         const memberRow = document.createElement('div');
         memberRow.className = 'team-member-row';
-        memberRow.innerHTML = `
-            <span>${member.avatar || '🦁'} ${member.nickname}</span>
-            <span class="team-member-progress">${clearedCount} / ${familyCount} families cleared</span>
-        `;
+
+        if (member.is_captain) {
+            memberRow.innerHTML = `
+                <span>${member.avatar || '🦁'} ${member.nickname}</span>
+                <span class="team-member-progress" style="color:#b45309;">👑 Captain — exempt</span>
+            `;
+        } else {
+            const clearedCount = (level?.letter_families || []).filter(letter => {
+                const row = (progressRows || []).find(r => r.student_id === member.id && r.base_letter === letter);
+                return row?.streak_passed && row?.writing_passed;
+            }).length;
+
+            memberRow.innerHTML = `
+                <span>${member.avatar || '🦁'} ${member.nickname}</span>
+                <span class="team-member-progress">${clearedCount} / ${familyCount} families cleared</span>
+            `;
+        }
+
         mountEl.appendChild(memberRow);
     });
 }
