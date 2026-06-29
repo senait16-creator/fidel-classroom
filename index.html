@@ -337,7 +337,8 @@
             <p style="font-size:16px; font-weight:700; color:#92400e; margin-bottom:2px;">👑 You're a Captain!</p>
             <p style="font-size:13px; color:#b45309;">Help lead your team to victory!</p>
         </div>
-        <h2 class="main-title" style="font-size: 22px;">Choose Your Path</h2>
+        <p class="mode-select-greeting">ሰላም<span id="modeSelectNickname"></span>!</p>
+        <h2 class="main-title" style="font-size: 22px;">What are you working on today?</h2>
         <p class="subtitle">Practice on your own, compete with your team, or advance to reading!</p>
         <div style="display:flex; flex-direction:column; gap:14px;">
             <div class="mode-option" id="modeSelectCaptainOption" style="display:none; background: linear-gradient(135deg, #fffbeb, white); border-color: #fde68a;" onclick="enterCaptainDashboard()">
@@ -346,16 +347,19 @@
                 <div class="mode-option-desc">Review your team's submissions and progress</div>
             </div>
             <div class="mode-option" onclick="chooseModePractice()">
+                <div class="mode-option-amharic">ፊደል</div>
                 <div class="mode-option-icon">📖</div>
                 <div class="mode-option-title">Practice the Fidel</div>
                 <div class="mode-option-desc">Free play — explore any letter, no pressure</div>
             </div>
             <div class="mode-option challenge-variant" onclick="chooseModeChallenge()">
+                <div class="mode-option-amharic">ውድድር</div>
                 <div class="mode-option-icon">🏆</div>
                 <div class="mode-option-title">Fidel Challenge</div>
                 <div class="mode-option-desc">Team competition — level up together</div>
             </div>
             <div class="mode-option" style="background: linear-gradient(135deg, #f0f9ff, white); border-color: #7dd3fc;" onclick="chooseModeReading()">
+                <div class="mode-option-amharic">ንባብ</div>
                 <div class="mode-option-icon">📘</div>
                 <div class="mode-option-title">Advance to Reading</div>
                 <div class="mode-option-desc">Already know the Fidel? Start reading real Amharic</div>
