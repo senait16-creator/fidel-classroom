@@ -606,6 +606,9 @@ function launchDashboard(viewMode) {
         loadTeamDashboard(currentUser);
         buildMatrixInterfaceGrid();
         renderStudentTeamProgress();
+
+        const captainBtn = document.getElementById("captainDashboardEntryBtn");
+        if (captainBtn) captainBtn.style.display = currentProfile?.is_captain ? "block" : "none";
     }
 }
 
