@@ -322,6 +322,25 @@ function openChallengeFamilyDetail(fidelObj, levelNumber) {
     document.getElementById("challengeFamilyDetailTitle").innerText = `Family: "${fidelObj.base}"`;
 
     renderChallengeFamilyDetailGiantRow(fidelObj);
+
+    // Captains already know Amharic and aren't required to play through
+    // the gates themselves — they're here to lead their team, not compete.
+    // Show the letters for reference, but skip the streak/writing
+    // requirements entirely rather than making them complete busywork
+    // that proves nothing about a skill they already have.
+    if (currentProfile?.is_captain) {
+        document.getElementById("challengeDetailPlayBtn").style.display = "none";
+        document.getElementById("challengeDetailFlashcardBtn").style.display = "none";
+        document.getElementById("challengeDetailWritingBtn").style.display = "none";
+        const box = document.getElementById("challengeWritingStatusBox");
+        box.style.display = "block";
+        box.innerHTML = `<div class="challenge-writing-status approved">👑 As team captain, you're exempt from this challenge — focus on reviewing your team's submissions instead!</div>`;
+        return;
+    }
+
+    document.getElementById("challengeDetailPlayBtn").style.display = "flex";
+    document.getElementById("challengeDetailFlashcardBtn").style.display = "flex";
+    document.getElementById("challengeDetailWritingBtn").style.display = "block";
     renderWritingStatusForFamily(fidelObj.base);
 
     document.getElementById("challengeDetailPlayBtn").onclick = () => launchChallengeStreakGame(fidelObj, levelNumber);
