@@ -41,6 +41,226 @@ function chooseModePractice() {
     launchDashboard("student");
 }
 
+// -----------------------------------------------------------------------------
+// Captain Dashboard — scoped review screen for a team's captain. Shows ONLY
+// their own team's pending submissions and member progress, enforced both
+// by these queries (filtered to their team_id) AND by RLS at the database
+// level (is_captain_of_student()), so this isn't just a UI-level scoping.
+// -----------------------------------------------------------------------------
+
+function enterCaptainDashboard() {
+    document.getElementById("studentDashboard").style.display = "none";
+    document.getElementById("captainDashboardScreen").style.display = "block";
+    loadCaptainWritingQueue();
+    loadCaptainTeamProgress();
+}
+
+function exitCaptainDashboard() {
+    document.getElementById("captainDashboardScreen").style.display = "none";
+    document.getElementById("studentDashboard").style.display = "block";
+}
+
+async function loadCaptainWritingQueue() {
+    const mount = document.getElementById("captainWritingQueueMount");
+    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
+
+    if (!currentProfile?.team_id) {
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">You're not assigned to a team.</p>`;
+        return;
+    }
+
+    // Get this captain's team members first, then filter submissions to
+    // just those students — the RLS policy also enforces this server-side,
+    // but filtering here too keeps the query itself scoped and efficient.
+    const { data: members } = await _supabase
+        .from('profiles')
+        .select('id')
+        .eq('team_id', currentProfile.team_id);
+
+    const memberIds = (members || []).map(m => m.id);
+    if (memberIds.length === 0) {
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No teammates yet.</p>`;
+        return;
+    }
+
+    const { data: submissions, error } = await _supabase
+        .from('writing_submissions')
+        .select('id, base_letter, image_url, status, submitted_at, student_id, profiles!writing_submissions_student_id_fkey(nickname, avatar)')
+        .in('student_id', memberIds)
+        .eq('status', 'pending')
+        .order('submitted_at', { ascending: true });
+
+    if (error) {
+        console.error("Failed to load captain's writing queue:", error);
+        mount.innerHTML = `<p style="color:#ef4444; font-size:13px;">Couldn't load submissions: ${error.message}</p>`;
+        return;
+    }
+
+    if (!submissions || submissions.length === 0) {
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No pending submissions from your team — all caught up!</p>`;
+        return;
+    }
+
+    mount.innerHTML = "";
+    submissions.forEach(sub => {
+        const card = document.createElement('div');
+        card.className = "teacher-submission-card";
+        card.innerHTML = `
+            <img src="${sub.image_url}" alt="Writing sample">
+            <div class="teacher-submission-meta">
+                <strong>${sub.profiles?.avatar || '🦁'} ${sub.profiles?.nickname || 'Student'}</strong>
+                <span class="letter">${sub.base_letter}</span>
+                <div class="teacher-submission-actions">
+                    <button class="btn-approve">✓ Approve</button>
+                    <button class="btn-reject">✗ Reject</button>
+                </div>
+                <input type="text" class="teacher-reject-note-input" placeholder="Optional note for rejection..." style="display:none;">
+            </div>
+        `;
+
+        const approveBtn = card.querySelector('.btn-approve');
+        const rejectBtn = card.querySelector('.btn-reject');
+        const noteInput = card.querySelector('.teacher-reject-note-input');
+
+        approveBtn.onclick = () => captainApproveSubmission(sub.id, sub.student_id, sub.base_letter);
+
+        rejectBtn.onclick = () => {
+            if (noteInput.style.display === "none") {
+                noteInput.style.display = "block";
+                rejectBtn.innerText = "Confirm Reject";
+            } else {
+                captainRejectSubmission(sub.id, noteInput.value.trim());
+            }
+        };
+
+        mount.appendChild(card);
+    });
+}
+
+async function captainApproveSubmission(submissionId, studentId, baseLetter) {
+    showNotificationToast("Approving...");
+
+    const { error: subError } = await _supabase
+        .from('writing_submissions')
+        .update({ status: 'approved', reviewed_by: currentUser.id, reviewed_at: new Date().toISOString() })
+        .eq('id', submissionId);
+
+    if (subError) {
+        console.error("Captain approval failed:", subError);
+        return showNotificationToast("Approval failed: " + subError.message);
+    }
+
+    const { data: progressRow } = await _supabase
+        .from('student_family_progress')
+        .select('streak_passed')
+        .eq('student_id', studentId)
+        .eq('base_letter', baseLetter)
+        .maybeSingle();
+
+    const updatePayload = { writing_passed: true };
+    if (progressRow?.streak_passed) updatePayload.completed_at = new Date().toISOString();
+
+    const { error: progressError } = await _supabase
+        .from('student_family_progress')
+        .update(updatePayload)
+        .eq('student_id', studentId)
+        .eq('base_letter', baseLetter);
+
+    if (progressError) console.error("Failed to update family progress:", progressError);
+
+    showNotificationToast("Submission approved! ✓");
+    await loadCaptainWritingQueue();
+    await loadCaptainTeamProgress();
+
+    // Same team-completion check the teacher's approval triggers — a
+    // captain's approval should be equally capable of unlocking the next
+    // level for their team, not just the admin's.
+    if (typeof checkAndUpdateTeamLevelCompletion === "function") {
+        await checkAndUpdateTeamLevelCompletion(studentId);
+    }
+}
+
+async function captainRejectSubmission(submissionId, note) {
+    showNotificationToast("Rejecting submission...");
+
+    const { error } = await _supabase
+        .from('writing_submissions')
+        .update({
+            status: 'rejected',
+            reviewed_by: currentUser.id,
+            reviewed_at: new Date().toISOString(),
+            reviewer_note: note || null
+        })
+        .eq('id', submissionId);
+
+    if (error) {
+        console.error("Captain rejection failed:", error);
+        return showNotificationToast("Reject failed: " + error.message);
+    }
+
+    showNotificationToast("Submission rejected — student can resubmit.");
+    await loadCaptainWritingQueue();
+}
+
+async function loadCaptainTeamProgress() {
+    const mount = document.getElementById("captainTeamProgressMount");
+    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
+
+    if (!currentProfile?.team_id) {
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">You're not assigned to a team.</p>`;
+        return;
+    }
+
+    const { data: team } = await _supabase
+        .from('teams')
+        .select('current_level')
+        .eq('id', currentProfile.team_id)
+        .maybeSingle();
+
+    const { data: members } = await _supabase
+        .from('profiles')
+        .select('id, nickname, avatar, is_captain')
+        .eq('team_id', currentProfile.team_id)
+        .order('nickname');
+
+    if (!members || members.length === 0) {
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No teammates yet.</p>`;
+        return;
+    }
+
+    const { data: level } = await _supabase
+        .from('challenge_levels')
+        .select('letter_families')
+        .eq('level_number', team?.current_level || 1)
+        .maybeSingle();
+
+    const familyCount = (level?.letter_families || []).length;
+
+    const { data: progressRows } = await _supabase
+        .from('student_family_progress')
+        .select('student_id, base_letter, streak_passed, writing_passed')
+        .in('student_id', members.map(m => m.id))
+        .eq('level_number', team?.current_level || 1);
+
+    mount.innerHTML = "";
+    members.forEach(member => {
+        const row = document.createElement('div');
+        row.className = 'team-member-row';
+
+        if (member.is_captain) {
+            row.innerHTML = `<span>${member.avatar || '🦁'} ${member.nickname} (you)</span><span class="team-member-progress" style="color:#b45309;">👑 Captain</span>`;
+        } else {
+            const clearedCount = (level?.letter_families || []).filter(letter => {
+                const r = (progressRows || []).find(pr => pr.student_id === member.id && pr.base_letter === letter);
+                return r?.streak_passed && r?.writing_passed;
+            }).length;
+            row.innerHTML = `<span>${member.avatar || '🦁'} ${member.nickname}</span><span class="team-member-progress">${clearedCount} / ${familyCount} families cleared</span>`;
+        }
+
+        mount.appendChild(row);
+    });
+}
+
 async function chooseModeChallenge() {
     if (!currentProfile?.team_id) {
         showNotificationToast("Fidel Challenge is a team competition — join a team in your profile to play!");
@@ -393,3 +613,5 @@ window.exitChallengeFamilyPicker = exitChallengeFamilyPicker;
 window.returnToChallengeFamilyPicker = returnToChallengeFamilyPicker;
 window.launchChallengeStreakGame = launchChallengeStreakGame;
 window.exitChallengeFamilyDetail = exitChallengeFamilyDetail;
+window.enterCaptainDashboard = enterCaptainDashboard;
+window.exitCaptainDashboard = exitCaptainDashboard;
