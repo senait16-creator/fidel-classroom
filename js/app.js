@@ -188,6 +188,40 @@ function executeVictoryConfettiCelebration() {
     animateConfettiLoop();
 }
 
+// told to add this
+function maybeShowStreakExplainer(onConfirm) {
+    const seen = localStorage.getItem('streak_explainer_seen');
+    if (seen) { onConfirm(); return; }
+
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+        display: flex; align-items: center; justify-content: center;
+        z-index: 99998; padding: 24px;
+    `;
+    overlay.innerHTML = `
+        <div style="background:white; border-radius:20px; padding:28px 24px; max-width:380px; width:100%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+            <div style="font-size:40px; margin-bottom:12px;">🔥</div>
+            <h2 style="font-size:20px; font-weight:800; color:#166534; margin-bottom:8px;">How the Streak Game Works</h2>
+            <p style="font-size:14px; color:#475569; line-height:1.6; margin-bottom:16px;">
+                Match each Amharic letter to its sound. Get <strong>20 correct in a row</strong> to pass.<br><br>
+                Miss one and your streak resets to zero — so take your time and think before you tap!
+            </p>
+            <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:12px; padding:12px; margin-bottom:20px; font-size:13px; color:#92400e;">
+                💡 Tip: Study the flashcards first, then play the game when you feel ready.
+            </div>
+            <button id="streakExplainerBtn" style="background:#166534; color:white; border:none; border-radius:12px; padding:14px; width:100%; font-size:15px; font-weight:700; cursor:pointer;">
+                Got it — Let's Play!
+            </button>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+    document.getElementById('streakExplainerBtn').onclick = () => {
+        localStorage.setItem('streak_explainer_seen', 'true');
+        overlay.remove();
+        onConfirm();
+    };
+}
 // ---------------------------------------------------------------------------
 // Sketchpad
 // ---------------------------------------------------------------------------
