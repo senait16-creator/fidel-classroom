@@ -261,8 +261,9 @@ function openTeamHubPracticePost() {
 
 async function uploadTeamPracticePost(file, baseLetter) {
     showNotificationToast("Uploading your practice post...");
-const storagePath = `practice-${currentUser.id}-${encodeURIComponent(baseLetter)}-${Date.now()}.png`;
-
+const letterIndex = alphabetData.findIndex(item => item.base === baseLetter);
+const storagePath = `practice-${currentUser.id}-fam${letterIndex}-${Date.now()}.png`;
+    
     const { error: uploadError } = await _supabase.storage
         .from('art_shares')
         .upload(storagePath, file, { contentType: file.type });
