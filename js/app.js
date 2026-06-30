@@ -1125,27 +1125,44 @@ async function renderWritingStatusForFamily(baseLetter) {
 
     const { data: submissions } = await _supabase
         .from('writing_submissions')
-        .select('status, reviewer_note, submitted_at')
+        .select('status, reviewer_note, submitted_at, image_url')
         .eq('student_id', currentUser.id)
         .eq('base_letter', baseLetter)
         .order('submitted_at', { ascending: false })
-        .limit(1);
+        .limit(3);
 
-    const latest = submissions?.[0];
-
-    if (!latest) {
+    if (!submissions || submissions.length === 0) {
         box.style.display = "none";
         return;
     }
 
     box.style.display = "block";
+    const latest = submissions[0];
+
+    let statusHTML = '';
     if (latest.status === 'approved') {
-        box.innerHTML = `<div class="challenge-writing-status approved">✓ Your writing for "${baseLetter}" was approved!</div>`;
+        statusHTML = `<div class="challenge-writing-status approved">✓ Your writing for "${baseLetter}" was approved!</div>`;
     } else if (latest.status === 'rejected') {
-        box.innerHTML = `<div class="challenge-writing-status rejected">✗ Your writing needs another try.${latest.reviewer_note ? ' Note: ' + latest.reviewer_note : ''}</div>`;
+        statusHTML = `<div class="challenge-writing-status rejected">✗ Needs another try.${latest.reviewer_note ? `<br><strong>Captain's note:</strong> ${latest.reviewer_note}` : ''}</div>`;
     } else {
-        box.innerHTML = `<div class="challenge-writing-status pending">⏳ Waiting for your captain to review your submission.</div>`;
+        statusHTML = `<div class="challenge-writing-status pending">⏳ Waiting for your captain to review.</div>`;
     }
+
+    // Show history if there are older submissions
+    if (submissions.length > 1) {
+        const historyItems = submissions.slice(1).map(sub => {
+            const date = new Date(sub.submitted_at).toLocaleDateString();
+            const icon = sub.status === 'approved' ? '✓' : sub.status === 'rejected' ? '✗' : '⏳';
+            const color = sub.status === 'approved' ? '#166534' : sub.status === 'rejected' ? '#991b1b' : '#92400e';
+            return `<div style="font-size:11px; color:${color}; padding:3px 0; border-top:1px solid #f1f5f9; margin-top:4px;">
+                ${icon} ${date}${sub.reviewer_note ? ` — "${sub.reviewer_note}"` : ''}
+            </div>`;
+        }).join('');
+
+        statusHTML += `<div style="margin-top:8px;">${historyItems}</div>`;
+    }
+
+    box.innerHTML = statusHTML;
 }
 
 // ---------------------------------------------------------------------------
