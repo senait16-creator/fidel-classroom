@@ -1498,3 +1498,5 @@ window.toggleDropdownElement = toggleDropdownElement;
 window.submitVerificationCounterBump = submitVerificationCounterBump;
 window.deleteSharedDrawing = deleteSharedDrawing;
 window.approveStudentWork = approveStudentWork;
+window.maybeShowStreakExplainer = maybeShowStreakExplainer;
+
