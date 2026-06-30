@@ -843,7 +843,7 @@ function renderErgonomicBlockGameElements() {
 }
 
 function selectBlockTokenTrackElement(element, index) {
-    if (element.classList.contains("resolved-pair")) return;
+    if (element.classList.contains("resolved-pair") || element.classList.contains("match-flash")) return;
     const targetToken = activeGamePairs[index];
 
     if (selectedGameTokenId === null) {
@@ -860,18 +860,28 @@ function selectBlockTokenTrackElement(element, index) {
         const priorToken = activeGamePairs[selectedGameTokenId];
 
         if (targetToken.matchKey === priorToken.matchKey && targetToken.kind !== priorToken.kind) {
-            element.className = "game-interactive-token resolved-pair";
-            absolutePriorElement.className = "game-interactive-token resolved-pair";
+            // Flash gold before resolving
+            element.classList.remove("active-selected");
+            absolutePriorElement.classList.remove("active-selected");
+            element.classList.add("match-flash");
+            absolutePriorElement.classList.add("match-flash");
+
+            setTimeout(() => {
+                element.className = "game-interactive-token resolved-pair";
+                absolutePriorElement.className = "game-interactive-token resolved-pair";
+                checkBlockGameCompletionState();
+            }, 350);
+
             currentStreakScore++;
             document.getElementById("gameStreakValue").innerText = currentStreakScore;
-            showNotificationToast("Match found!");
             selectedGameTokenId = null;
-            checkBlockGameCompletionState();
 
-            // Challenge mode: report every new best streak, and fire the
-            // pass callback the moment the threshold is reached. Casual
-            // Practice-mode play (activeChallengeContext === null) is
-            // completely unaffected by this block.
+            // Milestone toasts
+            if (currentStreakScore === 5) showNotificationToast("🔥 5 in a row!");
+            else if (currentStreakScore === 10) showGobezToast("10 streak — halfway there!");
+            else if (currentStreakScore === 15) showGobezToast("15 streak — almost there!");
+            else showNotificationToast("Match!");
+
             if (activeChallengeContext) {
                 activeChallengeContext.onStreakUpdate?.(currentStreakScore);
                 if (currentStreakScore >= STREAK_THRESHOLD) {
@@ -881,7 +891,7 @@ function selectBlockTokenTrackElement(element, index) {
         } else {
             currentStreakScore = 0;
             document.getElementById("gameStreakValue").innerText = currentStreakScore;
-            showNotificationToast("Not quite right! Streak reset.");
+            showNotificationToast("Not quite! Streak reset.");
             element.classList.remove("active-selected");
             absolutePriorElement.classList.remove("active-selected");
             selectedGameTokenId = null;
