@@ -836,7 +836,7 @@ window.addEventListener('beforeunload', () => {
 // ---------------------------------------------------------------------------
 
 
-window.openMatchingGameWorkspaceMode = openMatchingGameWorkspaceMode;
+
 window.shuffleClassroomRowPhonetics = shuffleClassroomRowPhonetics;
 window.classroomMarkAsMasteredDirectly = classroomMarkAsMasteredDirectly;
 window.classroomUnmasterLetterRow = classroomUnmasterLetterRow;
