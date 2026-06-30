@@ -244,7 +244,6 @@ async function loadCaptainTeamProgress() {
 
     const { data: progressRows } = await _supabase
         .from('student_family_progress')
-        .select('student_id, base_letter, streak_passed, writing_passed')
         .select('student_id, base_letter, streak_passed, writing_passed, best_streak')
         .in('student_id', members.map(m => m.id))
         .eq('level_number', team?.current_level || 1);
@@ -258,17 +257,9 @@ async function loadCaptainTeamProgress() {
     mount.innerHTML = "";
     members.forEach(member => {
         const row = document.createElement('div');
-        row.className = 'team-member-row';
         row.className = 'captain-member-card';
 
         if (member.is_captain) {
-            row.innerHTML = `<span>${member.avatar || '🦁'} ${member.nickname} (you)</span><span class="team-member-progress" style="color:#b45309;">👑 Captain</span>`;
-        } else {
-            const clearedCount = (level?.letter_families || []).filter(letter => {
-                const r = (progressRows || []).find(pr => pr.student_id === member.id && pr.base_letter === letter);
-                return r?.streak_passed && r?.writing_passed;
-            }).length;
-            row.innerHTML = `<span>${member.avatar || '🦁'} ${member.nickname}</span><span class="team-member-progress">${clearedCount} / ${familyCount} families cleared</span>`;
             row.innerHTML = `
                 <div class="captain-member-header">
                     <span>${member.avatar || '🦁'} ${member.nickname} (you)</span>
@@ -667,6 +658,7 @@ function renderChallengeFamilyDetailGiantRow(fidelObj) {
 window.enterModeSelect = enterModeSelect;
 window.chooseModePractice = chooseModePractice;
 window.chooseModeChallenge = chooseModeChallenge;
+window.chooseModeReading = chooseModeReading;
 window.exitChallengeBackToDashboard = exitChallengeBackToDashboard;
 window.openChallengeFamilyPicker = openChallengeFamilyPicker;
 window.exitChallengeFamilyPicker = exitChallengeFamilyPicker;
