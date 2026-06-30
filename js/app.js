@@ -836,7 +836,7 @@ window.addEventListener('beforeunload', () => {
 // ---------------------------------------------------------------------------
 
 
-
+// KEEP these — they still live in app.js:
 window.shuffleClassroomRowPhonetics = shuffleClassroomRowPhonetics;
 window.classroomMarkAsMasteredDirectly = classroomMarkAsMasteredDirectly;
 window.classroomUnmasterLetterRow = classroomUnmasterLetterRow;
