@@ -265,8 +265,8 @@ const letterIndex = alphabetData.findIndex(item => item.base === baseLetter);
 const storagePath = `practice-${currentUser.id}-fam${letterIndex}-${Date.now()}.png`;
     
     const { error: uploadError } = await _supabase.storage
-        .from('art_shares')
-        .upload(storagePath, file, { contentType: file.type });
+    .from('team_posts')
+    .upload(storagePath, file, { contentType: file.type });
 
     if (uploadError) {
         console.error("Practice post upload failed:", uploadError);
