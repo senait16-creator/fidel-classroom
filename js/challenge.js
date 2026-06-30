@@ -1,28 +1,42 @@
 // =============================================================================
 // FIDEL CHALLENGE — challenge.js
 // Loads AFTER app.js. Relies on globals already defined there:
-//   _supabase, currentUser, currentProfile, showNotificationToast, alphabetData
+//   _supabase, currentUser, currentProfile, showNotificationToast,
+//   showGobezToast, alphabetData, executeVictoryConfettiCelebration
 // =============================================================================
 
-// STREAK_THRESHOLD is defined in app.js (loads first) and shared here.
+let challengeLevelsCache = null;
+let activeChallengeLevel = null;
+let activeChallengeFamilyObj = null;
+let activeChallengeFamilyLevel = null;
 
-let challengeLevelsCache = null; // loaded once from challenge_levels, reused across views
-let activeChallengeLevel = null; // the level object currently being viewed in the family picker
-let activeChallengeFamilyObj = null; // the family object currently being viewed in the detail screen
-let activeChallengeFamilyLevel = null; // the level number that family belongs to
+// Color map used by team hub header background
+const TEAM_COLORS = {
+    Red: '#b91c1c',
+    Blue: '#1d4ed8',
+    Green: '#166534',
+    Yellow: '#a16207',
+    Purple: '#7e22ce'
+};
+
+function getTeamHex(teamName) {
+    for (const [key, hex] of Object.entries(TEAM_COLORS)) {
+        if (teamName && teamName.includes(key)) return hex;
+    }
+    return '#166534';
+}
 
 // -----------------------------------------------------------------------------
 // Mode select
 // -----------------------------------------------------------------------------
 
-// Called from the student dashboard — e.g. a new "Fidel Challenge" button
-// placed next to (or instead of) the existing "Matching Game Arena" button.
 function enterModeSelect() {
     document.getElementById("studentDashboard").style.display = "none";
     document.getElementById("readingLevelsScreen").style.display = "none";
     document.getElementById("challengeLevelsScreen").style.display = "none";
     document.getElementById("challengeFamilyScreen").style.display = "none";
     document.getElementById("challengeFamilyDetailScreen").style.display = "none";
+    document.getElementById("teamHubScreen").style.display = "none";
     document.getElementById("modeSelectScreen").style.display = "block";
 
     const isCaptain = !!currentProfile?.is_captain;
@@ -30,28 +44,264 @@ function enterModeSelect() {
     const captainOption = document.getElementById("modeSelectCaptainOption");
     if (banner) banner.style.display = isCaptain ? "block" : "none";
     if (captainOption) captainOption.style.display = isCaptain ? "block" : "none";
+
+    const nickname = currentProfile?.nickname ? `, ${currentProfile.nickname}` : '';
+    const nicknameEl = document.getElementById("modeSelectNickname");
+    if (nicknameEl) nicknameEl.innerText = nickname;
 }
 
 function chooseModePractice() {
-    // "Practice the Fidel" = exactly what already exists today. No gating,
-    // no team dependency, doesn't touch challenge tables at all.
-    //
-    // Reuses launchDashboard("student") (defined in app.js) rather than
-    // duplicating its population logic here — chooseModePractice is now a
-    // real entry point into the dashboard (reached from mode-select), not
-    // just a visibility toggle, so it needs the same setup launchDashboard
-    // already does. Keeping one source of truth avoids the two drifting
-    // out of sync the way they briefly did (grid/leaderboard/team-progress
-    // staying empty when this function only toggled display).
     document.getElementById("modeSelectScreen").style.display = "none";
     launchDashboard("student");
 }
 
+function chooseModeChallenge() {
+    if (!currentProfile?.team_id) {
+        showNotificationToast("Fidel Challenge is a team competition — join a team in your profile to play!");
+        return;
+    }
+    document.getElementById("modeSelectScreen").style.display = "none";
+    enterTeamHub();
+}
+
+function chooseModeReading() {
+    document.getElementById("modeSelectScreen").style.display = "none";
+    document.getElementById("readingLevelsScreen").style.display = "block";
+    if (typeof renderReadingLevelsList === "function") renderReadingLevelsList();
+}
+
 // -----------------------------------------------------------------------------
-// Captain Dashboard — scoped review screen for a team's captain. Shows ONLY
-// their own team's pending submissions and member progress, enforced both
-// by these queries (filtered to their team_id) AND by RLS at the database
-// level (is_captain_of_student()), so this isn't just a UI-level scoping.
+// Team Hub
+// -----------------------------------------------------------------------------
+
+async function enterTeamHub() {
+    document.getElementById("teamHubScreen").style.display = "block";
+    await renderTeamHub();
+}
+
+function exitTeamHub() {
+    document.getElementById("teamHubScreen").style.display = "none";
+    enterModeSelect();
+}
+
+function enterChallengeLevelsFromHub() {
+    document.getElementById("teamHubScreen").style.display = "none";
+    document.getElementById("challengeLevelsScreen").style.display = "block";
+    renderChallengeLevelsView();
+}
+
+async function renderTeamHub() {
+    // Load team info
+    const { data: team } = await _supabase
+        .from('teams')
+        .select('id, name, current_level, streak_count')
+        .eq('id', currentProfile.team_id)
+        .maybeSingle();
+
+    if (!team) return;
+
+    // Header
+    const headerEl = document.getElementById("teamHubHeaderEl");
+    headerEl.style.background = `linear-gradient(135deg, ${getTeamHex(team.name)}, ${getTeamHex(team.name)}cc)`;
+    document.getElementById("teamHubTeamName").innerText = team.name;
+    document.getElementById("teamHubLevelLabel").innerText = `Level ${team.current_level}`;
+    document.getElementById("teamHubStreakLabel").innerText = team.streak_count || 0;
+
+    // Members row
+    const { data: members } = await _supabase
+        .from('profiles')
+        .select('id, nickname, avatar, is_captain')
+        .eq('team_id', currentProfile.team_id)
+        .order('nickname');
+
+    const membersRow = document.getElementById("teamHubMembersRow");
+    membersRow.innerHTML = "";
+    (members || []).forEach(m => {
+        const chip = document.createElement('div');
+        chip.className = `team-hub-member-chip ${m.is_captain ? 'is-captain' : ''}`;
+        chip.innerHTML = `${m.avatar || '🦁'} ${m.nickname}${m.is_captain ? ' 👑' : ''}`;
+        membersRow.appendChild(chip);
+    });
+
+    // Letter select for posting
+    const letterSelect = document.getElementById("teamHubLetterSelect");
+    letterSelect.innerHTML = "";
+    alphabetData.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item.base;
+        opt.innerText = item.base;
+        letterSelect.appendChild(opt);
+    });
+
+    // Load practice feed
+    await loadTeamPracticeFeed();
+}
+
+async function loadTeamPracticeFeed() {
+    const mount = document.getElementById("teamHubPracticeFeed");
+    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
+
+    const now = new Date().toISOString();
+    const { data: posts, error } = await _supabase
+        .from('team_practice_posts')
+        .select('id, base_letter, image_url, posted_at, expires_at, student_id, profiles!team_practice_posts_student_id_fkey(nickname, avatar)')
+        .eq('team_id', currentProfile.team_id)
+        .gt('expires_at', now)
+        .order('posted_at', { ascending: false });
+
+    if (error) {
+        console.error("Failed to load team practice feed:", error);
+        mount.innerHTML = `<p style="color:#ef4444; font-size:13px;">Couldn't load feed: ${error.message}</p>`;
+        return;
+    }
+
+    if (!posts || posts.length === 0) {
+        mount.innerHTML = `<div class="team-hub-empty">No practice posts yet — be the first to share! 🎉</div>`;
+        return;
+    }
+
+    // Load reactions for all posts in one query
+    const postIds = posts.map(p => p.id);
+    const { data: reactions } = await _supabase
+        .from('post_reactions')
+        .select('post_id, reactor_id, reaction')
+        .in('post_id', postIds);
+
+    mount.innerHTML = "";
+    posts.forEach(post => {
+        const postReactions = (reactions || []).filter(r => r.post_id === post.id);
+        const myReaction = postReactions.find(r => r.reactor_id === currentUser.id)?.reaction || null;
+
+        const hoursLeft = Math.max(0, Math.round((new Date(post.expires_at) - new Date()) / (1000 * 60 * 60)));
+        const isOwn = post.student_id === currentUser.id;
+
+        const reactionTypes = ['👍', '🔥', '👎', '😕'];
+        const reactionHTML = reactionTypes.map(emoji => {
+            const count = postReactions.filter(r => r.reaction === emoji).length;
+            const isActive = myReaction === emoji;
+            return `<button class="reaction-btn ${isActive ? 'reacted' : ''}" onclick="toggleReaction('${post.id}', '${emoji}', this)">
+                ${emoji} <span class="reaction-count">${count || ''}</span>
+            </button>`;
+        }).join('');
+
+        const card = document.createElement('div');
+        card.className = "practice-post-card";
+        card.dataset.postId = post.id;
+        card.innerHTML = `
+            <img src="${post.image_url}" class="practice-post-img" alt="Practice drawing">
+            <div class="practice-post-meta">
+                <div class="practice-post-header">
+                    <span class="practice-post-author">${post.profiles?.avatar || '🦁'} ${post.profiles?.nickname || 'Student'}</span>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span class="practice-post-letter">${post.base_letter}</span>
+                        <span class="practice-post-time">${hoursLeft}h left</span>
+                    </div>
+                </div>
+                <div class="reaction-row">${reactionHTML}</div>
+                ${isOwn ? `<button class="btn-secondary" style="font-size:11px; color:#ef4444; padding:2px 0; text-align:left;" onclick="deleteTeamPracticePost('${post.id}', '${post.image_url}')">🗑️ Delete</button>` : ''}
+            </div>
+        `;
+        mount.appendChild(card);
+    });
+}
+
+async function toggleReaction(postId, emoji, buttonEl) {
+    const isCurrentlyReacted = buttonEl.classList.contains('reacted');
+
+    // Optimistic UI update
+    const card = buttonEl.closest('.practice-post-card');
+    card.querySelectorAll('.reaction-btn').forEach(btn => btn.classList.remove('reacted'));
+
+    if (!isCurrentlyReacted) {
+        buttonEl.classList.add('reacted');
+        await _supabase.from('post_reactions').upsert(
+            { post_id: postId, reactor_id: currentUser.id, reaction: emoji },
+            { onConflict: 'post_id,reactor_id' }
+        );
+    } else {
+        await _supabase.from('post_reactions')
+            .delete()
+            .eq('post_id', postId)
+            .eq('reactor_id', currentUser.id);
+    }
+
+    // Reload just the feed to get accurate counts
+    await loadTeamPracticeFeed();
+}
+
+async function deleteTeamPracticePost(postId, imageUrl) {
+    if (!confirm("Delete this post?")) return;
+
+    const pathMatch = imageUrl.match(/art_shares\/(.+)$/);
+    const storagePath = pathMatch ? pathMatch[1] : null;
+
+    const { error } = await _supabase.from('team_practice_posts').delete().eq('id', postId);
+    if (error) return showNotificationToast("Couldn't delete: " + error.message);
+
+    if (storagePath) {
+        await _supabase.storage.from('art_shares').remove([storagePath]);
+    }
+
+    showNotificationToast("Post deleted.");
+    await loadTeamPracticeFeed();
+}
+
+// Opens the file picker for a PRACTICE post (goes to team feed, not captain queue)
+function openTeamHubPracticePost() {
+    const input = document.getElementById("teamHubPhotoInput");
+    input.value = "";
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const baseLetter = document.getElementById("teamHubLetterSelect").value;
+        await uploadTeamPracticePost(file, baseLetter);
+    };
+    input.click();
+}
+
+async function uploadTeamPracticePost(file, baseLetter) {
+    showNotificationToast("Uploading your practice post...");
+    const storagePath = `practice-${currentUser.id}-${baseLetter}-${Date.now()}.png`;
+
+    const { error: uploadError } = await _supabase.storage
+        .from('art_shares')
+        .upload(storagePath, file, { contentType: file.type });
+
+    if (uploadError) {
+        console.error("Practice post upload failed:", uploadError);
+        return showNotificationToast("Upload failed: " + uploadError.message);
+    }
+
+    const { data: urlData } = _supabase.storage.from('art_shares').getPublicUrl(storagePath);
+
+    const { error: insertError } = await _supabase.from('team_practice_posts').insert({
+        student_id: currentUser.id,
+        team_id: currentProfile.team_id,
+        base_letter: baseLetter,
+        image_url: urlData.publicUrl
+    });
+
+    if (insertError) {
+        console.error("Failed to save practice post:", insertError);
+        return showNotificationToast("Couldn't save post: " + insertError.message);
+    }
+
+    showGobezToast("Practice post shared with your team!");
+    await loadTeamPracticeFeed();
+}
+
+// Opens the writing submit screen for FINAL APPROVAL (goes to captain queue)
+function openTeamHubFinalSubmit() {
+    const baseLetter = document.getElementById("teamHubLetterSelect").value;
+    openWritingSubmitScreen(baseLetter, () => {
+        document.getElementById("teamHubScreen").style.display = "block";
+        loadTeamPracticeFeed();
+    });
+    document.getElementById("teamHubScreen").style.display = "none";
+}
+
+// -----------------------------------------------------------------------------
+// Captain Dashboard
 // -----------------------------------------------------------------------------
 
 function enterCaptainDashboard() {
@@ -75,9 +325,6 @@ async function loadCaptainWritingQueue() {
         return;
     }
 
-    // Get this captain's team members first, then filter submissions to
-    // just those students — the RLS policy also enforces this server-side,
-    // but filtering here too keeps the query itself scoped and efficient.
     const { data: members } = await _supabase
         .from('profiles')
         .select('id')
@@ -103,7 +350,7 @@ async function loadCaptainWritingQueue() {
     }
 
     if (!submissions || submissions.length === 0) {
-        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No pending submissions from your team — all caught up!</p>`;
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No pending submissions — all caught up!</p>`;
         return;
     }
 
@@ -120,16 +367,15 @@ async function loadCaptainWritingQueue() {
                     <button class="btn-approve">✓ Approve</button>
                     <button class="btn-reject">✗ Reject</button>
                 </div>
-                <input type="text" class="teacher-reject-note-input" placeholder="Optional note for rejection..." style="display:none;">
+                <input type="text" class="teacher-reject-note-input" placeholder="Optional note..." style="display:none;">
             </div>
         `;
 
-        const approveBtn = card.querySelector('.btn-approve');
+        card.querySelector('.btn-approve').onclick = () =>
+            captainApproveSubmission(sub.id, sub.student_id, sub.base_letter);
+
         const rejectBtn = card.querySelector('.btn-reject');
         const noteInput = card.querySelector('.teacher-reject-note-input');
-
-        approveBtn.onclick = () => captainApproveSubmission(sub.id, sub.student_id, sub.base_letter);
-
         rejectBtn.onclick = () => {
             if (noteInput.style.display === "none") {
                 noteInput.style.display = "block";
@@ -151,10 +397,7 @@ async function captainApproveSubmission(submissionId, studentId, baseLetter) {
         .update({ status: 'approved', reviewed_by: currentUser.id, reviewed_at: new Date().toISOString() })
         .eq('id', submissionId);
 
-    if (subError) {
-        console.error("Captain approval failed:", subError);
-        return showNotificationToast("Approval failed: " + subError.message);
-    }
+    if (subError) return showNotificationToast("Approval failed: " + subError.message);
 
     const { data: progressRow } = await _supabase
         .from('student_family_progress')
@@ -166,21 +409,16 @@ async function captainApproveSubmission(submissionId, studentId, baseLetter) {
     const updatePayload = { writing_passed: true };
     if (progressRow?.streak_passed) updatePayload.completed_at = new Date().toISOString();
 
-    const { error: progressError } = await _supabase
+    await _supabase
         .from('student_family_progress')
         .update(updatePayload)
         .eq('student_id', studentId)
         .eq('base_letter', baseLetter);
 
-    if (progressError) console.error("Failed to update family progress:", progressError);
-
-    showNotificationToast("Submission approved! ✓");
+    showGobezToast("Submission approved! ✓");
     await loadCaptainWritingQueue();
     await loadCaptainTeamProgress();
 
-    // Same team-completion check the teacher's approval triggers — a
-    // captain's approval should be equally capable of unlocking the next
-    // level for their team, not just the admin's.
     if (typeof checkAndUpdateTeamLevelCompletion === "function") {
         await checkAndUpdateTeamLevelCompletion(studentId);
     }
@@ -199,10 +437,7 @@ async function captainRejectSubmission(submissionId, note) {
         })
         .eq('id', submissionId);
 
-    if (error) {
-        console.error("Captain rejection failed:", error);
-        return showNotificationToast("Reject failed: " + error.message);
-    }
+    if (error) return showNotificationToast("Reject failed: " + error.message);
 
     showNotificationToast("Submission rejected — student can resubmit.");
     await loadCaptainWritingQueue();
@@ -272,11 +507,7 @@ async function loadCaptainTeamProgress() {
 
         const familyDetails = (level?.letter_families || []).map(letter => {
             const progress = (progressRows || []).find(r => r.student_id === member.id && r.base_letter === letter);
-            // Most recent submission for this student+letter, of any status —
-            // gives the captain a thumbnail to glance at even if it's still
-            // pending or was already approved, not just while it's in the queue.
             const latestSubmission = (submissions || []).find(s => s.student_id === member.id && s.base_letter === letter);
-
             const streak = progress?.best_streak || 0;
             const streakDone = !!progress?.streak_passed;
             const writingDone = !!progress?.writing_passed;
@@ -286,9 +517,11 @@ async function loadCaptainTeamProgress() {
                     <span class="captain-family-letter">${letter}</span>
                     <div class="captain-family-meta">
                         <span class="${streakDone ? 'captain-stat-done' : ''}">🔥 ${streak}/20</span>
-                        <span class="${writingDone ? 'captain-stat-done' : ''}">${writingDone ? '✓ Approved' : (latestSubmission ? '⏳ Pending' : '— No submission')}</span>
+                        <span class="${writingDone ? 'captain-stat-done' : ''}">
+                            ${writingDone ? '✓ Approved' : (latestSubmission ? '⏳ Pending' : '— No submission')}
+                        </span>
                     </div>
-                    ${latestSubmission ? `<img src="${latestSubmission.image_url}" class="captain-family-thumb" alt="${member.nickname}'s writing for ${letter}">` : ''}
+                    ${latestSubmission ? `<img src="${latestSubmission.image_url}" class="captain-family-thumb" alt="writing">` : ''}
                 </div>
             `;
         }).join('');
@@ -312,30 +545,14 @@ async function loadCaptainTeamProgress() {
     });
 }
 
-async function chooseModeChallenge() {
-    if (!currentProfile?.team_id) {
-        showNotificationToast("Fidel Challenge is a team competition — join a team in your profile to play!");
-        return;
-    }
-    document.getElementById("modeSelectScreen").style.display = "none";
-    document.getElementById("challengeLevelsScreen").style.display = "block";
-    await renderChallengeLevelsView();
-}
-
-function chooseModeReading() {
-    document.getElementById("modeSelectScreen").style.display = "none";
-    document.getElementById("readingLevelsScreen").style.display = "block";
-    if (typeof renderReadingLevelsList === "function") renderReadingLevelsList();
-}
+// -----------------------------------------------------------------------------
+// Challenge levels
+// -----------------------------------------------------------------------------
 
 function exitChallengeBackToDashboard() {
     document.getElementById("challengeLevelsScreen").style.display = "none";
-    enterModeSelect();
+    document.getElementById("teamHubScreen").style.display = "block";
 }
-
-// -----------------------------------------------------------------------------
-// Locked levels view (static for now — no gameplay wired up yet)
-// -----------------------------------------------------------------------------
 
 async function fetchChallengeLevels() {
     if (challengeLevelsCache) return challengeLevelsCache;
@@ -355,9 +572,6 @@ async function fetchChallengeLevels() {
     return challengeLevelsCache;
 }
 
-// Fetches the student's team row (name, current_level, streak_count).
-// Falls back to sensible defaults if no team is assigned yet, so the board
-// still renders something reasonable rather than breaking.
 async function getTeamBoardInfo() {
     if (!currentProfile?.team_id) {
         return { name: "No Team Yet", current_level: 1, streak_count: 0 };
@@ -369,9 +583,7 @@ async function getTeamBoardInfo() {
         .eq('id', currentProfile.team_id)
         .maybeSingle();
 
-    if (error || !team) {
-        return { name: "No Team Yet", current_level: 1, streak_count: 0 };
-    }
+    if (error || !team) return { name: "No Team Yet", current_level: 1, streak_count: 0 };
 
     return {
         name: team.name || "Your Team",
@@ -389,78 +601,53 @@ function renderChallengeBoardHeader(team, totalLevels) {
     document.getElementById("challengeBoardProgressFill").style.width = `${percent}%`;
 
     const swatch = document.getElementById("challengeBoardTeamSwatch");
-    if (team.name && team.name.includes("Red")) swatch.style.background = "#ef4444";
-    else if (team.name && team.name.includes("Blue")) swatch.style.background = "#3b82f6";
-    else if (team.name && team.name.includes("Green")) swatch.style.background = "#10b981";
-    else if (team.name && team.name.includes("Yellow")) swatch.style.background = "#f59e0b";
-    else if (team.name && team.name.includes("Purple")) swatch.style.background = "#a855f7";
-    else swatch.style.background = "var(--brand-primary)";
+    swatch.style.background = getTeamHex(team.name);
 }
 
 async function renderChallengeLevelsView() {
     const container = document.getElementById("challengeLevelsGrid");
     container.innerHTML = `<p style="color:#94a3b8;">Loading levels...</p>`;
 
-    const [levels, team] = await Promise.all([
-        fetchChallengeLevels(),
-        getTeamBoardInfo()
-    ]);
-
+    const [levels, team] = await Promise.all([fetchChallengeLevels(), getTeamBoardInfo()]);
     renderChallengeBoardHeader(team, levels.length || 12);
-
     container.innerHTML = "";
 
     levels.forEach(level => {
-        const card = document.createElement('div');
         const isCompleted = level.level_number < team.current_level;
         const isCurrent = level.level_number === team.current_level;
         const isUnlocked = level.level_number <= team.current_level;
         const isCapstone = level.level_number === 12;
 
         const stateClass = isCompleted ? 'completed' : (isUnlocked ? 'unlocked' : 'locked');
+        const card = document.createElement('div');
         card.className = `challenge-level-card ${stateClass} ${isCurrent ? 'current' : ''}`;
 
-        const familiesPreview = (level.letter_families || []).join(' ');
-        const badgeContent = isUnlocked ? level.level_number : '🔒';
-
         card.innerHTML = `
-            <div class="challenge-level-number-badge">${badgeContent}</div>
+            <div class="challenge-level-number-badge">${isUnlocked ? level.level_number : '🔒'}</div>
             <div class="challenge-level-title">${level.title || `Level ${level.level_number}`}</div>
-            <div class="challenge-level-families">${familiesPreview}</div>
+            <div class="challenge-level-families">${(level.letter_families || []).join(' ')}</div>
             ${isCapstone ? '<div class="challenge-capstone-badge">⭐ Capstone</div>' : ''}
         `;
 
-        if (isUnlocked) {
-            card.onclick = () => openChallengeFamilyPicker(level);
-        }
-
+        if (isUnlocked) card.onclick = () => openChallengeFamilyPicker(level);
         container.appendChild(card);
     });
 }
 
 // -----------------------------------------------------------------------------
-// Family picker — shown after clicking an unlocked level. Lets the student
-// choose which of the level's families to drill next, and shows per-family
-// progress (streak passed / writing passed) once that data exists.
+// Family picker
 // -----------------------------------------------------------------------------
 
 async function openChallengeFamilyPicker(level) {
     activeChallengeLevel = level;
-
     document.getElementById("challengeLevelsScreen").style.display = "none";
     document.getElementById("challengeFamilyScreen").style.display = "block";
-
     await renderChallengeFamilyPicker();
 }
 
-// Re-shown when exiting the matching game while in Challenge mode (hooked
-// from app.js's openMatchingGameWorkspaceMode exit handler).
 async function returnToChallengeFamilyPicker() {
     document.getElementById("gameWorkspace").style.display = "none";
 
-    // Return to the detail screen the game was launched from (giant letters +
-    // play/flashcard buttons), not all the way back out to the picker grid —
-    // matches how the student got here in the first place.
     if (activeChallengeFamilyObj) {
         document.getElementById("challengeFamilyDetailScreen").style.display = "block";
         renderChallengeFamilyDetailGiantRow(activeChallengeFamilyObj);
@@ -483,10 +670,7 @@ async function fetchStudentFamilyProgressForLevel(levelNumber) {
         .eq('student_id', currentUser.id)
         .eq('level_number', levelNumber);
 
-    if (error) {
-        console.error("Failed to load family progress:", error);
-        return [];
-    }
+    if (error) { console.error("Failed to load family progress:", error); return []; }
     return data || [];
 }
 
@@ -502,17 +686,14 @@ async function renderChallengeFamilyPicker() {
     progressRows.forEach(row => { progressByLetter[row.base_letter] = row; });
 
     container.innerHTML = "";
-
     const positionLabels = ["1st", "2nd", "3rd"];
 
     (level.letter_families || []).forEach((baseLetter, idx) => {
         const progress = progressByLetter[baseLetter] || { best_streak: 0, streak_passed: false, writing_passed: false };
         const fidelObj = alphabetData.find(item => item.base === baseLetter);
-        const posClass = `pos-${idx + 1}`; // 1st family = green, 2nd = yellow, 3rd = red, consistent every level
 
         const card = document.createElement('div');
-        card.className = `challenge-family-card ${posClass} ${progress.streak_passed && progress.writing_passed ? 'mastered' : ''}`;
-
+        card.className = `challenge-family-card pos-${idx + 1} ${progress.streak_passed && progress.writing_passed ? 'mastered' : ''}`;
         card.innerHTML = `
             <span class="challenge-family-position-tag">${positionLabels[idx] || `#${idx + 1}`}</span>
             <div class="challenge-family-letter">${baseLetter}</div>
@@ -525,29 +706,25 @@ async function renderChallengeFamilyPicker() {
                 </span>
             </div>
         `;
-
         card.onclick = () => openChallengeFamilyDetail(fidelObj, level.level_number);
         container.appendChild(card);
     });
 }
 
 // -----------------------------------------------------------------------------
-// Streak game launcher — sets activeChallengeContext, then reuses the
-// existing shared matching game from app.js unchanged.
+// Streak game
 // -----------------------------------------------------------------------------
 
 async function recordStreakProgress(baseLetter, levelNumber, bestStreak, passed) {
-    const payload = {
-        student_id: currentUser.id,
-        base_letter: baseLetter,
-        level_number: levelNumber,
-        best_streak: bestStreak,
-        streak_passed: passed
-    };
-
     const { error } = await _supabase
         .from('student_family_progress')
-        .upsert(payload, { onConflict: 'student_id,base_letter' });
+        .upsert({
+            student_id: currentUser.id,
+            base_letter: baseLetter,
+            level_number: levelNumber,
+            best_streak: bestStreak,
+            streak_passed: passed
+        }, { onConflict: 'student_id,base_letter' });
 
     if (error) console.error("Failed to save streak progress:", error);
 }
@@ -566,7 +743,7 @@ function launchChallengeStreakGame(fidelObj, levelNumber) {
         },
         onStreakPassed: async (finalStreak) => {
             await recordStreakProgress(fidelObj.base, levelNumber, finalStreak, true);
-            showNotificationToast(`🎉 Streak of ${STREAK_THRESHOLD}! "${fidelObj.base}" matching mastered!`);
+            showGobezToast(`Streak of ${STREAK_THRESHOLD} complete! Keep going!`);
             executeVictoryConfettiCelebration();
         }
     };
@@ -577,12 +754,10 @@ function launchChallengeStreakGame(fidelObj, levelNumber) {
 }
 
 // -----------------------------------------------------------------------------
-// Family detail screen — giant letter display, launch point for the
-// matching game (with streak rules explained) and the flashcard self-study
-// mode. Shown after clicking a family card in the picker.
+// Family detail
 // -----------------------------------------------------------------------------
 
-const vowelSoundLabels = ["-ä", "-u", "-ee", "-a", "-ay", "-ih", "-o"]; // matches standardVowelSubscripts in app.js
+const vowelSoundLabels = ["-ä", "-u", "-ee", "-a", "-ay", "-ih", "-o"];
 
 function openChallengeFamilyDetail(fidelObj, levelNumber) {
     activeChallengeFamilyObj = fidelObj;
@@ -594,18 +769,13 @@ function openChallengeFamilyDetail(fidelObj, levelNumber) {
 
     renderChallengeFamilyDetailGiantRow(fidelObj);
 
-    // Captains already know Amharic and aren't required to play through
-    // the gates themselves — they're here to lead their team, not compete.
-    // Show the letters for reference, but skip the streak/writing
-    // requirements entirely rather than making them complete busywork
-    // that proves nothing about a skill they already have.
     if (currentProfile?.is_captain) {
         document.getElementById("challengeDetailPlayBtn").style.display = "none";
         document.getElementById("challengeDetailFlashcardBtn").style.display = "none";
         document.getElementById("challengeDetailWritingBtn").style.display = "none";
         const box = document.getElementById("challengeWritingStatusBox");
         box.style.display = "block";
-        box.innerHTML = `<div class="challenge-writing-status approved">👑 As team captain, you're exempt from this challenge — focus on reviewing your team's submissions instead!</div>`;
+        box.innerHTML = `<div class="challenge-writing-status approved">👑 As team captain, you're exempt — focus on reviewing your team's submissions!</div>`;
         return;
     }
 
@@ -614,13 +784,16 @@ function openChallengeFamilyDetail(fidelObj, levelNumber) {
     document.getElementById("challengeDetailWritingBtn").style.display = "block";
     renderWritingStatusForFamily(fidelObj.base);
 
-    document.getElementById("challengeDetailPlayBtn").onclick = () => launchChallengeStreakGame(fidelObj, levelNumber);
+    document.getElementById("challengeDetailPlayBtn").onclick = () =>
+        launchChallengeStreakGame(fidelObj, levelNumber);
+
     document.getElementById("challengeDetailFlashcardBtn").onclick = () => {
         openFlashcardStudy(buildFlashcardDeckForFamily(fidelObj), `"${fidelObj.base}" Family`, () => {
             document.getElementById("challengeFamilyDetailScreen").style.display = "block";
         });
         document.getElementById("challengeFamilyDetailScreen").style.display = "none";
     };
+
     document.getElementById("challengeDetailWritingBtn").onclick = () => {
         openWritingSubmitScreen(fidelObj.base, () => {
             document.getElementById("challengeFamilyDetailScreen").style.display = "block";
@@ -652,13 +825,19 @@ function renderChallengeFamilyDetailGiantRow(fidelObj) {
 }
 
 // -----------------------------------------------------------------------------
-// Expose functions used via inline onclick="" handlers in index.html
+// Expose to inline handlers
 // -----------------------------------------------------------------------------
 
 window.enterModeSelect = enterModeSelect;
 window.chooseModePractice = chooseModePractice;
 window.chooseModeChallenge = chooseModeChallenge;
 window.chooseModeReading = chooseModeReading;
+window.exitTeamHub = exitTeamHub;
+window.enterChallengeLevelsFromHub = enterChallengeLevelsFromHub;
+window.openTeamHubPracticePost = openTeamHubPracticePost;
+window.openTeamHubFinalSubmit = openTeamHubFinalSubmit;
+window.toggleReaction = toggleReaction;
+window.deleteTeamPracticePost = deleteTeamPracticePost;
 window.exitChallengeBackToDashboard = exitChallengeBackToDashboard;
 window.openChallengeFamilyPicker = openChallengeFamilyPicker;
 window.exitChallengeFamilyPicker = exitChallengeFamilyPicker;
