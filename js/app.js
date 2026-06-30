@@ -550,14 +550,14 @@ async function saveProfileData(event) {
 // rows are created once via precreate_teams.sql, not on-the-fly during
 // signup. Only the admin is allowed to insert into teams per RLS, so a
 // student signing up would get a 403 if this tried to create a missing team.
-async function assignNextTeam() {
-    const { data: existingTeams } = await _supabase.from('teams').select('id, name');
 
-    if (!existingTeams || existingTeams.length === 0) {
-        console.error("No teams exist yet — run precreate_teams.sql in Supabase first.");
-        showNotificationToast("No teams set up yet — ask your teacher to add teams.");
-        return null;
-    }
+async function assignNextTeam() {
+    // Auto-assignment is disabled during the July cohort — teams are
+    // manually arranged by the teacher. New signups default to solo
+    // and get assigned via the teacher dashboard.
+    showNotificationToast("You'll be assigned to a team by your teacher shortly!");
+    return null;
+}
 
     const teamIds = existingTeams.map(t => t.id);
 
