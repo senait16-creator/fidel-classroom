@@ -1090,7 +1090,7 @@ async function submitWritingSketch() {
 
     showNotificationToast("Submitting your drawing...");
     canvas.toBlob(async (blob) => {
-        const storagePath = `writing-${currentUser.id}-${writingSubmitContext.baseLetter}-${Date.now()}.png`;
+const storagePath = `writing-${currentUser.id}-${encodeURIComponent(writingSubmitContext.baseLetter)}-${Date.now()}.png`;
         const { error: uploadError } = await _supabase.storage.from('art_shares').upload(storagePath, blob, { contentType: 'image/png' });
         if (uploadError) {
             console.error("Writing sketch upload failed:", uploadError);
