@@ -729,21 +729,41 @@ async function recordStreakProgress(baseLetter, levelNumber, bestStreak, passed)
     if (error) console.error("Failed to save streak progress:", error);
 }
 
+async function recordStreakProgress(baseLetter, levelNumber, bestStreak, passed) {
+    const { error } = await _supabase
+        .from('student_family_progress')
+        .upsert({
+            student_id: currentUser.id,
+            base_letter: baseLetter,
+            level_number: levelNumber,
+            best_streak: bestStreak,
+            streak_passed: passed
+        }, { onConflict: 'student_id,base_letter' });
+
+    if (error) console.error("Failed to save streak progress:", error);
+}
+
 function launchChallengeStreakGame(fidelObj, levelNumber) {
     let bestStreakThisSession = 0;
+    let matchesSinceLastSave = 0; // save every 5 matches not just on improvement
 
     activeChallengeContext = {
         baseLetter: fidelObj.base,
         levelNumber: levelNumber,
         onStreakUpdate: (currentStreak) => {
+            matchesSinceLastSave++;
             if (currentStreak > bestStreakThisSession) {
                 bestStreakThisSession = currentStreak;
+            }
+            // Save every 5 matches regardless of whether it's a new best
+            if (matchesSinceLastSave >= 5) {
+                matchesSinceLastSave = 0;
                 recordStreakProgress(fidelObj.base, levelNumber, bestStreakThisSession, false);
             }
         },
         onStreakPassed: async (finalStreak) => {
             await recordStreakProgress(fidelObj.base, levelNumber, finalStreak, true);
-            showGobezToast(`Streak of ${STREAK_THRESHOLD} complete! Keep going!`);
+            showGobezToast(`ጎበዝ! Streak of ${STREAK_THRESHOLD} complete! Keep going!`);
             executeVictoryConfettiCelebration();
         }
     };
