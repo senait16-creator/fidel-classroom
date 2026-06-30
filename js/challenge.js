@@ -768,9 +768,11 @@ function launchChallengeStreakGame(fidelObj, levelNumber) {
         }
     };
 
-    document.getElementById("challengeFamilyDetailScreen").style.display = "none";
-    document.getElementById("challengeFamilyScreen").style.display = "none";
-    openMatchingGameWorkspaceMode(fidelObj);
+   maybeShowStreakExplainer(() => {
+        document.getElementById("challengeFamilyDetailScreen").style.display = "none";
+        document.getElementById("challengeFamilyScreen").style.display = "none";
+        openMatchingGameWorkspaceMode(fidelObj);
+    });
 }
 
 // -----------------------------------------------------------------------------
