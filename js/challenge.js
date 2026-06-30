@@ -273,7 +273,7 @@ const storagePath = `practice-${currentUser.id}-fam${letterIndex}-${Date.now()}.
         return showNotificationToast("Upload failed: " + uploadError.message);
     }
 
-    const { data: urlData } = _supabase.storage.from('art_shares').getPublicUrl(storagePath);
+const { data: urlData } = _supabase.storage.from('team_posts').getPublicUrl(storagePath);
 
     const { error: insertError } = await _supabase.from('team_practice_posts').insert({
         student_id: currentUser.id,
