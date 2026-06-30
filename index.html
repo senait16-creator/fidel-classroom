@@ -542,7 +542,66 @@
             <div id="captainTeamProgressMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
         </div>
     </div>
+<!-- Team Hub — shown after choosing Fidel Challenge from mode select -->
+<div id="teamHubScreen">
+    <div class="team-hub-header" id="teamHubHeaderEl">
+        <div class="team-hub-header-content">
+            <button class="team-hub-back-btn" onclick="exitTeamHub()">← Back</button>
+            <div class="team-hub-name" id="teamHubTeamName">Your Team</div>
+            <div class="team-hub-level-tag">
+                <span>🏆</span>
+                <span id="teamHubLevelLabel">Level 1</span>
+                <span>•</span>
+                <span>🔥 <span id="teamHubStreakLabel">0</span> streak</span>
+            </div>
+            <div class="team-hub-members-row" id="teamHubMembersRow"></div>
+        </div>
+    </div>
 
+    <!-- Practice feed -->
+    <div class="team-hub-section">
+        <div class="team-hub-section-title">
+            <span>Team Practice Feed</span>
+            <span style="font-size:11px; color:#94a3b8; font-weight:500;">Posts disappear after 24h</span>
+        </div>
+        <div id="teamHubPracticeFeed"></div>
+    </div>
+
+    <!-- Post a practice drawing or submit for real approval -->
+    <div class="team-hub-section">
+        <div class="team-hub-section-title">Share Your Practice</div>
+        <p style="font-size:13px; color:#64748b; margin-bottom:14px;">
+            Share a drawing for your team to cheer on, or submit for official captain review when you're ready.
+        </p>
+
+        <!-- Letter picker for the post -->
+        <div style="margin-bottom:12px;">
+            <label style="font-size:12px; font-weight:700; color:#475569; display:block; margin-bottom:6px;">Which letter are you practicing?</label>
+            <select id="teamHubLetterSelect" style="max-width:200px;"></select>
+        </div>
+
+        <div class="team-hub-post-actions">
+            <button class="btn-practice-post" onclick="openTeamHubPracticePost()">
+                📸 Share Practice
+            </button>
+            <button class="btn-final-submit" onclick="openTeamHubFinalSubmit()">
+                ✍️ Submit for Approval
+                <span class="final-sub-label">Captain reviews this</span>
+            </button>
+        </div>
+
+        <input type="file" id="teamHubPhotoInput" accept="image/*" capture="environment" style="display:none;">
+    </div>
+
+    <!-- Enter challenge levels from here -->
+    <div class="team-hub-section" style="text-align:center;">
+        <p style="font-size:14px; color:#64748b; margin-bottom:14px;">Ready to practice your letters?</p>
+        <button class="btn-primary" onclick="enterChallengeLevelsFromHub()">
+            🏆 Go to Challenge Levels
+        </button>
+    </div>
+</div>
+    
     <script src="js/app.js" defer></script>
     <script src="js/teacher.js" defer></script>
     <script src="js/reading.js" defer></script>
