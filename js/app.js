@@ -1067,7 +1067,7 @@ function clearWritingSketchpad() {
 
 async function submitWritingPhoto(file) {
     showNotificationToast("Uploading your photo...");
-    const storagePath = `writing-${currentUser.id}-${writingSubmitContext.baseLetter}-${Date.now()}.png`;
+const storagePath = `writing-${currentUser.id}-${encodeURIComponent(writingSubmitContext.baseLetter)}-${Date.now()}.png`;
 
     const { error: uploadError } = await _supabase.storage.from('art_shares').upload(storagePath, file, { contentType: file.type });
     if (uploadError) {
