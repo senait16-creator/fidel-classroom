@@ -135,9 +135,12 @@
                 <h2 style="font-size: 18px; color: var(--neutral-dark);">Student Roster &amp; Progress</h2>
                 <button class="teacher-panel-toggle">▼</button>
             </div>
-            <div class="teacher-panel-body" id="rosterPanelBody">
-                <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">See how everyone in your class is moving through the alphabet rows.</p>
-                <table class="teacher-roster-table">
+          <div class="teacher-panel-body" id="rosterPanelBody">
+    <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">See how everyone in your class is moving through the alphabet rows.</p>
+    <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+        <button class="btn-primary" style="width:auto; padding:8px 18px; font-size:13px;" onclick="exportProgressCSV()">⬇️ Export Progress CSV</button>
+    </div>
+    <table class="teacher-roster-table">
                     <thead>
                         <tr>
                             <th>Student</th>
