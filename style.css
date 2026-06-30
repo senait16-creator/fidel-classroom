@@ -395,3 +395,282 @@
         .flashcard-face { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-standard); box-shadow: var(--shadow-premium); border: 1px solid var(--border-color); backface-visibility: hidden; transition: transform 0.5s; font-weight: 700; }
         .flashcard-front { background: white; font-size: 72px; font-family: 'Abyssinica SIL', serif; color: var(--neutral-dark); transform: rotateY(0deg); }
         .flashcard-back { background: var(--brand-primary); color: white; font-size: 28px; transform: rotateY(-180deg); }
+
+/* ============================================================
+   COLOR SCHEME OVERRIDE: Deep Forest Green + Warm Gold
+   Ethiopian flag reference. Paste at bottom of style.css.
+   ============================================================ */
+
+:root {
+    --brand-primary: #166534;
+    --brand-secondary: #15803d;
+    --accent-gold: #ca8a04;
+    --accent-gold-light: #fef9c3;
+    --accent-gold-bg: #fffbeb;
+    --neutral-light: #fffbf0;
+    --shadow-premium: 0 4px 20px rgba(20, 83, 45, 0.07);
+}
+
+/* Auth screen — deep green to gold gradient */
+.auth-decorative-bg {
+    background: linear-gradient(135deg, #14532d 0%, #166534 40%, #15803d 68%, #ca8a04 100%);
+}
+
+/* Challenge progress bar — green to gold */
+.challenge-board-progress-fill {
+    background: linear-gradient(90deg, #166534, #ca8a04);
+}
+
+/* Matching game — resolved pair goes gold not green */
+.game-interactive-token.resolved-pair {
+    background: #fffbeb;
+    border-color: #ca8a04;
+    color: #92400e;
+    opacity: 0.85;
+    pointer-events: none;
+}
+
+/* Reduce transition cost — "all" is slow on mobile */
+.game-interactive-token {
+    transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s;
+}
+
+/* Match found flash animation */
+@keyframes matchFlash {
+    0%   { transform: scale(1); }
+    45%  { transform: scale(1.07); background: #fef9c3; border-color: #ca8a04; }
+    100% { transform: scale(1); }
+}
+.game-interactive-token.match-flash {
+    animation: matchFlash 0.32s ease forwards;
+    pointer-events: none;
+}
+
+/* Gobez special toast */
+.toast-popup.gobez-toast {
+    background: linear-gradient(135deg, #14532d, #166534);
+    border: 2px solid #ca8a04;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 14px 22px;
+    color: #fef9c3;
+    box-shadow: 0 4px 24px rgba(202, 138, 4, 0.35);
+}
+
+/* ============================================================
+   TEAM HUB
+   ============================================================ */
+
+#teamHubScreen {
+    display: none;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 0 16px 100px;
+}
+
+.team-hub-header {
+    border-radius: var(--radius-standard);
+    padding: 26px 24px 20px;
+    color: white;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+
+.team-hub-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.12);
+}
+
+.team-hub-header-content { position: relative; z-index: 1; }
+
+.team-hub-back-btn {
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.35);
+    color: white;
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: 12px;
+    display: inline-block;
+}
+
+.team-hub-name {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+}
+
+.team-hub-level-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 18px;
+}
+
+.team-hub-members-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.team-hub-member-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.28);
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.team-hub-member-chip.is-captain {
+    background: rgba(202,138,4,0.28);
+    border-color: #fbbf24;
+}
+
+.team-hub-section {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-standard);
+    padding: 20px;
+    box-shadow: var(--shadow-premium);
+    margin-bottom: 16px;
+}
+
+.team-hub-section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--neutral-dark);
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.practice-post-card {
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.practice-post-img {
+    width: 100%;
+    max-height: 220px;
+    object-fit: cover;
+    display: block;
+    background: #f1f5f9;
+}
+
+.practice-post-meta {
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.practice-post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.practice-post-author { font-size: 13px; font-weight: 600; }
+
+.practice-post-letter {
+    font-family: 'Abyssinica SIL', serif;
+    font-size: 22px;
+    color: var(--brand-primary);
+    font-weight: 700;
+}
+
+.practice-post-time { font-size: 11px; color: #94a3b8; }
+
+.reaction-row { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.reaction-btn {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 5px 11px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: border-color 0.15s, background 0.15s;
+    user-select: none;
+}
+
+.reaction-btn:hover { border-color: var(--brand-primary); background: #f0fdf4; }
+.reaction-btn.reacted { border-color: var(--accent-gold); background: var(--accent-gold-bg); }
+.reaction-count { font-size: 11px; font-weight: 700; color: #64748b; }
+
+.team-hub-post-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.btn-practice-post {
+    flex: 1;
+    background: white;
+    border: 2px solid var(--brand-primary);
+    color: var(--brand-primary);
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.btn-practice-post:hover { background: #f0fdf4; }
+
+.btn-final-submit {
+    flex: 1;
+    background: var(--brand-primary);
+    border: none;
+    color: white;
+    padding: 10px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.2s;
+    line-height: 1.3;
+}
+
+.btn-final-submit:hover { background: var(--brand-secondary); }
+
+.btn-final-submit .final-sub-label { display: block; font-size: 10px; font-weight: 500; opacity: 0.8; margin-top: 2px; }
+
+.team-hub-empty {
+    text-align: center;
+    padding: 28px 16px;
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+@media (max-width: 640px) {
+    .team-hub-post-actions { flex-direction: column; }
+    .team-hub-members-row { gap: 7px; }
+}
