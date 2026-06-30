@@ -835,7 +835,7 @@ window.addEventListener('beforeunload', () => {
 //  submissions from submissions.js, teacher from teacher.js)
 // ---------------------------------------------------------------------------
 
-window.logout = logout;
+
 window.openMatchingGameWorkspaceMode = openMatchingGameWorkspaceMode;
 window.shuffleClassroomRowPhonetics = shuffleClassroomRowPhonetics;
 window.classroomMarkAsMasteredDirectly = classroomMarkAsMasteredDirectly;
@@ -843,7 +843,6 @@ window.classroomUnmasterLetterRow = classroomUnmasterLetterRow;
 window.clearSketchpadCanvas = clearSketchpadCanvas;
 window.uploadSketchpadDrawingCanvasData = uploadSketchpadDrawingCanvasData;
 window.exitClassroomViewBackToGrid = exitClassroomViewBackToGrid;
-window.openProfileEdit = openProfileEdit;
 window.toggleDropdownElement = toggleDropdownElement;
 window.submitVerificationCounterBump = submitVerificationCounterBump;
 window.deleteSharedDrawing = deleteSharedDrawing;
