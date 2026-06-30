@@ -1397,6 +1397,30 @@ async function checkMySubmissionStatus() {
 }
 
 // ---------------------------------------------------------------------------
+// Save streak progress before page unload so a crash or accidental close
+// doesn't wipe a student's best streak mid-game.
+// ---------------------------------------------------------------------------
+window.addEventListener('beforeunload', () => {
+    if (!activeChallengeContext || !currentUser) return;
+    if (currentStreakScore <= 0) return;
+
+    // Use sendBeacon for reliability on page close — fetch/XHR gets cancelled
+    // but sendBeacon fires even when the page is unloading.
+    const payload = JSON.stringify({
+        student_id: currentUser.id,
+        base_letter: activeChallengeContext.baseLetter,
+        level_number: activeChallengeContext.levelNumber,
+        best_streak: currentStreakScore,
+        streak_passed: currentStreakScore >= STREAK_THRESHOLD
+    });
+
+    // Supabase REST upsert via sendBeacon
+    navigator.sendBeacon(
+        `${SUPABASE_URL}/rest/v1/student_family_progress?on_conflict=student_id,base_letter`,
+        new Blob([payload], { type: 'application/json' })
+    );
+});
+// ---------------------------------------------------------------------------
 // Expose functions used via inline onclick="" handlers in index.html
 // ---------------------------------------------------------------------------
 
