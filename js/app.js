@@ -417,14 +417,15 @@ function launchDashboard(viewMode) {
         document.getElementById("adminHeaderToggleBar").style.display = "flex";
     }
 
-    if (viewMode === "teacher") {
-        document.getElementById("teacherOnlyDashboard").style.display = "block";
-        loadTeacherRosterData();
-        teacherRefreshConfigurationDropdowns();
-        loadTeacherWritingQueue();
-        loadTeacherTeamProgress();
-        populateCaptainTeamDropdown();
-        loadCurrentCaptains();
+if (viewMode === "teacher") {
+    document.getElementById("teacherOnlyDashboard").style.display = "block";
+    loadTeacherRosterData();
+    teacherRefreshConfigurationDropdowns();
+    loadTeacherWritingQueue();
+    loadTeacherTeamProgress();
+    loadTeacherLevelCompletionQueue('levelCompletionQueueMount');
+    populateCaptainTeamDropdown();
+    loadCurrentCaptains();
     } else {
         document.getElementById("studentDashboard").style.display = "block";
         fetchUserProgress();
