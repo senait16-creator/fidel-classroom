@@ -191,15 +191,13 @@ async function sendPasswordResetLink() {
         redirectTo: 'https://senait16-creator.github.io/fidel-classroom/'
     });
 
-    if (error) {
-        console.error("Password reset request failed:", error);
-        return showNotificationToast("Couldn't send reset link: " + error.message);
-    }
+    if (error) return showNotificationToast("Couldn't send reset link: " + error.message);
 
     showNotificationToast("Reset link sent! Check your email.");
     document.getElementById("forgotPasswordScreen").style.display = "none";
     document.getElementById("authScreen").style.display = "flex";
 }
+
 
 async function saveNewPassword() {
     const newPassword = document.getElementById('newPasswordInput').value;
