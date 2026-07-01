@@ -133,6 +133,12 @@ function selectBlockTokenTrackElement(element, index) {
         currentStreakScore++;
         document.getElementById("gameStreakValue").innerText = currentStreakScore;
         updateStreakProgressBar(currentStreakScore);
+        // Streak bump animation
+        const streakEl = document.getElementById("gameStreakValue");
+        streakEl.classList.remove("streak-bump");
+        void streakEl.offsetWidth;
+        streakEl.classList.add("streak-bump");
+        setTimeout(() => streakEl.classList.remove("streak-bump"), 300);
         selectedGameTokenId = null;
 
         if (currentStreakScore === 5)        showNotificationToast("🔥 5 in a row!");
