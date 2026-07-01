@@ -10,21 +10,35 @@ let writingSketchDrawing = false;
 
 function openWritingSubmitScreen(baseLetter, onClose) {
     writingSubmitContext = { baseLetter, onClose };
-    document.getElementById("writingSubmitTitle").innerText = `Submit Writing: "${baseLetter}"`;
-    document.getElementById("writingSubmitScreen").style.display = "block";
+
+    document.getElementById("writingSubmitTitle").innerText = `"${baseLetter}" Writing`;
+    document.getElementById("writingSubmitScreen").style.display = "flex";
     document.getElementById("writingSketchpadArea").style.display = "none";
     document.getElementById("writingRejectionNote").style.display = "none";
-    document.querySelectorAll('#writingSubmitScreen .mode-option').forEach(el => el.classList.remove('selected'));
+
+    // Show the letter family row at the top for reference
+    const fidelObj = alphabetData.find(item => item.base === baseLetter);
+    const letterDisplay = document.getElementById("writingSubmitLetterDisplay");
+    const letterRow = document.getElementById("writingSubmitLetterRow");
+    if (fidelObj && letterDisplay && letterRow) {
+        letterRow.innerText = fidelObj.family.join("  ");
+        letterDisplay.style.display = "block";
+    }
+
+    // Reset button borders
+    const uploadCard = document.getElementById("writingChoiceUploadCard");
+    const sketchCard = document.getElementById("writingChoiceSketchCard");
+    if (uploadCard) uploadCard.style.border = "2px solid #e2e8f0";
+    if (sketchCard) sketchCard.style.border = "2px solid #e2e8f0";
 
     renderWritingStatusForFamily(baseLetter);
 
-    document.getElementById("writingChoiceUploadCard").onclick = () => {
+    uploadCard.onclick = () => {
         document.getElementById("writingPhotoInput").click();
     };
 
-    document.getElementById("writingChoiceSketchCard").onclick = () => {
-        document.querySelectorAll('#writingSubmitScreen .mode-option').forEach(el => el.classList.remove('selected'));
-        document.getElementById("writingChoiceSketchCard").classList.add('selected');
+    sketchCard.onclick = () => {
+        sketchCard.style.border = "2px solid #166534";
         document.getElementById("writingSketchpadArea").style.display = "block";
         setTimeout(initWritingSketchpad, 50);
     };
@@ -34,7 +48,7 @@ function openWritingSubmitScreen(baseLetter, onClose) {
     photoInput.onchange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            document.getElementById("writingChoiceUploadCard").classList.add('selected');
+            uploadCard.style.border = "2px solid #166534";
             submitWritingPhoto(file);
         }
     };
