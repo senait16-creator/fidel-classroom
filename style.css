@@ -734,3 +734,100 @@
     margin: 0 auto;
     width: 100%;
 }
+
+/* =============================================================================
+   CSS ADDITIONS — paste at the very bottom of style.css
+   Covers: practice sheet modal, streak progress bar, level completion banner,
+   team race view, help flags, embedded level map.
+   ============================================================================= */
+
+/* Practice sheet modal */
+#familyPracticeSheet {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+#familyPracticeSheet > div {
+    box-shadow: 0 -8px 40px rgba(0,0,0,0.2);
+}
+
+/* Drag handle hint on mobile */
+#familyPracticeSheet > div::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 4px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    margin: 0 auto 16px;
+}
+
+/* Streak progress bar container in game workspace */
+#gameStreakProgressBar {
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+/* Post-streak writing prompt overlay */
+#postStreakPrompt {
+    animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Level completion banner pulse on new state */
+#levelCompletionMount > div {
+    animation: gentlePulse 2s ease-in-out 1;
+}
+
+@keyframes gentlePulse {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.01); }
+    100% { transform: scale(1); }
+}
+
+/* Embedded level map family cards */
+#embeddedLevelMapMount .giant-char-card {
+    min-height: 60px;
+}
+
+/* Captain actions area */
+#teamHubCaptainActions .btn-primary {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+/* Help flag cards */
+#helpFlagsMount {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-standard);
+    padding: 16px;
+    box-shadow: var(--shadow-premium);
+    margin-bottom: 16px;
+}
+
+/* Team race rows */
+#teamRaceMount > div {
+    padding: 2px 0;
+}
+
+/* Practice sheet write button only shows after streak passed */
+#practiceSheetWriteBtn {
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Level completion mount — full width padding */
+#levelCompletionMount {
+    max-width: 820px;
+    margin: 0 auto;
+    width: 100%;
+}
+            
