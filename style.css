@@ -1510,3 +1510,102 @@ input, select {
     padding: 8px 16px 4px;
     line-height: 1.4;
 }            
+
+            /* =============================================================
+   CLEANUP ADDITIONS — paste at bottom of style.css
+   ============================================================= */
+
+/* Avatar group — overlapping circles in team hub header */
+.avatar-group-row {
+    display: flex;
+    align-items: center;
+    margin-top: 12px;
+    justify-content: center;
+}
+
+.avatar-group-circle {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    border: 2px solid rgba(255,255,255,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    margin-left: -8px;
+    position: relative;
+    backdrop-filter: blur(4px);
+    transition: transform 0.15s;
+}
+
+.avatar-group-circle:first-child {
+    margin-left: 0;
+}
+
+.avatar-group-circle:hover {
+    transform: translateY(-2px);
+    z-index: 1;
+}
+
+.avatar-group-count {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.25);
+    border: 2px solid rgba(255,255,255,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+    margin-left: -8px;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Letter picker reveal animation */
+#teamHubLetterPickerWrap {
+    animation: screenFadeIn 0.2s ease forwards;
+}
+
+/* Remove bottom banner from team hub and student dashboard */
+#teamHubScreen .bottom-banner,
+#studentDashboard .bottom-banner {
+    display: none !important;
+}
+
+/* Team hub section — remove title for level map section */
+.team-hub-section-notitle {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-standard);
+    padding: 20px;
+    box-shadow: var(--shadow-premium);
+    margin-bottom: 16px;
+}
+
+/* Instructional nudge text */
+#teamHubScreen > div[style*="padding:12px"] p {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Hub header menu button */
+.team-hub-header .menu-trigger-btn {
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.35);
+    color: white;
+    border-radius: 10px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    align-self: flex-start;
+    margin-bottom: 10px;
+    font-family: 'Inter', sans-serif;
+    transition: background 0.15s;
+}
+
+.team-hub-header .menu-trigger-btn:hover {
+    background: rgba(255,255,255,0.28);
+}
