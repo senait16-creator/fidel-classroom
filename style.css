@@ -831,3 +831,347 @@
     width: 100%;
 }
             
+/* =============================================================================
+   VISUAL IMPROVEMENTS — paste at the very bottom of style.css
+   ============================================================================= */
+
+/* Playfair Display tightening */
+.team-hub-name,
+.team-hub-level-tag span[style*="Playfair"],
+#practiceSheetTitle,
+#gameWorkspaceTitle,
+h1.main-title {
+    letter-spacing: -0.3px;
+}
+
+/* ----------------------------------------------------------------
+   SCREEN TRANSITIONS — fade in on every screen change
+   In app.js / auth.js add this class when showing any screen:
+   element.classList.add('screen-fade-in');
+   ---------------------------------------------------------------- */
+@keyframes screenFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.screen-fade-in {
+    animation: screenFadeIn 0.22s ease forwards;
+}
+
+/* ----------------------------------------------------------------
+   TOAST — slide in from right
+   ---------------------------------------------------------------- */
+@keyframes toastSlideIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+.toast-popup {
+    animation: toastSlideIn 0.2s ease forwards;
+}
+
+/* ----------------------------------------------------------------
+   STREAK COUNTER — scale bump on increment
+   Apply .streak-bump class via JS on each correct match,
+   remove after 300ms
+   ---------------------------------------------------------------- */
+@keyframes streakBump {
+    0%   { transform: scale(1); }
+    45%  { transform: scale(1.25); color: #ca8a04; }
+    100% { transform: scale(1); }
+}
+.streak-value-display {
+    display: inline-block;
+    transition: color 0.2s;
+}
+.streak-value-display.streak-bump {
+    animation: streakBump 0.28s ease forwards;
+}
+
+/* ----------------------------------------------------------------
+   PROGRESS BAR — animated fill on load
+   ---------------------------------------------------------------- */
+.progress-bar-animated {
+    transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ----------------------------------------------------------------
+   BOTTOM BANNER — frosted glass effect
+   ---------------------------------------------------------------- */
+.bottom-banner {
+    background: rgba(30, 41, 59, 0.82) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* ----------------------------------------------------------------
+   MATCHING GAME TOKENS — letter vs phonetic distinction
+   ---------------------------------------------------------------- */
+.game-interactive-token[data-kind="fidel"] {
+    font-family: 'Abyssinica SIL', serif;
+    font-size: 26px;
+    background: linear-gradient(135deg, #f0fdf4, white);
+    border-color: #bbf7d0;
+    color: #166534;
+}
+.game-interactive-token[data-kind="phonetic"] {
+    font-size: 15px;
+    font-weight: 700;
+    color: #475569;
+    letter-spacing: 0.5px;
+}
+.game-interactive-token.active-selected[data-kind="fidel"] {
+    background: #dcfce7;
+    border-color: #166534;
+    color: #166534;
+}
+
+/* ----------------------------------------------------------------
+   FIDEL GRID — hover reveals phonetic sound
+   ---------------------------------------------------------------- */
+.fidel-card {
+    position: relative;
+    flex-direction: column;
+    gap: 4px;
+}
+.fidel-card .fidel-sound-hint {
+    font-size: 10px;
+    color: #94a3b8;
+    font-family: 'Ubuntu', sans-serif;
+    opacity: 0;
+    transition: opacity 0.2s;
+    position: absolute;
+    bottom: 6px;
+}
+.fidel-card:hover .fidel-sound-hint {
+    opacity: 1;
+}
+
+/* ----------------------------------------------------------------
+   TEAM HUB HEADER — Ethiopian diamond pattern overlay
+   ---------------------------------------------------------------- */
+.team-hub-header {
+    position: relative;
+    overflow: hidden;
+}
+.team-hub-header-pattern {
+    position: absolute;
+    inset: 0;
+    opacity: 0.06;
+    background-image: repeating-linear-gradient(
+        45deg,
+        white 0px,
+        white 1px,
+        transparent 1px,
+        transparent 12px
+    ),
+    repeating-linear-gradient(
+        -45deg,
+        white 0px,
+        white 1px,
+        transparent 1px,
+        transparent 12px
+    );
+    pointer-events: none;
+}
+.team-hub-header-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+.team-hub-members-row {
+    justify-content: center;
+}
+
+/* ----------------------------------------------------------------
+   LOGIN SCREEN — slow float animation on bg letters
+   ---------------------------------------------------------------- */
+@keyframes floatUp {
+    0%   { transform: translateY(0px); }
+    50%  { transform: translateY(-18px); }
+    100% { transform: translateY(0px); }
+}
+.letter-1 { animation: floatUp 9s ease-in-out infinite; }
+.letter-3 { animation: floatUp 11s ease-in-out infinite 2s; }
+.letter-5 { animation: floatUp 8s ease-in-out infinite 1s; }
+.letter-6 { animation: floatUp 13s ease-in-out infinite 3s; }
+.letter-8 { animation: floatUp 10s ease-in-out infinite 0.5s; }
+
+/* ----------------------------------------------------------------
+   EMPTY STATE — team practice feed
+   ---------------------------------------------------------------- */
+.team-hub-empty {
+    text-align: center;
+    padding: 36px 16px;
+    color: #94a3b8;
+    font-size: 13px;
+    position: relative;
+}
+.team-hub-empty::before {
+    content: 'ፊ';
+    font-family: 'Abyssinica SIL', serif;
+    font-size: 80px;
+    color: #f1f5f9;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%);
+    z-index: 0;
+    pointer-events: none;
+    user-select: none;
+}
+.team-hub-empty span,
+.team-hub-empty p {
+    position: relative;
+    z-index: 1;
+}
+
+/* ----------------------------------------------------------------
+   LEVEL CARDS — border color by status in embedded map
+   ---------------------------------------------------------------- */
+/* Cleared */
+#embeddedLevelMapMount [data-cleared="true"] {
+    border-left-color: #10b981 !important;
+}
+/* In progress (streak done, writing pending) */
+#embeddedLevelMapMount [data-inprogress="true"] {
+    border-left-color: #ca8a04 !important;
+}
+
+/* ----------------------------------------------------------------
+   SKELETON LOADER
+   ---------------------------------------------------------------- */
+@keyframes shimmer {
+    0%   { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+}
+.skeleton {
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+    background-size: 400px 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+    border-radius: 8px;
+}
+.skeleton-row td {
+    background: none;
+}
+
+/* ----------------------------------------------------------------
+   PRACTICE SHEET — entrance animation
+   ---------------------------------------------------------------- */
+@keyframes sheetSlideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+}
+#familyPracticeSheet[style*="flex"] {
+    animation: sheetSlideUp 0.28s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+/* ----------------------------------------------------------------
+   STREAK PROGRESS BAR
+   ---------------------------------------------------------------- */
+#gameStreakProgressBar {
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+/* ----------------------------------------------------------------
+   GOBEZ TOAST
+   ---------------------------------------------------------------- */
+.toast-popup.gobez-toast {
+    background: linear-gradient(135deg, #14532d, #166534);
+    border: 2px solid #ca8a04;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 14px 22px;
+    color: #fef9c3;
+    box-shadow: 0 4px 24px rgba(202,138,4,0.35);
+}
+
+/* ----------------------------------------------------------------
+   MATCH FLASH ANIMATION
+   ---------------------------------------------------------------- */
+@keyframes matchFlash {
+    0%   { transform: scale(1); }
+    45%  { transform: scale(1.07); background: #fef9c3; border-color: #ca8a04; }
+    100% { transform: scale(1); }
+}
+.game-interactive-token.match-flash {
+    animation: matchFlash 0.32s ease forwards;
+    pointer-events: none;
+}
+.game-interactive-token.resolved-pair {
+    background: #fffbeb;
+    border-color: #ca8a04;
+    color: #92400e;
+    opacity: 0.85;
+    pointer-events: none;
+}
+.game-interactive-token {
+    transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s;
+}
+
+/* ----------------------------------------------------------------
+   COLOR SCHEME OVERRIDE: Deep Forest Green + Warm Gold
+   ---------------------------------------------------------------- */
+:root {
+    --brand-primary: #166534;
+    --brand-secondary: #15803d;
+    --accent-gold: #ca8a04;
+    --accent-gold-light: #fef9c3;
+    --accent-gold-bg: #fffbeb;
+    --neutral-light: #fffbf0;
+    --shadow-premium: 0 4px 20px rgba(20, 83, 45, 0.07);
+}
+.auth-decorative-bg {
+    background: linear-gradient(135deg, #14532d 0%, #166534 40%, #15803d 68%, #ca8a04 100%);
+}
+.challenge-board-progress-fill {
+    background: linear-gradient(90deg, #166534, #ca8a04);
+}
+.fidel-card:hover {
+    transform: translateY(-1px);
+    border-color: var(--brand-primary);
+    box-shadow: 0 6px 20px rgba(22, 101, 52, 0.08);
+}
+.challenge-level-card.unlocked:hover {
+    transform: translateY(-3px);
+    border-color: var(--brand-primary);
+    box-shadow: 0 8px 24px rgba(22, 101, 52, 0.12);
+}
+
+/* ----------------------------------------------------------------
+   TEAM HUB SECTIONS — consistent padding/max-width
+   ---------------------------------------------------------------- */
+#teamHubScreen .team-hub-section,
+#teamHubScreen > div:not(.team-hub-header) {
+    max-width: 820px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+}
+
+/* ----------------------------------------------------------------
+   SHARE / SUBMIT BUTTONS — hover states
+   ---------------------------------------------------------------- */
+#teamHubStudentActions button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(22, 101, 52, 0.15);
+}
+
+/* ----------------------------------------------------------------
+   REACTION BUTTONS
+   ---------------------------------------------------------------- */
+.reaction-btn:hover  { border-color: var(--brand-primary); background: #f0fdf4; }
+.reaction-btn.reacted { border-color: var(--accent-gold); background: var(--accent-gold-bg); }
+
+/* ----------------------------------------------------------------
+   LEVEL COMPLETION BANNER PULSE
+   ---------------------------------------------------------------- */
+#levelCompletionMount > div {
+    animation: gentlePulse 2s ease-in-out 1;
+}
+@keyframes gentlePulse {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.01); }
+    100% { transform: scale(1); }
+}
