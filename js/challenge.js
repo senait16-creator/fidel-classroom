@@ -51,8 +51,6 @@ function enterModeSelect() {
         showOnboardingCard();
     }
 }
-    document.getElementById("modeSelectScreen").style.display = "block";
-
     // Hide captain banner — captain flow is inside the team hub now
     const banner = document.getElementById("captainModeSelectBanner");
     const captainOption = document.getElementById("modeSelectCaptainOption");
