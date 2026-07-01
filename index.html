@@ -33,338 +33,6 @@
 
 
 <!-- ==========================================================================
-     HAMBURGER MENU PANEL + OVERLAY
-     Add before closing </body> tag
-     ========================================================================== -->
-
-<!-- Overlay (click to close) -->
-<div id="hamburgerMenuOverlay"
-     onclick="closeHamburgerMenu()"
-     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4);
-            z-index:9981; backdrop-filter:blur(2px);"></div>
-
-<!-- Slide-in panel from right -->
-<div id="hamburgerMenuPanel"
-     style="position:fixed; top:0; right:0; bottom:0; width:280px;
-            background:white; z-index:9982; transform:translateX(100%);
-            transition:transform 0.25s cubic-bezier(0.32,0.72,0,1);
-            display:flex; flex-direction:column; box-shadow:-8px 0 32px rgba(0,0,0,0.15);
-            overflow-y:auto;">
-
-    <!-- Panel header -->
-    <div style="padding:20px 20px 16px; border-bottom:1px solid #e2e8f0;
-                display:flex; justify-content:space-between; align-items:center;
-                background:linear-gradient(135deg, #14532d, #166534);">
-        <div>
-            <div style="font-family:'Abyssinica SIL',serif; font-size:20px;
-                        color:#ca8a04; font-weight:700;">ፊደል</div>
-            <div style="font-size:13px; font-weight:700; color:white; margin-top:2px;"
-                 id="menuNicknameDisplay">Menu</div>
-        </div>
-        <button onclick="closeHamburgerMenu()"
-                style="background:rgba(255,255,255,0.15); border:none; color:white;
-                       border-radius:50%; width:32px; height:32px; font-size:16px;
-                       cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
-    </div>
-
-    <!-- Menu items -->
-    <div style="flex:1; padding:12px 0;">
-
-        <!-- Profile -->
-        <button onclick="openProfileFromMenu()"
-                style="width:100%; background:none; border:none; padding:16px 20px;
-                       display:flex; align-items:center; gap:14px; cursor:pointer;
-                       font-size:15px; font-weight:600; color:#1e293b; text-align:left;
-                       transition:background 0.15s; border-bottom:1px solid #f1f5f9;">
-            <span style="font-size:22px; width:32px; text-align:center;">👤</span>
-            <div>
-                <div>Profile</div>
-                <div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">
-                    Change nickname or avatar
-                </div>
-            </div>
-        </button>
-
-        <!-- Rules -->
-        <button onclick="showRulesCard()"
-                style="width:100%; background:none; border:none; padding:16px 20px;
-                       display:flex; align-items:center; gap:14px; cursor:pointer;
-                       font-size:15px; font-weight:600; color:#1e293b; text-align:left;
-                       transition:background 0.15s; border-bottom:1px solid #f1f5f9;">
-            <span style="font-size:22px; width:32px; text-align:center;">📋</span>
-            <div>
-                <div>Rules</div>
-                <div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">
-                    How the game works
-                </div>
-            </div>
-        </button>
-
-        <!-- Resources -->
-        <button onclick="showResourcesCard()"
-                style="width:100%; background:none; border:none; padding:16px 20px;
-                       display:flex; align-items:center; gap:14px; cursor:pointer;
-                       font-size:15px; font-weight:600; color:#1e293b; text-align:left;
-                       transition:background 0.15s; border-bottom:1px solid #f1f5f9;">
-            <span style="font-size:22px; width:32px; text-align:center;">🔗</span>
-            <div>
-                <div>Resources</div>
-                <div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">
-                    Amharic learning tools &amp; links
-                </div>
-            </div>
-        </button>
-
-        <!-- Switch Mode -->
-        <button onclick="switchModeFromMenu()"
-                style="width:100%; background:none; border:none; padding:16px 20px;
-                       display:flex; align-items:center; gap:14px; cursor:pointer;
-                       font-size:15px; font-weight:600; color:#1e293b; text-align:left;
-                       transition:background 0.15s; border-bottom:1px solid #f1f5f9;">
-            <span style="font-size:22px; width:32px; text-align:center;">🔄</span>
-            <div>
-                <div>Switch Mode</div>
-                <div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">
-                    Practice, Challenge, or Reading
-                </div>
-            </div>
-        </button>
-
-        <!-- Contact Teacher -->
-        <a href="mailto:senaitrichmond16@gmail.com?subject=Fidel Classroom Question"
-           style="display:flex; align-items:center; gap:14px; padding:16px 20px;
-                  text-decoration:none; color:#1e293b; font-size:15px; font-weight:600;
-                  border-bottom:1px solid #f1f5f9;">
-            <span style="font-size:22px; width:32px; text-align:center;">✉️</span>
-            <div>
-                <div>Contact Teacher</div>
-                <div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">
-                    Send a question or note
-                </div>
-            </div>
-        </a>
-
-    </div>
-
-    <!-- Log out at bottom -->
-    <div style="padding:16px 20px; border-top:1px solid #e2e8f0;">
-        <button onclick="logoutFromMenu()"
-                style="width:100%; background:#fef2f2; border:1px solid #fecaca;
-                       color:#991b1b; border-radius:12px; padding:14px;
-                       font-size:14px; font-weight:700; cursor:pointer;">
-            Log Out
-        </button>
-    </div>
-</div>
-
-
-<!-- ==========================================================================
-     RULES CARD OVERLAY
-     ========================================================================== -->
-<div id="rulesCardOverlay"
-     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);
-            z-index:9983; align-items:center; justify-content:center; padding:24px;">
-    <div style="background:white; border-radius:20px; padding:28px 24px;
-                max-width:420px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.3);
-                max-height:90vh; overflow-y:auto;">
-
-        <!-- Header -->
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h2 style="font-size:20px; font-weight:800; color:#166534;
-                       font-family:'Playfair Display',serif; margin:0;">How It Works</h2>
-            <button onclick="closeRulesCard()"
-                    style="background:#f1f5f9; border:none; border-radius:50%;
-                           width:32px; height:32px; font-size:16px; cursor:pointer;">✕</button>
-        </div>
-
-        <!-- Rules list -->
-        <div style="display:flex; flex-direction:column; gap:14px; margin-bottom:20px;">
-
-            <div style="display:flex; gap:12px; align-items:flex-start;">
-                <div style="background:#166534; color:white; border-radius:50%;
-                            width:26px; height:26px; display:flex; align-items:center;
-                            justify-content:center; font-size:13px; font-weight:800;
-                            flex-shrink:0; margin-top:1px;">1</div>
-                <div>
-                    <strong style="font-size:14px; color:#1e293b; display:block; margin-bottom:3px;">
-                        Each level has 3 letter families
-                    </strong>
-                    <p style="font-size:13px; color:#64748b; margin:0; line-height:1.5;">
-                        A letter family is a row of 7 characters that share the same base sound.
-                        Your current level shows which 3 families to work on.
-                    </p>
-                </div>
-            </div>
-
-            <div style="display:flex; gap:12px; align-items:flex-start;">
-                <div style="background:#166534; color:white; border-radius:50%;
-                            width:26px; height:26px; display:flex; align-items:center;
-                            justify-content:center; font-size:13px; font-weight:800;
-                            flex-shrink:0; margin-top:1px;">2</div>
-                <div>
-                    <strong style="font-size:14px; color:#1e293b; display:block; margin-bottom:3px;">
-                        Get a streak of 20 in the matching game
-                    </strong>
-                    <p style="font-size:13px; color:#64748b; margin:0; line-height:1.5;">
-                        Match letters to their sounds. Get 20 correct in a row without missing.
-                        Miss one and your streak resets to zero — take your time.
-                    </p>
-                </div>
-            </div>
-
-            <div style="display:flex; gap:12px; align-items:flex-start;">
-                <div style="background:#166534; color:white; border-radius:50%;
-                            width:26px; height:26px; display:flex; align-items:center;
-                            justify-content:center; font-size:13px; font-weight:800;
-                            flex-shrink:0; margin-top:1px;">3</div>
-                <div>
-                    <strong style="font-size:14px; color:#1e293b; display:block; margin-bottom:3px;">
-                        Submit your handwriting
-                    </strong>
-                    <p style="font-size:13px; color:#64748b; margin:0; line-height:1.5;">
-                        After passing the streak, submit a photo or drawing of your handwriting.
-                        Your captain reviews it and approves or asks you to try again.
-                    </p>
-                </div>
-            </div>
-
-            <div style="display:flex; gap:12px; align-items:flex-start;">
-                <div style="background:#166534; color:white; border-radius:50%;
-                            width:26px; height:26px; display:flex; align-items:center;
-                            justify-content:center; font-size:13px; font-weight:800;
-                            flex-shrink:0; margin-top:1px;">4</div>
-                <div>
-                    <strong style="font-size:14px; color:#1e293b; display:block; margin-bottom:3px;">
-                        Clear all 3 families to advance
-                    </strong>
-                    <p style="font-size:13px; color:#64748b; margin:0; line-height:1.5;">
-                        Once all 3 families are cleared a button appears to submit for teacher
-                        approval. Your teacher signs off and your team moves to the next level.
-                    </p>
-                </div>
-            </div>
-
-            <div style="display:flex; gap:12px; align-items:flex-start;">
-                <div style="background:#ca8a04; color:white; border-radius:50%;
-                            width:26px; height:26px; display:flex; align-items:center;
-                            justify-content:center; font-size:13px; font-weight:800;
-                            flex-shrink:0; margin-top:1px;">!</div>
-                <div>
-                    <strong style="font-size:14px; color:#1e293b; display:block; margin-bottom:3px;">
-                        Your whole team moves up together
-                    </strong>
-                    <p style="font-size:13px; color:#64748b; margin:0; line-height:1.5;">
-                        Every team member needs to clear all 3 families before the team advances.
-                        If a teammate is stuck, help them — your progress depends on theirs.
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <button onclick="closeRulesCard()"
-                style="width:100%; background:#166534; color:white; border:none;
-                       border-radius:12px; padding:14px; font-size:15px;
-                       font-weight:700; cursor:pointer;">
-            Got it ✓
-        </button>
-    </div>
-</div>
-
-
-<!-- ==========================================================================
-     RESOURCES CARD OVERLAY
-     ========================================================================== -->
-<div id="resourcesCardOverlay"
-     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);
-            z-index:9983; align-items:center; justify-content:center; padding:24px;">
-    <div style="background:white; border-radius:20px; padding:28px 24px;
-                max-width:420px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.3);
-                max-height:90vh; overflow-y:auto;">
-
-        <!-- Header -->
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h2 style="font-size:20px; font-weight:800; color:#166534;
-                       font-family:'Playfair Display',serif; margin:0;">Resources</h2>
-            <button onclick="closeResourcesCard()"
-                    style="background:#f1f5f9; border:none; border-radius:50%;
-                           width:32px; height:32px; font-size:16px; cursor:pointer;">✕</button>
-        </div>
-
-        <p style="font-size:13px; color:#64748b; margin-bottom:20px; line-height:1.6;">
-            Extra tools to help you learn the Amharic alphabet faster.
-            Use these alongside Fidel Classroom for the best results.
-        </p>
-
-        <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
-
-            <a href="https://amharicteacher.com/hahu" target="_blank" rel="noopener"
-               style="display:flex; align-items:center; gap:12px; padding:14px 16px;
-                      background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px;
-                      text-decoration:none; color:#1e293b; transition:all 0.2s;">
-                <span style="font-size:24px; flex-shrink:0;">🔊</span>
-                <div>
-                    <div style="font-size:14px; font-weight:700; color:#166534;">Amharic Teacher</div>
-                    <div style="font-size:12px; color:#64748b; margin-top:2px;">
-                        Hear every letter pronounced out loud
-                    </div>
-                </div>
-                <span style="margin-left:auto; color:#94a3b8; font-size:12px;">↗</span>
-            </a>
-
-            <a href="https://www.youtube.com/results?search_query=amharic+alphabet+song" target="_blank" rel="noopener"
-               style="display:flex; align-items:center; gap:12px; padding:14px 16px;
-                      background:#fff7ed; border:1px solid #fed7aa; border-radius:12px;
-                      text-decoration:none; color:#1e293b; transition:all 0.2s;">
-                <span style="font-size:24px; flex-shrink:0;">🎵</span>
-                <div>
-                    <div style="font-size:14px; font-weight:700; color:#c2410c;">Amharic Alphabet Song</div>
-                    <div style="font-size:12px; color:#64748b; margin-top:2px;">
-                        Learn the letters through music on YouTube
-                    </div>
-                </div>
-                <span style="margin-left:auto; color:#94a3b8; font-size:12px;">↗</span>
-            </a>
-
-            <a href="https://www.duolingo.com" target="_blank" rel="noopener"
-               style="display:flex; align-items:center; gap:12px; padding:14px 16px;
-                      background:#f0f9ff; border:1px solid #bae6fd; border-radius:12px;
-                      text-decoration:none; color:#1e293b; transition:all 0.2s;">
-                <span style="font-size:24px; flex-shrink:0;">🦉</span>
-                <div>
-                    <div style="font-size:14px; font-weight:700; color:#0369a1;">Duolingo</div>
-                    <div style="font-size:12px; color:#64748b; margin-top:2px;">
-                        Extra daily language practice
-                    </div>
-                </div>
-                <span style="margin-left:auto; color:#94a3b8; font-size:12px;">↗</span>
-            </a>
-
-            <a href="https://www.youtube.com/@LearnAmharicwithAbebeHaile" target="_blank" rel="noopener"
-               style="display:flex; align-items:center; gap:12px; padding:14px 16px;
-                      background:#fdf4ff; border:1px solid #e9d5ff; border-radius:12px;
-                      text-decoration:none; color:#1e293b; transition:all 0.2s;">
-                <span style="font-size:24px; flex-shrink:0;">📺</span>
-                <div>
-                    <div style="font-size:14px; font-weight:700; color:#7e22ce;">Amharic YouTube Lessons</div>
-                    <div style="font-size:12px; color:#64748b; margin-top:2px;">
-                        Video lessons for beginners
-                    </div>
-                </div>
-                <span style="margin-left:auto; color:#94a3b8; font-size:12px;">↗</span>
-            </a>
-
-        </div>
-
-        <button onclick="closeResourcesCard()"
-                style="width:100%; background:#166534; color:white; border:none;
-                       border-radius:12px; padding:14px; font-size:15px;
-                       font-weight:700; cursor:pointer;">
-            Close
-        </button>
-    </div>
-</div>
-
-<!-- ==========================================================================
      AUTH SCREEN
      ========================================================================== -->
 <div id="authScreen" class="auth-decorative-bg">
@@ -764,9 +432,13 @@
 
     <!-- Team race -->
     <div class="team-hub-section">
-        <div class="team-hub-section-title"><span>Team Race</span></div>
-        <div id="teamRaceMount"></div>
+    <div class="team-hub-section-title"
+         onclick="toggleTeamRace()" style="cursor:pointer; user-select:none;">
+        <span>Team Race</span>
+        <span id="teamRaceToggleArrow" style="color:#94a3b8; font-size:12px;">▼</span>
     </div>
+    <div id="teamRaceMount" style="display:none;"></div>
+</div>
 
     <!-- Help flags (captain only) -->
     <div id="helpFlagsMount"
@@ -1152,6 +824,338 @@
                 ✍️ Submit My Writing
             </button>
         </div>
+    </div>
+</div>
+
+    <!-- ==========================================================================
+     HAMBURGER MENU PANEL + OVERLAY
+     Add before closing </body> tag
+     ========================================================================== -->
+
+<!-- Overlay (click to close) -->
+<div id="hamburgerMenuOverlay"
+     onclick="closeHamburgerMenu()"
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4);
+            z-index:9981; backdrop-filter:blur(2px);"></div>
+
+<!-- Slide-in panel from right -->
+<div id="hamburgerMenuPanel"
+     style="position:fixed; top:0; right:0; bottom:0; width:280px;
+            background:white; z-index:9982; transform:translateX(100%);
+            transition:transform 0.25s cubic-bezier(0.32,0.72,0,1);
+            display:flex; flex-direction:column; box-shadow:-8px 0 32px rgba(0,0,0,0.15);
+            overflow-y:auto;">
+
+    <!-- Panel header -->
+    <div style="padding:20px 20px 16px; border-bottom:1px solid #e2e8f0;
+                display:flex; justify-content:space-between; align-items:center;
+                background:linear-gradient(135deg, #14532d, #166534);">
+        <div>
+            <div style="font-family:'Abyssinica SIL',serif; font-size:20px;
+                        color:#ca8a04; font-weight:700;">ፊደል</div>
+            <div style="font-size:13px; font-weight:700; color:white; margin-top:2px;"
+                 id="menuNicknameDisplay">Menu</div>
+        </div>
+        <button onclick="closeHamburgerMenu()"
+                style="background:rgba(255,255,255,0.15); border:none; color:white;
+                       border-radius:50%; width:32px; height:32px; font-size:16px;
+                       cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+    </div>
+
+    <!-- Menu items -->
+    <div style="flex:1; padding:12px 0;">
+
+        <!-- Profile -->
+        <button onclick="openProfileFromMenu()"
+                style="width:100%; background:none; border:none; padding:16px 20px;
+                       display:flex; align-items:center; gap:14px; cursor:pointer;
+                       font-size:15px; font-weight:600; color:#1e293b; text-align:left;
+                       transition:background 0.15s; border-bottom:1px solid #f1f5f9;">
+            <span style="font-size:22px; width:32px; text-align:center;">👤</span>
+            <div>
+                <div>Profile</div>
+                <div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">
+                    Change nickname or avatar
+                </div>
+            </div>
+        </button>
+
+        <!-- Rules -->
+        <button onclick="showRulesCard()"
+                style="width:100%; background:none; border:none; padding:16px 20px;
+                       display:flex; align-items:center; gap:14px; cursor:pointer;
+                       font-size:15px; font-weight:600; color:#1e293b; text-align:left;
+                       transition:background 0.15s; border-bottom:1px solid #f1f5f9;">
+            <span style="font-size:22px; width:32px; text-align:center;">📋</span>
+            <div>
+                <div>Rules</div>
+                <div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">
+                    How the game works
+                </div>
+            </div>
+        </button>
+
+        <!-- Resources -->
+        <button onclick="showResourcesCard()"
+                style="width:100%; background:none; border:none; padding:16px 20px;
+                       display:flex; align-items:center; gap:14px; cursor:pointer;
+                       font-size:15px; font-weight:600; color:#1e293b; text-align:left;
+                       transition:background 0.15s; border-bottom:1px solid #f1f5f9;">
+            <span style="font-size:22px; width:32px; text-align:center;">🔗</span>
+            <div>
+                <div>Resources</div>
+                <div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">
+                    Amharic learning tools &amp; links
+                </div>
+            </div>
+        </button>
+
+        <!-- Switch Mode -->
+        <button onclick="switchModeFromMenu()"
+                style="width:100%; background:none; border:none; padding:16px 20px;
+                       display:flex; align-items:center; gap:14px; cursor:pointer;
+                       font-size:15px; font-weight:600; color:#1e293b; text-align:left;
+                       transition:background 0.15s; border-bottom:1px solid #f1f5f9;">
+            <span style="font-size:22px; width:32px; text-align:center;">🔄</span>
+            <div>
+                <div>Switch Mode</div>
+                <div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">
+                    Practice, Challenge, or Reading
+                </div>
+            </div>
+        </button>
+
+        <!-- Contact Teacher -->
+        <a href="mailto:senaitrichmond16@gmail.com?subject=Fidel Classroom Question"
+           style="display:flex; align-items:center; gap:14px; padding:16px 20px;
+                  text-decoration:none; color:#1e293b; font-size:15px; font-weight:600;
+                  border-bottom:1px solid #f1f5f9;">
+            <span style="font-size:22px; width:32px; text-align:center;">✉️</span>
+            <div>
+                <div>Contact Teacher</div>
+                <div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">
+                    Send a question or note
+                </div>
+            </div>
+        </a>
+
+    </div>
+
+    <!-- Log out at bottom -->
+    <div style="padding:16px 20px; border-top:1px solid #e2e8f0;">
+        <button onclick="logoutFromMenu()"
+                style="width:100%; background:#fef2f2; border:1px solid #fecaca;
+                       color:#991b1b; border-radius:12px; padding:14px;
+                       font-size:14px; font-weight:700; cursor:pointer;">
+            Log Out
+        </button>
+    </div>
+</div>
+
+
+<!-- ==========================================================================
+     RULES CARD OVERLAY
+     ========================================================================== -->
+<div id="rulesCardOverlay"
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);
+            z-index:9983; align-items:center; justify-content:center; padding:24px;">
+    <div style="background:white; border-radius:20px; padding:28px 24px;
+                max-width:420px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.3);
+                max-height:90vh; overflow-y:auto;">
+
+        <!-- Header -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h2 style="font-size:20px; font-weight:800; color:#166534;
+                       font-family:'Playfair Display',serif; margin:0;">How It Works</h2>
+            <button onclick="closeRulesCard()"
+                    style="background:#f1f5f9; border:none; border-radius:50%;
+                           width:32px; height:32px; font-size:16px; cursor:pointer;">✕</button>
+        </div>
+
+        <!-- Rules list -->
+        <div style="display:flex; flex-direction:column; gap:14px; margin-bottom:20px;">
+
+            <div style="display:flex; gap:12px; align-items:flex-start;">
+                <div style="background:#166534; color:white; border-radius:50%;
+                            width:26px; height:26px; display:flex; align-items:center;
+                            justify-content:center; font-size:13px; font-weight:800;
+                            flex-shrink:0; margin-top:1px;">1</div>
+                <div>
+                    <strong style="font-size:14px; color:#1e293b; display:block; margin-bottom:3px;">
+                        Each level has 3 letter families
+                    </strong>
+                    <p style="font-size:13px; color:#64748b; margin:0; line-height:1.5;">
+                        A letter family is a row of 7 characters that share the same base sound.
+                        Your current level shows which 3 families to work on.
+                    </p>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:12px; align-items:flex-start;">
+                <div style="background:#166534; color:white; border-radius:50%;
+                            width:26px; height:26px; display:flex; align-items:center;
+                            justify-content:center; font-size:13px; font-weight:800;
+                            flex-shrink:0; margin-top:1px;">2</div>
+                <div>
+                    <strong style="font-size:14px; color:#1e293b; display:block; margin-bottom:3px;">
+                        Get a streak of 20 in the matching game
+                    </strong>
+                    <p style="font-size:13px; color:#64748b; margin:0; line-height:1.5;">
+                        Match letters to their sounds. Get 20 correct in a row without missing.
+                        Miss one and your streak resets to zero — take your time.
+                    </p>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:12px; align-items:flex-start;">
+                <div style="background:#166534; color:white; border-radius:50%;
+                            width:26px; height:26px; display:flex; align-items:center;
+                            justify-content:center; font-size:13px; font-weight:800;
+                            flex-shrink:0; margin-top:1px;">3</div>
+                <div>
+                    <strong style="font-size:14px; color:#1e293b; display:block; margin-bottom:3px;">
+                        Submit your handwriting
+                    </strong>
+                    <p style="font-size:13px; color:#64748b; margin:0; line-height:1.5;">
+                        After passing the streak, submit a photo or drawing of your handwriting.
+                        Your captain reviews it and approves or asks you to try again.
+                    </p>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:12px; align-items:flex-start;">
+                <div style="background:#166534; color:white; border-radius:50%;
+                            width:26px; height:26px; display:flex; align-items:center;
+                            justify-content:center; font-size:13px; font-weight:800;
+                            flex-shrink:0; margin-top:1px;">4</div>
+                <div>
+                    <strong style="font-size:14px; color:#1e293b; display:block; margin-bottom:3px;">
+                        Clear all 3 families to advance
+                    </strong>
+                    <p style="font-size:13px; color:#64748b; margin:0; line-height:1.5;">
+                        Once all 3 families are cleared a button appears to submit for teacher
+                        approval. Your teacher signs off and your team moves to the next level.
+                    </p>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:12px; align-items:flex-start;">
+                <div style="background:#ca8a04; color:white; border-radius:50%;
+                            width:26px; height:26px; display:flex; align-items:center;
+                            justify-content:center; font-size:13px; font-weight:800;
+                            flex-shrink:0; margin-top:1px;">!</div>
+                <div>
+                    <strong style="font-size:14px; color:#1e293b; display:block; margin-bottom:3px;">
+                        Your whole team moves up together
+                    </strong>
+                    <p style="font-size:13px; color:#64748b; margin:0; line-height:1.5;">
+                        Every team member needs to clear all 3 families before the team advances.
+                        If a teammate is stuck, help them — your progress depends on theirs.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="closeRulesCard()"
+                style="width:100%; background:#166534; color:white; border:none;
+                       border-radius:12px; padding:14px; font-size:15px;
+                       font-weight:700; cursor:pointer;">
+            Got it ✓
+        </button>
+    </div>
+</div>
+
+
+<!-- ==========================================================================
+     RESOURCES CARD OVERLAY
+     ========================================================================== -->
+<div id="resourcesCardOverlay"
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);
+            z-index:9983; align-items:center; justify-content:center; padding:24px;">
+    <div style="background:white; border-radius:20px; padding:28px 24px;
+                max-width:420px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.3);
+                max-height:90vh; overflow-y:auto;">
+
+        <!-- Header -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h2 style="font-size:20px; font-weight:800; color:#166534;
+                       font-family:'Playfair Display',serif; margin:0;">Resources</h2>
+            <button onclick="closeResourcesCard()"
+                    style="background:#f1f5f9; border:none; border-radius:50%;
+                           width:32px; height:32px; font-size:16px; cursor:pointer;">✕</button>
+        </div>
+
+        <p style="font-size:13px; color:#64748b; margin-bottom:20px; line-height:1.6;">
+            Extra tools to help you learn the Amharic alphabet faster.
+            Use these alongside Fidel Classroom for the best results.
+        </p>
+
+        <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
+
+            <a href="https://amharicteacher.com/hahu" target="_blank" rel="noopener"
+               style="display:flex; align-items:center; gap:12px; padding:14px 16px;
+                      background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px;
+                      text-decoration:none; color:#1e293b; transition:all 0.2s;">
+                <span style="font-size:24px; flex-shrink:0;">🔊</span>
+                <div>
+                    <div style="font-size:14px; font-weight:700; color:#166534;">Amharic Teacher</div>
+                    <div style="font-size:12px; color:#64748b; margin-top:2px;">
+                        Hear every letter pronounced out loud
+                    </div>
+                </div>
+                <span style="margin-left:auto; color:#94a3b8; font-size:12px;">↗</span>
+            </a>
+
+            <a href="https://www.youtube.com/results?search_query=amharic+alphabet+song" target="_blank" rel="noopener"
+               style="display:flex; align-items:center; gap:12px; padding:14px 16px;
+                      background:#fff7ed; border:1px solid #fed7aa; border-radius:12px;
+                      text-decoration:none; color:#1e293b; transition:all 0.2s;">
+                <span style="font-size:24px; flex-shrink:0;">🎵</span>
+                <div>
+                    <div style="font-size:14px; font-weight:700; color:#c2410c;">Amharic Alphabet Song</div>
+                    <div style="font-size:12px; color:#64748b; margin-top:2px;">
+                        Learn the letters through music on YouTube
+                    </div>
+                </div>
+                <span style="margin-left:auto; color:#94a3b8; font-size:12px;">↗</span>
+            </a>
+
+            <a href="https://www.duolingo.com" target="_blank" rel="noopener"
+               style="display:flex; align-items:center; gap:12px; padding:14px 16px;
+                      background:#f0f9ff; border:1px solid #bae6fd; border-radius:12px;
+                      text-decoration:none; color:#1e293b; transition:all 0.2s;">
+                <span style="font-size:24px; flex-shrink:0;">🦉</span>
+                <div>
+                    <div style="font-size:14px; font-weight:700; color:#0369a1;">Duolingo</div>
+                    <div style="font-size:12px; color:#64748b; margin-top:2px;">
+                        Extra daily language practice
+                    </div>
+                </div>
+                <span style="margin-left:auto; color:#94a3b8; font-size:12px;">↗</span>
+            </a>
+
+            <a href="https://www.youtube.com/@LearnAmharicwithAbebeHaile" target="_blank" rel="noopener"
+               style="display:flex; align-items:center; gap:12px; padding:14px 16px;
+                      background:#fdf4ff; border:1px solid #e9d5ff; border-radius:12px;
+                      text-decoration:none; color:#1e293b; transition:all 0.2s;">
+                <span style="font-size:24px; flex-shrink:0;">📺</span>
+                <div>
+                    <div style="font-size:14px; font-weight:700; color:#7e22ce;">Amharic YouTube Lessons</div>
+                    <div style="font-size:12px; color:#64748b; margin-top:2px;">
+                        Video lessons for beginners
+                    </div>
+                </div>
+                <span style="margin-left:auto; color:#94a3b8; font-size:12px;">↗</span>
+            </a>
+
+        </div>
+
+        <button onclick="closeResourcesCard()"
+                style="width:100%; background:#166534; color:white; border:none;
+                       border-radius:12px; padding:14px; font-size:15px;
+                       font-weight:700; cursor:pointer;">
+            Close
+        </button>
     </div>
 </div>
 
