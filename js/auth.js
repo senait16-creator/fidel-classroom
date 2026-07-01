@@ -467,14 +467,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 _supabase.auth.onAuthStateChange(async (event, session) => {
     if (event === 'PASSWORD_RECOVERY') {
-        document.getElementById("authScreen").style.display = "none";
-        document.getElementById("forgotPasswordScreen").style.display = "none";
+        // Hide everything, show the new password screen
+        document.querySelectorAll('body > div').forEach(el => el.style.display = 'none');
         document.getElementById("newPasswordScreen").style.display = "block";
         return;
     }
 
     if (event === 'SIGNED_IN' && session?.user) {
-        // Only auto-route if we're still on the auth screen
         const authScreen = document.getElementById("authScreen");
         if (authScreen && authScreen.style.display !== "none") {
             await proceedFlowMap(session.user);
