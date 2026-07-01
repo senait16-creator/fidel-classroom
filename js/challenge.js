@@ -51,22 +51,6 @@ function enterModeSelect() {
         showOnboardingCard();
     }
 }
-    // Hide captain banner — captain flow is inside the team hub now
-    const banner = document.getElementById("captainModeSelectBanner");
-    const captainOption = document.getElementById("modeSelectCaptainOption");
-    if (banner) banner.style.display = "none";
-    if (captainOption) captainOption.style.display = "none";
-
-    const nickname = currentProfile?.nickname ? `, ${currentProfile.nickname}` : '';
-    const nicknameEl = document.getElementById("modeSelectNickname");
-    if (nicknameEl) nicknameEl.innerText = nickname;
-
-    // First-time onboarding card
-    if (!hasVisited) {
-        localStorage.setItem('fidel_has_visited', 'true');
-        showOnboardingCard();
-    }
-}
 
 function chooseModePractice() {
     document.getElementById("modeSelectScreen").style.display = "none";
