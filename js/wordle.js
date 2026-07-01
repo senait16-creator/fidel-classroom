@@ -212,10 +212,10 @@ window.submitWordleAnswer = submitWordleAnswer;
 
 async function saveWordleScoreToSupabase(attempts, won) {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+const { data: { user } } = await _supabase.auth.getUser();
     if (!user) return;
     const dayIndex = getDayIndex();
-    await supabase.from('wordle_scores').upsert({
+    await _supabase.from('wordle_scores').upsert({
       user_id: user.id,
       day_index: dayIndex,
       attempts_used: attempts,
