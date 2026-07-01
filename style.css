@@ -259,7 +259,9 @@
         .mode-option-title { font-size: 16px; font-weight: 700; color: var(--neutral-dark); }
         .mode-option-desc { font-size: 12px; color: #64748b; }
         .mode-option.challenge-variant { background: linear-gradient(135deg, #f0fdfa, white); border-color: #5eead4; }
-
+body {
+    background: #f5f5f0;
+}
         /* ---------------------------------------------------------------- */
         /* Fidel Challenge: level map                                       */
         /* ---------------------------------------------------------------- */
