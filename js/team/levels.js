@@ -55,7 +55,10 @@ async function renderEmbeddedLevelMap(mountId) {
     (progressRows || []).forEach(row => { progressByLetter[row.base_letter] = row; });
 
     mount.innerHTML = "";
-
+const hint = document.createElement('p');
+hint.style.cssText = 'font-size:13px; color:#94a3b8; margin-bottom:14px; font-family:Inter,sans-serif;';
+hint.innerText = 'Tap any family card to practice. Clear all 3 to advance your team.';
+mount.appendChild(hint);
     // Current level — shown expanded with family cards
     const currentLevelData = (allLevels || []).find(l => l.level_number === currentLevel);
     if (currentLevelData) {
