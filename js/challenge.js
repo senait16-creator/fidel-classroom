@@ -343,6 +343,11 @@ function exitChallengeFamilyPicker() {
     renderChallengeLevelsView();
 }
 
+function exitChallengeFamilyDetail() {
+    document.getElementById("challengeFamilyDetailScreen").style.display = "none";
+    document.getElementById("challengeFamilyScreen").style.display = "block";
+}
+
 // -----------------------------------------------------------------------------
 // Expose
 // -----------------------------------------------------------------------------
