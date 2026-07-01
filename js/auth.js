@@ -17,7 +17,8 @@ function resetToGate() {
     document.getElementById("credentialFields").style.display = "none";
     document.getElementById("studentDashboard").style.display = "none";
     document.getElementById("teacherOnlyDashboard").style.display = "none";
-    document.getElementById("adminViewSelectorGate").style.display = "none";
+    const adminGate = document.getElementById("adminViewSelectorGate");
+    if (adminGate) adminGate.style.display = "none";
 
     const emailField = document.getElementById("email");
     const passwordField = document.getElementById("password");
