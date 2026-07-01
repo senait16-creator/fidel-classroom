@@ -1212,3 +1212,47 @@ h1.main-title {
     flex-direction: column;
 }
             
+/* =============================================================================
+   HAMBURGER MENU CSS — paste at bottom of style.css
+   ============================================================================= */
+
+/* Hamburger button hover */
+#hamburgerBtn:hover {
+    box-shadow: 0 4px 16px rgba(22, 101, 52, 0.2);
+    transform: scale(1.05);
+    transition: all 0.2s;
+}
+
+/* Menu item hover */
+#hamburgerMenuPanel button:hover,
+#hamburgerMenuPanel a:hover {
+    background: #f0fdf4 !important;
+}
+
+/* Resource link hover */
+#resourcesCardOverlay a:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* Rules card number badges */
+#rulesCardOverlay div[style*="border-radius:50%"] {
+    font-family: 'Ubuntu', sans-serif;
+}
+
+/* Smooth overlay fade */
+#hamburgerMenuOverlay {
+    animation: screenFadeIn 0.2s ease forwards;
+}
+
+/* Panel entrance */
+#hamburgerMenuPanel {
+    will-change: transform;
+}
+
+/* Rules and resources overlay entrance */
+#rulesCardOverlay > div,
+#resourcesCardOverlay > div {
+    animation: screenFadeIn 0.22s ease forwards;
+}
+            
