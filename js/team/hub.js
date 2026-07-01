@@ -369,6 +369,7 @@ async function loadCaptainWritingQueue() {
         return;
     }
 
+    // Pending submissions
     const { data: submissions, error } = await _supabase
         .from('writing_submissions')
         .select(`
@@ -384,45 +385,104 @@ async function loadCaptainWritingQueue() {
         return;
     }
 
-    if (!submissions || submissions.length === 0) {
-        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No pending submissions — all caught up! ✓</p>`;
-        return;
-    }
+    // Recently rejected (last 24 hours) — no image since deleted from storage
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { data: recentlyRejected } = await _supabase
+        .from('writing_submissions')
+        .select(`
+            id, base_letter, rejected_at, reviewer_note, student_id,
+            profiles!writing_submissions_student_id_fkey(nickname, avatar)
+        `)
+        .in('student_id', memberIds)
+        .eq('status', 'rejected')
+        .gt('rejected_at', twentyFourHoursAgo)
+        .order('rejected_at', { ascending: false });
 
     mount.innerHTML = "";
-    submissions.forEach(sub => {
-        const card = document.createElement('div');
-        card.className = "teacher-submission-card";
-        card.innerHTML = `
-            <img src="${sub.image_url}" alt="Writing sample">
-            <div class="teacher-submission-meta">
-                <strong>${sub.profiles?.avatar || '🦁'} ${sub.profiles?.nickname || 'Student'}</strong>
-                <span class="letter">${sub.base_letter}</span>
-                <div class="teacher-submission-actions">
-                    <button class="btn-approve">✓ Approve</button>
-                    <button class="btn-reject">✗ Reject</button>
+
+    // Pending section
+    if (!submissions || submissions.length === 0) {
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px; margin-bottom:16px;">
+            No pending submissions — all caught up! ✓</p>`;
+    } else {
+        submissions.forEach(sub => {
+            const card = document.createElement('div');
+            card.className = "teacher-submission-card";
+            card.innerHTML = `
+                <img src="${sub.image_url}" alt="Writing sample"
+                     onerror="this.style.display='none'">
+                <div class="teacher-submission-meta">
+                    <strong>${sub.profiles?.avatar || '🦁'} ${sub.profiles?.nickname || 'Student'}</strong>
+                    <span class="letter">${sub.base_letter}</span>
+                    <div class="teacher-submission-actions">
+                        <button class="btn-approve">✓ Approve</button>
+                        <button class="btn-reject">✗ Reject</button>
+                    </div>
+                    <input type="text" class="teacher-reject-note-input"
+                           placeholder="Optional note for student..." style="display:none;">
                 </div>
-                <input type="text" class="teacher-reject-note-input"
-                       placeholder="Optional note..." style="display:none;">
-            </div>
+            `;
+
+            card.querySelector('.btn-approve').onclick = () =>
+                captainApproveSubmission(sub.id, sub.student_id, sub.base_letter);
+
+            const rejectBtn = card.querySelector('.btn-reject');
+            const noteInput = card.querySelector('.teacher-reject-note-input');
+            rejectBtn.onclick = () => {
+                if (noteInput.style.display === "none") {
+                    noteInput.style.display = "block";
+                    rejectBtn.innerText = "Confirm Reject";
+                } else {
+                    captainRejectSubmission(sub.id, noteInput.value.trim(), sub.image_url);
+                }
+            };
+
+            mount.appendChild(card);
+        });
+    }
+
+    // Recently rejected section — shows for 24 hours then disappears
+    if (recentlyRejected && recentlyRejected.length > 0) {
+        const section = document.createElement('div');
+        section.style.cssText = "margin-top:20px;";
+        section.innerHTML = `
+            <p style="font-size:12px; font-weight:700; color:#94a3b8;
+                      text-transform:uppercase; letter-spacing:0.4px; margin-bottom:10px;">
+                Recently Rejected (disappears after 24h)
+            </p>
         `;
 
-        card.querySelector('.btn-approve').onclick = () =>
-            captainApproveSubmission(sub.id, sub.student_id, sub.base_letter);
+        recentlyRejected.forEach(sub => {
+            const hoursLeft = Math.max(0, Math.round(
+                (new Date(sub.rejected_at).getTime() + 24 * 60 * 60 * 1000 - Date.now()) / (1000 * 60 * 60)
+            ));
+            const card = document.createElement('div');
+            card.style.cssText = `
+                display:flex; justify-content:space-between; align-items:center;
+                padding:12px 14px; background:#fef2f2; border:1px solid #fecaca;
+                border-radius:12px; margin-bottom:8px; font-size:13px;
+            `;
+            card.innerHTML = `
+                <div>
+                    <strong>${sub.profiles?.avatar || '🦁'} ${sub.profiles?.nickname || 'Student'}</strong>
+                    <span style="font-family:'Abyssinica SIL',serif; font-size:18px; margin:0 6px;">
+                        ${sub.base_letter}
+                    </span>
+                    ${sub.reviewer_note
+                        ? `<div style="font-size:11px; color:#64748b; margin-top:3px;">
+                               Note: "${sub.reviewer_note}"
+                           </div>`
+                        : ''}
+                </div>
+                <span style="font-size:11px; color:#94a3b8; flex-shrink:0; margin-left:8px;">
+                    ${hoursLeft}h left
+                </span>
+            `;
+            section.appendChild(card);
+        });
 
-        const rejectBtn = card.querySelector('.btn-reject');
-        const noteInput = card.querySelector('.teacher-reject-note-input');
-        rejectBtn.onclick = () => {
-            if (noteInput.style.display === "none") {
-                noteInput.style.display = "block";
-                rejectBtn.innerText = "Confirm Reject";
-            } else {
-                captainRejectSubmission(sub.id, noteInput.value.trim());
-            }
-        };
-
-        mount.appendChild(card);
-    });
+        mount.appendChild(section);
+    }
 }
 
 async function captainApproveSubmission(submissionId, studentId, baseLetter) {
@@ -464,19 +524,31 @@ async function captainApproveSubmission(submissionId, studentId, baseLetter) {
     }
 }
 
-async function captainRejectSubmission(submissionId, note) {
+async function captainRejectSubmission(submissionId, note, imageUrl) {
+    const now = new Date().toISOString();
+
     const { error } = await _supabase
         .from('writing_submissions')
         .update({
             status: 'rejected',
             reviewed_by: currentUser.id,
-            reviewed_at: new Date().toISOString(),
+            reviewed_at: now,
+            rejected_at: now,
             reviewer_note: note || null
         })
         .eq('id', submissionId);
 
     if (error) return showNotificationToast("Reject failed: " + error.message);
-    showNotificationToast("Rejected — student can resubmit.");
+
+    // Delete image from storage immediately on rejection
+    if (imageUrl) {
+        const pathMatch = imageUrl.match(/art_shares\/(.+)$/);
+        if (pathMatch) {
+            await _supabase.storage.from('art_shares').remove([pathMatch[1]]);
+        }
+    }
+
+    showNotificationToast("Rejected — student will be notified to resubmit.");
     await loadCaptainWritingQueue();
 }
 
