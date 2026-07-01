@@ -140,7 +140,12 @@ async function proceedFlowMap(user) {
         if (modeGreetSub && profile?.nickname) {
             modeGreetSub.innerText = `Welcome back, ${profile.nickname}`;
         }
+         const modeGreetSub2 = document.getElementById('modeGreetingSub');
+        if (modeGreetSub2 && currentProfile?.nickname) {
+            modeGreetSub2.innerText = `Welcome back, ${currentProfile.nickname}`;
+        }
         enterModeSelect();
+    }
         // Wordle popup — fires 600ms after screen appears
         setTimeout(() => {
             if (typeof maybeShowWordleOnLogin === 'function') maybeShowWordleOnLogin();
