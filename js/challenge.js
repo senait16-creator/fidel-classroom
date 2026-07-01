@@ -162,6 +162,18 @@ async function openChallengeFamilyPicker(level) {
 
 async function returnToChallengeFamilyPicker() {
     document.getElementById("gameWorkspace").style.display = "none";
+
+    // Game launched from embedded level map — return to practice sheet
+    if (!activeChallengeLevel) {
+        if (typeof embeddedActiveFamily !== "undefined" && embeddedActiveFamily) {
+            document.getElementById("familyPracticeSheet").style.display = "flex";
+        } else {
+            document.getElementById("teamHubScreen").style.display = "block";
+        }
+        return;
+    }
+
+    // Game launched from old-style challenge screens — return there
     if (activeChallengeFamilyObj) {
         document.getElementById("challengeFamilyDetailScreen").style.display = "block";
         renderChallengeFamilyDetailGiantRow(activeChallengeFamilyObj);
@@ -169,12 +181,6 @@ async function returnToChallengeFamilyPicker() {
         document.getElementById("challengeFamilyScreen").style.display = "block";
         await renderChallengeFamilyPicker();
     }
-}
-
-function exitChallengeFamilyPicker() {
-    document.getElementById("challengeFamilyScreen").style.display = "none";
-    document.getElementById("challengeLevelsScreen").style.display = "block";
-    renderChallengeLevelsView();
 }
 
 async function fetchStudentFamilyProgressForLevel(levelNumber) {
