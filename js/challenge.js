@@ -337,6 +337,12 @@ function launchChallengeStreakGame(fidelObj, levelNumber) {
     });
 }
 
+function exitChallengeFamilyPicker() {
+    document.getElementById("challengeFamilyScreen").style.display = "none";
+    document.getElementById("challengeLevelsScreen").style.display = "block";
+    renderChallengeLevelsView();
+}
+
 // -----------------------------------------------------------------------------
 // Expose
 // -----------------------------------------------------------------------------
