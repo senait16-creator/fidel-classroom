@@ -1339,6 +1339,10 @@ select,
    TODAY CARD
    ---------------------------------------------------------------- */
 .today-card {
+    border-left: 4px solid var(--brand-primary);
+    background: #fafffe;
+}
+            .today-card {
     background: white;
     border: 1px solid #e2e8f0;
     border-radius: 16px;
