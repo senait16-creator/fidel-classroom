@@ -474,7 +474,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 _supabase.auth.onAuthStateChange(async (event, session) => {
     if (event === 'PASSWORD_RECOVERY') {
-        // Hide everything, show the new password screen
         document.querySelectorAll('body > div').forEach(el => el.style.display = 'none');
         document.getElementById("newPasswordScreen").style.display = "block";
         return;
