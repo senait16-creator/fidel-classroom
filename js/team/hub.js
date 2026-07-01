@@ -611,10 +611,19 @@ async function checkCaptainInboxBadge() {
     }
 }
 
+function toggleTeamFeed() {
+    const feed = document.getElementById("teamHubPracticeFeed");
+    const arrow = document.getElementById("teamFeedToggleArrow");
+    const isOpen = feed.style.display !== "none";
+    feed.style.display = isOpen ? "none" : "block";
+    if (arrow) arrow.innerText = isOpen ? "▼" : "▲";
+}
+
 // ---------------------------------------------------------------------------
 // Expose
 // ---------------------------------------------------------------------------
 
+window.toggleTeamFeed = toggleTeamFeed;
 window.enterTeamHub = enterTeamHub;
 window.exitTeamHub = exitTeamHub;
 window.enterChallengeLevelsFromHub = () => {
