@@ -377,70 +377,61 @@ function showOnboardingCard() {
         <div style="background:white; border-radius:20px; padding:32px 24px;
                     max-width:400px; width:100%; text-align:center;
                     box-shadow:0 20px 60px rgba(0,0,0,0.3);">
-            <div style="font-size:48px; margin-bottom:12px;">ሰላም!</div>
-            <h2 style="font-size:22px; font-weight:800; color:#166534;
-                       margin-bottom:8px;">Welcome to Fidel Classroom</h2>
-            <p style="font-size:14px; color:#475569; line-height:1.7;
-                      margin-bottom:20px;">
-                You're here to learn the <strong>Amharic alphabet</strong>
-                with your team. Here's how it works:
+            <div style="font-size:36px; font-family:'Abyssinica SIL',serif;
+                        font-weight:700; color:#166534; margin-bottom:4px;">ሰላም!</div>
+            <h2 style="font-size:22px; font-weight:800; color:#1e293b; margin-bottom:8px;">
+                Welcome to Fidel Classroom
+            </h2>
+            <p style="font-size:14px; color:#64748b; margin-bottom:22px; line-height:1.6;">
+                Learn the Amharic alphabet and practice reading and writing!
             </p>
 
-            <div style="text-align:left; display:flex; flex-direction:column;
-                        gap:12px; margin-bottom:24px;">
+            <div style="text-align:left; display:flex; flex-direction:column; gap:14px; margin-bottom:22px;">
                 <div style="display:flex; gap:12px; align-items:flex-start;">
-                    <span style="font-size:22px; flex-shrink:0;">📖</span>
+                    <span style="font-size:24px; flex-shrink:0; margin-top:2px;">📖</span>
                     <div>
-                        <strong style="font-size:13px; color:#166534;">
+                        <strong style="font-size:14px; color:#166534; display:block; margin-bottom:3px;">
                             Practice the Fidel
                         </strong>
-                        <p style="font-size:12px; color:#64748b; margin-top:2px;">
-                            Explore letters freely, use flashcards and
-                            the matching game at your own pace.
+                        <p style="font-size:13px; color:#64748b; margin:0; line-height:1.5;">
+                            Explore letters freely, use flashcards and the matching game at your own pace.
                         </p>
                     </div>
                 </div>
                 <div style="display:flex; gap:12px; align-items:flex-start;">
-                    <span style="font-size:22px; flex-shrink:0;">🏆</span>
+                    <span style="font-size:24px; flex-shrink:0; margin-top:2px;">🏆</span>
                     <div>
-                        <strong style="font-size:13px; color:#166534;">
+                        <strong style="font-size:14px; color:#166534; display:block; margin-bottom:3px;">
                             Fidel Challenge
                         </strong>
-                        <p style="font-size:12px; color:#64748b; margin-top:2px;">
-                            Compete with your team. Get a streak of 20
-                            in the matching game, then submit your
-                            handwriting for captain approval.
-                            Your whole team advances together.
+                        <p style="font-size:13px; color:#64748b; margin:0; line-height:1.5;">
+                            Compete with your team. Play games, learn with others, and submit your handwriting for approval. The whole team advances together!
                         </p>
                     </div>
                 </div>
                 <div style="display:flex; gap:12px; align-items:flex-start;">
-                    <span style="font-size:22px; flex-shrink:0;">📘</span>
+                    <span style="font-size:24px; flex-shrink:0; margin-top:2px;">📘</span>
                     <div>
-                        <strong style="font-size:13px; color:#166534;">
+                        <strong style="font-size:14px; color:#166534; display:block; margin-bottom:3px;">
                             Reading Path
                         </strong>
-                        <p style="font-size:12px; color:#64748b; margin-top:2px;">
-                            Once you know the letters, start reading
-                            real Amharic sentences.
+                        <p style="font-size:13px; color:#64748b; margin:0; line-height:1.5;">
+                            Once you know the letters, start reading real full sentences.
                         </p>
                     </div>
                 </div>
             </div>
 
-            <div style="background:#fffbeb; border:1px solid #fde68a;
-                        border-radius:12px; padding:12px 14px;
-                        margin-bottom:20px; font-size:13px; color:#92400e;
-                        text-align:left;">
-                💡 <strong>New here?</strong> Start with
-                <em>Practice the Fidel</em> to get familiar,
-                then move into the Challenge when you're ready.
+            <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:12px;
+                        padding:12px 14px; margin-bottom:20px; font-size:13px;
+                        color:#92400e; text-align:left;">
+                💡 <strong>New here?</strong> Start with <em>Practice the Fidel</em>
             </div>
 
             <button onclick="document.getElementById('onboardingOverlay').remove();"
-                    style="background:#166534; color:white; border:none;
-                           border-radius:12px; padding:14px; width:100%;
-                           font-size:15px; font-weight:700; cursor:pointer;">
+                    style="background:#166534; color:white; border:none; border-radius:12px;
+                           padding:14px; width:100%; font-size:15px; font-weight:700;
+                           cursor:pointer;">
                 Let's Go! ➜
             </button>
         </div>
