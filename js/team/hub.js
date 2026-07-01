@@ -72,14 +72,29 @@ async function renderTeamHub() {
  
     const membersRow = document.getElementById("teamHubMembersRow");
     if (membersRow) {
-        membersRow.innerHTML = "";
-        (members || []).forEach(m => {
-            const chip = document.createElement('div');
-            chip.className = `team-hub-member-chip ${m.is_captain ? 'is-captain' : ''}`;
-            chip.innerHTML = `${m.avatar || '🦁'} ${m.nickname}${m.is_captain ? ' 👑' : ''}`;
-            membersRow.appendChild(chip);
-        });
+    membersRow.innerHTML = "";
+    const visible = (members || []).slice(0, 3);
+    const extra = (members || []).length - visible.length;
+ 
+    visible.forEach(m => {
+        const circle = document.createElement('div');
+        circle.className = 'avatar-group-circle';
+        circle.title = m.nickname + (m.is_captain ? ' 👑' : '');
+        circle.innerText = m.avatar || '🦁';
+        if (m.is_captain) {
+            circle.style.border = '2px solid #ca8a04';
+            circle.style.background = 'rgba(202,138,4,0.25)';
+        }
+        membersRow.appendChild(circle);
+    });
+ 
+    if (extra > 0) {
+        const count = document.createElement('div');
+        count.className = 'avatar-group-count';
+        count.innerText = `+${extra}`;
+        membersRow.appendChild(count);
     }
+}
  
     // Letter select filtered to current level
     await populateTeamHubLetterSelect(team.current_level);
@@ -128,6 +143,18 @@ async function renderTeamHub() {
     await checkCaptainInboxBadge();
 }
  
+
+function revealLetterPickerThen(actionFnName) {
+    const wrap = document.getElementById('teamHubLetterPickerWrap');
+    if (wrap) wrap.style.display = 'block';
+ 
+    // If action is ready to fire immediately (letter already selected), fire it
+    const select = document.getElementById('teamHubLetterSelect');
+    if (select && select.options.length > 0) {
+        if (actionFnName === 'openTeamHubPracticePost') openTeamHubPracticePost();
+        else if (actionFnName === 'openTeamHubFinalSubmit') openTeamHubFinalSubmit();
+    }
+}
 
 async function populateTeamHubLetterSelect(currentLevel) {
     const letterSelect = document.getElementById("teamHubLetterSelect");
@@ -700,6 +727,8 @@ function exitTeamHub() {
     document.getElementById("teamHubScreen").style.display = "none";
     document.getElementById("familyPracticeSheet").style.display = "none";
     launchDashboard("student");
+ const wrap = document.getElementById('teamHubLetterPickerWrap');
+if (wrap) wrap.style.display = 'none';
 }
 // ---------------------------------------------------------------------------
 // Expose
@@ -713,6 +742,8 @@ window.enterChallengeLevelsFromHub = () => {
         behavior: 'smooth', block: 'start'
     });
 };
+
+window.revealLetterPickerThen = revealLetterPickerThen;
 window.loadTeamPracticeFeed = loadTeamPracticeFeed;
 window.toggleReaction = toggleReaction;
 window.deleteTeamPracticePost = deleteTeamPracticePost;
