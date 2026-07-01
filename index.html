@@ -4,12 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Fidel Classroom</title>
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=Abyssinica+SIL&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -17,7 +15,9 @@
     <canvas id="confettiCanvas"></canvas>
     <div id="toastContainer"></div>
 
-    <!-- Onboarding Panel Matrix -->
+    <!-- =====================================================================
+         AUTH SCREEN
+         ===================================================================== -->
     <div id="authScreen" class="auth-decorative-bg">
         <span class="bg-letter letter-1">ሀ</span>
         <span class="bg-letter letter-2">ለ</span>
@@ -43,27 +43,21 @@
                     <button class="auth-back-btn" onclick="resetToGate()" aria-label="Go back">← Back</button>
                     <span id="credentialFieldsModeLabel" style="font-size:13px; font-weight:700; color:var(--neutral-dark);">Sign Up</span>
                 </div>
-
-                <!-- Label and Input are now siblings, correctly linked by 'for' and 'id' -->
                 <label for="email">Email Address</label>
                 <input type="email" id="email" name="email" autocomplete="email">
-
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" autocomplete="current-password">
-
                 <button id="auth-btn">Let's Go!</button>
-
                 <p class="auth-switch-mode-text">
                     <span id="switchModePrompt">Already have an account?</span>
                     <button id="switchModeBtn" class="auth-switch-mode-link" onclick="switchAuthFlow()">Log In</button>
                 </p>
-
                 <button id="forgotPasswordBtn" class="btn-secondary" style="margin-top:8px;">Forgot password?</button>
             </div>
         </div>
     </div>
 
-    <!-- Forgot password: enter email, get a reset link -->
+    <!-- Forgot password -->
     <div id="forgotPasswordScreen" class="app-card" style="display: none;">
         <h2 class="main-title" style="font-size: 22px;">Reset your password</h2>
         <p class="subtitle">Enter your email and we'll send you a reset link.</p>
@@ -72,7 +66,7 @@
         <button id="backToLoginFromForgotBtn" class="btn-secondary" style="margin-top:8px;">← Back to Log In</button>
     </div>
 
-    <!-- Shown after clicking the reset link in their email -->
+    <!-- New password after reset link -->
     <div id="newPasswordScreen" class="app-card" style="display: none;">
         <h2 class="main-title" style="font-size: 22px;">Set a new password</h2>
         <p class="subtitle">Enter a new password for your account.</p>
@@ -80,7 +74,7 @@
         <button id="saveNewPasswordBtn" class="btn-primary">Save New Password</button>
     </div>
 
-    <!-- Administrative Target Routing Gate -->
+    <!-- Admin routing gate -->
     <div id="adminViewSelectorGate" class="admin-gate-card">
         <h2 class="main-title" style="font-size:22px;">Welcome, Teacher!</h2>
         <p class="subtitle">Where would you like to go first?</p>
@@ -90,12 +84,13 @@
         </div>
     </div>
 
-    <!-- Custom Profile Struct Node -->
+    <!-- =====================================================================
+         PROFILE SETUP
+         ===================================================================== -->
     <div id="profileSetupScreen" class="app-card" style="display: none;">
         <h2 class="main-title" style="font-size: 22px;">Create Your Profile</h2>
-        <p class="subtitle">Pick a nickname and choose your color team!</p>
+        <p class="subtitle">Pick a nickname and avatar!</p>
         <input type="text" id="displayName" placeholder="Your Nickname">
-
         <div class="avatar-grid">
             <div class="avatar-option selected" onclick="selectAvatar('🦁', this)">🦁</div>
             <div class="avatar-option" onclick="selectAvatar('🦅', this)">🦅</div>
@@ -103,7 +98,6 @@
             <div class="avatar-option" onclick="selectAvatar('🦊', this)">🦊</div>
             <div class="avatar-option" onclick="selectAvatar('🐘', this)">🐘</div>
         </div>
-
         <div style="text-align: left; margin-bottom: 16px;" id="teamChoiceSection">
             <label style="font-size: 13px; font-weight: 700; color: var(--neutral-dark); display:block; margin-bottom:8px;">How do you want to learn?</label>
             <div style="display:flex; flex-direction:column; gap:8px;">
@@ -118,29 +112,30 @@
             </div>
             <select id="profileTeamSelect" style="display:none;"></select>
         </div>
-
         <button class="btn-primary" onclick="saveProfileData(event)">Join the Classroom</button>
     </div>
 
-    <!-- Teacher Dashboard Module View -->
+    <!-- =====================================================================
+         TEACHER DASHBOARD
+         ===================================================================== -->
     <div id="teacherOnlyDashboard">
         <div class="workspace-title" style="margin-top:20px;">
             <span>Teacher Hub</span>
             <button class="btn-primary" style="width:auto; padding:8px 16px; font-size:13px;" onclick="switchAdminPanelsFromDashboard('student')">Switch to Student View →</button>
         </div>
 
-        <!-- Live Roster Progress List -->
+        <!-- Student Roster -->
         <div class="teacher-panel" style="margin-bottom: 20px;">
             <div class="teacher-panel-header" onclick="toggleTeacherPanel('rosterPanelBody', this)">
                 <h2 style="font-size: 18px; color: var(--neutral-dark);">Student Roster &amp; Progress</h2>
                 <button class="teacher-panel-toggle">▼</button>
             </div>
-          <div class="teacher-panel-body" id="rosterPanelBody">
-    <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">See how everyone in your class is moving through the alphabet rows.</p>
-    <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
-        <button class="btn-primary" style="width:auto; padding:8px 18px; font-size:13px;" onclick="exportProgressCSV()">⬇️ Export Progress CSV</button>
-    </div>
-    <table class="teacher-roster-table">
+            <div class="teacher-panel-body" id="rosterPanelBody">
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">See how everyone is moving through the alphabet rows.</p>
+                <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+                    <button class="btn-primary" style="width:auto; padding:8px 18px; font-size:13px;" onclick="exportProgressCSV()">⬇️ Export Progress CSV</button>
+                </div>
+                <table class="teacher-roster-table">
                     <thead>
                         <tr>
                             <th>Student</th>
@@ -156,17 +151,31 @@
             </div>
         </div>
 
+        <!-- Level Completion Requests -->
+        <div class="teacher-panel" style="margin-bottom: 20px;">
+            <div class="teacher-panel-header" onclick="toggleTeacherPanel('levelCompletionPanelBody', this)">
+                <h2 style="font-size: 18px; color: var(--neutral-dark);">⭐ Level Completion Requests</h2>
+                <button class="teacher-panel-toggle">▼</button>
+            </div>
+            <div class="teacher-panel-body" id="levelCompletionPanelBody">
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">Students who have cleared all 3 families and are requesting level advancement.</p>
+                <div id="levelCompletionQueueMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
+            </div>
+        </div>
+
+        <!-- Pending Writing Submissions -->
         <div class="teacher-panel" style="margin-bottom: 20px;">
             <div class="teacher-panel-header" onclick="toggleTeacherPanel('writingQueuePanelBody', this)">
                 <h2 style="font-size: 18px; color: var(--neutral-dark);">Pending Writing Submissions</h2>
                 <button class="teacher-panel-toggle">▼</button>
             </div>
             <div class="teacher-panel-body" id="writingQueuePanelBody">
-                <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">Review handwriting samples students have submitted for Fidel Challenge.</p>
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">Review handwriting samples students submitted for Fidel Challenge.</p>
                 <div id="teacherWritingQueueMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
             </div>
         </div>
 
+        <!-- Team Level Progress -->
         <div class="teacher-panel" style="margin-bottom: 20px;">
             <div class="teacher-panel-header" onclick="toggleTeacherPanel('teamProgressPanelBody', this)">
                 <h2 style="font-size: 18px; color: var(--neutral-dark);">Team Level Progress</h2>
@@ -178,6 +187,7 @@
             </div>
         </div>
 
+        <!-- Manage Teams -->
         <div class="teacher-panel" style="margin-bottom: 20px;">
             <div class="teacher-panel-header" onclick="toggleTeacherPanel('manageTeamsPanelBody', this)">
                 <h2 style="font-size: 18px; color: var(--neutral-dark);">Manage Student Color Teams</h2>
@@ -193,13 +203,14 @@
             </div>
         </div>
 
+        <!-- Assign Captain -->
         <div class="teacher-panel" style="margin-bottom: 20px;">
             <div class="teacher-panel-header" onclick="toggleTeacherPanel('captainPanelBody', this)">
                 <h2 style="font-size: 18px; color: var(--neutral-dark);">👑 Assign Team Captain</h2>
                 <button class="teacher-panel-toggle collapsed">▼</button>
             </div>
             <div class="teacher-panel-body collapsed" id="captainPanelBody">
-                <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">Pick a team, then choose which of its members is the captain. The captain reviews their teammates' writing submissions.</p>
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">Pick a team, then choose which member is the captain.</p>
                 <div class="teacher-control-group" style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); max-width: 500px;">
                     <select id="captainTeamSelect"><option value="">Select Team...</option></select>
                     <select id="captainStudentSelect" disabled><option value="">Select Team First...</option></select>
@@ -208,10 +219,13 @@
                 <div id="currentCaptainsMount" style="margin-top:14px;"></div>
             </div>
         </div>
+
         <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
     </div>
 
-    <!-- Student Interface Core Matrix Layout Workspace -->
+    <!-- =====================================================================
+         STUDENT DASHBOARD (Practice Mode)
+         ===================================================================== -->
     <div id="studentDashboard">
         <div id="adminHeaderToggleBar" style="display:none; background:#f0fdfa; border:1px solid #ccfbf1; padding:10px 16px; border-radius:12px; margin-bottom:16px; justify-content:space-between; align-items:center;">
             <span style="font-size:13px; font-weight:700; color:var(--brand-primary);">Teacher Access Mode Active</span>
@@ -222,7 +236,7 @@
 
         <div class="dashboard-split-layout">
             <div class="main-workspace-panel">
-
+                <!-- Team pod card -->
                 <div class="pod-card" id="podCard">
                     <div class="pod-header-row" id="podHeaderRow">
                         <div class="pod-header-left">
@@ -237,13 +251,14 @@
                     <div id="podTeammatesMount" class="pod-teammates-list"></div>
                 </div>
 
+                <!-- Workspace header -->
                 <div class="workspace-header-block">
                     <div>
                         <span id="workspaceDynamicHeader" class="workspace-title-main">Amharic Fidel Letter Board</span>
                         <p class="workspace-title-sub">Amharic Fidel (ፊደል) Letter Board</p>
                     </div>
                     <div class="workspace-action-row">
-                        <button id="gameActivationToggleBtn" class="workspace-action-btn" onclick="openMatchingGameWorkspaceMode('all')"> Matching Game</button>
+                        <button id="gameActivationToggleBtn" class="workspace-action-btn" onclick="openMatchingGameWorkspaceMode('all')">Matching Game</button>
                         <button id="studyAllFlashcardsBtn" class="workspace-action-btn">🗂️ Study All Letters</button>
                         <button id="readingPathEntryBtn" class="workspace-action-btn" style="background:#0369a1; color:white; border-color:#0369a1;" onclick="enterReadingPath()">📖 Reading Path</button>
                         <button id="captainDashboardEntryBtn" class="workspace-action-btn" style="background:#b45309; color:white; border-color:#b45309; display:none;" onclick="enterCaptainDashboard()">👑 Captain Dashboard</button>
@@ -251,10 +266,10 @@
                     </div>
                 </div>
 
-                <!-- Core Grid Selection Array -->
+                <!-- Letter grid -->
                 <div id="viewFidelGrid" class="fidel-grid-3col"></div>
 
-                <!-- Micro-Classroom Isolation Node -->
+                <!-- Single family classroom view -->
                 <div id="isolatedFamilyClassroom">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; gap:8px;">
                         <h2 id="classroomFamilyTitle" style="font-size:22px;">Reviewing Row</h2>
@@ -274,23 +289,20 @@
                         </div>
                         <button id="classroomUndoBtn" class="btn-secondary" style="color: #ef4444; font-weight:700; display:none;" onclick="classroomUnmasterLetterRow()">Oops, I didn't mean to master this yet. Keep practicing!</button>
                     </div>
-
-                    <!-- Inline Functional Digital Ink Engine Segment Integration -->
                     <div class="embedded-classroom-sketchpad">
                         <h3 style="font-size:14px; font-weight:700; margin-bottom:4px; color:var(--neutral-dark);">Practice Writing Pad</h3>
-                        <p style="font-size:12px; color:#64748b; margin-bottom:10px;">Draw the characters below to share your writing with your team!</p>
+                        <p style="font-size:12px; color:#64748b; margin-bottom:10px;">Draw the characters to practice — sharing goes to your team feed!</p>
                         <canvas id="sketchpad" class="sketch-canvas-element"></canvas>
                         <div class="sketchpad-actions-row">
                             <button class="btn-primary" style="padding:6px 12px; font-size:12px; background:#64748b;" onclick="clearSketchpadCanvas()">Clear Pad</button>
                             <button class="btn-primary" style="padding:6px 12px; font-size:12px;" onclick="uploadSketchpadDrawingCanvasData()">Share My Drawing</button>
                         </div>
                     </div>
-
                     <button class="btn-secondary" style="margin-top:16px;" onclick="exitClassroomViewBackToGrid()">← Back to Letter Board</button>
                 </div>
             </div>
 
-            <!-- Dashboard Analytics Sidebar Tracking Cluster -->
+            <!-- Sidebar -->
             <div class="sidebar-sticky-panel">
                 <header>
                     <div class="profile-clickable-trigger" onclick="openProfileEdit()" style="cursor: pointer;">
@@ -303,14 +315,12 @@
                     </div>
                     <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
                 </header>
-
                 <div class="collapsible-dropdown-container">
                     <button class="dropdown-toggle-header" onclick="toggleDropdownElement('liveLeaderboardContent')">
                         <span>Class Leaderboard</span><span>▼</span>
                     </button>
                     <div class="dropdown-content-pane" id="liveLeaderboardContent"></div>
                 </div>
-
                 <div class="collapsible-dropdown-container">
                     <button class="dropdown-toggle-header" onclick="toggleDropdownElement('photoBoardContent')">
                         <span>Shared Class Drawings</span><span>▼</span>
@@ -319,13 +329,12 @@
                         <div class="feed-grid" id="disappearingArtGalleryFeed"></div>
                     </div>
                 </div>
-
                 <div class="collapsible-dropdown-container">
                     <button class="dropdown-toggle-header" onclick="toggleDropdownElement('teamLevelProgressContent')">
                         <span>🏆 Team Level Progress</span><span>▼</span>
                     </button>
                     <div class="dropdown-content-pane open" id="teamLevelProgressContent">
-                        <p style="font-size:12px; color:#64748b; margin-bottom:10px;">See which teams are ready for their live quiz with the teacher.</p>
+                        <p style="font-size:12px; color:#64748b; margin-bottom:10px;">See which teams are ready for their live quiz.</p>
                         <div id="studentTeamProgressMount"><p style="color:#94a3b8; font-size:12px;">Loading...</p></div>
                     </div>
                 </div>
@@ -334,17 +343,16 @@
         <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
     </div>
 
-    <!-- Fidel Challenge: Mode Select -->
+    <!-- =====================================================================
+         MODE SELECT
+         ===================================================================== -->
     <div id="modeSelectScreen" class="app-card" style="max-width: 480px; display: none;">
-        <div id="captainModeSelectBanner" style="display:none; background: linear-gradient(135deg, #fffbeb, white); border: 1px solid #fde68a; border-radius: var(--radius-standard); padding: 14px 16px; margin-bottom: 16px; text-align: center;">
-            <p style="font-size:16px; font-weight:700; color:#92400e; margin-bottom:2px;">👑 You're a Captain!</p>
-            <p style="font-size:13px; color:#b45309;">Help lead your team to victory!</p>
-        </div>
+        <div id="captainModeSelectBanner" style="display:none;"></div>
         <p class="mode-select-greeting">ሰላም<span id="modeSelectNickname"></span>!</p>
         <h2 class="main-title" style="font-size: 22px;">What are you working on today?</h2>
         <p class="subtitle">Practice on your own, compete with your team, or advance to reading!</p>
         <div style="display:flex; flex-direction:column; gap:14px;">
-            <div class="mode-option" id="modeSelectCaptainOption" style="display:none; background: linear-gradient(135deg, #fffbeb, white); border-color: #fde68a;" onclick="enterCaptainDashboard()">
+            <div class="mode-option" id="modeSelectCaptainOption" style="display:none;" onclick="enterCaptainDashboard()">
                 <div class="mode-option-icon">👑</div>
                 <div class="mode-option-title">Captain Dashboard</div>
                 <div class="mode-option-desc">Review your team's submissions and progress</div>
@@ -370,13 +378,120 @@
         </div>
     </div>
 
-    <!-- Fidel Challenge: Levels Overview -->
+    <!-- =====================================================================
+         TEAM HUB — Main student interface for Fidel Challenge
+         ===================================================================== -->
+    <div id="teamHubScreen" style="display:none;">
+
+        <!-- Team header -->
+        <div class="team-hub-header" id="teamHubHeaderEl">
+            <div class="team-hub-header-content">
+                <button class="team-hub-back-btn" onclick="exitTeamHub()">← Back</button>
+                <div class="team-hub-name" id="teamHubTeamName">Your Team</div>
+                <div class="team-hub-level-tag">
+                    <span>🏆</span>
+                    <span id="teamHubLevelLabel">Level 1</span>
+                    <span>•</span>
+                    <span>🔥 <span id="teamHubStreakLabel">0</span> streak</span>
+                </div>
+                <div class="team-hub-members-row" id="teamHubMembersRow"></div>
+            </div>
+        </div>
+
+        <!-- Level completion banner (hidden until all 3 families cleared) -->
+        <div id="levelCompletionMount" style="display:none; padding:0 16px; max-width:820px; margin:16px auto 0;"></div>
+
+        <!-- Embedded level map -->
+        <div class="team-hub-section" style="margin-top:16px;">
+            <div class="team-hub-section-title">
+                <span>🏆 Your Current Level</span>
+            </div>
+            <div id="embeddedLevelMapMount"></div>
+        </div>
+
+        <!-- Team race -->
+        <div class="team-hub-section">
+            <div class="team-hub-section-title">
+                <span>Team Race</span>
+            </div>
+            <div id="teamRaceMount"></div>
+        </div>
+
+        <!-- Help flags (captain only, shown via JS) -->
+        <div id="helpFlagsMount" style="display:none; max-width:820px; margin:0 auto 16px; padding:0 16px;"></div>
+
+        <!-- Practice feed -->
+        <div class="team-hub-section">
+            <div class="team-hub-section-title">
+                <span>Team Practice Feed</span>
+                <span style="font-size:11px; color:#94a3b8; font-weight:500;">Posts disappear after 48h</span>
+            </div>
+            <div id="teamHubPracticeFeed"></div>
+        </div>
+
+        <!-- Share / upload section -->
+        <div class="team-hub-section">
+            <div class="team-hub-section-title">Share Your Practice</div>
+
+            <!-- Letter picker -->
+            <div style="margin-bottom:12px;">
+                <label style="font-size:12px; font-weight:700; color:#475569; display:block; margin-bottom:6px;">
+                    Which letter are you practicing?
+                </label>
+                <select id="teamHubLetterSelect" style="max-width:200px;"></select>
+            </div>
+
+            <!-- Student actions -->
+            <div id="teamHubStudentActions">
+                <p style="font-size:13px; color:#64748b; margin-bottom:14px;">
+                    Share a drawing for your team to cheer on, or submit for official captain review.
+                </p>
+                <div class="team-hub-post-actions">
+                    <button class="btn-practice-post" onclick="openTeamHubPracticePost()">
+                        📸 Share Practice
+                    </button>
+                    <button class="btn-final-submit" onclick="openTeamHubFinalSubmit()">
+                        ✍️ Submit for Approval
+                        <span class="final-sub-label">Captain reviews this</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Captain actions -->
+            <div id="teamHubCaptainActions" style="display:none;">
+                <p style="font-size:13px; color:#64748b; margin-bottom:14px;">
+                    You're the captain — review submissions and share encouragement in the feed.
+                </p>
+                <button class="btn-primary" onclick="enterCaptainDashboard()" style="margin-bottom:10px;">
+                    👑 Review Pending Submissions
+                </button>
+                <button class="btn-practice-post" onclick="openTeamHubPracticePost()">
+                    📸 Share Something with Your Team
+                </button>
+            </div>
+
+            <input type="file" id="teamHubPhotoInput" accept="image/*" style="display:none;">
+        </div>
+
+        <!-- Go to challenge levels -->
+        <div class="team-hub-section" style="text-align:center;">
+            <p style="font-size:14px; color:#64748b; margin-bottom:14px;">Want the full level map view?</p>
+            <button class="btn-primary" onclick="enterChallengeLevelsFromHub()">
+                🏆 Go to Challenge Levels
+            </button>
+        </div>
+
+        <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
+    </div>
+
+    <!-- =====================================================================
+         CHALLENGE LEVELS SCREEN (fallback / full map view)
+         ===================================================================== -->
     <div id="challengeLevelsScreen" style="display: none; max-width: 900px; margin: 40px auto; padding: 0 16px;">
         <div class="workspace-title">
             <span>🏆 Fidel Challenge</span>
-            <button class="btn-secondary" onclick="exitChallengeBackToDashboard()">← Back to Dashboard</button>
+            <button class="btn-secondary" onclick="exitChallengeBackToDashboard()">← Back</button>
         </div>
-
         <div class="challenge-board-header">
             <div class="challenge-board-team">
                 <div class="challenge-board-team-swatch" id="challengeBoardTeamSwatch"></div>
@@ -396,55 +511,46 @@
         <div class="challenge-board-progress-track">
             <div class="challenge-board-progress-fill" id="challengeBoardProgressFill" style="width: 0%;"></div>
         </div>
-
         <div id="challengeLevelsGrid" class="challenge-levels-grid"></div>
     </div>
 
-    <!-- Fidel Challenge: Family Picker (shown after clicking an unlocked level) -->
+    <!-- Challenge family picker -->
     <div id="challengeFamilyScreen" style="display: none; max-width: 700px; margin: 40px auto; padding: 0 16px;">
         <div class="workspace-title">
             <span id="challengeFamilyTitle">Level</span>
             <button class="btn-secondary" onclick="exitChallengeFamilyPicker()">← Back to Levels</button>
         </div>
-        <p class="subtitle" style="text-align:left; margin-bottom: 16px;">Pick a letter family to practice. Get a streak of 20 in the matching game, then submit your writing for approval.</p>
+        <p class="subtitle" style="text-align:left; margin-bottom: 16px;">Pick a letter family to practice. Get a streak of 20, then submit your writing for approval.</p>
         <div id="challengeFamilyGrid" class="challenge-family-grid"></div>
     </div>
 
-    <!-- Fidel Challenge: Family Detail (giant letters, matching game launch, flashcards) -->
+    <!-- Challenge family detail -->
     <div id="challengeFamilyDetailScreen" style="display: none; max-width: 700px; margin: 40px auto; padding: 0 16px;">
         <div class="workspace-title">
             <span id="challengeFamilyDetailTitle">Family</span>
             <button class="btn-secondary" onclick="exitChallengeFamilyDetail()">← Back to Families</button>
         </div>
-
         <div id="challengeFamilyDetailGiantRow" class="classroom-row-giant"></div>
-
         <div class="challenge-streak-rule-banner">
-            <strong>Get a streak of 20 in a row</strong> to pass this letter's matching game. Miss one, and your streak goes back to zero — so take your time!
+            <strong>Get a streak of 20 in a row</strong> to pass this letter's matching game. Miss one, and your streak resets to zero.
         </div>
-
         <div style="display:flex; gap:10px; margin-bottom: 12px;">
             <button id="challengeDetailPlayBtn" class="btn-primary" style="flex:1;">🎮 Play Matching Game</button>
-            <button id="challengeDetailFlashcardBtn" class="btn-primary" style="flex:1; background:#475569;">🗂️ Self-Study Flashcards</button>
+            <button id="challengeDetailFlashcardBtn" class="btn-primary" style="flex:1; background:#475569;">🗂️ Flashcards</button>
         </div>
-
         <button id="challengeDetailWritingBtn" class="btn-primary" style="width:100%; background:#7c3aed; margin-bottom: 16px;">✍️ Submit Your Writing</button>
-
         <div id="challengeWritingStatusBox" style="display:none;"></div>
     </div>
 
-    <!-- Writing submission screen — student chooses photo upload OR sketchpad,
-         submits for captain/teacher review. Top-level for the same reason
-         as gameWorkspace and flashcardScreen: avoids being trapped inside a
-         hidden parent. -->
+    <!-- =====================================================================
+         WRITING SUBMISSION SCREEN
+         ===================================================================== -->
     <div id="writingSubmitScreen" style="display: none; max-width: 600px; margin: 40px auto; padding: 0 16px;">
         <div class="workspace-title">
             <span id="writingSubmitTitle">Submit Writing</span>
             <button class="btn-secondary" id="writingSubmitCloseBtn">← Back</button>
         </div>
-
         <div id="writingRejectionNote" style="display:none; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; padding:12px 16px; border-radius:12px; margin-bottom:16px; font-size:13px; text-align:left;"></div>
-
         <div class="mode-option" style="margin-bottom:12px;" id="writingChoiceUploadCard">
             <div class="mode-option-icon">📷</div>
             <div class="mode-option-title">Upload a Photo</div>
@@ -455,10 +561,7 @@
             <div class="mode-option-title">Draw on Sketchpad</div>
             <div class="mode-option-desc">Write directly here using your finger or mouse</div>
         </div>
-
-<input type="file" id="writingPhotoInput" accept="image/*" style="display:none;">
-
-        <!-- Sketchpad sub-area, shown only when that option is chosen -->
+        <input type="file" id="writingPhotoInput" accept="image/*" style="display:none;">
         <div id="writingSketchpadArea" style="display:none; margin-top:16px;">
             <canvas id="writingSketchpad" class="sketch-canvas-element" style="height:220px;"></canvas>
             <div class="sketchpad-actions-row">
@@ -468,10 +571,9 @@
         </div>
     </div>
 
-    <!-- Shared flashcard study screen — top-level so it works the same way
-         whether launched from Fidel Challenge's family detail screen,
-         Practice mode's single-row screen, or the full-alphabet study mode.
-         Generic IDs (not "challenge"-prefixed) since it's shared across all three. -->
+    <!-- =====================================================================
+         FLASHCARD SCREEN
+         ===================================================================== -->
     <div id="flashcardScreen" style="display: none; max-width: 500px; margin: 40px auto; padding: 0 16px; text-align:center;">
         <div class="workspace-title">
             <span id="flashcardScreenTitle">Flashcards</span>
@@ -483,7 +585,7 @@
                 <div class="flashcard-face flashcard-back" id="flashcardBack"></div>
             </div>
         </div>
-        <p class="subtitle" style="margin-top:10px;">Tap the card to flip it. Try to say the sound before you flip!</p>
+        <p class="subtitle" style="margin-top:10px;">Tap the card to flip it. Swipe left/right to navigate!</p>
         <p class="subtitle" id="flashcardProgressLabel" style="margin-top:-8px; font-weight:700;"></p>
         <div style="display:flex; gap:10px; justify-content:center; margin-top:10px;">
             <button class="btn-secondary" id="flashcardPrevBtn">← Previous</button>
@@ -491,33 +593,44 @@
         </div>
     </div>
 
-    <!-- Touch Ergonomic Block Match Arena Module — top-level so it can be
-         shown from either Practice mode (inside studentDashboard) or
-         Fidel Challenge mode (a separate top-level screen) without being
-         trapped invisible inside whichever parent happens to be hidden. -->
+    <!-- =====================================================================
+         MATCHING GAME WORKSPACE
+         ===================================================================== -->
     <div id="gameWorkspace">
         <h2 id="gameWorkspaceTitle" style="font-size:22px; margin-bottom:4px;">Practice Arena</h2>
-        <p class="subtitle" style="margin-bottom:12px;">Tap a letter and its matching English sound to clear them!</p>
-        <div style="background:#f1f5f9; padding:6px 14px; border-radius:8px; display:inline-block; font-size:13px; font-weight:700; color:var(--brand-primary); margin-bottom:12px;">
+        <p class="subtitle" style="margin-bottom:12px;">Tap a letter and its matching sound to clear them!</p>
+
+        <!-- Streak counter -->
+        <div style="background:#f1f5f9; padding:6px 14px; border-radius:8px; display:inline-block; font-size:13px; font-weight:700; color:var(--brand-primary); margin-bottom:8px;">
             Current Streak: <span id="gameStreakValue">0</span>
         </div>
 
-        <div class="matching-game-grid-blocks" id="ergonomicBlockGameMount"></div>
+        <!-- Streak progress bar toward 20 -->
+        <div style="width:100%; max-width:400px; margin:0 auto 6px; background:#e2e8f0; border-radius:8px; height:8px; overflow:hidden;">
+            <div id="gameStreakProgressBar"
+                 style="height:100%; width:0%; background:#cbd5e1; border-radius:8px; transition:width 0.3s ease, background 0.3s ease;">
+            </div>
+        </div>
+        <p style="font-size:11px; color:#94a3b8; margin-bottom:14px;">
+            Goal: <strong style="color:#166534;">20 in a row</strong>
+        </p>
 
+        <div class="matching-game-grid-blocks" id="ergonomicBlockGameMount"></div>
         <button id="gameExitActionBtn" class="btn-secondary" style="margin-top:10px;">← Close Game</button>
     </div>
 
-    <!-- Reading Path: Levels List -->
+    <!-- =====================================================================
+         READING PATH
+         ===================================================================== -->
     <div id="readingLevelsScreen" style="display: none; max-width: 900px; margin: 40px auto; padding: 0 16px;">
         <div class="workspace-title">
             <span>📖 Reading Path</span>
             <button class="btn-secondary" onclick="exitReadingPath()">← Back to Dashboard</button>
         </div>
-        <p class="subtitle" style="text-align:left; margin-bottom:16px;">You know the Fidel — now learn to read, translate, and understand real Amharic sentences. Levels unlock one at a time, at your own pace.</p>
+        <p class="subtitle" style="text-align:left; margin-bottom:16px;">You know the Fidel — now learn to read, translate, and understand real Amharic sentences.</p>
         <div id="readingLevelsGrid" class="challenge-levels-grid"></div>
     </div>
 
-    <!-- Reading Path: Level Detail (sequential read -> translate -> grammar) -->
     <div id="readingLevelDetailScreen" style="display: none; max-width: 600px; margin: 40px auto; padding: 0 16px;">
         <div class="workspace-title">
             <span id="readingLevelDetailTitle">Level</span>
@@ -526,93 +639,77 @@
         <div id="readingStepContent"></div>
     </div>
 
-    <!-- Captain Dashboard: scoped writing-submission review for the
-         captain's own team only, plus their team's member progress. -->
+    <!-- =====================================================================
+         CAPTAIN DASHBOARD
+         ===================================================================== -->
     <div id="captainDashboardScreen" style="display: none; max-width: 700px; margin: 40px auto; padding: 0 16px;">
         <div class="workspace-title">
             <span>👑 Captain Dashboard</span>
-            <button class="btn-secondary" onclick="exitCaptainDashboard()">← Back to Dashboard</button>
+            <button class="btn-secondary" onclick="exitCaptainDashboard()">← Back</button>
         </div>
         <p class="subtitle" style="text-align:left; margin-bottom:16px;">Review your team's writing submissions and see how everyone's progressing.</p>
-
         <div class="teacher-panel" style="margin-bottom: 20px;">
             <h2 style="font-size: 16px; color: var(--neutral-dark); margin-bottom: 10px;">Pending Submissions</h2>
             <div id="captainWritingQueueMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
         </div>
-
         <div class="teacher-panel">
             <h2 style="font-size: 16px; color: var(--neutral-dark); margin-bottom: 10px;">Team Progress</h2>
             <div id="captainTeamProgressMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
         </div>
     </div>
-<!-- Team Hub — shown after choosing Fidel Challenge from mode select -->
-<div id="teamHubScreen" style="display:none;">
-    <div class="team-hub-header" id="teamHubHeaderEl">
-        <div class="team-hub-header-content">
-            <button class="team-hub-back-btn" onclick="exitTeamHub()">← Back</button>
-            <div class="team-hub-name" id="teamHubTeamName">Your Team</div>
-            <div class="team-hub-level-tag">
-                <span>🏆</span>
-                <span id="teamHubLevelLabel">Level 1</span>
-                <span>•</span>
-                <span>🔥 <span id="teamHubStreakLabel">0</span> streak</span>
+
+    <!-- =====================================================================
+         FAMILY PRACTICE SHEET MODAL
+         Slides up from bottom when a family card is tapped in the level map.
+         ===================================================================== -->
+    <div id="familyPracticeSheet"
+         style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55);
+                z-index:9990; align-items:flex-end; justify-content:center; padding:0;">
+        <div style="background:white; border-radius:20px 20px 0 0; width:100%; max-width:600px;
+                    max-height:90vh; overflow-y:auto; padding:24px 20px 40px;
+                    box-shadow: 0 -8px 40px rgba(0,0,0,0.2);">
+            <!-- Drag handle -->
+            <div style="width:40px; height:4px; background:#e2e8f0; border-radius:4px; margin:0 auto 16px;"></div>
+            <!-- Header -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <h2 id="practiceSheetTitle" style="font-size:20px; font-weight:800; color:#166534;">Family</h2>
+                <button onclick="closeEmbeddedFamilyPractice()"
+                        style="background:#f1f5f9; border:none; border-radius:50%; width:36px; height:36px;
+                               font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
             </div>
-            <div class="team-hub-members-row" id="teamHubMembersRow"></div>
+            <!-- Giant letters -->
+            <div id="practiceSheetLetters" class="classroom-row-giant" style="margin-bottom:20px;"></div>
+            <!-- Writing status -->
+            <div id="practiceSheetWritingStatus" style="margin-bottom:16px;"></div>
+            <!-- Action buttons -->
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button id="practiceSheetFlashcardBtn" class="btn-primary" style="background:#475569;">
+                    🗂️ Study Flashcards First
+                </button>
+                <button id="practiceSheetPlayBtn" class="btn-primary">
+                    🎮 Play Matching Game
+                </button>
+                <button id="practiceSheetWriteBtn" class="btn-primary" style="background:#7c3aed; display:none;">
+                    ✍️ Submit My Writing
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- Practice feed -->
-    <div class="team-hub-section">
-        <div class="team-hub-section-title">
-            <span>Team Practice Feed</span>
-            <span style="font-size:11px; color:#94a3b8; font-weight:500;">Posts disappear after 24h</span>
-        </div>
-        <div id="teamHubPracticeFeed"></div>
-    </div>
+    <!-- =====================================================================
+         SCRIPT TAGS — order matters, do not rearrange
+         ===================================================================== -->
+    <script src="js/app.js?v=3" defer></script>
+    <script src="js/auth.js?v=3" defer></script>
+    <script src="js/utils/compress.js?v=3" defer></script>
+    <script src="js/game.js?v=3" defer></script>
+    <script src="js/submissions.js?v=3" defer></script>
+    <script src="js/teacher.js?v=3" defer></script>
+    <script src="js/reading.js?v=3" defer></script>
+    <script src="js/team/progress.js?v=3" defer></script>
+    <script src="js/team/levels.js?v=3" defer></script>
+    <script src="js/team/hub.js?v=3" defer></script>
+    <script src="js/challenge.js?v=3" defer></script>
 
-    <!-- Post a practice drawing or submit for real approval -->
-    <div class="team-hub-section">
-        <div class="team-hub-section-title">Share Your Practice</div>
-        <p style="font-size:13px; color:#64748b; margin-bottom:14px;">
-            Share a drawing for your team to cheer on, or submit for official captain review when you're ready.
-        </p>
-
-        <!-- Letter picker for the post -->
-        <div style="margin-bottom:12px;">
-            <label style="font-size:12px; font-weight:700; color:#475569; display:block; margin-bottom:6px;">Which letter are you practicing?</label>
-            <select id="teamHubLetterSelect" style="max-width:200px;"></select>
-        </div>
-
-        <div class="team-hub-post-actions">
-            <button class="btn-practice-post" onclick="openTeamHubPracticePost()">
-                📸 Share Practice
-            </button>
-            <button class="btn-final-submit" onclick="openTeamHubFinalSubmit()">
-                ✍️ Submit for Approval
-                <span class="final-sub-label">Captain reviews this</span>
-            </button>
-        </div>
-
-<input type="file" id="teamHubPhotoInput" accept="image/*" style="display:none;">
-    </div>
-
-    <!-- Enter challenge levels from here -->
-    <div class="team-hub-section" style="text-align:center;">
-        <p style="font-size:14px; color:#64748b; margin-bottom:14px;">Ready to practice your letters?</p>
-        <button class="btn-primary" onclick="enterChallengeLevelsFromHub()">
-            🏆 Go to Challenge Levels
-        </button>
-    </div>
-</div>
-    
- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js" defer></script>
-<script src="js/auth.js" defer></script>
-<script src="js/game.js" defer></script>
-<script src="js/submissions.js?v=2" defer></script>
-<script src="js/teacher.js" defer></script>
-<script src="js/reading.js" defer></script>
-<script src="js/challenge.js" defer></script>
-  
 </body>
 </html>
