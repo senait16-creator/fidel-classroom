@@ -495,6 +495,5 @@ window.logout = logout;
 window.selectAvatar = selectAvatar;
 window.openProfileEdit = openProfileEdit;
 window.saveProfileData = saveProfileData;
-window.routeAdminTerminalDirectly = routeAdminTerminalDirectly;
 window.switchAdminPanelsFromDashboard = switchAdminPanelsFromDashboard;
 window.showOnboardingCard = showOnboardingCard;
