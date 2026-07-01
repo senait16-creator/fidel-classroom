@@ -1255,4 +1255,258 @@ h1.main-title {
 #resourcesCardOverlay > div {
     animation: screenFadeIn 0.22s ease forwards;
 }
-            
+
+/* =============================================================================
+   MAP + TODAY CARD + TYPOGRAPHY — paste at bottom of style.css
+   ============================================================================= */
+
+/* ----------------------------------------------------------------
+   TYPOGRAPHY UPDATE
+   Inter for UI, Lora for headings and instructional text
+   ---------------------------------------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,600;0,700;1,600&display=swap');
+
+body {
+    font-family: 'Inter', 'Ubuntu', sans-serif;
+}
+
+.main-title {
+    font-family: 'Lora', 'Playfair Display', serif;
+    font-weight: 700;
+}
+
+.workspace-title-main,
+.team-hub-name,
+#gameWorkspaceTitle,
+#practiceSheetTitle,
+#writingSubmitTitle,
+h1, h2 {
+    font-family: 'Lora', 'Playfair Display', serif;
+}
+
+/* Instructional / body text stays Inter */
+.subtitle,
+.mode-option-desc,
+.challenge-streak-rule-banner,
+p {
+    font-family: 'Inter', 'Ubuntu', sans-serif;
+    font-weight: 400;
+}
+
+/* ----------------------------------------------------------------
+   CONSISTENT BORDER RADIUS
+   ---------------------------------------------------------------- */
+.app-card,
+.teacher-panel,
+.pod-card,
+.team-hub-section,
+.collapsible-dropdown-container,
+.challenge-level-card,
+.challenge-family-card,
+.practice-post-card,
+.captain-member-card,
+.teacher-submission-card,
+.mode-option,
+header,
+.reading-passage-card,
+.reading-grammar-note,
+.flashcard-face {
+    border-radius: 16px !important;
+}
+
+.btn-primary,
+.btn-secondary,
+#auth-btn,
+.btn-approve,
+.btn-reject,
+.btn-advance,
+.workspace-action-btn,
+input,
+select,
+.teacher-reject-note-input {
+    border-radius: 12px !important;
+}
+
+.game-interactive-token,
+.leaderboard-row,
+.feed-item,
+.toast-popup,
+.team-hub-member-chip {
+    border-radius: 12px !important;
+}
+
+/* ----------------------------------------------------------------
+   TODAY CARD
+   ---------------------------------------------------------------- */
+.today-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(22, 101, 52, 0.07);
+    margin-bottom: 16px;
+}
+
+.today-card-complete {
+    background: linear-gradient(135deg, #f0fdf4, #fffbeb);
+    border: 2px solid #166534;
+    text-align: center;
+}
+
+.today-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    gap: 12px;
+}
+
+.today-card-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    font-family: 'Inter', sans-serif;
+}
+
+.today-card-heading {
+    font-size: 22px;
+    font-weight: 700;
+    color: #166534;
+    margin-bottom: 4px;
+    line-height: 1.2;
+}
+
+.today-card-sub {
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.today-card-letter {
+    font-family: 'Abyssinica SIL', serif;
+    font-size: 56px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.today-action-btn {
+    width: 100%;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.today-action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* ----------------------------------------------------------------
+   CHALLENGE MAP OVERLAY
+   ---------------------------------------------------------------- */
+#challengeMapOverlay {
+    position: fixed;
+    inset: 0;
+    background: white;
+    z-index: 9994;
+    flex-direction: column;
+    overflow-y: auto;
+    display: none;
+}
+
+#challengeMapHeader {
+    position: sticky;
+    top: 0;
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1;
+}
+
+#challengeMapMount {
+    flex: 1;
+}
+
+/* Team pulse animation for "your" dot on the map */
+@keyframes teamPulse {
+    0%   { box-shadow: 0 0 0 2px white, 0 0 0 3px currentColor; }
+    50%  { box-shadow: 0 0 0 2px white, 0 0 0 5px currentColor; }
+    100% { box-shadow: 0 0 0 2px white, 0 0 0 3px currentColor; }
+}
+
+/* ----------------------------------------------------------------
+   MAP BUTTON in team hub
+   ---------------------------------------------------------------- */
+.map-entry-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #166534, #15803d);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 16px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(22, 101, 52, 0.25);
+    margin-bottom: 16px;
+}
+
+.map-entry-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(22, 101, 52, 0.3);
+}
+
+.map-entry-btn .map-btn-icon {
+    font-size: 22px;
+}
+
+/* ----------------------------------------------------------------
+   IMPROVE INPUT + BUTTON FEEL
+   ---------------------------------------------------------------- */
+input, select {
+    font-family: 'Inter', 'Ubuntu', sans-serif;
+    font-size: 15px;
+}
+
+.btn-primary, .btn-secondary, #auth-btn {
+    font-family: 'Inter', 'Ubuntu', sans-serif;
+    letter-spacing: 0.1px;
+}
+
+/* ----------------------------------------------------------------
+   TEAM HUB SECTION TITLES
+   ---------------------------------------------------------------- */
+.team-hub-section-title {
+    font-family: 'Inter', 'Ubuntu', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+/* ----------------------------------------------------------------
+   NOTIFICATION LINK in menu
+   ---------------------------------------------------------------- */
+.menu-notification-note {
+    font-size: 11px;
+    color: #94a3b8;
+    text-align: center;
+    padding: 8px 16px 4px;
+    line-height: 1.4;
+}            
