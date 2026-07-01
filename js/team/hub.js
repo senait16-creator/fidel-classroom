@@ -17,6 +17,7 @@
 // Entry / Exit
 // ---------------------------------------------------------------------------
 
+ 
 async function enterTeamHub() {
     document.getElementById("studentDashboard").style.display = "none";
     document.getElementById("modeSelectScreen").style.display = "none";
@@ -26,51 +27,49 @@ async function enterTeamHub() {
     document.getElementById("readingLevelsScreen").style.display = "none";
     document.getElementById("captainDashboardScreen").style.display = "none";
     document.getElementById("teamHubScreen").style.display = "block";
-
+ 
+    // Show hamburger button
+    if (typeof showHamburgerBtn === 'function') showHamburgerBtn();
+ 
     await renderTeamHub();
-}
-
-function exitTeamHub() {
-    document.getElementById("teamHubScreen").style.display = "none";
-    document.getElementById("familyPracticeSheet").style.display = "none";
-    launchDashboard("student");
 }
 
 // ---------------------------------------------------------------------------
 // Main render
 // ---------------------------------------------------------------------------
 
+
 async function renderTeamHub() {
     if (!currentProfile?.team_id) {
         showNotificationToast("You're not on a team yet — your teacher will assign you soon!");
         return;
     }
-
+ 
     const { data: team } = await _supabase
         .from('teams')
         .select('id, name, current_level, streak_count')
         .eq('id', currentProfile.team_id)
         .maybeSingle();
-
+ 
     if (!team) return;
-
+ 
     const isCaptain = !!currentProfile?.is_captain;
-
-    // Team header
+ 
+    // Header
     const headerEl = document.getElementById("teamHubHeaderEl");
     const teamHex = getTeamHex(team.name);
     headerEl.style.background = `linear-gradient(135deg, ${teamHex} 0%, ${teamHex}bb 100%)`;
     document.getElementById("teamHubTeamName").innerText = team.name + (isCaptain ? ' 👑' : '');
     document.getElementById("teamHubLevelLabel").innerText = `Level ${team.current_level}`;
     document.getElementById("teamHubStreakLabel").innerText = team.streak_count || 0;
-
+ 
     // Members chips
     const { data: members } = await _supabase
         .from('profiles')
         .select('id, nickname, avatar, is_captain')
         .eq('team_id', currentProfile.team_id)
         .order('nickname');
-
+ 
     const membersRow = document.getElementById("teamHubMembersRow");
     if (membersRow) {
         membersRow.innerHTML = "";
@@ -81,10 +80,15 @@ async function renderTeamHub() {
             membersRow.appendChild(chip);
         });
     }
-
-    // Populate letter select for team hub upload (filtered to current level)
+ 
+    // Letter select filtered to current level
     await populateTeamHubLetterSelect(team.current_level);
-
+ 
+    // Today card (students only)
+    if (!isCaptain && typeof renderTodayCard === 'function') {
+        await renderTodayCard('todayCardMount');
+    }
+ 
     // Student vs captain action areas
     const studentActions = document.getElementById("teamHubStudentActions");
     const captainActions = document.getElementById("teamHubCaptainActions");
@@ -95,7 +99,7 @@ async function renderTeamHub() {
         if (studentActions) studentActions.style.display = "block";
         if (captainActions) captainActions.style.display = "none";
     }
-
+ 
     // Level completion banner (students only)
     const completionMount = document.getElementById('levelCompletionMount');
     if (completionMount) {
@@ -105,24 +109,25 @@ async function renderTeamHub() {
             await renderLevelCompletionBanner('levelCompletionMount');
         }
     }
-
+ 
     // Embedded level map
     await renderEmbeddedLevelMap('embeddedLevelMapMount');
-
-    // Team race view
+ 
+    // Team race
     await renderTeamRaceView('teamRaceMount');
-
+ 
     // Practice feed
     await loadTeamPracticeFeed();
-
+ 
     // Help flags (captain only)
     if (isCaptain) {
         await loadHelpFlags('helpFlagsMount');
     }
-
-    // Captain inbox badge notification
+ 
+    // Captain inbox badge
     await checkCaptainInboxBadge();
 }
+ 
 
 async function populateTeamHubLetterSelect(currentLevel) {
     const letterSelect = document.getElementById("teamHubLetterSelect");
