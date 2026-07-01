@@ -116,7 +116,7 @@ async function proceedFlowMap(user) {
 
     currentProfile = profile || null;
 
-    // Suspended account check — block login before anything else
+    // Suspended account check
     if (currentProfile?.is_suspended) {
         await _supabase.auth.signOut();
         showNotificationToast("Your account has been suspended. Please contact your teacher.");
@@ -124,7 +124,7 @@ async function proceedFlowMap(user) {
         return;
     }
 
-    // Admin gets its own routing gate
+    // Admin routing
     if (currentUser.email === ADMIN_EMAIL) {
         document.getElementById("authScreen").style.display = "none";
         document.getElementById("adminViewSelectorGate").style.display = "block";
@@ -134,31 +134,26 @@ async function proceedFlowMap(user) {
     if (profile && profile.nickname) {
         selectedAvatarSymbol = profile.avatar || "🦁";
         document.getElementById("authScreen").style.display = "none";
-                await applyProfileToHeader(profile);
-        // Update mode select greeting with real nickname
+        await applyProfileToHeader(profile);
+
         const modeGreetSub = document.getElementById('modeGreetingSub');
-        if (modeGreetSub && profile?.nickname) {
+        if (modeGreetSub) {
             modeGreetSub.innerText = `Welcome back, ${profile.nickname}`;
         }
-         const modeGreetSub2 = document.getElementById('modeGreetingSub');
-        if (modeGreetSub2 && currentProfile?.nickname) {
-            modeGreetSub2.innerText = `Welcome back, ${currentProfile.nickname}`;
-        }
+
         enterModeSelect();
-    }
-        // Wordle popup — fires 600ms after screen appears
+
         setTimeout(() => {
             if (typeof maybeShowWordleOnLogin === 'function') maybeShowWordleOnLogin();
         }, 600);
+
     } else {
-        // First-time setup: nickname + avatar only.
         isEditingProfile = false;
         document.getElementById("authScreen").style.display = "none";
         document.getElementById("profileSetupScreen").style.display = "block";
         prefillProfileSetupScreen(null);
     }
 }
-
 // ---------------------------------------------------------------------------
 // Team name lookup (shared by header + challenge board)
 // ---------------------------------------------------------------------------
