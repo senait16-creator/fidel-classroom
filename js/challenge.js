@@ -1,13 +1,5 @@
 // =============================================================================
 // CHALLENGE.JS
-// Simplified — team hub, captain dashboard, and embedded level map have
-// all moved to js/team/hub.js, js/team/levels.js, js/team/progress.js.
-// This file keeps: mode select, old-style challenge screens (fallback),
-// and the reading mode entry point.
-//
-// Loads LAST (after all team/ files). Relies on globals from app.js,
-// auth.js, game.js, submissions.js, team/hub.js, team/levels.js,
-// team/progress.js.
 // =============================================================================
 
 let challengeLevelsCache = null;
@@ -28,8 +20,7 @@ function getTeamHex(teamName) {
 }
 
 // -----------------------------------------------------------------------------
-// Mode select — entry point after login
-// After first visit, students with a team go straight to team hub
+// Mode select — home screen after login, shown every time
 // -----------------------------------------------------------------------------
 
 function enterModeSelect() {
@@ -42,10 +33,8 @@ function enterModeSelect() {
     document.getElementById("captainDashboardScreen").style.display = "none";
     document.getElementById("modeSelectScreen").style.display = "block";
 
-    // Mark as visited for future reference (used elsewhere)
     localStorage.setItem('fidel_has_visited', '1');
 
-    // First time ever — show onboarding card
     if (!localStorage.getItem('onboarding_seen')) {
         localStorage.setItem('onboarding_seen', '1');
         showOnboardingCard();
@@ -78,8 +67,7 @@ function exitChallengeBackToDashboard() {
 }
 
 // -----------------------------------------------------------------------------
-// Challenge levels screen (fallback — still accessible from team hub
-// "Go to Challenge Levels" button for students who prefer the old view)
+// Challenge levels screen (fallback)
 // -----------------------------------------------------------------------------
 
 async function fetchChallengeLevels() {
@@ -95,7 +83,11 @@ async function fetchChallengeLevels() {
 
 async function getTeamBoardInfo() {
     if (!currentProfile?.team_id) return { name: "No Team Yet", current_level: 1, streak_count: 0 };
-    const { data: team, error } = await _supabase.from('teams').select('name, current_level, streak_count').eq('id', currentProfile.team_id).maybeSingle();
+    const { data: team, error } = await _supabase
+        .from('teams')
+        .select('name, current_level, streak_count')
+        .eq('id', currentProfile.team_id)
+        .maybeSingle();
     if (error || !team) return { name: "No Team Yet", current_level: 1, streak_count: 0 };
     return { name: team.name || "Your Team", current_level: team.current_level || 1, streak_count: team.streak_count || 0 };
 }
@@ -148,7 +140,6 @@ async function openChallengeFamilyPicker(level) {
 async function returnToChallengeFamilyPicker() {
     document.getElementById("gameWorkspace").style.display = "none";
 
-    // Game launched from embedded level map — return to practice sheet
     if (!activeChallengeLevel) {
         if (typeof embeddedActiveFamily !== "undefined" && embeddedActiveFamily) {
             document.getElementById("familyPracticeSheet").style.display = "flex";
@@ -158,7 +149,6 @@ async function returnToChallengeFamilyPicker() {
         return;
     }
 
-    // Game launched from old-style challenge screens — return there
     if (activeChallengeFamilyObj) {
         document.getElementById("challengeFamilyDetailScreen").style.display = "block";
         renderChallengeFamilyDetailGiantRow(activeChallengeFamilyObj);
@@ -276,8 +266,7 @@ function renderChallengeFamilyDetailGiantRow(fidelObj) {
 }
 
 // -----------------------------------------------------------------------------
-// Streak game (old-style challenge screens fallback)
-// Primary streak game now lives in team/levels.js (launchEmbeddedStreakGame)
+// Streak game
 // -----------------------------------------------------------------------------
 
 async function recordStreakProgress(baseLetter, levelNumber, bestStreak, passed) {
@@ -326,11 +315,6 @@ function exitChallengeFamilyPicker() {
     document.getElementById("challengeFamilyScreen").style.display = "none";
     document.getElementById("challengeLevelsScreen").style.display = "block";
     renderChallengeLevelsView();
-}
-
-function exitChallengeFamilyDetail() {
-    document.getElementById("challengeFamilyDetailScreen").style.display = "none";
-    document.getElementById("challengeFamilyScreen").style.display = "block";
 }
 
 // -----------------------------------------------------------------------------
