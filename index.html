@@ -332,36 +332,110 @@
 <!-- ============================================================
      MODE SELECT
      ============================================================ -->
-<div id="modeSelectScreen" class="app-card screen-fade-in" style="max-width:480px; display:none;">
-    <div id="captainModeSelectBanner" style="display:none;"></div>
-    <p class="mode-select-greeting">ሰላም<span id="modeSelectNickname"></span>!</p>
-    <h2 class="main-title" style="font-size:22px;">What are you working on today?</h2>
-    <p class="subtitle">Practice on your own, compete with your team, or advance to reading!</p>
-    <div style="display:flex; flex-direction:column; gap:14px;">
-        <div class="mode-option" id="modeSelectCaptainOption" style="display:none;" onclick="enterCaptainDashboard()">
-            <div class="mode-option-icon">👑</div>
-            <div class="mode-option-title">Captain Dashboard</div>
-            <div class="mode-option-desc">Review your team's submissions and progress</div>
-        </div>
-        <div class="mode-option" onclick="chooseModePractice()">
-            <div class="mode-option-amharic">ፊደል</div>
-            <div class="mode-option-icon">📖</div>
-            <div class="mode-option-title">Practice the Fidel</div>
-            <div class="mode-option-desc">Free play — explore any letter, no pressure</div>
-        </div>
-        <div class="mode-option challenge-variant" onclick="chooseModeChallenge()">
-            <div class="mode-option-amharic">ውድድር</div>
-            <div class="mode-option-icon">🏆</div>
-            <div class="mode-option-title">Fidel Challenge</div>
-            <div class="mode-option-desc">Team competition — level up together</div>
-        </div>
-        <div class="mode-option" style="background:linear-gradient(135deg,#f0f9ff,white); border-color:#7dd3fc;" onclick="chooseModeReading()">
-            <div class="mode-option-amharic">ንባብ</div>
-            <div class="mode-option-icon">📘</div>
-            <div class="mode-option-title">Advance to Reading</div>
-            <div class="mode-option-desc">Already know the Fidel? Start reading real Amharic</div>
-        </div>
+<!-- ── NEW MODE SELECT ───────────────────────────────────────── -->
+<div id="modeSelectScreen" style="display:none; min-height:100vh;">
+ 
+    <div class="mode-greeting-sub" id="modeGreetingSub">Welcome back</div>
+    <div class="mode-greeting-main">
+        What are you<br>practicing <span>today?</span>
     </div>
+ 
+    <div class="cups-grid">
+ 
+        <!-- Fidel map -->
+        <div class="cup-card" onclick="chooseModeChallenge()">
+            <span class="cup-card-badge green">Alphabet</span>
+            <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
+                <rect x="6" y="22" width="32" height="30" rx="7" fill="#dcfce7" stroke="#166534" stroke-width="1.5"/>
+                <path d="M38 28 Q47 28 47 35 Q47 42 38 42" fill="none" stroke="#166534" stroke-width="1.5" stroke-linecap="round"/>
+                <rect x="12" y="52" width="18" height="4" rx="2" fill="#166534" opacity="0.25"/>
+                <path d="M16 17 Q16 13 19 15 Q22 17 19 20" fill="none" stroke="#166534" stroke-width="1.1" stroke-linecap="round"/>
+                <path d="M23 15 Q23 11 26 13 Q29 15 26 18" fill="none" stroke="#166534" stroke-width="1.1" stroke-linecap="round"/>
+                <text x="22" y="42" text-anchor="middle" font-size="11" font-weight="700" fill="#166534" font-family="serif" font-style="italic">ፊደል</text>
+            </svg>
+            <div class="cup-card-label">Fidel map</div>
+            <div class="cup-card-desc">Letter families as levels, one map stop each</div>
+        </div>
+ 
+        <!-- Challenge -->
+        <div class="cup-card" onclick="chooseModeChallenge()">
+            <span class="cup-card-badge amber">Team</span>
+            <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
+                <rect x="6" y="22" width="32" height="30" rx="7" fill="#fef3c7" stroke="#b45309" stroke-width="1.5"/>
+                <path d="M38 28 Q47 28 47 35 Q47 42 38 42" fill="none" stroke="#b45309" stroke-width="1.5" stroke-linecap="round"/>
+                <rect x="12" y="52" width="18" height="4" rx="2" fill="#b45309" opacity="0.25"/>
+                <path d="M16 17 Q16 13 19 15 Q22 17 19 20" fill="none" stroke="#b45309" stroke-width="1.1" stroke-linecap="round"/>
+                <path d="M23 15 Q23 11 26 13 Q29 15 26 18" fill="none" stroke="#b45309" stroke-width="1.1" stroke-linecap="round"/>
+                <text x="22" y="42" text-anchor="middle" font-size="9" font-weight="700" fill="#b45309" font-family="sans-serif">ውድድር</text>
+            </svg>
+            <div class="cup-card-label">Challenge</div>
+            <div class="cup-card-desc">Team competition, 12 levels</div>
+        </div>
+ 
+        <!-- Reading -->
+        <div class="cup-card" onclick="chooseModeReading()">
+            <span class="cup-card-badge blue">Advanced</span>
+            <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
+                <rect x="6" y="22" width="32" height="30" rx="7" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.5"/>
+                <path d="M38 28 Q47 28 47 35 Q47 42 38 42" fill="none" stroke="#1d4ed8" stroke-width="1.5" stroke-linecap="round"/>
+                <rect x="12" y="52" width="18" height="4" rx="2" fill="#1d4ed8" opacity="0.25"/>
+                <path d="M16 17 Q16 13 19 15 Q22 17 19 20" fill="none" stroke="#1d4ed8" stroke-width="1.1" stroke-linecap="round"/>
+                <path d="M23 15 Q23 11 26 13 Q29 15 26 18" fill="none" stroke="#1d4ed8" stroke-width="1.1" stroke-linecap="round"/>
+                <text x="22" y="42" text-anchor="middle" font-size="9" font-weight="700" fill="#1d4ed8" font-family="sans-serif">ንባብ</text>
+            </svg>
+            <div class="cup-card-label">Reading</div>
+            <div class="cup-card-desc">Real Amharic sentences</div>
+        </div>
+ 
+        <!-- Vocab -->
+        <div class="cup-card" onclick="chooseModeReading()">
+            <span class="cup-card-badge purple">New</span>
+            <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
+                <rect x="6" y="22" width="32" height="30" rx="7" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+                <path d="M38 28 Q47 28 47 35 Q47 42 38 42" fill="none" stroke="#7c3aed" stroke-width="1.5" stroke-linecap="round"/>
+                <rect x="12" y="52" width="18" height="4" rx="2" fill="#7c3aed" opacity="0.25"/>
+                <path d="M16 17 Q16 13 19 15 Q22 17 19 20" fill="none" stroke="#7c3aed" stroke-width="1.1" stroke-linecap="round"/>
+                <path d="M23 15 Q23 11 26 13 Q29 15 26 18" fill="none" stroke="#7c3aed" stroke-width="1.1" stroke-linecap="round"/>
+                <text x="22" y="42" text-anchor="middle" font-size="9" font-weight="700" fill="#7c3aed" font-family="sans-serif">ቃላት</text>
+            </svg>
+            <div class="cup-card-label">Vocab</div>
+            <div class="cup-card-desc">Words, phrases, conversation</div>
+        </div>
+ 
+        <!-- Full board — wide -->
+        <div class="cup-card wide" onclick="chooseModePractice()">
+            <svg width="48" height="54" viewBox="0 0 48 54" fill="none" style="flex-shrink:0;">
+                <rect x="4" y="16" width="30" height="26" rx="6" fill="#f0fdf4" stroke="#166534" stroke-width="1.5"/>
+                <path d="M34 21 Q42 21 42 29 Q42 37 34 37" fill="none" stroke="#166534" stroke-width="1.4" stroke-linecap="round"/>
+                <rect x="9" y="42" width="16" height="3" rx="1.5" fill="#166534" opacity="0.2"/>
+                <path d="M11 12 Q11 9 14 10 Q16 12 14 14" fill="none" stroke="#166534" stroke-width="1" stroke-linecap="round"/>
+                <path d="M17 10 Q17 7 20 9 Q22 11 20 13" fill="none" stroke="#166534" stroke-width="1" stroke-linecap="round"/>
+                <rect x="10" y="22" width="4" height="4" rx="1" fill="#166534" opacity="0.5"/>
+                <rect x="16" y="22" width="4" height="4" rx="1" fill="#166534" opacity="0.4"/>
+                <rect x="22" y="22" width="4" height="4" rx="1" fill="#166534" opacity="0.3"/>
+                <rect x="10" y="28" width="4" height="4" rx="1" fill="#166534" opacity="0.4"/>
+                <rect x="16" y="28" width="4" height="4" rx="1" fill="#166534" opacity="0.5"/>
+                <rect x="22" y="28" width="4" height="4" rx="1" fill="#166534" opacity="0.35"/>
+            </svg>
+            <div class="cup-card-text">
+                <div class="cup-card-label">Full letter board</div>
+                <div class="cup-card-desc">Browse all 33 letter families freely — no levels, no progression. Great for review.</div>
+            </div>
+            <span class="cup-card-badge gray">Free play</span>
+        </div>
+ 
+    </div>
+ 
+    <div class="mode-divider"><span>or jump back in</span></div>
+    <div class="mode-jump-row">
+        <button class="mode-jump-btn" id="modeContinueBtn" onclick="chooseModeChallenge()">
+            Continue Level 1
+        </button>
+        <button class="mode-jump-btn" onclick="openChallengeMap()">
+            Open map
+        </button>
+    </div>
+ 
 </div>
 
 <!-- ============================================================
@@ -823,6 +897,16 @@
     <div id="challengeMapMount"></div>
 </div>
 
+    <div id="wordleOverlay" style="display:none; position:fixed; inset:0; z-index:9995; background:rgba(0,0,0,0.55); backdrop-filter:blur(4px); align-items:flex-end; justify-content:center;">
+    <div class="wordle-sheet">
+        <div class="wordle-sheet-handle"></div>
+        <div class="wordle-top-bar">
+            <div class="wordle-title">ዛሬ ይህን ይፍቱ · Today's Decode</div>
+            <button class="wordle-skip-btn" onclick="closeWordleOverlay()">Skip ✕</button>
+        </div>
+        <div id="wordleGameMount"></div>
+    </div>
+</div>
 <!-- ============================================================
      SCRIPT TAGS — order matters
      ============================================================ -->
