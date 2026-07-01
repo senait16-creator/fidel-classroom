@@ -125,9 +125,9 @@ async function proceedFlowMap(user) {
     }
 
     // Admin routing
-    if (currentUser.email === ADMIN_EMAIL) {
+   if (currentUser.email === ADMIN_EMAIL) {
         document.getElementById("authScreen").style.display = "none";
-        document.getElementById("adminViewSelectorGate").style.display = "block";
+        launchDashboard("teacher");
         return;
     }
 
