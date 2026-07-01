@@ -188,7 +188,7 @@ async function sendPasswordResetLink() {
     if (!email) return showNotificationToast("Enter your email first.");
 
     const { error } = await _supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + window.location.pathname
+        redirectTo: 'https://senait16-creator.github.io/fidel-classroom/'
     });
 
     if (error) {
@@ -196,7 +196,9 @@ async function sendPasswordResetLink() {
         return showNotificationToast("Couldn't send reset link: " + error.message);
     }
 
-    showNotificationToast("Check your email for a reset link!");
+    showNotificationToast("Reset link sent! Check your email.");
+    document.getElementById("forgotPasswordScreen").style.display = "none";
+    document.getElementById("authScreen").style.display = "flex";
 }
 
 async function saveNewPassword() {
@@ -438,6 +440,47 @@ function showOnboardingCard() {
     `;
     document.body.appendChild(overlay);
 }
+
+// ---------------------------------------------------------------------------
+// Button wiring — password reset flow
+// ---------------------------------------------------------------------------
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById("forgotPasswordBtn").onclick = () => {
+        document.getElementById("authScreen").style.display = "none";
+        document.getElementById("forgotPasswordScreen").style.display = "block";
+    };
+
+    document.getElementById("backToLoginFromForgotBtn").onclick = () => {
+        document.getElementById("forgotPasswordScreen").style.display = "none";
+        document.getElementById("authScreen").style.display = "flex";
+    };
+
+    document.getElementById("sendResetLinkBtn").onclick = sendPasswordResetLink;
+    document.getElementById("saveNewPasswordBtn").onclick = saveNewPassword;
+    document.getElementById("auth-btn").onclick = handleAuth;
+});
+
+// ---------------------------------------------------------------------------
+// Auth state listener — handles PASSWORD_RECOVERY from email link
+// ---------------------------------------------------------------------------
+
+_supabase.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'PASSWORD_RECOVERY') {
+        document.getElementById("authScreen").style.display = "none";
+        document.getElementById("forgotPasswordScreen").style.display = "none";
+        document.getElementById("newPasswordScreen").style.display = "block";
+        return;
+    }
+
+    if (event === 'SIGNED_IN' && session?.user) {
+        // Only auto-route if we're still on the auth screen
+        const authScreen = document.getElementById("authScreen");
+        if (authScreen && authScreen.style.display !== "none") {
+            await proceedFlowMap(session.user);
+        }
+    }
+});
 
 // ---------------------------------------------------------------------------
 // Expose to inline onclick="" handlers in index.html
