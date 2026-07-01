@@ -140,7 +140,14 @@ async function renderTeamHub() {
     }
  
     // Captain inbox badge
+   // Captain inbox badge
     await checkCaptainInboxBadge();
+
+    // Update mode select "Continue" button with real level
+    const continueBtn = document.getElementById('modeContinueBtn');
+    if (continueBtn && team?.current_level) {
+        continueBtn.innerText = `Continue Level ${team.current_level}`;
+    }
 }
  
 
