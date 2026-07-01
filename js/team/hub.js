@@ -696,6 +696,11 @@ function toggleTeamFeed() {
     if (arrow) arrow.innerText = isOpen ? "▼" : "▲";
 }
 
+function exitTeamHub() {
+    document.getElementById("teamHubScreen").style.display = "none";
+    document.getElementById("familyPracticeSheet").style.display = "none";
+    launchDashboard("student");
+}
 // ---------------------------------------------------------------------------
 // Expose
 // ---------------------------------------------------------------------------
