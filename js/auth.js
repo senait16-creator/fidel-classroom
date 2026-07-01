@@ -357,10 +357,6 @@ async function assignNextTeam() {
 // Dashboard routing
 // ---------------------------------------------------------------------------
 
-function routeAdminTerminalDirectly(targetPanel) {
-    document.getElementById("adminViewSelectorGate").style.display = "none";
-    launchDashboard(targetPanel);
-}
 
 function switchAdminPanelsFromDashboard(targetPanel) {
     document.getElementById("studentDashboard").style.display = "none";
