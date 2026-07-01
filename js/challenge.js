@@ -40,14 +40,17 @@ function enterModeSelect() {
     document.getElementById("challengeFamilyDetailScreen").style.display = "none";
     document.getElementById("teamHubScreen").style.display = "none";
     document.getElementById("captainDashboardScreen").style.display = "none";
+    document.getElementById("modeSelectScreen").style.display = "block";
 
-    // After first visit: students with a team go directly to the hub
-    const hasVisited = localStorage.getItem('fidel_has_visited');
-    if (hasVisited && currentProfile?.team_id) {
-        enterTeamHub();
-        return;
+    // Mark as visited for future reference (used elsewhere)
+    localStorage.setItem('fidel_has_visited', '1');
+
+    // First time ever — show onboarding card
+    if (!localStorage.getItem('onboarding_seen')) {
+        localStorage.setItem('onboarding_seen', '1');
+        showOnboardingCard();
     }
-
+}
     document.getElementById("modeSelectScreen").style.display = "block";
 
     // Hide captain banner — captain flow is inside the team hub now
