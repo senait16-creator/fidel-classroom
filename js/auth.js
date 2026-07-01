@@ -134,8 +134,17 @@ async function proceedFlowMap(user) {
     if (profile && profile.nickname) {
         selectedAvatarSymbol = profile.avatar || "🦁";
         document.getElementById("authScreen").style.display = "none";
-        await applyProfileToHeader(profile);
+                await applyProfileToHeader(profile);
+        // Update mode select greeting with real nickname
+        const modeGreetSub = document.getElementById('modeGreetingSub');
+        if (modeGreetSub && profile?.nickname) {
+            modeGreetSub.innerText = `Welcome back, ${profile.nickname}`;
+        }
         enterModeSelect();
+        // Wordle popup — fires 600ms after screen appears
+        setTimeout(() => {
+            if (typeof maybeShowWordleOnLogin === 'function') maybeShowWordleOnLogin();
+        }, 600);
     } else {
         // First-time setup: nickname + avatar only.
         isEditingProfile = false;
