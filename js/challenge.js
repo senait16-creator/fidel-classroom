@@ -79,7 +79,7 @@ async function chooseModeChallenge() {
     await renderChallengeDashboard();
 }
 
-async function renderChallengeDashboard() {
+async function renderChallengeDashboard() { 
     const [team, levels] = await Promise.all([
         getTeamBoardInfo(),
         fetchChallengeLevels()
