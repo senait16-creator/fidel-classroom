@@ -40,10 +40,6 @@ function enterModeSelect() {
 
     localStorage.setItem('fidel_has_visited', '1');
 
-    if (!localStorage.getItem('onboarding_seen')) {
-        localStorage.setItem('onboarding_seen', '1');
-        showOnboardingCard();
-    }
 }
 
 function chooseModePractice() {
