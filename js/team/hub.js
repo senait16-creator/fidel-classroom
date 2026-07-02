@@ -103,7 +103,8 @@ async function renderTeamHub() {
     if (!isCaptain && typeof renderTodayCard === 'function') {
         await renderTodayCard('todayCardMount');
     }
- 
+ if (typeof checkAndShowLevelAdvanceBanner === 'function')
+    await checkAndShowLevelAdvanceBanner('levelAdvanceBannerMount');
     // Student vs captain action areas
     const studentActions = document.getElementById("teamHubStudentActions");
     const captainActions = document.getElementById("teamHubCaptainActions");
