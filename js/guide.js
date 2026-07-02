@@ -72,7 +72,7 @@ function showCharacterGuide() {
     const style = document.createElement("style");
     style.id = "guideStyles";
     style.textContent = GUIDE_CSS;
-    document.head.appendChild(style);
+    document.head.appendChild(style); 
   }
 }
 
