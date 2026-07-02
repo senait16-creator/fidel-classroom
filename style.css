@@ -1,16 +1,16 @@
 /* =============================================================================
-   FIDEL CLASSROOM â€” style.css v9
+   FIDEL CLASSROOM style.css v9
    Safe full replacement based on your current working CSS.
    Keeps existing IDs/classes your JavaScript relies on, while polishing the
    mode select, guide removal flow, dashboard spacing, team hub, and mobile UI.
    ============================================================================= */
 
 /* =============================================================================
-   FIDEL CLASSROOM â€” style.css
+   FIDEL CLASSROOM style.css
    Clean consolidated version. No duplicate blocks, no unclosed rules.
    ============================================================================= */
 
-/* â”€â”€ Variables â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/*  Variables */
 :root {
     --brand-primary:   #166534;
     --brand-secondary: #15803d;
@@ -28,7 +28,7 @@
     --team-blue:   #3b82f6;
 }
 
-/* â”€â”€ Reset â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/*  Reset */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -44,7 +44,7 @@ body {
     min-height: 100vh;
 }
 
-/* â”€â”€ Typography â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/*  Typography  */
 .main-title {
     font-family: 'Lora', 'Playfair Display', serif;
     font-size: 30px;
@@ -71,7 +71,7 @@ p {
     font-weight: 400;
 }
 
-/* â”€â”€ App card (auth screens) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* App card (auth screens)  */
 .app-card {
     max-width: 420px;
     width: 100%;
@@ -86,7 +86,7 @@ p {
     z-index: 2;
 }
 
-/* â”€â”€ Auth screen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/*  Auth screen */
 .auth-decorative-bg {
     position: fixed;
     inset: 0;
@@ -128,7 +128,7 @@ p {
     .app-card { margin: 0; }
 }
 
-/* â”€â”€ Team dot accent â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/*  Team dot accent  */
 .team-dot-accent { display: flex; justify-content: center; gap: 6px; margin-bottom: 14px; }
 .team-dot-accent span { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 .team-dot-accent .dot-red    { background: var(--team-red); }
@@ -138,7 +138,7 @@ p {
 
 .subtitle { font-size: 14px; color: #64748b; margin-bottom: 24px; font-weight: 400; }
 
-/* â”€â”€ Inputs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/*  Inputs  */
 input, select {
     width: 100%;
     padding: 14px;
@@ -153,7 +153,7 @@ input, select {
 }
 input:focus, select:focus { border-color: var(--brand-primary); }
 
-/* â”€â”€ Auth buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/*  Auth buttons  */
 .choice-container { display: flex; gap: 12px; margin-bottom: 12px; }
 .btn-filled-rectangle { flex: 1; padding: 14px; font-size: 14px; font-weight: 700; border-radius: 10px; border: none; cursor: pointer; }
 .btn-signup-rect { background: var(--brand-primary); color: white; }
@@ -183,7 +183,7 @@ input:focus, select:focus { border-color: var(--brand-primary); }
 .auth-switch-mode-text { font-size: 13px; color: #64748b; text-align: center; margin-top: 12px; }
 .auth-switch-mode-link { background: none; border: none; font-size: 13px; font-weight: 700; color: var(--brand-primary); cursor: pointer; padding: 0 0 0 4px; text-decoration: underline; }
 
-/* â”€â”€ Global buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/*  Global buttons  */
 .btn-primary {
     background: var(--brand-primary);
     color: white;
@@ -210,7 +210,7 @@ input:focus, select:focus { border-color: var(--brand-primary); }
     font-family: 'Inter', sans-serif;
 }
 
-/* â”€â”€ Dashboards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/*  Dashboards  */
 #studentDashboard,
 #teacherOnlyDashboard { display: none; max-width: 1300px; margin: 0 auto; width: 100%; }
 
@@ -231,7 +231,7 @@ header {
 .progress-bar { height: 100%; width: 0%; background: #10b981; transition: width 0.4s ease; }
 .progress-bar-animated { transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1); }
 
-/* â”€â”€ Pod card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/*  Pod card  */
 .pod-card { background: white; border: 1px solid var(--border-color); border-radius: var(--radius-standard); padding: 16px 20px; margin-bottom: 20px; box-shadow: var(--shadow-premium); }
 .pod-header-row { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
 .pod-header-left { display: flex; align-items: center; gap: 12px; }
@@ -244,7 +244,7 @@ header {
 .pod-teammates-list.open { display: flex; }
 .teammate-row { font-size: 13px; font-weight: 500; color: #475569; }
 
-/* â”€â”€ Admin gate (kept for JS compatibility, never shown) â”€â”€â”€ */
+/*  Admin gate (kept for JS compatibility, never shown)  */
 .admin-gate-card { display: none; }
 
 /* â”€â”€ Teacher panels â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
