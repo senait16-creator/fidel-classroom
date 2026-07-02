@@ -3,82 +3,15 @@
 // Shows after login/profile setup. Routes users into the app modes.
 // =============================================================================
 
+// GUIDE.JS — no intro screen, go straight to cup-card dashboard
+
 function showCharacterGuide() {
-  const existing = document.getElementById("guideOverlay");
-  if (existing) existing.remove();
-
-  const name = currentProfile?.nickname || "there";
-
-  const overlay = document.createElement("div");
-  overlay.id = "guideOverlay";
-
-  overlay.innerHTML = `
-    <div class="guide-bg">
-      <span class="guide-letter l1">ሀ</span>
-      <span class="guide-letter l2">ለ</span>
-      <span class="guide-letter l3">መ</span>
-      <span class="guide-letter l4">ሰ</span>
-      <span class="guide-letter l5">ተ</span>
-      <span class="guide-letter l6">ደ</span>
-
-      <div class="guide-content">
-        <img src="./IMG_2406.svg" class="guide-girl" alt="Fidel guide character">
-
-        <div class="guide-header">
-          <img src="./Buna_Cini_Website.svg" class="guide-cup-small" alt="">
-          <div class="guide-kicker">Welcome back</div>
-          <h1>Selam, ${name}!</h1>
-          <p>Choose your learning path</p>
-        </div>
-
-        <div class="guide-speech">
-          I’m Fidel! I’ll help you learn Amharic step by step. 💛
-        </div>
-
-        <div class="guide-cards">
-          <button class="guide-card green" onclick="guideChoose('practice')">
-            <span class="guide-card-badge">Alphabet</span>
-            <span class="guide-icon">ፊ</span>
-            <strong>Fidel Map</strong>
-            <small>Practice letter families and build your foundation.</small>
-          </button>
-
-          <button class="guide-card gold" onclick="guideChoose('challenge')">
-            <span class="guide-card-badge">Team</span>
-            <span class="guide-icon">☕</span>
-            <strong>Challenge</strong>
-            <small>Compete with your team and move through 12 levels.</small>
-          </button>
-
-          <button class="guide-card blue" onclick="guideChoose('reading')">
-            <span class="guide-card-badge">Reading</span>
-            <span class="guide-icon">ን</span>
-            <strong>Reading Path</strong>
-            <small>Read real Amharic words, sentences, and stories.</small>
-          </button>
-
-          <button class="guide-card purple" onclick="guideChoose('vocab')">
-            <span class="guide-card-badge">Words</span>
-            <span class="guide-icon">ቃ</span>
-            <strong>Vocab Path</strong>
-            <small>Learn words, phrases, and daily conversation.</small>
-          </button>
-        </div>
-
-        <button class="guide-skip" onclick="guideSkip()">Skip intro</button>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(overlay);
-
-  if (!document.getElementById("guideStyles")) {
-    const style = document.createElement("style");
-    style.id = "guideStyles";
-    style.textContent = GUIDE_CSS;
-    document.head.appendChild(style);
+  if (typeof enterModeSelect === "function") {
+    enterModeSelect();
   }
 }
+
+window.showCharacterGuide = showCharacterGuide;
 
 function guideChoose(mode) {
   guideDismiss();
