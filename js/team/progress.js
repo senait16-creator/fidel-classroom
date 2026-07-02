@@ -15,48 +15,149 @@
 async function renderTeamRaceView(mountId) {
     const mount = document.getElementById(mountId);
     if (!mount) return;
-    mount.innerHTML = `<p style="color:#94a3b8; font-size:12px;">Loading...</p>`;
+    mount.innerHTML = `<p style="color:#94a3b8;font-size:13px;padding:8px 0;">Loading race...</p>`;
 
-    const { data: teams } = await _supabase
-        .from('teams')
-        .select('id, name, current_level, streak_count')
-        .order('current_level', { ascending: false });
+    try {
+        const { data: teams } = await _supabase
+            .from('teams')
+            .select('id, name, current_level')
+            .order('name');
 
-    if (!teams || teams.length === 0) {
-        mount.innerHTML = `<p style="color:#94a3b8; font-size:12px;">No teams yet.</p>`;
-        return;
+        if (!teams || teams.length === 0) {
+            mount.innerHTML = `<p style="color:#94a3b8;font-size:13px;">No teams yet.</p>`;
+            return;
+        }
+
+        const myTeam = teams.find(t => t.id === currentProfile?.team_id);
+        const currentLevel = myTeam?.current_level || 1;
+
+        const { data: levelData } = await _supabase
+            .from('challenge_levels')
+            .select('letter_families')
+            .eq('level_number', currentLevel)
+            .maybeSingle();
+
+        const families = levelData?.letter_families || [];
+
+        const teamIds = teams.map(t => t.id);
+        const { data: allMembers } = await _supabase
+            .from('profiles')
+            .select('id, team_id')
+            .in('team_id', teamIds);
+
+        const memberIds = (allMembers || []).map(m => m.id);
+        let allProgress = [];
+        if (memberIds.length > 0) {
+            const { data: prog } = await _supabase
+                .from('student_family_progress')
+                .select('student_id, base_letter, streak_passed, writing_passed')
+                .in('student_id', memberIds)
+                .eq('level_number', currentLevel);
+            allProgress = prog || [];
+        }
+
+        const standings = teams.map(team => {
+            const members = (allMembers || []).filter(m => m.team_id === team.id);
+            const memberCount = members.length;
+            if (memberCount === 0) return { ...team, clearedCount: 0, familyStatus: families.map(() => 'empty'), memberCount: 0 };
+
+            const familyStatus = families.map(fam => {
+                const famProgress = allProgress.filter(p =>
+                    p.base_letter === fam &&
+                    members.some(m => m.id === p.student_id)
+                );
+                const cleared = famProgress.filter(p => p.streak_passed && p.writing_passed);
+                const started = famProgress.filter(p => p.streak_passed || p.writing_passed);
+
+                if (cleared.length === memberCount && memberCount > 0) return 'done';
+                if (started.length > 0) return 'progress';
+                return 'empty';
+            });
+
+            const clearedCount = familyStatus.filter(s => s === 'done').length;
+
+            return { ...team, clearedCount, familyStatus, memberCount };
+        });
+
+        standings.sort((a, b) => b.clearedCount - a.clearedCount);
+
+        const teamColorMap = {
+            'Red':    '#ef4444',
+            'Blue':   '#1d4ed8',
+            'Green':  '#166534',
+            'Yellow': '#a16207',
+            'Purple': '#7c3aed',
+        };
+
+        function getTeamColor(name) {
+            for (const [key, hex] of Object.entries(teamColorMap)) {
+                if (name && name.includes(key)) return hex;
+            }
+            return '#64748b';
+        }
+
+        function getTeamInitial(name) {
+            if (!name) return '?';
+            for (const key of Object.keys(teamColorMap)) {
+                if (name.includes(key)) return key[0];
+            }
+            return name[0];
+        }
+
+        const medals = ['🥇', '🥈', '🥉'];
+
+        mount.innerHTML = '';
+        const standings_div = document.createElement('div');
+        standings_div.className = 'race-standings';
+
+        standings.forEach((team, idx) => {
+            const isYou = team.id === currentProfile?.team_id;
+            const color = getTeamColor(team.name);
+            const pct = families.length > 0
+                ? Math.round((team.clearedCount / families.length) * 100)
+                : 0;
+
+            const row = document.createElement('div');
+            row.className = `race-row${isYou ? ' race-you' : ''}`;
+
+            const medalHtml = idx < 3
+                ? `<div class="race-medal">${medals[idx]}</div>`
+                : `<div class="race-medal race-num">${idx + 1}</div>`;
+
+            const familyChipsHtml = families.map((fam, fi) => {
+                const status = team.familyStatus[fi] || 'empty';
+                return `<div class="race-chip chip-${status}">${fam}</div>`;
+            }).join('');
+
+            row.innerHTML = `
+                ${medalHtml}
+                <div class="race-team-dot" style="background:${color};">
+                    ${getTeamInitial(team.name)}
+                </div>
+                <div class="race-team-info">
+                    <div class="race-team-name-row">
+                        <div class="race-team-name-text">
+                            ${team.name}
+                            ${isYou ? '<span class="race-you-tag">You</span>' : ''}
+                        </div>
+                        <div class="race-team-count">${team.clearedCount}/${families.length} cleared</div>
+                    </div>
+                    <div class="race-bar-track">
+                        <div class="race-bar-fill" style="width:${pct}%;background:${color};"></div>
+                    </div>
+                    <div class="race-family-chips">${familyChipsHtml}</div>
+                </div>
+            `;
+
+            standings_div.appendChild(row);
+        });
+
+        mount.appendChild(standings_div);
+
+    } catch(e) {
+        console.error('Race render error:', e);
+        mount.innerHTML = `<p style="color:#94a3b8;font-size:13px;">Couldn't load race standings.</p>`;
     }
-
-    const maxLevel = 12;
-    mount.innerHTML = `
-        <p style="font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase;
-                  letter-spacing:0.4px; margin-bottom:10px;">Team Race</p>
-    `;
-
-    teams.forEach(team => {
-        const isOwnTeam = currentProfile?.team_id === team.id;
-        const progressPercent = Math.min(100, Math.round(((team.current_level - 1) / maxLevel) * 100));
-        const teamHex = getTeamHex(team.name);
-
-        const row = document.createElement('div');
-        row.style.cssText = `margin-bottom:12px;`;
-        row.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                <span style="font-size:13px; font-weight:${isOwnTeam ? '800' : '600'};
-                             color:${isOwnTeam ? teamHex : '#475569'};">
-                    ${isOwnTeam ? '▶ ' : ''}${team.name}
-                </span>
-                <span style="font-size:11px; color:#64748b; font-weight:600;">
-                    Lvl ${team.current_level} • 🔥${team.streak_count || 0}
-                </span>
-            </div>
-            <div style="height:8px; background:#e2e8f0; border-radius:8px; overflow:hidden;">
-                <div style="height:100%; width:${progressPercent}%; background:${teamHex};
-                            border-radius:8px; transition:width 0.6s ease;"></div>
-            </div>
-        `;
-        mount.appendChild(row);
-    });
 }
 
 // ---------------------------------------------------------------------------
