@@ -31,7 +31,12 @@ function enterModeSelect() {
     document.getElementById("challengeFamilyDetailScreen").style.display = "none";
     document.getElementById("teamHubScreen").style.display = "none";
     document.getElementById("captainDashboardScreen").style.display = "none";
-    document.getElementById("modeSelectScreen").style.display = "block";
+
+    // Close letter board and other full-screen overlays
+    const lb = document.getElementById("letterBoardScreen");
+    if (lb) lb.style.display = "none";
+
+    document.getElementById("modeSelectScreen").style.display = "flex";
 
     localStorage.setItem('fidel_has_visited', '1');
 
@@ -43,12 +48,16 @@ function enterModeSelect() {
 
 function chooseModePractice() {
     document.getElementById("modeSelectScreen").style.display = "none";
-    launchDashboard("student");
+    if (typeof openLetterBoard === 'function') {
+        openLetterBoard();
+    } else {
+        launchDashboard("student");
+    }
 }
 
 function chooseModeChallenge() {
     if (!currentProfile?.team_id) {
-        showNotificationToast("Fidel Challenge is a team competition — your teacher will assign you to a team soon!");
+        showNotificationToast("Fidel Challenge is team-based — your teacher will assign you to a team soon!");
         return;
     }
     document.getElementById("modeSelectScreen").style.display = "none";
