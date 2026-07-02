@@ -293,7 +293,6 @@ const GUIDE_CSS = `
   .guide-card { min-height: 155px; }
   .guide-card strong { font-size: 18px; }
 }
-`;
 
 window.showCharacterGuide = showCharacterGuide;
 window.guideChoose = guideChoose;
