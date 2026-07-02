@@ -1,12 +1,10 @@
 // =============================================================================
 // TEACHER DASHBOARD — teacher.js
 // Everything specific to the teacher/admin view: roster, captain assignment,
-// writing submission approval, team level progress + advancement. Split out
-// of app.js once it grew large enough to warrant its own file, mirroring the
-// challenge.js / reading.js split done earlier for those features.
+// writing submission approval, team level progress + advancement.
 //
-// Loads AFTER app.js. Relies on globals already defined there:
-//   _supabase, currentUser, showNotificationToast
+// Loads AFTER app.js. Relies on globals: _supabase, currentUser,
+// showNotificationToast, alphabetData
 // =============================================================================
 
 // ---------------------------------------------------------------------------
@@ -30,8 +28,6 @@ async function loadTeacherRosterData() {
     progress?.forEach(rec => { progressMap[rec.user_id] = rec.mastered_letters || []; });
 
     tbody.innerHTML = '';
-
-    // Don't list the admin account itself as a "student" in the roster.
     const realStudents = (students || []).filter(s => !s.is_admin);
 
     if (realStudents.length === 0) {
@@ -46,11 +42,6 @@ async function loadTeacherRosterData() {
             ? `<span style="font-weight:700;">${teamName}</span>`
             : '<span style="color:#0d9488; font-style:italic;">Practicing Solo</span>';
 
-        // Only show the removal action for students currently ON a team —
-        // someone already solo has nothing to remove. This is a reversible,
-        // safe action (sets team_id to null) — NOT account deletion, which
-        // can't be done securely from browser JS (requires Supabase's
-        // service-role key, which must never be exposed client-side).
         const actionButton = teamName
             ? `<button class="btn-secondary" style="font-size:11px; padding:6px 10px; color:#ef4444; border:1px solid #fecaca;" onclick="removeStudentFromTeam('${s.id}', '${s.nickname.replace(/'/g, "\\'")}')">Remove from Team</button>`
             : '<span style="font-size:11px; color:#cbd5e1;">—</span>';
@@ -66,15 +57,8 @@ async function loadTeacherRosterData() {
     });
 }
 
-// Removes a student from their current team, setting them to "Practicing
-// Solo" — they keep their account, their progress, and can rejoin a team
-// later (via teacherAssignStudentToPod). This is the safe, reversible
-// action; true account deletion is intentionally not built here since it
-// requires Supabase's secret service-role key, which cannot be used from
-// browser-side JavaScript without exposing it to anyone who opens dev tools.
 async function removeStudentFromTeam(studentId, nickname) {
     if (!confirm(`Remove ${nickname} from their team? They'll switch to "Practicing Solo" and can be reassigned later.`)) return;
-
     showNotificationToast("Removing from team...");
 
     const { error } = await _supabase
@@ -82,10 +66,7 @@ async function removeStudentFromTeam(studentId, nickname) {
         .update({ team_id: null })
         .eq('id', studentId);
 
-    if (error) {
-        console.error("Failed to remove student from team:", error);
-        return showNotificationToast("Failed: " + error.message);
-    }
+    if (error) return showNotificationToast("Failed: " + error.message);
 
     showNotificationToast(`${nickname} is now Practicing Solo.`);
     await loadTeacherRosterData();
@@ -94,7 +75,6 @@ async function removeStudentFromTeam(studentId, nickname) {
 
 async function teacherRefreshConfigurationDropdowns() {
     const { data: students } = await _supabase.from('profiles').select('id, nickname');
-
     const sSelect = document.getElementById("teacherStudentSelect");
     sSelect.innerHTML = '<option value="">Select Student...</option>';
     students?.forEach(s => { sSelect.innerHTML += `<option value="${s.id}">${s.nickname}</option>`; });
@@ -110,24 +90,13 @@ async function teacherAssignStudentToPod() {
     const chosenTeamId = document.getElementById("teacherPodSelect").value;
     const chosenTeamLabel = document.getElementById("teacherPodSelect").selectedOptions[0]?.text;
 
-    if (!studentId || !chosenTeamId) {
-        return showNotificationToast("Please pick both a student and a team color.");
-    }
+    if (!studentId || !chosenTeamId) return showNotificationToast("Please pick both a student and a team color.");
 
     showNotificationToast("Updating team assignment...");
-
-    const { error } = await _supabase
-        .from('profiles')
-        .update({ team_id: chosenTeamId })
-        .eq('id', studentId);
-
-    if (error) {
-        console.error("Error moving student:", error);
-        return showNotificationToast("Failed to move student: " + error.message);
-    }
+    const { error } = await _supabase.from('profiles').update({ team_id: chosenTeamId }).eq('id', studentId);
+    if (error) return showNotificationToast("Failed to move student: " + error.message);
 
     showNotificationToast(`Student assigned to ${chosenTeamLabel}!`);
-
     await loadTeacherRosterData();
     await teacherRefreshConfigurationDropdowns();
 }
@@ -143,24 +112,15 @@ async function populateCaptainTeamDropdown() {
     (teams || []).forEach(t => { select.innerHTML += `<option value="${t.id}">${t.name}</option>`; });
 }
 
-// Only shows students who are actually ON the selected team — a captain
-// has to be a member of the team they're captaining, so the dropdown is
-// filtered rather than listing every student in the class.
 async function populateCaptainStudentDropdown(teamId) {
     const studentSelect = document.getElementById('captainStudentSelect');
-
     if (!teamId) {
         studentSelect.innerHTML = '<option value="">Select Team First...</option>';
         studentSelect.disabled = true;
         return;
     }
-
     const { data: members } = await _supabase
-        .from('profiles')
-        .select('id, nickname')
-        .eq('team_id', teamId)
-        .order('nickname');
-
+        .from('profiles').select('id, nickname').eq('team_id', teamId).order('nickname');
     studentSelect.disabled = false;
     studentSelect.innerHTML = '<option value="">Select Student...</option>';
     (members || []).forEach(m => { studentSelect.innerHTML += `<option value="${m.id}">${m.nickname}</option>`; });
@@ -171,48 +131,20 @@ async function setTeamCaptain() {
     const studentId = document.getElementById('captainStudentSelect').value;
     const studentLabel = document.getElementById('captainStudentSelect').selectedOptions[0]?.text;
 
-    if (!teamId || !studentId) {
-        return showNotificationToast("Please pick both a team and a student.");
-    }
-
+    if (!teamId || !studentId) return showNotificationToast("Please pick both a team and a student.");
     showNotificationToast("Setting captain...");
 
-    // If this team already has a different captain, clear THEIR is_captain
-    // flag first — otherwise a replaced captain would stay permanently
-    // exempt from Fidel Challenge even after losing the role.
     const { data: existingTeam } = await _supabase
-        .from('teams')
-        .select('captain_id')
-        .eq('id', teamId)
-        .maybeSingle();
+        .from('teams').select('captain_id').eq('id', teamId).maybeSingle();
 
     if (existingTeam?.captain_id && existingTeam.captain_id !== studentId) {
-        await _supabase
-            .from('profiles')
-            .update({ is_captain: false })
-            .eq('id', existingTeam.captain_id);
+        await _supabase.from('profiles').update({ is_captain: false }).eq('id', existingTeam.captain_id);
     }
 
-    const { error } = await _supabase
-        .from('teams')
-        .update({ captain_id: studentId })
-        .eq('id', teamId);
+    const { error } = await _supabase.from('teams').update({ captain_id: studentId }).eq('id', teamId);
+    if (error) return showNotificationToast("Failed: " + error.message);
 
-    if (error) {
-        console.error("Failed to set captain:", error);
-        return showNotificationToast("Failed: " + error.message);
-    }
-
-    // Mark the new captain's own profile as exempt from Fidel Challenge
-    // gates — teams.captain_id alone only tells us which team has a
-    // captain, not whether THIS person should skip the streak/writing
-    // requirements, which is what profiles.is_captain is for.
-    const { error: flagError } = await _supabase
-        .from('profiles')
-        .update({ is_captain: true })
-        .eq('id', studentId);
-
-    if (flagError) console.error("Failed to set is_captain flag:", flagError);
+    await _supabase.from('profiles').update({ is_captain: true }).eq('id', studentId);
 
     showNotificationToast(`${studentLabel} is now the captain! 👑`);
     await loadCurrentCaptains();
@@ -242,7 +174,7 @@ async function loadCurrentCaptains() {
 }
 
 // ---------------------------------------------------------------------------
-// Writing submission review queue (teacher/captain approval)
+// Writing submission review queue
 // ---------------------------------------------------------------------------
 
 async function loadTeacherWritingQueue() {
@@ -256,7 +188,6 @@ async function loadTeacherWritingQueue() {
         .order('submitted_at', { ascending: true });
 
     if (error) {
-        console.error("Failed to load writing queue:", error);
         mount.innerHTML = `<p style="color:#ef4444; font-size:13px;">Couldn't load submissions: ${error.message}</p>`;
         return;
     }
@@ -284,12 +215,11 @@ async function loadTeacherWritingQueue() {
         `;
 
         const approveBtn = card.querySelector('.btn-approve');
-        const rejectBtn = card.querySelector('.btn-reject');
-        const noteInput = card.querySelector('.teacher-reject-note-input');
+        const rejectBtn  = card.querySelector('.btn-reject');
+        const noteInput  = card.querySelector('.teacher-reject-note-input');
 
         approveBtn.onclick = () => approveWritingSubmission(sub.id, sub.student_id, sub.base_letter);
-
-        rejectBtn.onclick = () => {
+        rejectBtn.onclick  = () => {
             if (noteInput.style.display === "none") {
                 noteInput.style.display = "block";
                 rejectBtn.innerText = "Confirm Reject";
@@ -310,13 +240,8 @@ async function approveWritingSubmission(submissionId, studentId, baseLetter) {
         .update({ status: 'approved', reviewed_by: currentUser.id, reviewed_at: new Date().toISOString() })
         .eq('id', submissionId);
 
-    if (subError) {
-        console.error("Failed to approve submission:", subError);
-        return showNotificationToast("Approval failed: " + subError.message);
-    }
+    if (subError) return showNotificationToast("Approval failed: " + subError.message);
 
-    // Flip writing_passed on the student's family progress row, and mark
-    // completed_at if the streak gate is also already passed.
     const { data: progressRow } = await _supabase
         .from('student_family_progress')
         .select('streak_passed')
@@ -327,13 +252,11 @@ async function approveWritingSubmission(submissionId, studentId, baseLetter) {
     const updatePayload = { writing_passed: true };
     if (progressRow?.streak_passed) updatePayload.completed_at = new Date().toISOString();
 
-    const { error: progressError } = await _supabase
+    await _supabase
         .from('student_family_progress')
         .update(updatePayload)
         .eq('student_id', studentId)
         .eq('base_letter', baseLetter);
-
-    if (progressError) console.error("Failed to update family progress:", progressError);
 
     showNotificationToast("Submission approved! ✓");
     await loadTeacherWritingQueue();
@@ -342,7 +265,6 @@ async function approveWritingSubmission(submissionId, studentId, baseLetter) {
 
 async function rejectWritingSubmission(submissionId, note) {
     showNotificationToast("Rejecting submission...");
-
     const { error } = await _supabase
         .from('writing_submissions')
         .update({
@@ -353,22 +275,15 @@ async function rejectWritingSubmission(submissionId, note) {
         })
         .eq('id', submissionId);
 
-    if (error) {
-        console.error("Failed to reject submission:", error);
-        return showNotificationToast("Reject failed: " + error.message);
-    }
-
+    if (error) return showNotificationToast("Reject failed: " + error.message);
     showNotificationToast("Submission rejected — student can resubmit.");
     await loadTeacherWritingQueue();
 }
 
 // ---------------------------------------------------------------------------
-// Team level progress + advancement
+// Team level progress (team_level_status flow — live quiz gate)
 // ---------------------------------------------------------------------------
 
-// After any approval, check whether the approved student's whole team has
-// now cleared every family in their current level — if so, flag the team
-// as ready for the live quiz on the teacher dashboard.
 async function checkAndUpdateTeamLevelCompletion(studentId) {
     const { data: student } = await _supabase.from('profiles').select('team_id').eq('id', studentId).maybeSingle();
     if (!student?.team_id) return;
@@ -379,12 +294,6 @@ async function checkAndUpdateTeamLevelCompletion(studentId) {
     const { data: level } = await _supabase.from('challenge_levels').select('letter_families').eq('level_number', team.current_level).maybeSingle();
     if (!level) return;
 
-    // Captains are exempt from Fidel Challenge gates entirely (they already
-    // know Amharic — their job is leading the team, not racing through
-    // levels), so they're excluded from the "did everyone clear every
-    // family" check. Without this, a team with a captain could never
-    // advance, since the captain would never have student_family_progress
-    // rows to begin with.
     const { data: members } = await _supabase.from('profiles').select('id, is_captain').eq('team_id', team.id);
     const memberIds = (members || []).filter(m => !m.is_captain).map(m => m.id);
     if (memberIds.length === 0) return;
@@ -452,7 +361,7 @@ async function loadTeacherTeamProgress() {
             advanceTeamLevel(team.id, team.current_level);
         };
 
-        const toggleBtn = row.querySelector('.team-members-toggle');
+        const toggleBtn   = row.querySelector('.team-members-toggle');
         const membersList = row.querySelector(`#teamMembers-${team.id}`);
         toggleBtn.onclick = (e) => {
             e.stopPropagation();
@@ -468,17 +377,11 @@ async function loadTeacherTeamProgress() {
     });
 }
 
-// Fetches and renders one team's members + their individual progress for
-// the team's current level (how many of that level's families they've
-// fully cleared) — shown when the teacher expands a team row.
 async function loadTeamMembersForRoster(teamId, currentLevel, mountEl) {
     mountEl.innerHTML = `<p style="color:#94a3b8; font-size:12px; padding:8px 0;">Loading members...</p>`;
 
     const { data: members } = await _supabase
-        .from('profiles')
-        .select('id, nickname, avatar, is_captain')
-        .eq('team_id', teamId)
-        .order('nickname');
+        .from('profiles').select('id, nickname, avatar, is_captain').eq('team_id', teamId).order('nickname');
 
     if (!members || members.length === 0) {
         mountEl.innerHTML = `<p style="color:#94a3b8; font-size:12px; padding:8px 0;">No members on this team yet.</p>`;
@@ -486,11 +389,7 @@ async function loadTeamMembersForRoster(teamId, currentLevel, mountEl) {
     }
 
     const { data: level } = await _supabase
-        .from('challenge_levels')
-        .select('letter_families')
-        .eq('level_number', currentLevel)
-        .maybeSingle();
-
+        .from('challenge_levels').select('letter_families').eq('level_number', currentLevel).maybeSingle();
     const familyCount = (level?.letter_families || []).length;
 
     const { data: progressRows } = await _supabase
@@ -520,11 +419,11 @@ async function loadTeamMembersForRoster(teamId, currentLevel, mountEl) {
                 <span class="team-member-progress">${clearedCount} / ${familyCount} families cleared</span>
             `;
         }
-
         mountEl.appendChild(memberRow);
     });
 }
 
+// "Mark Quiz Passed" advance — used from the Team Level Progress panel
 async function advanceTeamLevel(teamId, currentLevel) {
     showNotificationToast("Advancing team...");
 
@@ -534,51 +433,316 @@ async function advanceTeamLevel(teamId, currentLevel) {
         .eq('team_id', teamId)
         .eq('level_number', currentLevel);
 
-    if (statusError) {
-        console.error("Failed to mark live quiz passed:", statusError);
-        return showNotificationToast("Failed: " + statusError.message);
-    }
+    if (statusError) return showNotificationToast("Failed: " + statusError.message);
 
-    // streak_count tracks consecutive levels advanced — increment it here.
-    // It only resets to zero via the separate "stuck team" detector (not yet
-    // built) if too much time passes without an advance, not on advance itself.
     const { data: teamRow } = await _supabase.from('teams').select('streak_count').eq('id', teamId).maybeSingle();
     const newStreak = (teamRow?.streak_count || 0) + 1;
 
     const { error: teamError } = await _supabase
         .from('teams')
-        .update({
-            current_level: currentLevel + 1,
-            streak_count: newStreak,
-            last_advanced_at: new Date().toISOString()
-        })
+        .update({ current_level: currentLevel + 1, streak_count: newStreak, last_advanced_at: new Date().toISOString() })
         .eq('id', teamId);
 
-    if (teamError) {
-        console.error("Failed to advance team:", teamError);
-        return showNotificationToast("Failed: " + teamError.message);
-    }
+    if (teamError) return showNotificationToast("Failed: " + teamError.message);
 
     showNotificationToast("Team advanced to the next level! 🎉");
     await loadTeacherTeamProgress();
 }
 
 // ---------------------------------------------------------------------------
+// Level Completion Request queue (level_completion_requests flow)
+// Students submit this after clearing all families — teacher sees it here
+// and clicks "Advance" which does the full DB chain.
+// ---------------------------------------------------------------------------
+
+async function loadTeacherLevelCompletionQueue() {
+    const mount = document.getElementById('levelCompletionQueueMount');
+    if (!mount) return;
+
+    mount.innerHTML = '<p style="color:#94a3b8; font-size:13px;">Loading...</p>';
+
+    const { data: requests, error } = await _supabase
+        .from('level_completion_requests')
+        .select(`
+            id,
+            team_id,
+            level_number,
+            submitted_at,
+            submitted_by,
+            teams ( id, name, current_level, streak_count ),
+            profiles ( nickname, avatar )
+        `)
+        .order('submitted_at', { ascending: true });
+
+    if (error) {
+        mount.innerHTML = `<p style="color:#ef4444; font-size:13px;">Error loading queue: ${error.message}</p>`;
+        return;
+    }
+
+    if (!requests || requests.length === 0) {
+        mount.innerHTML = `
+            <div style="text-align:center; padding:28px 20px; color:#94a3b8;">
+                <div style="font-size:28px; margin-bottom:8px;">☕</div>
+                <p style="font-size:14px; font-weight:600; margin-bottom:4px; color:#64748b;">No pending level requests</p>
+                <p style="font-size:13px; margin:0;">When teams clear all 3 families and submit for advancement, they'll appear here.</p>
+            </div>`;
+        return;
+    }
+
+    // Fetch next level data for preview
+    const levelNumbers = [...new Set(requests.map(r => r.level_number + 1))];
+    const { data: nextLevels } = await _supabase
+        .from('challenge_levels')
+        .select('level_number, title, letter_families')
+        .in('level_number', levelNumbers);
+
+    const nextLevelMap = {};
+    (nextLevels || []).forEach(l => { nextLevelMap[l.level_number] = l; });
+
+    mount.innerHTML = '';
+
+    requests.forEach(req => {
+        const team         = req.teams;
+        const submitter    = req.profiles;
+        const completedLevel = req.level_number;
+        const nextLevel    = completedLevel + 1;
+        const nextLevelInfo = nextLevelMap[nextLevel];
+        const teamHex      = getTeamHex(team?.name || '');
+        const submittedDate = req.submitted_at
+            ? new Date(req.submitted_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+            : 'Unknown time';
+
+        const noNextLevel = !nextLevelInfo;
+        const noFamilies  = nextLevelInfo && (!nextLevelInfo.letter_families || nextLevelInfo.letter_families.length === 0);
+        const blocked     = noNextLevel || noFamilies;
+
+        const card = document.createElement('div');
+        card.style.cssText = `
+            background:white; border:1px solid #e2e8f0; border-radius:14px;
+            padding:18px 20px; margin-bottom:14px; box-shadow:0 2px 8px rgba(0,0,0,0.05);
+        `;
+
+        const familiesDisplay = nextLevelInfo?.letter_families?.length
+            ? `<span style="font-family:'Abyssinica SIL',serif; font-size:18px; color:#166534; margin-left:6px; letter-spacing:4px;">
+                   ${nextLevelInfo.letter_families.join('  ')}
+               </span>`
+            : '';
+
+        card.innerHTML = `
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+                <div style="width:12px; height:12px; border-radius:50%; background:${teamHex}; flex-shrink:0;"></div>
+                <div style="flex:1;">
+                    <div style="font-size:15px; font-weight:700; color:#1e293b;">${team?.name || 'Unknown Team'}</div>
+                    <div style="font-size:12px; color:#94a3b8; margin-top:2px;">
+                        Submitted by ${submitter?.nickname || 'Unknown'} ${submitter?.avatar || ''} · ${submittedDate}
+                    </div>
+                </div>
+                <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:4px 10px; font-size:12px; font-weight:700; color:#166534;">
+                    Level ${completedLevel} ✓
+                </div>
+            </div>
+
+            <div style="background:#f8fafc; border-radius:10px; padding:12px 14px; margin-bottom:14px;">
+                ${blocked ? `
+                    <div style="color:#ef4444; font-size:13px; font-weight:600;">
+                        ⚠️ ${noNextLevel
+                            ? `Level ${nextLevel} not seeded in challenge_levels. Add a row before approving.`
+                            : `Level ${nextLevel} exists but has no letter_families set.`}
+                    </div>
+                ` : `
+                    <div style="font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">
+                        Next up → Level ${nextLevel}
+                    </div>
+                    <div style="font-size:14px; font-weight:700; color:#166534; margin-bottom:6px;">
+                        ${nextLevelInfo.title || 'Level ' + nextLevel}
+                    </div>
+                    <div style="font-size:12px; color:#64748b;">
+                        Letter families: ${familiesDisplay}
+                    </div>
+                `}
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <button
+                    onclick="teacherApproveTeamAdvance('${team?.id}', '${(team?.name || '').replace(/'/g, "\\'")}', ${completedLevel}, '${req.id}')"
+                    ${blocked ? 'disabled' : ''}
+                    style="flex:2; padding:12px; font-size:14px; font-weight:700;
+                           background:${blocked ? '#e2e8f0' : '#166534'};
+                           color:${blocked ? '#94a3b8' : 'white'};
+                           border:none; border-radius:10px;
+                           cursor:${blocked ? 'not-allowed' : 'pointer'}; transition:all 0.2s;">
+                    ${blocked ? `⚠️ Seed Level ${nextLevel} First` : `⬆️ Advance to Level ${nextLevel}`}
+                </button>
+                <button
+                    onclick="teacherDismissLevelRequest('${req.id}', '${(team?.name || '').replace(/'/g, "\\'")}')"
+                    style="flex:1; padding:12px; font-size:13px; font-weight:600;
+                           background:white; color:#ef4444;
+                           border:2px solid #fecaca; border-radius:10px; cursor:pointer;">
+                    Dismiss
+                </button>
+            </div>
+        `;
+
+        mount.appendChild(card);
+    });
+}
+
+// Full advance chain — called from the level completion request card
+async function teacherApproveTeamAdvance(teamId, teamName, completedLevel, requestId) {
+    const nextLevel = completedLevel + 1;
+
+    // 1. Verify next level exists and has families
+    const { data: nextLevelData, error: levelErr } = await _supabase
+        .from('challenge_levels')
+        .select('level_number, title, letter_families')
+        .eq('level_number', nextLevel)
+        .maybeSingle();
+
+    if (levelErr || !nextLevelData) {
+        return showNotificationToast(`⚠️ No challenge_levels row for Level ${nextLevel}. Seed it before advancing.`);
+    }
+    if (!nextLevelData.letter_families || nextLevelData.letter_families.length === 0) {
+        return showNotificationToast(`⚠️ Level ${nextLevel} has no letter_families set.`);
+    }
+
+    // 2. Increment current_level + streak_count
+    const { data: currentTeam } = await _supabase
+        .from('teams').select('current_level, streak_count').eq('id', teamId).maybeSingle();
+
+    const newStreak = (currentTeam?.streak_count || 0) + 1;
+
+    const { error: teamUpdateErr } = await _supabase
+        .from('teams')
+        .update({ current_level: nextLevel, streak_count: newStreak, last_advanced_at: new Date().toISOString() })
+        .eq('id', teamId);
+
+    if (teamUpdateErr) return showNotificationToast(`Failed to advance team: ${teamUpdateErr.message}`);
+
+    // 3. Delete the level_completion_requests row
+    if (requestId) {
+        await _supabase.from('level_completion_requests').delete().eq('id', requestId);
+    } else {
+        await _supabase.from('level_completion_requests').delete()
+            .eq('team_id', teamId).eq('level_number', completedLevel);
+    }
+
+    // 4. Write team notification so students see a banner on next hub load
+    const { error: notifErr } = await _supabase.from('team_notifications').insert({
+        team_id: teamId,
+        type: 'level_advance',
+        message: `🎉 Your team advanced to Level ${nextLevel}! Next up: ${nextLevelData.title || 'Level ' + nextLevel}. New families: ${nextLevelData.letter_families.join(', ')}.`,
+        level_number: nextLevel,
+        created_at: new Date().toISOString()
+    });
+    if (notifErr) console.warn('Could not write team notification:', notifErr.message);
+
+    // 5. Also update team_level_status so the Team Progress panel stays in sync
+    await _supabase.from('team_level_status').upsert({
+        team_id: teamId,
+        level_number: completedLevel,
+        all_members_cleared: true,
+        live_quiz_passed: true,
+        live_quiz_passed_at: new Date().toISOString()
+    }, { onConflict: 'team_id,level_number' });
+
+    // 6. Refresh both queues
+    showNotificationToast(`✅ ${teamName} advanced to Level ${nextLevel} — ${nextLevelData.title || ''}!`);
+    await loadTeacherLevelCompletionQueue();
+    await loadTeacherTeamProgress();
+}
+
+async function teacherDismissLevelRequest(requestId, teamName) {
+    if (!confirm(`Dismiss this request from ${teamName}? The team will need to re-submit.`)) return;
+    await _supabase.from('level_completion_requests').delete().eq('id', requestId);
+    showNotificationToast(`Request from ${teamName} dismissed.`);
+    await loadTeacherLevelCompletionQueue();
+}
+
+// ---------------------------------------------------------------------------
+// Student-side: level advance notification banner
+// Call in renderTeamHub() after todayCard:
+//   if (typeof checkAndShowLevelAdvanceBanner === 'function')
+//       await checkAndShowLevelAdvanceBanner('levelAdvanceBannerMount');
+// ---------------------------------------------------------------------------
+
+async function checkAndShowLevelAdvanceBanner(mountId) {
+    if (!currentProfile?.team_id) return;
+    const mount = document.getElementById(mountId);
+    if (!mount) return;
+
+    const { data: notif } = await _supabase
+        .from('team_notifications')
+        .select('id, message, type, level_number')
+        .eq('team_id', currentProfile.team_id)
+        .eq('type', 'level_advance')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+    if (!notif) { mount.style.display = 'none'; return; }
+
+    mount.style.display = 'block';
+    mount.innerHTML = `
+        <div style="background:linear-gradient(135deg,#166534,#15803d); border-radius:14px;
+                    padding:18px 20px; color:white; margin-bottom:4px;">
+            <div style="font-size:22px; margin-bottom:8px;">⭐</div>
+            <p style="font-size:15px; font-weight:700; margin:0 0 6px;">${notif.message}</p>
+            <button onclick="this.closest('div').parentElement.style.display='none'"
+                    style="margin-top:10px; background:rgba(255,255,255,0.2); border:none;
+                           color:white; border-radius:8px; padding:8px 16px;
+                           font-size:13px; font-weight:700; cursor:pointer;">
+                Let's go! →
+            </button>
+        </div>`;
+
+    // Delete so it only shows once
+    await _supabase.from('team_notifications').delete().eq('id', notif.id);
+}
+
+// Export progress CSV
+async function exportProgressCSV() {
+    const { data: students } = await _supabase
+        .from('profiles')
+        .select('id, nickname, email, teams!profiles_team_id_fkey(name)');
+
+    const { data: progress } = await _supabase
+        .from('user_progress')
+        .select('user_id, mastered_letters');
+
+    const progressMap = {};
+    progress?.forEach(r => { progressMap[r.user_id] = r.mastered_letters || []; });
+
+    const rows = [['Nickname', 'Email', 'Team', 'Mastered Rows']];
+    students?.filter(s => !s.is_admin).forEach(s => {
+        rows.push([s.nickname, s.email || '', s.teams?.name || 'Solo', (progressMap[s.id] || []).length]);
+    });
+
+    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `fidel_progress_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+}
+
+// ---------------------------------------------------------------------------
 // UI helpers
 // ---------------------------------------------------------------------------
 
-// Collapses/expands a teacher dashboard panel — same idea as the student
-// sidebar's collapsible dropdowns, applied here so the teacher view isn't
-// one long uninterrupted scroll of 5 full panels on a phone.
 function toggleTeacherPanel(bodyId, headerEl) {
     document.getElementById(bodyId).classList.toggle('collapsed');
     headerEl.querySelector('.teacher-panel-toggle')?.classList.toggle('collapsed');
 }
 
 // ---------------------------------------------------------------------------
-// Expose functions used via inline onclick="" handlers in index.html
+// Expose
 // ---------------------------------------------------------------------------
 
-window.removeStudentFromTeam = removeStudentFromTeam;
-window.teacherAssignStudentToPod = teacherAssignStudentToPod;
-window.toggleTeacherPanel = toggleTeacherPanel;
+window.removeStudentFromTeam           = removeStudentFromTeam;
+window.teacherAssignStudentToPod       = teacherAssignStudentToPod;
+window.toggleTeacherPanel              = toggleTeacherPanel;
+window.loadTeacherLevelCompletionQueue = loadTeacherLevelCompletionQueue;
+window.teacherApproveTeamAdvance       = teacherApproveTeamAdvance;
+window.teacherDismissLevelRequest      = teacherDismissLevelRequest;
+window.checkAndShowLevelAdvanceBanner  = checkAndShowLevelAdvanceBanner;
+window.exportProgressCSV               = exportProgressCSV;
