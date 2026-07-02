@@ -51,13 +51,121 @@ function chooseModePractice() {
     }
 }
 
-function chooseModeChallenge() {
+async function chooseModeChallenge() {
     if (!currentProfile?.team_id) {
         showNotificationToast("Fidel Challenge is team-based — your teacher will assign you to a team soon!");
         return;
     }
-    document.getElementById("modeSelectScreen").style.display = "none";
-    enterTeamHub();
+
+    [
+        "modeSelectScreen",
+        "studentDashboard",
+        "teamHubScreen",
+        "readingLevelsScreen",
+        "challengeLevelsScreen",
+        "challengeFamilyScreen",
+        "challengeFamilyDetailScreen",
+        "captainDashboardScreen"
+    ].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = "none";
+    });
+
+    const dash = document.getElementById("challengeDashboardScreen");
+    if (dash) dash.style.display = "block";
+
+    document.getElementById("hamburgerBtn").style.display = "flex";
+
+    await renderChallengeDashboard();
+}
+
+async function renderChallengeDashboard() {
+    const [team, levels] = await Promise.all([
+        getTeamBoardInfo(),
+        fetchChallengeLevels()
+    ]);
+
+    const teamHex = getTeamHex(team.name);
+
+    const sub = document.getElementById("challengeDashSub");
+    if (sub) {
+        sub.innerText = `${team.name} • Level ${team.current_level} • 🔥 ${team.streak_count || 0} streak`;
+    }
+
+    const teamBtn = document.getElementById("challengeYourTeamBtn");
+    if (teamBtn) {
+        teamBtn.style.background = `linear-gradient(135deg, ${teamHex}, ${teamHex}cc)`;
+        teamBtn.innerText = `Open ${team.name} Dashboard →`;
+    }
+
+    await renderChallengeDashboardMap(levels, team);
+    await renderChallengeDashboardRace();
+    renderChallengeComingUp(levels, team.current_level);
+}
+
+async function renderChallengeDashboardMap(levels, team) {
+    const mount = document.getElementById("challengeDashMapMount");
+    if (!mount) return;
+
+    mount.innerHTML = "";
+
+    levels.forEach(level => {
+        const isCompleted = level.level_number < team.current_level;
+        const isCurrent = level.level_number === team.current_level;
+        const isLocked = level.level_number > team.current_level;
+
+        const card = document.createElement("div");
+        card.className = `challenge-level-card ${isCompleted ? "completed" : isLocked ? "locked" : "unlocked"} ${isCurrent ? "current" : ""}`;
+        card.style.marginBottom = "10px";
+
+        card.innerHTML = `
+            <div class="challenge-level-number-badge">${isLocked ? "🔒" : level.level_number}</div>
+            <div class="challenge-level-title">${level.title || `Level ${level.level_number}`}</div>
+            <div class="challenge-level-families">${(level.letter_families || []).join(" ")}</div>
+            ${isCurrent ? '<div class="challenge-capstone-badge">Current Level</div>' : ''}
+        `;
+
+        if (!isLocked) {
+            card.onclick = () => openChallengeFamilyPicker(level);
+        }
+
+        mount.appendChild(card);
+    });
+}
+
+async function renderChallengeDashboardRace() {
+    const mount = document.getElementById("challengeDashRaceMount");
+    if (!mount) return;
+
+    if (typeof renderTeamRaceView === "function") {
+        await renderTeamRaceView("challengeDashRaceMount");
+    } else {
+        mount.innerHTML = `<p style="font-size:13px; color:#94a3b8;">Team race loading soon.</p>`;
+    }
+}
+
+function renderChallengeComingUp(levels, currentLevel) {
+    const mount = document.getElementById("challengeComingUpMount");
+    if (!mount) return;
+
+    const next = levels.find(l => l.level_number === currentLevel + 1)
+            || levels.find(l => l.level_number === currentLevel);
+
+    if (!next) {
+        mount.innerHTML = `<p style="font-size:13px; color:#94a3b8;">No upcoming level found.</p>`;
+        return;
+    }
+
+    mount.innerHTML = `
+        <p style="font-size:12px; color:#64748b; margin-bottom:10px;">
+            ${next.level_number === currentLevel ? "Current rows:" : `Next: Level ${next.level_number}`}
+        </p>
+        <div class="coming-up-row">
+            ${(next.letter_families || []).map(letter => `
+                <div class="coming-up-letter">${letter}</div>
+            `).join("")}
+        </div>
+    `;
 }
 
 function chooseModeReading() {
@@ -337,3 +445,8 @@ window.returnToChallengeFamilyPicker = returnToChallengeFamilyPicker;
 window.launchChallengeStreakGame = launchChallengeStreakGame;
 window.exitChallengeFamilyDetail = exitChallengeFamilyDetail;
 window.getTeamHex = getTeamHex;
+
+window.renderChallengeDashboard = renderChallengeDashboard;
+window.renderChallengeDashboardMap = renderChallengeDashboardMap;
+window.renderChallengeDashboardRace = renderChallengeDashboardRace;
+window.renderChallengeComingUp = renderChallengeComingUp;
