@@ -43,18 +43,18 @@ function switchAuthFlow() {
 }
 
 function updateAuthModeLabels() {
-    const modeLabel = document.getElementById("credentialFieldsModeLabel");
+    const modeLabel    = document.getElementById("credentialFieldsModeLabel");
     const switchPrompt = document.getElementById("switchModePrompt");
-    const switchBtn = document.getElementById("switchModeBtn");
+    const switchBtn    = document.getElementById("switchModeBtn");
 
     if (isSignUpMode) {
-        modeLabel.innerText = "Sign Up";
+        modeLabel.innerText    = "Sign Up";
         switchPrompt.innerText = "Already have an account?";
-        switchBtn.innerText = "Log In";
+        switchBtn.innerText    = "Log In";
     } else {
-        modeLabel.innerText = "Log In";
+        modeLabel.innerText    = "Log In";
         switchPrompt.innerText = "New here?";
-        switchBtn.innerText = "Sign Up";
+        switchBtn.innerText    = "Sign Up";
     }
 }
 
@@ -63,7 +63,7 @@ function updateAuthModeLabels() {
 // ---------------------------------------------------------------------------
 
 async function handleAuth() {
-    const email = document.getElementById("email").value.trim();
+    const email    = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
     if (!email || !password) return showNotificationToast("Please fill in all boxes.");
 
@@ -73,25 +73,17 @@ async function handleAuth() {
         ? await _supabase.auth.signUp({ email, password })
         : await _supabase.auth.signInWithPassword({ email, password });
 
-    console.log("Auth response:", { data, error });
-
     if (error) {
         console.error("Auth error:", error);
         return showNotificationToast(error.message);
     }
 
-    // A user object can exist even when email confirmation is required and
-    // there's no active session yet — checking data.user alone was the gap.
-    // Without a real session, the next step (querying profiles) has no
-    // valid auth.uid() to match against and silently stalls.
     if (data?.session && data?.user) {
         await proceedFlowMap(data.user);
     } else if (data?.user && !data?.session) {
-        console.warn("User created but no session — email confirmation likely required:", data);
         showNotificationToast("Account created! Check your email to confirm, then log in.");
         resetToGate();
     } else {
-        console.warn("Auth returned no error but no usable user/session:", data);
         showNotificationToast("Something went wrong. Please try again.");
         resetToGate();
     }
@@ -126,7 +118,7 @@ async function proceedFlowMap(user) {
     }
 
     // Admin routing
-   if (currentUser.email === ADMIN_EMAIL) {
+    if (currentUser.email === ADMIN_EMAIL) {
         document.getElementById("authScreen").style.display = "none";
         launchDashboard("teacher");
         return;
@@ -138,26 +130,27 @@ async function proceedFlowMap(user) {
         await applyProfileToHeader(profile);
 
         const modeGreetSub = document.getElementById('modeGreetingSub');
-        if (modeGreetSub) {
-            modeGreetSub.innerText = `Welcome back, ${profile.nickname}`;
+        if (modeGreetSub) modeGreetSub.innerText = `Welcome back, ${profile.nickname}`;
+
+        // Show character guide if available, otherwise go straight to mode select
+        if (typeof showCharacterGuide === 'function') {
+            showCharacterGuide();
+        } else {
+            enterModeSelect();
+            setTimeout(() => {
+                if (typeof maybeShowWordleOnLogin === 'function') maybeShowWordleOnLogin();
+            }, 600);
         }
 
-        if (typeof showCharacterGuide === 'function') {
-    showCharacterGuide();
-} else {
-    enterModeSelect();
-    setTimeout(() => {
-        if (typeof maybeShowWordleOnLogin === 'function') maybeShowWordleOnLogin();
-    }, 600);
-}
-
     } else {
+        // New user — needs to set up their profile
         isEditingProfile = false;
         document.getElementById("authScreen").style.display = "none";
         document.getElementById("profileSetupScreen").style.display = "block";
         prefillProfileSetupScreen(null);
     }
 }
+
 // ---------------------------------------------------------------------------
 // Team name lookup (shared by header + challenge board)
 // ---------------------------------------------------------------------------
@@ -173,12 +166,12 @@ async function fetchTeamName(teamId) {
 }
 
 async function applyProfileToHeader(profile) {
-    document.getElementById("displayUserHeader").innerText = profile.nickname;
+    document.getElementById("displayUserHeader").innerText  = profile.nickname;
     document.getElementById("displayAvatarHeader").innerText = profile.avatar || "🦁";
 
     const teamDisplay = document.getElementById("sidebarPodBadge");
-    const teamName = await fetchTeamName(profile.team_id);
-    teamDisplay.innerText = teamName || "Practicing Solo";
+    const teamName    = await fetchTeamName(profile.team_id);
+    if (teamDisplay) teamDisplay.innerText = teamName || "Practicing Solo";
 }
 
 // ---------------------------------------------------------------------------
@@ -187,7 +180,7 @@ async function applyProfileToHeader(profile) {
 
 async function logout() {
     await _supabase.auth.signOut();
-    currentUser = null;
+    currentUser    = null;
     currentProfile = null;
     resetToGate();
 }
@@ -211,7 +204,6 @@ async function sendPasswordResetLink() {
     document.getElementById("authScreen").style.display = "flex";
 }
 
-
 async function saveNewPassword() {
     const newPassword = document.getElementById('newPasswordInput').value;
     if (!newPassword || newPassword.length < 6) {
@@ -219,7 +211,6 @@ async function saveNewPassword() {
     }
 
     const { error } = await _supabase.auth.updateUser({ password: newPassword });
-
     if (error) {
         console.error("Password update failed:", error);
         return showNotificationToast("Couldn't update password: " + error.message);
@@ -265,7 +256,7 @@ function openProfileEdit() {
     if (!currentUser) return;
     isEditingProfile = true;
 
-    document.getElementById("studentDashboard").style.display = "none";
+    document.getElementById("studentDashboard").style.display  = "none";
     document.getElementById("teacherOnlyDashboard").style.display = "none";
     document.getElementById("profileSetupScreen").style.display = "block";
 
@@ -274,21 +265,20 @@ function openProfileEdit() {
 
 async function saveProfileData(event) {
     const nameInput = document.getElementById("displayName").value.trim();
-    const saveBtn = event
+    const saveBtn   = event
         ? event.target
         : document.querySelector('#profileSetupScreen .btn-primary');
 
     if (!nameInput) return showNotificationToast("Please enter a nickname.");
-
     if (saveBtn) { saveBtn.disabled = true; saveBtn.innerText = "Saving..."; }
 
     const { data: { user } } = await _supabase.auth.getUser();
 
     const payload = {
-        id: user.id,
-        email: user.email,
+        id:       user.id,
+        email:    user.email,
         nickname: nameInput,
-        avatar: selectedAvatarSymbol
+        avatar:   selectedAvatarSymbol
     };
 
     // Only assign a team at first profile creation, never during edits
@@ -319,27 +309,24 @@ async function saveProfileData(event) {
     if (currentProfile) await applyProfileToHeader(currentProfile);
 
     document.getElementById("profileSetupScreen").style.display = "none";
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.innerText = "Save Changes"; }
 
     if (isEditingProfile) {
         showNotificationToast("Profile updated!");
         launchDashboard("student");
     } else {
-        if (isEditingProfile) {
-    showNotificationToast("Profile updated!");
-    launchDashboard("student");
-} else {
-    if (typeof showCharacterGuide === 'function') {
-        showCharacterGuide();
-    } else {
-        enterModeSelect();
+        // New profile created — show guide or go to mode select
+        if (typeof showCharacterGuide === 'function') {
+            showCharacterGuide();
+        } else {
+            enterModeSelect();
+        }
     }
-}
-if (saveBtn) { saveBtn.disabled = false; saveBtn.innerText = "Save Changes"; }
-    }
+}   // ← this closing brace was missing in the live file
+
 // ---------------------------------------------------------------------------
 // Team assignment
 // Auto-assignment disabled for July cohort — teacher assigns manually.
-// Re-enable by restoring the original balanced-assignment logic below.
 // ---------------------------------------------------------------------------
 
 async function assignNextTeam() {
@@ -367,10 +354,9 @@ async function assignNextTeam() {
 // Dashboard routing
 // ---------------------------------------------------------------------------
 
-
 function switchAdminPanelsFromDashboard(targetPanel) {
-    document.getElementById("studentDashboard").style.display = "none";
-    document.getElementById("teacherOnlyDashboard").style.display = "none";
+    document.getElementById("studentDashboard").style.display      = "none";
+    document.getElementById("teacherOnlyDashboard").style.display  = "none";
     launchDashboard(targetPanel);
 }
 
@@ -400,7 +386,6 @@ function showOnboardingCard() {
             <p style="font-size:14px; color:#64748b; margin-bottom:22px; line-height:1.6;">
                 Learn the Amharic alphabet and practice reading and writing!
             </p>
-
             <div style="text-align:left; display:flex; flex-direction:column; gap:14px; margin-bottom:22px;">
                 <div style="display:flex; gap:12px; align-items:flex-start;">
                     <span style="font-size:24px; flex-shrink:0; margin-top:2px;">📖</span>
@@ -420,7 +405,7 @@ function showOnboardingCard() {
                             Fidel Challenge
                         </strong>
                         <p style="font-size:13px; color:#64748b; margin:0; line-height:1.5;">
-                            Compete with your team. Play games, learn with others, and submit your handwriting for approval. The whole team advances together!
+                            Compete with your team. Play games, learn with others, and submit your handwriting for approval.
                         </p>
                     </div>
                 </div>
@@ -431,22 +416,19 @@ function showOnboardingCard() {
                             Reading Path
                         </strong>
                         <p style="font-size:13px; color:#64748b; margin:0; line-height:1.5;">
-                            Once you know the letters, start reading real full sentences.
+                            Once you know the letters, start reading real Amharic sentences.
                         </p>
                     </div>
                 </div>
             </div>
-
             <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:12px;
                         padding:12px 14px; margin-bottom:20px; font-size:13px;
                         color:#92400e; text-align:left;">
                 💡 <strong>New here?</strong> Start with <em>Practice the Fidel</em>
             </div>
-
             <button onclick="document.getElementById('onboardingOverlay').remove();"
                     style="background:#166534; color:white; border:none; border-radius:12px;
-                           padding:14px; width:100%; font-size:15px; font-weight:700;
-                           cursor:pointer;">
+                           padding:14px; width:100%; font-size:15px; font-weight:700; cursor:pointer;">
                 Let's Go! ➜
             </button>
         </div>
@@ -463,12 +445,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById("authScreen").style.display = "none";
         document.getElementById("forgotPasswordScreen").style.display = "block";
     };
-
     document.getElementById("backToLoginFromForgotBtn").onclick = () => {
         document.getElementById("forgotPasswordScreen").style.display = "none";
         document.getElementById("authScreen").style.display = "flex";
     };
-
     document.getElementById("sendResetLinkBtn").onclick = sendPasswordResetLink;
     document.getElementById("saveNewPasswordBtn").onclick = saveNewPassword;
     document.getElementById("auth-btn").onclick = handleAuth;
@@ -484,7 +464,6 @@ _supabase.auth.onAuthStateChange(async (event, session) => {
         document.getElementById("newPasswordScreen").style.display = "block";
         return;
     }
-
     if (event === 'SIGNED_IN' && session?.user) {
         const authScreen = document.getElementById("authScreen");
         if (authScreen && authScreen.style.display !== "none") {
@@ -497,13 +476,14 @@ _supabase.auth.onAuthStateChange(async (event, session) => {
 // Expose to inline onclick="" handlers in index.html
 // ---------------------------------------------------------------------------
 
-window.resetToGate = resetToGate;
-window.selectAuthFlow = selectAuthFlow;
-window.switchAuthFlow = switchAuthFlow;
-window.handleAuth = handleAuth;
-window.logout = logout;
-window.selectAvatar = selectAvatar;
-window.openProfileEdit = openProfileEdit;
-window.saveProfileData = saveProfileData;
+window.resetToGate                    = resetToGate;
+window.selectAuthFlow                 = selectAuthFlow;
+window.switchAuthFlow                 = switchAuthFlow;
+window.handleAuth                     = handleAuth;
+window.logout                         = logout;
+window.selectAvatar                   = selectAvatar;
+window.openProfileEdit                = openProfileEdit;
+window.saveProfileData                = saveProfileData;
 window.switchAdminPanelsFromDashboard = switchAdminPanelsFromDashboard;
-window.showOnboardingCard = showOnboardingCard;
+window.showOnboardingCard             = showOnboardingCard;
+window.routeAdminTerminalDirectly     = switchAdminPanelsFromDashboard;
