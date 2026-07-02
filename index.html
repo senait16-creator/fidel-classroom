@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="am">
 <head>
@@ -8,13 +9,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=4">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <canvas id="confettiCanvas"></canvas>
 <div id="toastContainer"></div>
 
+<!-- Hamburger — doubles as menu trigger from team hub header too -->
 <button id="hamburgerBtn" onclick="openHamburgerMenu()"
         style="display:none; position:fixed; top:16px; right:16px; z-index:9980;
                width:44px; height:44px; border-radius:50%; border:none;
@@ -26,12 +28,18 @@
     <span style="display:block; width:18px; height:2px; background:#166534; border-radius:2px;"></span>
 </button>
 
-<!-- AUTH -->
+<!-- ============================================================
+     AUTH SCREEN
+     ============================================================ -->
 <div id="authScreen" class="auth-decorative-bg">
-    <span class="bg-letter letter-1">ሀ</span><span class="bg-letter letter-2">ለ</span>
-    <span class="bg-letter letter-3">መ</span><span class="bg-letter letter-4">ሰ</span>
-    <span class="bg-letter letter-5">ተ</span><span class="bg-letter letter-6">ነ</span>
-    <span class="bg-letter letter-7">ደ</span><span class="bg-letter letter-8">ወ</span>
+    <span class="bg-letter letter-1">ሀ</span>
+    <span class="bg-letter letter-2">ለ</span>
+    <span class="bg-letter letter-3">መ</span>
+    <span class="bg-letter letter-4">ሰ</span>
+    <span class="bg-letter letter-5">ተ</span>
+    <span class="bg-letter letter-6">ገ</span>
+    <span class="bg-letter letter-7">ደ</span>
+    <span class="bg-letter letter-8">ወ</span>
     <div class="app-card screen-fade-in">
         <h1 class="main-title">Fidel Classroom</h1>
         <div class="team-dot-accent">
@@ -77,7 +85,9 @@
     <button id="saveNewPasswordBtn" class="btn-primary">Save New Password</button>
 </div>
 
-<!-- PROFILE SETUP -->
+<!-- ============================================================
+     PROFILE SETUP
+     ============================================================ -->
 <div id="profileSetupScreen" class="app-card screen-fade-in" style="display:none;">
     <h2 class="main-title" style="font-size:22px;">Create Your Profile</h2>
     <p class="subtitle">Pick a nickname and avatar!</p>
@@ -106,11 +116,32 @@
     <button class="btn-primary" onclick="saveProfileData(event)">Join the Classroom</button>
 </div>
 
-<!-- TEACHER DASHBOARD -->
+<!-- ============================================================
+     TEACHER DASHBOARD
+     ============================================================ -->
 <div id="teacherOnlyDashboard">
     <div class="workspace-title" style="margin-top:20px;">
         <span>Teacher Hub</span>
         <button class="btn-primary" style="width:auto; padding:8px 16px; font-size:13px;" onclick="switchAdminPanelsFromDashboard('student')">Switch to Student View →</button>
+    </div>
+
+    <div class="teacher-panel" style="margin-bottom:20px;">
+        <div class="teacher-panel-header" onclick="toggleTeacherPanel('rosterPanelBody', this)">
+            <h2 style="font-size:18px; color:var(--neutral-dark);">Student Roster &amp; Progress</h2>
+            <button class="teacher-panel-toggle">▼</button>
+        </div>
+        <div class="teacher-panel-body" id="rosterPanelBody">
+            <p style="font-size:13px; color:#64748b; margin-bottom:12px;">See how everyone is moving through the alphabet rows.</p>
+            <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+                <button class="btn-primary" style="width:auto; padding:8px 18px; font-size:13px;" onclick="exportProgressCSV()">⬇️ Export Progress CSV</button>
+            </div>
+            <table class="teacher-roster-table">
+                <thead><tr><th>Student</th><th>Team</th><th>Progress</th><th>Action</th></tr></thead>
+                <tbody id="teacherRosterTableBody">
+                    <tr><td colspan="4" style="color:#94a3b8; text-align:center;">Loading roster...</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div class="teacher-panel" style="margin-bottom:20px;">
@@ -119,7 +150,7 @@
             <button class="teacher-panel-toggle">▼</button>
         </div>
         <div class="teacher-panel-body" id="levelCompletionPanelBody">
-            <p style="font-size:13px; color:#64748b; margin-bottom:12px;">Teams that cleared all 3 families and are requesting advancement.</p>
+            <p style="font-size:13px; color:#64748b; margin-bottom:12px;">Students who cleared all 3 families and are requesting level advancement.</p>
             <div id="levelCompletionQueueMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
         </div>
     </div>
@@ -136,31 +167,12 @@
     </div>
 
     <div class="teacher-panel" style="margin-bottom:20px;">
-        <div class="teacher-panel-header" onclick="toggleTeacherPanel('rosterPanelBody', this)">
-            <h2 style="font-size:18px; color:var(--neutral-dark);">Student Roster &amp; Progress</h2>
-            <button class="teacher-panel-toggle collapsed">▼</button>
-        </div>
-        <div class="teacher-panel-body collapsed" id="rosterPanelBody">
-            <p style="font-size:13px; color:#64748b; margin-bottom:12px;">See how everyone is moving through the alphabet rows.</p>
-            <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
-                <button class="btn-primary" style="width:auto; padding:8px 18px; font-size:13px;" onclick="exportProgressCSV()">⬇️ Export Progress CSV</button>
-            </div>
-            <table class="teacher-roster-table">
-                <thead><tr><th>Student</th><th>Team</th><th>Progress</th><th>Action</th></tr></thead>
-                <tbody id="teacherRosterTableBody">
-                    <tr><td colspan="4" style="color:#94a3b8; text-align:center;">Loading roster...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div class="teacher-panel" style="margin-bottom:20px;">
         <div class="teacher-panel-header" onclick="toggleTeacherPanel('teamProgressPanelBody', this)">
             <h2 style="font-size:18px; color:var(--neutral-dark);">Team Level Progress</h2>
-            <button class="teacher-panel-toggle collapsed">▼</button>
+            <button class="teacher-panel-toggle">▼</button>
         </div>
-        <div class="teacher-panel-body collapsed" id="teamProgressPanelBody">
-            <p style="font-size:13px; color:#64748b; margin-bottom:12px;">See all teams and which level they're on.</p>
+        <div class="teacher-panel-body" id="teamProgressPanelBody">
+            <p style="font-size:13px; color:#64748b; margin-bottom:12px;">See which teams are ready for their live quiz.</p>
             <div id="teacherTeamProgressMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
         </div>
     </div>
@@ -171,6 +183,7 @@
             <button class="teacher-panel-toggle collapsed">▼</button>
         </div>
         <div class="teacher-panel-body collapsed" id="manageTeamsPanelBody">
+            <p style="font-size:13px; color:#64748b; margin-bottom:12px;">Reassign students to predecided classroom color tracks.</p>
             <div class="teacher-control-group" style="background:#f8fafc; padding:16px; border-radius:12px; border:1px solid var(--border-color); max-width:500px;">
                 <select id="teacherStudentSelect"><option value="">Select Student...</option></select>
                 <select id="teacherPodSelect"><option value="">Select Color Team...</option></select>
@@ -185,6 +198,7 @@
             <button class="teacher-panel-toggle collapsed">▼</button>
         </div>
         <div class="teacher-panel-body collapsed" id="captainPanelBody">
+            <p style="font-size:13px; color:#64748b; margin-bottom:12px;">Pick a team, then choose which member is the captain.</p>
             <div class="teacher-control-group" style="background:#f8fafc; padding:16px; border-radius:12px; border:1px solid var(--border-color); max-width:500px;">
                 <select id="captainTeamSelect"><option value="">Select Team...</option></select>
                 <select id="captainStudentSelect" disabled><option value="">Select Team First...</option></select>
@@ -194,10 +208,13 @@
         </div>
     </div>
 
+    <!-- logout kept on teacher dashboard only -->
     <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
 </div>
 
-<!-- STUDENT DASHBOARD -->
+<!-- ============================================================
+     STUDENT DASHBOARD (Practice Mode)
+     ============================================================ -->
 <div id="studentDashboard">
     <div id="adminHeaderToggleBar" style="display:none; background:#f0fdfa; border:1px solid #ccfbf1; padding:10px 16px; border-radius:12px; margin-bottom:16px; justify-content:space-between; align-items:center;">
         <span style="font-size:13px; font-weight:700; color:var(--brand-primary);">Teacher Access Mode Active</span>
@@ -208,7 +225,8 @@
 
     <div class="dashboard-split-layout">
         <div class="main-workspace-panel">
-            <div class="pod-card" id="podCard">
+            <!-- Compact team label — replaces the heavy pod card -->
+            <div id="podCard" class="pod-card">
                 <div class="pod-header-row" id="podHeaderRow">
                     <div class="pod-header-left">
                         <span class="pod-color-swatch" id="podColorSwatch"></span>
@@ -257,15 +275,13 @@
                     </div>
                     <button id="classroomUndoBtn" class="btn-secondary" style="color:#ef4444; font-weight:700; display:none;" onclick="classroomUnmasterLetterRow()">Oops — keep practicing!</button>
                 </div>
-                <!-- Practice sketchpad — Share goes to teamHubPracticeFeed only -->
                 <div class="embedded-classroom-sketchpad">
                     <h3 style="font-size:14px; font-weight:700; margin-bottom:4px; color:var(--neutral-dark);">Practice Writing Pad</h3>
-                    <p style="font-size:12px; color:#64748b; margin-bottom:10px;">Draw the characters — sharing posts to your team feed!</p>
+                    <p style="font-size:12px; color:#64748b; margin-bottom:10px;">Draw the characters — sharing goes to your team feed!</p>
                     <canvas id="sketchpad" class="sketch-canvas-element"></canvas>
                     <div class="sketchpad-actions-row">
-                        <button class="btn-primary" style="padding:6px 10px; font-size:12px; background:#94a3b8;" onclick="undoSketchpadCanvas()">↩ Undo</button>
-                        <button class="btn-primary" style="padding:6px 10px; font-size:12px; background:#64748b;" onclick="clearSketchpadCanvas()">Clear</button>
-                        <button class="btn-primary" style="padding:6px 10px; font-size:12px;" onclick="uploadSketchpadDrawingCanvasData()">Share ↑</button>
+                        <button class="btn-primary" style="padding:6px 12px; font-size:12px; background:#64748b;" onclick="clearSketchpadCanvas()">Clear</button>
+                        <button class="btn-primary" style="padding:6px 12px; font-size:12px;" onclick="uploadSketchpadDrawingCanvasData()">Share My Drawing</button>
                     </div>
                 </div>
                 <button class="btn-secondary" style="margin-top:16px;" onclick="exitClassroomViewBackToGrid()">← Back to Letter Board</button>
@@ -289,169 +305,275 @@
                 <div class="dropdown-content-pane" id="liveLeaderboardContent"></div>
             </div>
             <div class="collapsible-dropdown-container">
-                <button class="dropdown-toggle-header" onclick="toggleDropdownElement('teamLevelProgressContent')"><span>🏆 Team Level Progress</span><span>▼</span></button>
+                <button class="dropdown-toggle-header" onclick="toggleDropdownElement('photoBoardContent')"><span>Shared Class Drawings</span><span>▼</span></button>
+                <div class="dropdown-content-pane open" id="photoBoardContent">
+                    <div class="feed-grid" id="disappearingArtGalleryFeed"></div>
+                </div>
+            </div>
+            <div class="collapsible-dropdown-container">
+                <button class="dropdown-toggle-header" onclick="toggleDropdownElement('teamLevelProgressContent')"><span>Team Level Progress</span><span>▼</span></button>
                 <div class="dropdown-content-pane open" id="teamLevelProgressContent">
                     <div id="studentTeamProgressMount"><p style="color:#94a3b8; font-size:12px;">Loading...</p></div>
                 </div>
             </div>
         </div>
     </div>
+    <!-- no bottom banner on student dashboard -->
 </div>
 
-<!-- MODE SELECT — cup cards -->
-<div id="modeSelectScreen" class="app-card screen-fade-in" style="max-width:480px; display:none;">
-    <h2 class="main-title" style="font-size:24px; margin-bottom:4px;">Selam, <span id="modeSelectNickname"></span>! ☕</h2>
-    <p class="subtitle" style="margin-bottom:24px;">What are you working on today?</p>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
-        <button onclick="chooseModeChallenge()"
-                style="background:linear-gradient(135deg,#166534,#15803d); color:white; border:none;
-                       border-radius:16px; padding:20px 16px; cursor:pointer; text-align:left;
-                       transition:all 0.2s; box-shadow:0 4px 16px rgba(22,101,52,0.3);">
-            <div style="font-size:28px; margin-bottom:8px;">☕</div>
-            <div style="font-family:'Abyssinica SIL',serif; font-size:18px; margin-bottom:4px; letter-spacing:1px;">ውድድር</div>
-            <div style="font-size:14px; font-weight:700; margin-bottom:3px;">Fidel Challenge</div>
-            <div style="font-size:11px; opacity:0.8;">Team competition · level up</div>
+<!-- ============================================================
+     MODE SELECT
+     ============================================================ -->
+<!-- ── NEW MODE SELECT ───────────────────────────────────────── -->
+<div id="modeSelectScreen" style="display:none; min-height:100vh;">
+ 
+    <div class="mode-greeting-sub" id="modeGreetingSub">Welcome back</div>
+    <div class="mode-greeting-main">
+        What are you<br>practicing <span>today?</span>
+    </div>
+ 
+    <div class="cups-grid">
+ 
+        <!-- Fidel map -->
+        <div class="cup-card" onclick="chooseModeChallenge()">
+            <span class="cup-card-badge green">Alphabet</span>
+            <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
+                <rect x="6" y="22" width="32" height="30" rx="7" fill="#dcfce7" stroke="#166534" stroke-width="1.5"/>
+                <path d="M38 28 Q47 28 47 35 Q47 42 38 42" fill="none" stroke="#166534" stroke-width="1.5" stroke-linecap="round"/>
+                <rect x="12" y="52" width="18" height="4" rx="2" fill="#166534" opacity="0.25"/>
+                <path d="M16 17 Q16 13 19 15 Q22 17 19 20" fill="none" stroke="#166534" stroke-width="1.1" stroke-linecap="round"/>
+                <path d="M23 15 Q23 11 26 13 Q29 15 26 18" fill="none" stroke="#166534" stroke-width="1.1" stroke-linecap="round"/>
+                <text x="22" y="42" text-anchor="middle" font-size="11" font-weight="700" fill="#166534" font-family="serif" font-style="italic">ፊደል</text>
+            </svg>
+            <div class="cup-card-label">Fidel map</div>
+            <div class="cup-card-desc">Letter families as levels, one map stop each</div>
+        </div>
+ 
+        <!-- Challenge -->
+        <div class="cup-card" onclick="chooseModeChallenge()">
+            <span class="cup-card-badge amber">Team</span>
+            <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
+                <rect x="6" y="22" width="32" height="30" rx="7" fill="#fef3c7" stroke="#b45309" stroke-width="1.5"/>
+                <path d="M38 28 Q47 28 47 35 Q47 42 38 42" fill="none" stroke="#b45309" stroke-width="1.5" stroke-linecap="round"/>
+                <rect x="12" y="52" width="18" height="4" rx="2" fill="#b45309" opacity="0.25"/>
+                <path d="M16 17 Q16 13 19 15 Q22 17 19 20" fill="none" stroke="#b45309" stroke-width="1.1" stroke-linecap="round"/>
+                <path d="M23 15 Q23 11 26 13 Q29 15 26 18" fill="none" stroke="#b45309" stroke-width="1.1" stroke-linecap="round"/>
+                <text x="22" y="42" text-anchor="middle" font-size="9" font-weight="700" fill="#b45309" font-family="sans-serif">ውድድር</text>
+            </svg>
+            <div class="cup-card-label">Challenge</div>
+            <div class="cup-card-desc">Team competition, 12 levels</div>
+        </div>
+ 
+        <!-- Reading -->
+        <div class="cup-card" onclick="chooseModeReading()">
+            <span class="cup-card-badge blue">Advanced</span>
+            <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
+                <rect x="6" y="22" width="32" height="30" rx="7" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.5"/>
+                <path d="M38 28 Q47 28 47 35 Q47 42 38 42" fill="none" stroke="#1d4ed8" stroke-width="1.5" stroke-linecap="round"/>
+                <rect x="12" y="52" width="18" height="4" rx="2" fill="#1d4ed8" opacity="0.25"/>
+                <path d="M16 17 Q16 13 19 15 Q22 17 19 20" fill="none" stroke="#1d4ed8" stroke-width="1.1" stroke-linecap="round"/>
+                <path d="M23 15 Q23 11 26 13 Q29 15 26 18" fill="none" stroke="#1d4ed8" stroke-width="1.1" stroke-linecap="round"/>
+                <text x="22" y="42" text-anchor="middle" font-size="9" font-weight="700" fill="#1d4ed8" font-family="sans-serif">ንባብ</text>
+            </svg>
+            <div class="cup-card-label">Reading</div>
+            <div class="cup-card-desc">Real Amharic sentences</div>
+        </div>
+ 
+        <!-- Vocab -->
+        <div class="cup-card" onclick="chooseModeReading()">
+            <span class="cup-card-badge purple">New</span>
+            <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
+                <rect x="6" y="22" width="32" height="30" rx="7" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+                <path d="M38 28 Q47 28 47 35 Q47 42 38 42" fill="none" stroke="#7c3aed" stroke-width="1.5" stroke-linecap="round"/>
+                <rect x="12" y="52" width="18" height="4" rx="2" fill="#7c3aed" opacity="0.25"/>
+                <path d="M16 17 Q16 13 19 15 Q22 17 19 20" fill="none" stroke="#7c3aed" stroke-width="1.1" stroke-linecap="round"/>
+                <path d="M23 15 Q23 11 26 13 Q29 15 26 18" fill="none" stroke="#7c3aed" stroke-width="1.1" stroke-linecap="round"/>
+                <text x="22" y="42" text-anchor="middle" font-size="9" font-weight="700" fill="#7c3aed" font-family="sans-serif">ቃላት</text>
+            </svg>
+            <div class="cup-card-label">Vocab</div>
+            <div class="cup-card-desc">Words, phrases, conversation</div>
+        </div>
+ 
+        <!-- Full board — wide -->
+        <div class="cup-card wide" onclick="chooseModePractice()">
+            <svg width="48" height="54" viewBox="0 0 48 54" fill="none" style="flex-shrink:0;">
+                <rect x="4" y="16" width="30" height="26" rx="6" fill="#f0fdf4" stroke="#166534" stroke-width="1.5"/>
+                <path d="M34 21 Q42 21 42 29 Q42 37 34 37" fill="none" stroke="#166534" stroke-width="1.4" stroke-linecap="round"/>
+                <rect x="9" y="42" width="16" height="3" rx="1.5" fill="#166534" opacity="0.2"/>
+                <path d="M11 12 Q11 9 14 10 Q16 12 14 14" fill="none" stroke="#166534" stroke-width="1" stroke-linecap="round"/>
+                <path d="M17 10 Q17 7 20 9 Q22 11 20 13" fill="none" stroke="#166534" stroke-width="1" stroke-linecap="round"/>
+                <rect x="10" y="22" width="4" height="4" rx="1" fill="#166534" opacity="0.5"/>
+                <rect x="16" y="22" width="4" height="4" rx="1" fill="#166534" opacity="0.4"/>
+                <rect x="22" y="22" width="4" height="4" rx="1" fill="#166534" opacity="0.3"/>
+                <rect x="10" y="28" width="4" height="4" rx="1" fill="#166534" opacity="0.4"/>
+                <rect x="16" y="28" width="4" height="4" rx="1" fill="#166534" opacity="0.5"/>
+                <rect x="22" y="28" width="4" height="4" rx="1" fill="#166534" opacity="0.35"/>
+            </svg>
+            <div class="cup-card-text">
+                <div class="cup-card-label">Full letter board</div>
+                <div class="cup-card-desc">Browse all 33 letter families freely — no levels, no progression. Great for review.</div>
+            </div>
+            <span class="cup-card-badge gray">Free play</span>
+        </div>
+ 
+    </div>
+ 
+    <div class="mode-divider"><span>or jump back in</span></div>
+    <div class="mode-jump-row">
+        <button class="mode-jump-btn" id="modeContinueBtn" onclick="chooseModeChallenge()">
+            Continue Level 1
         </button>
-        <button onclick="chooseModePractice()"
-                style="background:linear-gradient(135deg,#f0fdf4,#ffffff); border:2px solid #166534;
-                       border-radius:16px; padding:20px 16px; cursor:pointer; text-align:left; transition:all 0.2s;">
-            <div style="font-size:28px; margin-bottom:8px;">📖</div>
-            <div style="font-family:'Abyssinica SIL',serif; font-size:18px; margin-bottom:4px; letter-spacing:1px; color:#166534;">ፊደል</div>
-            <div style="font-size:14px; font-weight:700; color:#166534; margin-bottom:3px;">Practice Fidel</div>
-            <div style="font-size:11px; color:#64748b;">Free play · all letters</div>
-        </button>
-        <button onclick="chooseModeReading()"
-                style="background:linear-gradient(135deg,#f0f9ff,#ffffff); border:2px solid #0369a1;
-                       border-radius:16px; padding:20px 16px; cursor:pointer; text-align:left; transition:all 0.2s;">
-            <div style="font-size:28px; margin-bottom:8px;">📘</div>
-            <div style="font-family:'Abyssinica SIL',serif; font-size:18px; margin-bottom:4px; letter-spacing:1px; color:#0369a1;">ንባብ</div>
-            <div style="font-size:14px; font-weight:700; color:#0369a1; margin-bottom:3px;">Reading Path</div>
-            <div style="font-size:11px; color:#64748b;">Sentences · translate</div>
-        </button>
-        <button onclick="chooseModeVocab()"
-                style="background:linear-gradient(135deg,#fdf4ff,#ffffff); border:2px solid #7c3aed;
-                       border-radius:16px; padding:20px 16px; cursor:pointer; text-align:left; transition:all 0.2s;">
-            <div style="font-size:28px; margin-bottom:8px;">🟩</div>
-            <div style="font-family:'Abyssinica SIL',serif; font-size:18px; margin-bottom:4px; letter-spacing:1px; color:#7c3aed;">ቃላት</div>
-            <div style="font-size:14px; font-weight:700; color:#7c3aed; margin-bottom:3px;">Vocab + Wordle</div>
-            <div style="font-size:11px; color:#64748b;">Words · daily decode</div>
+        <button class="mode-jump-btn" onclick="openChallengeMap()">
+            Open map
         </button>
     </div>
-    <button id="modeSelectCaptainBtn" onclick="enterCaptainDashboard()"
-            style="display:none; width:100%; background:linear-gradient(135deg,#78350f,#92400e);
-                   color:white; border:none; border-radius:14px; padding:14px 16px;
-                   font-size:14px; font-weight:700; cursor:pointer; text-align:left;
-                   align-items:center; gap:12px;">
-        <span style="font-size:22px;">👑</span> Captain Dashboard
-        <span style="font-size:11px; opacity:0.8; margin-left:8px;">Review your team's submissions</span>
-    </button>
+ 
 </div>
 
-<!-- TEAM HUB -->
+<!-- ============================================================
+     TEAM HUB
+     ============================================================ -->
 <div id="teamHubScreen" style="display:none;">
+
+    <!-- Header: gradient, floating letters, Option B (bleeds down) -->
     <div class="team-hub-header" id="teamHubHeaderEl">
         <div class="team-hub-header-pattern"></div>
         <div class="team-hub-header-content">
+
+            <!-- Menu trigger -->
             <button onclick="openHamburgerMenu()"
                     style="background:rgba(255,255,255,0.18); border:1px solid rgba(255,255,255,0.35);
                            color:white; border-radius:10px; padding:6px 12px; font-size:12px;
                            font-weight:700; cursor:pointer; align-self:flex-start; margin-bottom:10px;">
                 ☰ Menu
             </button>
-            <div class="team-hub-name" id="teamHubTeamName" style="font-family:'Playfair Display',serif; text-align:center;">Your Team</div>
+
+            <!-- Team name: Lora italic -->
+            <div class="team-hub-name" id="teamHubTeamName"
+                 style="font-family:'Lora',Georgia,serif; font-style:italic; text-align:center;">
+                Your Team
+            </div>
+
             <div class="team-hub-level-tag">
                 <span>☕</span>
-                <span id="teamHubLevelLabel" style="font-family:'Playfair Display',serif; font-style:italic;">Level 1</span>
+                <span id="teamHubLevelLabel"
+                      style="font-family:'Lora',Georgia,serif; font-style:italic;">Level 1</span>
                 <span>•</span>
                 <span>🔥 <span id="teamHubStreakLabel">0</span> streak</span>
             </div>
+
+            <!-- Avatar group -->
             <div id="teamHubMembersRow" class="avatar-group-row"></div>
         </div>
     </div>
 
-    <!-- Level advance notification (one-time banner after teacher approves) -->
-    <div id="levelAdvanceBannerMount" style="padding:8px 16px 0; max-width:820px; margin:0 auto; display:none;"></div>
+    <!-- Body: overlaps header by 20px (Option B) -->
+    <div class="team-hub-body">
 
-    <div style="padding:12px 16px 0; max-width:820px; margin:0 auto;">
-        <p style="font-size:13px; color:#64748b; margin:0; line-height:1.5;">
-            Tap any family card below to practice. Clear all 3 to advance your team.
-        </p>
-    </div>
+        <!-- Today card -->
+        <div id="todayCardMount"></div>
 
-    <div id="todayCardMount" style="padding:8px 16px 0; max-width:820px; margin:0 auto;"></div>
-
-    <div style="padding:8px 16px 0; max-width:820px; margin:0 auto;">
+        <!-- Map button -->
         <button class="map-entry-btn" onclick="openChallengeMap()">
             <span class="map-btn-icon">☕</span>
             Open Level Map
             <span style="margin-left:auto; opacity:0.7; font-size:13px;">View all 12 levels →</span>
         </button>
-    </div>
 
-    <div id="levelCompletionMount" style="display:none; padding:0 16px; max-width:820px; margin:8px auto 0;"></div>
+        <!-- Level completion banner -->
+        <div id="levelCompletionMount" style="display:none;"></div>
 
-    <div class="team-hub-section" style="margin-top:12px;">
-        <div id="embeddedLevelMapMount"></div>
-    </div>
-
-    <div class="team-hub-section">
-        <div class="team-hub-section-title" onclick="toggleTeamRace()" style="cursor:pointer; user-select:none;">
-            <span>Team Race</span>
-            <span id="teamRaceToggleArrow" style="color:#94a3b8; font-size:12px;">▼</span>
+        <!-- Embedded level map -->
+        <div class="team-hub-section" style="margin-top:0;">
+            <div id="embeddedLevelMapMount"></div>
         </div>
-        <div id="teamRaceMount" style="display:none;"></div>
-    </div>
 
-    <div id="helpFlagsMount" style="display:none; max-width:820px; margin:0 auto 16px; padding:0 16px;"></div>
-
-    <div class="team-hub-section">
-        <div class="team-hub-section-title" onclick="toggleTeamFeed()" style="cursor:pointer; user-select:none;">
-            <span>Team Practice Feed</span>
-            <span id="teamFeedToggleArrow" style="color:#94a3b8; font-size:12px;">▼</span>
-        </div>
-        <div id="teamHubPracticeFeed" style="display:none;"></div>
-    </div>
-
-    <div class="team-hub-section">
-        <div class="team-hub-section-title">Share Your Practice</div>
-        <div id="teamHubLetterPickerWrap" style="display:none; margin-bottom:14px;">
-            <label style="font-size:12px; font-weight:700; color:#475569; display:block; margin-bottom:6px;">Which letter are you practicing?</label>
-            <select id="teamHubLetterSelect" style="max-width:200px;"></select>
-        </div>
-        <div id="teamHubStudentActions">
-            <div style="display:flex; flex-direction:column; gap:10px;">
-                <button onclick="revealLetterPickerThen('openTeamHubPracticePost')"
-                        style="background:white; border:2px solid #166534; color:#166534; border-radius:14px; padding:16px; font-size:14px; font-weight:700; cursor:pointer; text-align:left; display:flex; align-items:center; gap:12px; transition:all 0.2s;">
-                    <span style="font-size:26px; flex-shrink:0;">📸</span>
-                    <div>
-                        <div>Share Practice</div>
-                        <div style="font-size:12px; font-weight:500; color:#64748b; margin-top:3px;">Post to your team feed for encouragement</div>
-                    </div>
-                </button>
-                <button onclick="revealLetterPickerThen('openTeamHubFinalSubmit')"
-                        style="background:#166534; border:none; color:white; border-radius:14px; padding:16px; font-size:14px; font-weight:700; cursor:pointer; text-align:left; display:flex; align-items:center; gap:12px; transition:all 0.2s;">
-                    <span style="font-size:26px; flex-shrink:0;">✍️</span>
-                    <div>
-                        <div>Submit for Approval</div>
-                        <div style="font-size:12px; font-weight:500; opacity:0.8; margin-top:3px;">Captain reviews your handwriting</div>
-                    </div>
-                </button>
+        <!-- Team race (collapsed by default) -->
+        <div class="team-hub-section">
+            <div class="team-hub-section-title" onclick="toggleTeamRace()"
+                 style="cursor:pointer; user-select:none;">
+                <span>Team Race</span>
+                <span id="teamRaceToggleArrow" style="color:#94a3b8; font-size:12px;">▼</span>
             </div>
+            <div id="teamRaceMount" style="display:none;"></div>
         </div>
-        <div id="teamHubCaptainActions" style="display:none;">
-            <p style="font-size:13px; color:#64748b; margin-bottom:14px;">Review submissions and share encouragement.</p>
-            <button class="btn-primary" onclick="enterCaptainDashboard()" style="margin-bottom:10px;">👑 Review Pending Submissions</button>
-            <button onclick="revealLetterPickerThen('openTeamHubPracticePost')"
-                    style="background:white; border:2px solid #166534; color:#166534; border-radius:14px; padding:14px 16px; font-size:13px; font-weight:700; cursor:pointer; width:100%; text-align:center;">
-                📸 Share Something with Your Team
-            </button>
-        </div>
-        <input type="file" id="teamHubPhotoInput" accept="image/*" style="display:none;">
-    </div>
-    <div style="height:60px;"></div>
-</div>
 
-<!-- CHALLENGE LEVELS (fallback) -->
+        <!-- Help flags (captain only) -->
+        <div id="helpFlagsMount" style="display:none;"></div>
+
+        <!-- Practice feed (collapsed) -->
+        <div class="team-hub-section">
+            <div class="team-hub-section-title" onclick="toggleTeamFeed()"
+                 style="cursor:pointer; user-select:none;">
+                <span>Team Practice Feed</span>
+                <span id="teamFeedToggleArrow" style="color:#94a3b8; font-size:12px;">▼</span>
+            </div>
+            <div id="teamHubPracticeFeed" style="display:none;"></div>
+        </div>
+
+        <!-- Share / upload — ICON BUTTONS -->
+        <div class="team-hub-section">
+            <div class="team-hub-section-title">Share Your Practice</div>
+
+            <!-- Letter picker hidden until needed -->
+            <div id="teamHubLetterPickerWrap" style="display:none; margin-bottom:14px;">
+                <label style="font-size:12px; font-weight:700; color:#475569;
+                              display:block; margin-bottom:6px;">
+                    Which letter are you practicing?
+                </label>
+                <select id="teamHubLetterSelect" style="max-width:200px;"></select>
+            </div>
+
+            <!-- Student: icon buttons -->
+            <div id="teamHubStudentActions">
+                <p class="share-hint-text">
+                    Share a practice photo with your team, or submit writing for captain approval.
+                </p>
+                <div class="icon-action-row">
+                    <div class="icon-action-btn"
+                         onclick="revealLetterPickerThen('openTeamHubPracticePost')">
+                        <div class="icon-action-circle share-circle">📸</div>
+                        <div class="icon-action-label">Share</div>
+                    </div>
+                    <div class="icon-action-btn"
+                         onclick="revealLetterPickerThen('openTeamHubFinalSubmit')">
+                        <div class="icon-action-circle submit-circle">✍️</div>
+                        <div class="icon-action-label" style="color:white;background:#166534;
+                             padding:2px 10px;border-radius:10px;">Submit</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Captain: simpler version -->
+            <div id="teamHubCaptainActions" style="display:none;">
+                <p class="share-hint-text">
+                    Review your team's writing submissions and share encouragement.
+                </p>
+                <button class="btn-primary" onclick="enterCaptainDashboard()"
+                        style="margin-bottom:10px;">
+                    👑 Review Pending Submissions
+                </button>
+                <div class="icon-action-row" style="margin-top:4px;">
+                    <div class="icon-action-btn"
+                         onclick="revealLetterPickerThen('openTeamHubPracticePost')">
+                        <div class="icon-action-circle share-circle">📸</div>
+                        <div class="icon-action-label">Share</div>
+                    </div>
+                </div>
+            </div>
+
+            <input type="file" id="teamHubPhotoInput" accept="image/*" style="display:none;">
+        </div>
+
+    </div>
+    <!-- end .team-hub-body -->
+
+</div>
+<!-- end #teamHubScreen -->
+
+<!-- ============================================================
+     CHALLENGE LEVELS (full map fallback)
+     ============================================================ -->
 <div id="challengeLevelsScreen" style="display:none; max-width:900px; margin:40px auto; padding:0 16px;">
     <div class="workspace-title">
         <span>🏆 Fidel Challenge</span>
@@ -484,7 +606,7 @@
         <span id="challengeFamilyTitle">Level</span>
         <button class="btn-secondary" onclick="exitChallengeFamilyPicker()">← Back to Levels</button>
     </div>
-    <p class="subtitle" style="text-align:left; margin-bottom:16px;">Pick a letter family. Get a streak of 20, then submit your writing.</p>
+    <p class="subtitle" style="text-align:left; margin-bottom:16px;">Pick a letter family. Get a streak of 20, then submit your writing for approval.</p>
     <div id="challengeFamilyGrid" class="challenge-family-grid"></div>
 </div>
 
@@ -505,13 +627,12 @@
     <div id="challengeDetailWritingStatusBox" style="display:none;"></div>
 </div>
 
-<!-- WRITING SUBMISSION -->
+<!-- ============================================================
+     WRITING SUBMISSION SCREEN
+     ============================================================ -->
 <div id="writingSubmitScreen" style="display:none;">
-    <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px;
-                position:sticky; top:0; background:white; border-bottom:1px solid #e2e8f0; z-index:1;">
-        <button id="writingSubmitCloseBtn"
-                style="background:#f1f5f9; border:none; border-radius:8px; padding:8px 14px;
-                       font-size:13px; font-weight:700; color:#475569; cursor:pointer;">← Back</button>
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; position:sticky; top:0; background:white; border-bottom:1px solid #e2e8f0; z-index:1;">
+        <button id="writingSubmitCloseBtn" style="background:#f1f5f9; border:none; border-radius:8px; padding:8px 14px; font-size:13px; font-weight:700; color:#475569; cursor:pointer;">← Back</button>
         <span id="writingSubmitTitle" style="font-size:18px; font-weight:800; color:#166534; font-family:'Playfair Display',serif;"></span>
         <div style="width:70px;"></div>
     </div>
@@ -522,36 +643,35 @@
         </div>
         <div id="writingRejectionNote" style="display:none; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; padding:12px 16px; border-radius:12px; margin-bottom:16px; font-size:13px;"></div>
         <p style="font-size:15px; font-weight:700; color:#1e293b; margin-bottom:6px;">How would you like to submit?</p>
-        <p style="font-size:13px; color:#64748b; margin-bottom:20px;">Your captain will review and approve or ask you to redo it.</p>
-        <button id="writingChoiceUploadCard"
-                style="width:100%; background:white; border:2px solid #e2e8f0; border-radius:14px; padding:18px 20px; margin-bottom:12px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:all 0.2s; text-align:left;">
+        <p style="font-size:13px; color:#64748b; margin-bottom:20px;">Your captain will review your handwriting and approve or ask you to try again.</p>
+        <button id="writingChoiceUploadCard" style="width:100%; background:white; border:2px solid #e2e8f0; border-radius:14px; padding:18px 20px; margin-bottom:12px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:all 0.2s; text-align:left;">
             <span style="font-size:32px; flex-shrink:0;">📷</span>
             <div>
                 <div style="font-size:15px; font-weight:700; color:#1e293b; margin-bottom:3px;">Upload a Photo</div>
                 <div style="font-size:13px; color:#64748b;">Take a picture of your handwriting on paper</div>
             </div>
         </button>
-        <button id="writingChoiceSketchCard"
-                style="width:100%; background:white; border:2px solid #e2e8f0; border-radius:14px; padding:18px 20px; margin-bottom:20px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:all 0.2s; text-align:left;">
+        <button id="writingChoiceSketchCard" style="width:100%; background:white; border:2px solid #e2e8f0; border-radius:14px; padding:18px 20px; margin-bottom:20px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:all 0.2s; text-align:left;">
             <span style="font-size:32px; flex-shrink:0;">✏️</span>
             <div>
                 <div style="font-size:15px; font-weight:700; color:#1e293b; margin-bottom:3px;">Draw on Sketchpad</div>
-                <div style="font-size:13px; color:#64748b;">Write directly with your finger or stylus</div>
+                <div style="font-size:13px; color:#64748b;">Write directly using your finger or stylus</div>
             </div>
         </button>
         <input type="file" id="writingPhotoInput" accept="image/*" style="display:none;">
         <div id="writingSketchpadArea" style="display:none;">
             <canvas id="writingSketchpad" class="sketch-canvas-element" style="height:260px;"></canvas>
             <div class="sketchpad-actions-row" style="margin-top:12px;">
-                <button class="btn-primary" style="padding:10px 14px; font-size:13px; background:#94a3b8; flex:1;" id="writingSketchUndoBtn">↩ Undo</button>
-                <button class="btn-primary" style="padding:10px 14px; font-size:13px; background:#64748b; flex:1;" id="writingSketchClearBtn">Clear</button>
-                <button class="btn-primary" style="padding:10px 14px; font-size:13px; flex:2;" id="writingSketchSubmitBtn">Submit Drawing ✓</button>
+                <button class="btn-primary" style="padding:10px 20px; font-size:13px; background:#64748b; flex:1;" id="writingSketchClearBtn">Clear</button>
+                <button class="btn-primary" style="padding:10px 20px; font-size:13px; flex:2;" id="writingSketchSubmitBtn">Submit Drawing ✓</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- FLASHCARD -->
+<!-- ============================================================
+     FLASHCARD SCREEN
+     ============================================================ -->
 <div id="flashcardScreen" style="display:none; max-width:500px; margin:40px auto; padding:0 16px; text-align:center;">
     <div class="workspace-title">
         <span id="flashcardScreenTitle">Flashcards</span>
@@ -571,7 +691,9 @@
     </div>
 </div>
 
-<!-- MATCHING GAME -->
+<!-- ============================================================
+     MATCHING GAME WORKSPACE
+     ============================================================ -->
 <div id="gameWorkspace">
     <h2 id="gameWorkspaceTitle" style="font-size:22px; margin-bottom:4px; font-family:'Playfair Display',serif;">Practice Arena</h2>
     <p class="subtitle" style="margin-bottom:12px;">Tap a letter and its matching sound to clear them!</p>
@@ -586,13 +708,15 @@
     <button id="gameExitActionBtn" class="btn-secondary" style="margin-top:10px;">← Close Game</button>
 </div>
 
-<!-- READING PATH -->
+<!-- ============================================================
+     READING PATH
+     ============================================================ -->
 <div id="readingLevelsScreen" style="display:none; max-width:900px; margin:40px auto; padding:0 16px;">
     <div class="workspace-title">
         <span>📖 Reading Path</span>
         <button class="btn-secondary" onclick="exitReadingPath()">← Back</button>
     </div>
-    <p class="subtitle" style="text-align:left; margin-bottom:16px;">You know the Fidel — now learn to read real Amharic sentences.</p>
+    <p class="subtitle" style="text-align:left; margin-bottom:16px;">You know the Fidel — now learn to read, translate, and understand real Amharic sentences.</p>
     <div id="readingLevelsGrid" class="challenge-levels-grid"></div>
 </div>
 
@@ -604,39 +728,28 @@
     <div id="readingStepContent"></div>
 </div>
 
-<!-- CAPTAIN DASHBOARD -->
+<!-- ============================================================
+     CAPTAIN DASHBOARD
+     ============================================================ -->
 <div id="captainDashboardScreen" style="display:none; max-width:700px; margin:40px auto; padding:0 16px;">
-    <div style="background:linear-gradient(135deg,#78350f,#92400e); border-radius:16px; padding:20px 24px; margin-bottom:20px; color:white;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div>
-                <div style="font-size:11px; font-weight:700; opacity:0.7; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Captain Command Center</div>
-                <h2 style="font-size:22px; font-weight:800; margin:0; font-family:'Playfair Display',serif;">👑 Your Dashboard</h2>
-            </div>
-            <button class="btn-secondary" onclick="exitCaptainDashboard()"
-                    style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.3); color:white; font-size:13px;">← Back</button>
-        </div>
+    <div class="workspace-title">
+        <span>👑 Captain Dashboard</span>
+        <button class="btn-secondary" onclick="exitCaptainDashboard()">← Back</button>
     </div>
+    <p class="subtitle" style="text-align:left; margin-bottom:16px;">Review your team's writing submissions and see how everyone's progressing.</p>
     <div class="teacher-panel" style="margin-bottom:20px;">
-        <div style="padding:16px 20px 12px; border-bottom:1px solid #e2e8f0;">
-            <h2 style="font-size:16px; color:var(--neutral-dark); margin:0;">Pending Submissions</h2>
-            <p style="font-size:12px; color:#94a3b8; margin:4px 0 0;">Handwriting your teammates submitted for your review</p>
-        </div>
-        <div style="padding:16px 20px;">
-            <div id="captainWritingQueueMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
-        </div>
+        <h2 style="font-size:16px; color:var(--neutral-dark); margin-bottom:10px;">Pending Submissions</h2>
+        <div id="captainWritingQueueMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
     </div>
     <div class="teacher-panel">
-        <div style="padding:16px 20px 12px; border-bottom:1px solid #e2e8f0;">
-            <h2 style="font-size:16px; color:var(--neutral-dark); margin:0;">Team Progress</h2>
-            <p style="font-size:12px; color:#94a3b8; margin:4px 0 0;">How each teammate is doing on the current level</p>
-        </div>
-        <div style="padding:16px 20px;">
-            <div id="captainTeamProgressMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
-        </div>
+        <h2 style="font-size:16px; color:var(--neutral-dark); margin-bottom:10px;">Team Progress</h2>
+        <div id="captainTeamProgressMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
     </div>
 </div>
 
-<!-- FAMILY PRACTICE SHEET -->
+<!-- ============================================================
+     FAMILY PRACTICE SHEET
+     ============================================================ -->
 <div id="familyPracticeSheet" style="display:none; position:fixed; inset:0; background:white; z-index:9990; flex-direction:column; overflow-y:auto;">
     <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; position:sticky; top:0; background:white; border-bottom:1px solid #e2e8f0; z-index:1;">
         <button onclick="closeEmbeddedFamilyPractice()" style="background:#f1f5f9; border:none; border-radius:8px; padding:8px 14px; font-size:13px; font-weight:700; color:#475569; cursor:pointer;">← Back</button>
@@ -656,14 +769,15 @@
     </div>
 </div>
 
-<!-- HAMBURGER MENU -->
+<!-- ============================================================
+     HAMBURGER MENU
+     ============================================================ -->
 <div id="hamburgerMenuOverlay" onclick="closeHamburgerMenu()"
      style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:9981; backdrop-filter:blur(2px);"></div>
+
 <div id="hamburgerMenuPanel"
-     style="position:fixed; top:0; right:0; bottom:0; width:280px; background:white; z-index:9982;
-            transform:translateX(100%); transition:transform 0.25s cubic-bezier(0.32,0.72,0,1);
-            display:flex; flex-direction:column; box-shadow:-8px 0 32px rgba(0,0,0,0.15); overflow-y:auto;">
-    <div style="padding:20px 20px 16px; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; background:linear-gradient(135deg,#14532d,#166534);">
+     style="position:fixed; top:0; right:0; bottom:0; width:280px; background:white; z-index:9982; transform:translateX(100%); transition:transform 0.25s cubic-bezier(0.32,0.72,0,1); display:flex; flex-direction:column; box-shadow:-8px 0 32px rgba(0,0,0,0.15); overflow-y:auto;">
+    <div style="padding:20px 20px 16px; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; background:linear-gradient(135deg, #14532d, #166534);">
         <div>
             <div style="font-family:'Abyssinica SIL',serif; font-size:20px; color:#ca8a04; font-weight:700;">ፊደል</div>
             <div style="font-size:13px; font-weight:700; color:white; margin-top:2px;" id="menuNicknameDisplay">Menu</div>
@@ -671,19 +785,19 @@
         <button onclick="closeHamburgerMenu()" style="background:rgba(255,255,255,0.15); border:none; color:white; border-radius:50%; width:32px; height:32px; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
     </div>
     <div style="flex:1; padding:12px 0;">
-        <button onclick="openProfileFromMenu()" style="width:100%; background:none; border:none; padding:16px 20px; display:flex; align-items:center; gap:14px; cursor:pointer; font-size:15px; font-weight:600; color:#1e293b; text-align:left; border-bottom:1px solid #f1f5f9;">
+        <button onclick="openProfileFromMenu()" style="width:100%; background:none; border:none; padding:16px 20px; display:flex; align-items:center; gap:14px; cursor:pointer; font-size:15px; font-weight:600; color:#1e293b; text-align:left; transition:background 0.15s; border-bottom:1px solid #f1f5f9;">
             <span style="font-size:22px; width:32px; text-align:center;">👤</span>
             <div><div>Profile</div><div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">Change nickname or avatar</div></div>
         </button>
-        <button onclick="showRulesCard()" style="width:100%; background:none; border:none; padding:16px 20px; display:flex; align-items:center; gap:14px; cursor:pointer; font-size:15px; font-weight:600; color:#1e293b; text-align:left; border-bottom:1px solid #f1f5f9;">
+        <button onclick="showRulesCard()" style="width:100%; background:none; border:none; padding:16px 20px; display:flex; align-items:center; gap:14px; cursor:pointer; font-size:15px; font-weight:600; color:#1e293b; text-align:left; transition:background 0.15s; border-bottom:1px solid #f1f5f9;">
             <span style="font-size:22px; width:32px; text-align:center;">📋</span>
             <div><div>Rules</div><div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">How the game works</div></div>
         </button>
-        <button onclick="showResourcesCard()" style="width:100%; background:none; border:none; padding:16px 20px; display:flex; align-items:center; gap:14px; cursor:pointer; font-size:15px; font-weight:600; color:#1e293b; text-align:left; border-bottom:1px solid #f1f5f9;">
+        <button onclick="showResourcesCard()" style="width:100%; background:none; border:none; padding:16px 20px; display:flex; align-items:center; gap:14px; cursor:pointer; font-size:15px; font-weight:600; color:#1e293b; text-align:left; transition:background 0.15s; border-bottom:1px solid #f1f5f9;">
             <span style="font-size:22px; width:32px; text-align:center;">🔗</span>
-            <div><div>Resources</div><div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">Amharic learning tools</div></div>
+            <div><div>Resources</div><div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">Amharic learning tools &amp; links</div></div>
         </button>
-        <button onclick="switchModeFromMenu()" style="width:100%; background:none; border:none; padding:16px 20px; display:flex; align-items:center; gap:14px; cursor:pointer; font-size:15px; font-weight:600; color:#1e293b; text-align:left; border-bottom:1px solid #f1f5f9;">
+        <button onclick="switchModeFromMenu()" style="width:100%; background:none; border:none; padding:16px 20px; display:flex; align-items:center; gap:14px; cursor:pointer; font-size:15px; font-weight:600; color:#1e293b; text-align:left; transition:background 0.15s; border-bottom:1px solid #f1f5f9;">
             <span style="font-size:22px; width:32px; text-align:center;">🔄</span>
             <div><div>Switch Mode</div><div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">Practice, Challenge, or Reading</div></div>
         </button>
@@ -703,7 +817,9 @@
     </div>
 </div>
 
-<!-- RULES CARD -->
+<!-- ============================================================
+     RULES CARD
+     ============================================================ -->
 <div id="rulesCardOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9983; align-items:center; justify-content:center; padding:24px;">
     <div style="background:white; border-radius:20px; padding:28px 24px; max-width:420px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.3); max-height:90vh; overflow-y:auto;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
@@ -713,55 +829,58 @@
         <div style="display:flex; flex-direction:column; gap:14px; margin-bottom:20px;">
             <div style="display:flex; gap:12px; align-items:flex-start;">
                 <div style="background:#166534; color:white; border-radius:50%; width:26px; height:26px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; flex-shrink:0; margin-top:1px;">1</div>
-                <div><strong style="font-size:14px; color:#1e293b; display:block; margin-bottom:3px;">Each level has 3 letter families</strong><p style="font-size:13px; color:#64748b; margin:0; line-height:1.5;">A letter family is a row of 7 characters sharing the same base sound. Your level shows which 3 to work on.</p></div>
+                <div><strong style="font-size:14px; color:#1e293b; display:block; margin-bottom:3px;">Each level has 3 letter families</strong><p style="font-size:13px; color:#64748b; margin:0; line-height:1.5;">A letter family is a row of 7 characters that share the same base sound. Your current level shows which 3 families to work on.</p></div>
             </div>
             <div style="display:flex; gap:12px; align-items:flex-start;">
                 <div style="background:#166534; color:white; border-radius:50%; width:26px; height:26px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; flex-shrink:0; margin-top:1px;">2</div>
-                <div><strong style="font-size:14px; color:#1e293b; display:block; margin-bottom:3px;">Get a streak of 20 in the matching game</strong><p style="font-size:13px; color:#64748b; margin:0; line-height:1.5;">Match letters to sounds. 20 correct in a row to pass. Miss one and the streak resets.</p></div>
+                <div><strong style="font-size:14px; color:#1e293b; display:block; margin-bottom:3px;">Get a streak of 20 in the matching game</strong><p style="font-size:13px; color:#64748b; margin:0; line-height:1.5;">Match letters to their sounds. Get 20 correct in a row without missing. Miss one and your streak resets to zero — take your time.</p></div>
             </div>
             <div style="display:flex; gap:12px; align-items:flex-start;">
                 <div style="background:#166534; color:white; border-radius:50%; width:26px; height:26px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; flex-shrink:0; margin-top:1px;">3</div>
-                <div><strong style="font-size:14px; color:#1e293b; display:block; margin-bottom:3px;">Submit your handwriting</strong><p style="font-size:13px; color:#64748b; margin:0; line-height:1.5;">After the streak, submit a photo or drawing. Your captain reviews and approves or asks you to redo it.</p></div>
+                <div><strong style="font-size:14px; color:#1e293b; display:block; margin-bottom:3px;">Submit your handwriting</strong><p style="font-size:13px; color:#64748b; margin:0; line-height:1.5;">After passing the streak, submit a photo or drawing of your handwriting. Your captain reviews it and approves or asks you to try again.</p></div>
             </div>
             <div style="display:flex; gap:12px; align-items:flex-start;">
                 <div style="background:#166534; color:white; border-radius:50%; width:26px; height:26px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; flex-shrink:0; margin-top:1px;">4</div>
-                <div><strong style="font-size:14px; color:#1e293b; display:block; margin-bottom:3px;">Clear all 3 families to advance</strong><p style="font-size:13px; color:#64748b; margin:0; line-height:1.5;">Once all 3 are cleared a button appears to request teacher approval. Your teacher signs off and the whole team moves up.</p></div>
+                <div><strong style="font-size:14px; color:#1e293b; display:block; margin-bottom:3px;">Clear all 3 families to advance</strong><p style="font-size:13px; color:#64748b; margin:0; line-height:1.5;">Once all 3 families are cleared a button appears to submit for teacher approval. Your teacher signs off and your team moves to the next level.</p></div>
             </div>
             <div style="display:flex; gap:12px; align-items:flex-start;">
                 <div style="background:#ca8a04; color:white; border-radius:50%; width:26px; height:26px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; flex-shrink:0; margin-top:1px;">!</div>
-                <div><strong style="font-size:14px; color:#1e293b; display:block; margin-bottom:3px;">Your whole team moves up together</strong><p style="font-size:13px; color:#64748b; margin:0; line-height:1.5;">Every member needs to clear all 3 families first. If a teammate is stuck, help them.</p></div>
+                <div><strong style="font-size:14px; color:#1e293b; display:block; margin-bottom:3px;">Your whole team moves up together</strong><p style="font-size:13px; color:#64748b; margin:0; line-height:1.5;">Every team member needs to clear all 3 families before the team advances. If a teammate is stuck, help them — your progress depends on theirs.</p></div>
             </div>
         </div>
         <button onclick="closeRulesCard()" style="width:100%; background:#166534; color:white; border:none; border-radius:12px; padding:14px; font-size:15px; font-weight:700; cursor:pointer;">Got it ✓</button>
     </div>
 </div>
 
-<!-- RESOURCES CARD -->
+<!-- ============================================================
+     RESOURCES CARD
+     ============================================================ -->
 <div id="resourcesCardOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9983; align-items:center; justify-content:center; padding:24px;">
     <div style="background:white; border-radius:20px; padding:28px 24px; max-width:420px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.3); max-height:90vh; overflow-y:auto;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <h2 style="font-size:20px; font-weight:800; color:#166534; font-family:'Playfair Display',serif; margin:0;">Resources</h2>
             <button onclick="closeResourcesCard()" style="background:#f1f5f9; border:none; border-radius:50%; width:32px; height:32px; font-size:16px; cursor:pointer;">✕</button>
         </div>
+        <p style="font-size:13px; color:#64748b; margin-bottom:20px; line-height:1.6;">Extra tools to help you learn the Amharic alphabet faster.</p>
         <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
-            <a href="https://amharicteacher.com/hahu" target="_blank" rel="noopener" style="display:flex; align-items:center; gap:12px; padding:14px 16px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; text-decoration:none; color:#1e293b;">
+            <a href="https://amharicteacher.com/hahu" target="_blank" rel="noopener" style="display:flex; align-items:center; gap:12px; padding:14px 16px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; text-decoration:none; color:#1e293b; transition:all 0.2s;">
                 <span style="font-size:24px; flex-shrink:0;">🔊</span>
                 <div><div style="font-size:14px; font-weight:700; color:#166534;">Amharic Teacher</div><div style="font-size:12px; color:#64748b; margin-top:2px;">Hear every letter pronounced out loud</div></div>
                 <span style="margin-left:auto; color:#94a3b8; font-size:12px;">↗</span>
             </a>
-            <a href="https://www.youtube.com/@Jebena_Amharicfidel" target="_blank" rel="noopener" style="display:flex; align-items:center; gap:12px; padding:14px 16px; background:#fef3c7; border:1px solid #fde68a; border-radius:12px; text-decoration:none; color:#1e293b;">
-                <span style="font-size:24px; flex-shrink:0;">☕</span>
-                <div><div style="font-size:14px; font-weight:700; color:#92400e;">Jebena on YouTube</div><div style="font-size:12px; color:#64748b; margin-top:2px;">Video lessons for each letter family</div></div>
-                <span style="margin-left:auto; color:#94a3b8; font-size:12px;">↗</span>
-            </a>
-            <a href="https://www.youtube.com/results?search_query=amharic+alphabet+song" target="_blank" rel="noopener" style="display:flex; align-items:center; gap:12px; padding:14px 16px; background:#fff7ed; border:1px solid #fed7aa; border-radius:12px; text-decoration:none; color:#1e293b;">
+            <a href="https://www.youtube.com/results?search_query=amharic+alphabet+song" target="_blank" rel="noopener" style="display:flex; align-items:center; gap:12px; padding:14px 16px; background:#fff7ed; border:1px solid #fed7aa; border-radius:12px; text-decoration:none; color:#1e293b; transition:all 0.2s;">
                 <span style="font-size:24px; flex-shrink:0;">🎵</span>
-                <div><div style="font-size:14px; font-weight:700; color:#c2410c;">Amharic Alphabet Song</div><div style="font-size:12px; color:#64748b; margin-top:2px;">Learn through music on YouTube</div></div>
+                <div><div style="font-size:14px; font-weight:700; color:#c2410c;">Amharic Alphabet Song</div><div style="font-size:12px; color:#64748b; margin-top:2px;">Learn the letters through music on YouTube</div></div>
                 <span style="margin-left:auto; color:#94a3b8; font-size:12px;">↗</span>
             </a>
-            <a href="https://www.duolingo.com" target="_blank" rel="noopener" style="display:flex; align-items:center; gap:12px; padding:14px 16px; background:#f0f9ff; border:1px solid #bae6fd; border-radius:12px; text-decoration:none; color:#1e293b;">
+            <a href="https://www.duolingo.com" target="_blank" rel="noopener" style="display:flex; align-items:center; gap:12px; padding:14px 16px; background:#f0f9ff; border:1px solid #bae6fd; border-radius:12px; text-decoration:none; color:#1e293b; transition:all 0.2s;">
                 <span style="font-size:24px; flex-shrink:0;">🦉</span>
                 <div><div style="font-size:14px; font-weight:700; color:#0369a1;">Duolingo</div><div style="font-size:12px; color:#64748b; margin-top:2px;">Extra daily language practice</div></div>
+                <span style="margin-left:auto; color:#94a3b8; font-size:12px;">↗</span>
+            </a>
+            <a href="https://www.youtube.com/@LearnAmharicwithAbebeHaile" target="_blank" rel="noopener" style="display:flex; align-items:center; gap:12px; padding:14px 16px; background:#fdf4ff; border:1px solid #e9d5ff; border-radius:12px; text-decoration:none; color:#1e293b; transition:all 0.2s;">
+                <span style="font-size:24px; flex-shrink:0;">📺</span>
+                <div><div style="font-size:14px; font-weight:700; color:#7e22ce;">Amharic YouTube Lessons</div><div style="font-size:12px; color:#64748b; margin-top:2px;">Video lessons for beginners</div></div>
                 <span style="margin-left:auto; color:#94a3b8; font-size:12px;">↗</span>
             </a>
         </div>
@@ -769,7 +888,42 @@
     </div>
 </div>
 
-<!-- CHALLENGE MAP OVERLAY -->
+<!-- ============================================================
+     CHALLENGE MAP OVERLAY
+     ============================================================ -->
+<div id="letterBoardScreen"
+     style="display:none; position:fixed; inset:0; z-index:9993;
+            overflow-y:auto; flex-direction:column; background:#f5f5f0;">
+
+    <!-- Header -->
+    <div class="letter-board-header">
+        <div class="letter-board-header-pattern"></div>
+        <div class="lb-header-content">
+            <div style="display:flex; justify-content:space-between; align-items:center;
+                        margin-bottom:10px;">
+                <button onclick="closeLetterBoard()"
+                        style="background:rgba(255,255,255,0.18); border:1px solid rgba(255,255,255,0.3);
+                               color:white; border-radius:8px; padding:5px 12px; font-size:12px;
+                               font-weight:700; cursor:pointer;">
+                    ← Back
+                </button>
+                <span style="font-size:10px; color:rgba(255,255,255,0.55);">Free play · no levels</span>
+            </div>
+            <div class="lb-title">Full Letter Board</div>
+            <div class="lb-sub">All 33+ families · tap any to practice</div>
+            <input id="lbSearchInput"
+                   class="lb-search"
+                   placeholder="Search a sound — try 'ha' or 'se'…"
+                   autocomplete="off" />
+        </div>
+    </div>
+
+    <!-- Body (overlaps header) -->
+    <div class="letter-board-body" id="lbBodyMount">
+        <p style="color:#94a3b8; font-size:13px; padding:16px 0;">Loading...</p>
+    </div>
+</div>
+
 <div id="challengeMapOverlay" style="display:none; position:fixed; inset:0; background:white; z-index:9994; flex-direction:column; overflow-y:auto;">
     <div id="challengeMapHeader" style="position:sticky; top:0; background:white; border-bottom:1px solid #e2e8f0; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; z-index:1;">
         <button onclick="closeChallengeMap()" style="background:#f1f5f9; border:none; border-radius:10px; padding:8px 14px; font-size:13px; font-weight:700; color:#475569; cursor:pointer;">← Back</button>
@@ -779,22 +933,34 @@
     <div id="challengeMapMount"></div>
 </div>
 
-<!-- SCRIPT TAGS — order matters -->
-<script src="js/app.js?v=3" defer></script>
-<script src="js/auth.js?v=3" defer></script>
-<script src="js/utils/compress.js?v=3" defer></script>
-<script src="js/game.js?v=3" defer></script>
-<script src="js/submissions.js?v=3" defer></script>
-<script src="js/teacher.js?v=3" defer></script>
-<script src="js/reading.js?v=3" defer></script>
-<script src="js/letterboard.js?v=1" defer></script>
-<script src="js/team/progress.js?v=3" defer></script>
-<script src="js/team/levels.js?v=3" defer></script>
-<script src="js/team/hub.js?v=3" defer></script>
-<script src="js/team/map.js?v=3" defer></script>
-<script src="js/wordle.js?v=1" defer></script>
-<script src="js/challenge.js?v=3" defer></script>
-<script src="js/menu.js?v=3" defer></script>
+    <div id="wordleOverlay" style="display:none; position:fixed; inset:0; z-index:9995; background:rgba(0,0,0,0.55); backdrop-filter:blur(4px); align-items:flex-end; justify-content:center;">
+    <div class="wordle-sheet">
+        <div class="wordle-sheet-handle"></div>
+        <div class="wordle-top-bar">
+            <div class="wordle-title">ዛሬ ይህን ይፍቱ · Today's Decode</div>
+            <button class="wordle-skip-btn" onclick="closeWordleOverlay()">Skip ✕</button>
+        </div>
+        <div id="wordleGameMount"></div>
+    </div>
+</div>
+<!-- ============================================================
+     SCRIPT TAGS — order matters
+     ============================================================ -->
+<script src="js/app.js?v=5" defer></script>
+<script src="js/auth.js?v=5" defer></script>
+<script src="js/utils/compress.js?v=5" defer></script>
+<script src="js/game.js?v=5" defer></script>
+<script src="js/submissions.js?v=5" defer></script>
+<script src="js/teacher.js?v=5" defer></script>
+<script src="js/reading.js?v=5" defer></script>
+<script src="js/letterboard.js?v=5" defer></script>
+<script src="js/team/progress.js?v=5" defer></script>
+<script src="js/team/levels.js?v=5" defer></script>
+<script src="js/team/hub.js?v=5" defer></script>
+<script src="js/team/map.js?v=5" defer></script>
+<script src="js/wordle.js?v=5" defer></script>
+<script src="js/challenge.js?v=5" defer></script>
+<script src="js/menu.js?v=5" defer></script>
 
 </body>
 </html>
