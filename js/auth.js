@@ -142,11 +142,14 @@ async function proceedFlowMap(user) {
             modeGreetSub.innerText = `Welcome back, ${profile.nickname}`;
         }
 
-        enterModeSelect();
-
-        setTimeout(() => {
-            if (typeof maybeShowWordleOnLogin === 'function') maybeShowWordleOnLogin();
-        }, 600);
+        if (typeof showCharacterGuide === 'function') {
+    showCharacterGuide();
+} else {
+    enterModeSelect();
+    setTimeout(() => {
+        if (typeof maybeShowWordleOnLogin === 'function') maybeShowWordleOnLogin();
+    }, 600);
+}
 
     } else {
         isEditingProfile = false;
@@ -321,11 +324,17 @@ async function saveProfileData(event) {
         showNotificationToast("Profile updated!");
         launchDashboard("student");
     } else {
+        if (isEditingProfile) {
+    showNotificationToast("Profile updated!");
+    launchDashboard("student");
+} else {
+    if (typeof showCharacterGuide === 'function') {
+        showCharacterGuide();
+    } else {
         enterModeSelect();
     }
-
-    if (saveBtn) { saveBtn.disabled = false; saveBtn.innerText = "Save Changes"; }
 }
+if (saveBtn) { saveBtn.disabled = false; saveBtn.innerText = "Save Changes"; }
 
 // ---------------------------------------------------------------------------
 // Team assignment
