@@ -429,7 +429,74 @@
             Open map
         </button>
     </div>
- 
+ <!-- CHALLENGE DASHBOARD -->
+<div id="challengeDashboardScreen" style="display:none; min-height:100vh; padding:24px 16px 48px; background:#f5f5f0;">
+
+    <div class="challenge-dash-hero">
+        <div>
+            <div class="challenge-dash-kicker">July Fidel Challenge</div>
+            <h1>Team Challenge</h1>
+            <p id="challengeDashSub">Loading your team...</p>
+        </div>
+        <button class="challenge-back-home" onclick="enterModeSelect()">← Home</button>
+    </div>
+
+    <div class="challenge-dash-grid">
+
+        <section class="challenge-dash-card challenge-map-card">
+            <div class="challenge-card-title">🗺️ Challenge Map</div>
+            <div id="challengeDashMapMount"></div>
+        </section>
+
+        <section class="challenge-dash-card">
+            <div class="challenge-card-title">🏁 Team Race</div>
+            <div id="challengeDashRaceMount"></div>
+        </section>
+
+        <section class="challenge-dash-card">
+            <div class="challenge-card-title">☕ Your Team</div>
+            <button id="challengeYourTeamBtn" class="challenge-your-team-btn" onclick="enterTeamHub()">
+                Open Team Dashboard →
+            </button>
+        </section>
+
+        <section class="challenge-dash-card">
+            <div class="challenge-card-title">📚 Resources</div>
+
+            <button class="challenge-resource-btn" onclick="window.open('https://www.youtube.com/watch?v=QgssO7_WkSk&t=160s','_blank')">
+                <span class="resource-play">▶</span>
+                <div>
+                    <strong>Start Here Video</strong>
+                    <small>Intro + ሀ ለ ሐ</small>
+                </div>
+            </button>
+
+            <button class="challenge-resource-btn" onclick="showRulesCard()">
+                <span>📋</span>
+                <div>
+                    <strong>Challenge Rules</strong>
+                    <small>How levels, writing, and approval work</small>
+                </div>
+            </button>
+
+            <button class="challenge-resource-btn" onclick="showResourcesCard()">
+                <span>🔗</span>
+                <div>
+                    <strong>Learning Resources</strong>
+                    <small>Helpful Amharic tools</small>
+                </div>
+            </button>
+        </section>
+
+        <section class="challenge-dash-card">
+            <div class="challenge-card-title">Coming Up</div>
+            <div id="challengeComingUpMount">
+                <p style="color:#94a3b8; font-size:13px;">Loading next rows...</p>
+            </div>
+        </section>
+
+    </div>
+</div>
 </div>
 
 <!-- ============================================================
