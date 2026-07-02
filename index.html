@@ -430,13 +430,6 @@
             Open map
         </button>
     </div>
- <!-- CHALLENGE DASHBOARD -->
-<div id="challengeDashboardScreen" style="display:none; min-height:100vh; padding:24px 16px 48px; background:linear-gradient(
-    180deg,
-    #fefce8 0%,
-    #f8fafc 40%,
-    #ffffff 100%
-);
 
 </div>
 <!-- END MODE SELECT -->
@@ -455,7 +448,6 @@
             <h1>Team Challenge</h1>
             <p id="challengeDashSub">Loading your team...</p>
         </div>
-        <button class="challenge-back-home" onclick="enterModeSelect()">← Home</button>
 
         <button class="challenge-back-home"
                 onclick="enterModeSelect()">
@@ -466,7 +458,6 @@
     <div class="challenge-dash-grid">
 
         <section class="challenge-dash-card challenge-map-card">
-            <div class="challenge-card-title">🗺️ Challenge Map</div>
             <div class="challenge-card-title">
                 🗺️ Challenge Map
             </div>
@@ -475,7 +466,6 @@
         </section>
 
         <section class="challenge-dash-card">
-            <div class="challenge-card-title">🏁 Team Race</div>
             <div class="challenge-card-title">
                 🏁 Team Race
             </div>
@@ -484,8 +474,6 @@
         </section>
 
         <section class="challenge-dash-card">
-            <div class="challenge-card-title">☕ Your Team</div>
-            <button id="challengeYourTeamBtn" class="challenge-your-team-btn" onclick="enterTeamHub()">
             <div class="challenge-card-title">
                 ☕ Your Team
             </div>
@@ -498,9 +486,7 @@
         </section>
 
         <section class="challenge-dash-card">
-            <div class="challenge-card-title">📚 Resources</div>
 
-            <button class="challenge-resource-btn" onclick="window.open('https://www.youtube.com/watch?v=QgssO7_WkSk&t=160s','_blank')">
             <div class="challenge-card-title">
                 📚 Resources
             </div>
@@ -517,7 +503,6 @@
 
             </button>
 
-            <button class="challenge-resource-btn" onclick="showRulesCard()">
             <button class="challenge-resource-btn"
                     onclick="showRulesCard()">
 
@@ -530,7 +515,6 @@
 
             </button>
 
-            <button class="challenge-resource-btn" onclick="showResourcesCard()">
             <button class="challenge-resource-btn"
                     onclick="showResourcesCard()">
 
@@ -542,18 +526,30 @@
                 </div>
 
             </button>
+
         </section>
 
         <section class="challenge-dash-card">
-            <div class="challenge-card-title">Coming Up</div>
-            <div id="challengeComingUpMount">
-                <p style="color:#94a3b8; font-size:13px;">Loading next rows...</p>
+
+            <div class="challenge-card-title">
+                Coming Up
             </div>
+
+            <div id="challengeComingUpMount">
+                <p style="color:#94a3b8;font-size:13px;">
+                    Loading next rows...
+                </p>
+            </div>
+
         </section>
 
     </div>
+
 </div>
-</div>
+
+<!-- ============================================================
+     TEAM HUB
+     ============================================================ -->
 
 <!-- ============================================================
      TEAM HUB
