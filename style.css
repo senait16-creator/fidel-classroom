@@ -1850,3 +1850,157 @@ header {
 .fml-locked .fml-char { color: #94a3b8; }
 
 .fml-sound { font-size: 9px; color: #94a3b8; font-family: 'Inter', sans-serif; }
+
+/* =============================================================================
+   FIDEL CLASSROOM — FINAL POLISH OVERRIDES
+   Paste at the VERY BOTTOM of style.css
+   ============================================================================= */
+
+/* Better full-page behavior */
+body {
+  background: #f5f5f0;
+  padding: 0;
+}
+
+/* Keep normal dashboard spacing */
+#studentDashboard,
+#teacherOnlyDashboard {
+  padding: 24px;
+}
+
+/* Auth keeps full-screen gradient */
+#authScreen {
+  padding: 24px;
+}
+
+/* Mode Select — green/gold gradient + floating-letter feel */
+#modeSelectScreen {
+  position: relative;
+  max-width: none !important;
+  width: 100%;
+  min-height: 100vh;
+  margin: 0 !important;
+  padding: 36px 20px 48px !important;
+  overflow: hidden;
+  background: linear-gradient(
+    155deg,
+    #14532d 0%,
+    #166534 38%,
+    #15803d 65%,
+    #ca8a04 100%
+  ) !important;
+}
+
+#modeSelectScreen::before,
+#modeSelectScreen::after {
+  position: absolute;
+  font-family: 'Abyssinica SIL', Georgia, serif;
+  color: white;
+  opacity: 0.1;
+  pointer-events: none;
+  user-select: none;
+  line-height: 1;
+  z-index: 0;
+}
+
+#modeSelectScreen::before {
+  content: "ሀ";
+  font-size: 190px;
+  top: -42px;
+  left: -28px;
+}
+
+#modeSelectScreen::after {
+  content: "መ";
+  font-size: 170px;
+  bottom: -38px;
+  right: 10px;
+}
+
+.mode-greeting-sub,
+.mode-greeting-main,
+.cups-grid,
+.mode-divider,
+.mode-jump-row {
+  position: relative;
+  z-index: 1;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.mode-greeting-sub {
+  color: rgba(255,255,255,0.65) !important;
+  margin-top: 10px;
+}
+
+.mode-greeting-main {
+  color: white !important;
+  font-size: 28px;
+  margin-bottom: 28px;
+}
+
+.mode-greeting-main span {
+  color: #fde68a !important;
+}
+
+.cup-card {
+  background: rgba(255,255,255,0.95) !important;
+  border: 1px solid rgba(255,255,255,0.35) !important;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.16) !important;
+  backdrop-filter: blur(8px);
+}
+
+.cup-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.22) !important;
+}
+
+.mode-divider::before {
+  background: rgba(255,255,255,0.25) !important;
+}
+
+.mode-divider span {
+  background: transparent !important;
+  color: rgba(255,255,255,0.6) !important;
+}
+
+.mode-jump-btn {
+  background: rgba(255,255,255,0.15) !important;
+  border: 1px solid rgba(255,255,255,0.32) !important;
+  color: white !important;
+  backdrop-filter: blur(6px);
+}
+
+.mode-jump-btn:hover {
+  background: rgba(255,255,255,0.25) !important;
+}
+
+/* Mobile polish */
+@media (max-width: 640px) {
+  #studentDashboard,
+  #teacherOnlyDashboard {
+    padding: 16px;
+  }
+
+  #modeSelectScreen {
+    padding: 34px 18px 44px !important;
+  }
+
+  .mode-greeting-main {
+    font-size: 26px;
+  }
+
+  .cup-card {
+    border-radius: 18px;
+    padding: 16px 12px 14px;
+  }
+
+  .cup-card-label {
+    font-size: 14px;
+  }
+
+  .cup-card-desc {
+    font-size: 10px;
+  }
+}
