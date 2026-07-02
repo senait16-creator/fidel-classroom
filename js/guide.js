@@ -298,4 +298,3 @@ const GUIDE_CSS = `
 window.showCharacterGuide = showCharacterGuide;
 window.guideChoose = guideChoose;
 window.guideSkip = guideSkip;
-`;
