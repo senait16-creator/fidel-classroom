@@ -827,7 +827,7 @@ header {
     color: white !important;
 }
 
-/* â”€â”€ Team hub: Option B overlap â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/*  Team hub: Option B overlap  */
 .team-hub-header {
     border-radius: 0 !important;
     padding-bottom: 48px !important;
@@ -858,7 +858,7 @@ header {
     max-width: none !important;
 }
 
-/* â”€â”€ Team race redesign â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/*  Team race redesign  */
 .race-standings {
     display: flex;
     flex-direction: column;
@@ -983,7 +983,7 @@ header {
 .race-chip.chip-progress { background: #fef3c7; color: #92400e; }
 .race-chip.chip-empty    { background: #f1f5f9; color: #94a3b8; }
 
-/* â”€â”€ Icon action buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/*  Icon action buttons  */
 .share-hint-text {
     font-size: 12px;
     color: #64748b;
@@ -1039,7 +1039,7 @@ header {
     font-family: 'Inter', sans-serif;
 }
 
-/* â”€â”€ Full letter board â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* Full letter board  */
 #letterBoardScreen {
     display: none;
     position: fixed;
@@ -1228,7 +1228,7 @@ header {
 .lbt-dot.dot-progress { background: #ca8a04; }
 .lbt-dot.dot-empty    { background: #e2e8f0; }
 
-/* â”€â”€ Reading path gradient header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* Reading path gradient header  */
 .reading-path-header {
     background: linear-gradient(155deg, #1e3a8a 0%, #1d4ed8 45%, #2563eb 72%, #38bdf8 100%);
     border-radius: 0 0 28px 28px;
@@ -1256,7 +1256,7 @@ header {
     padding: 0 16px 60px;
 }
 
-/* â”€â”€ Vocab path gradient header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/*  Vocab path gradient header */
 .vocab-path-header {
     background: linear-gradient(155deg, #3b0764 0%, #6d28d9 45%, #7c3aed 72%, #a78bfa 100%);
     border-radius: 0 0 28px 28px;
@@ -1274,7 +1274,7 @@ header {
     padding: 0 16px 60px;
 }
 
-/* â”€â”€ Path header shared styles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/*  Path header shared styles  */
 .path-header-bg-letter {
     position: absolute;
     font-family: 'Abyssinica SIL', serif;
@@ -1324,7 +1324,7 @@ header {
     font-family: 'Inter', sans-serif;
 }
 
-/* â”€â”€ Level card shared (reading + vocab) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/*  Level card shared (reading + vocab)  */
 .path-level-type {
     font-size: 10px;
     font-weight: 700;
@@ -1538,7 +1538,7 @@ header {
 
 .voice-preview-text strong { color: #7c3aed; }
 
-/* â”€â”€ Daily Decode in Vocab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* Daily Decode in Vocab */
 .daily-decode-card {
     background: white;
     border-radius: 14px;
@@ -2328,4 +2328,50 @@ button:active,
     .cup-desc {
         font-size: 9.5px !important;
     }
+}
+
+.team-video-card {
+  background: white;
+  border-radius: 18px;
+  padding: 14px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,.12);
+  cursor: pointer;
+  margin-bottom: 14px;
+}
+
+.video-preview {
+  width: 110px;
+  height: 70px;
+  background: #020617;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.video-play {
+  color: white;
+  background: #dc2626;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.team-video-card strong {
+  color: #1e293b;
+  font-size: 14px;
+}
+
+.team-video-card p {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 4px;
 }
