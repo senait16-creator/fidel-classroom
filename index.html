@@ -327,115 +327,28 @@
 <!-- ============================================================
      MODE SELECT
      ============================================================ -->
-<div id="modeSelectScreen" style="display:none; min-height:100vh;">
- 
-    <div class="mode-greeting-sub" id="modeGreetingSub">Welcome back</div>
-    <div class="mode-greeting-main">
-        What are you<br>practicing <span>today?</span>
-    </div>
- 
-    <div class="cups-grid">
- 
-        <!-- Fidel map -->
-        <div class="cup-card" onclick="chooseModePractice()">
-            <span class="cup-card-badge green">Alphabet</span>
-            <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
-                <rect x="6" y="22" width="32" height="30" rx="7" fill="#dcfce7" stroke="#166534" stroke-width="1.5"/>
-                <path d="M38 28 Q47 28 47 35 Q47 42 38 42" fill="none" stroke="#166534" stroke-width="1.5" stroke-linecap="round"/>
-                <rect x="12" y="52" width="18" height="4" rx="2" fill="#166534" opacity="0.25"/>
-                <path d="M16 17 Q16 13 19 15 Q22 17 19 20" fill="none" stroke="#166534" stroke-width="1.1" stroke-linecap="round"/>
-                <path d="M23 15 Q23 11 26 13 Q29 15 26 18" fill="none" stroke="#166534" stroke-width="1.1" stroke-linecap="round"/>
-                <text x="22" y="42" text-anchor="middle" font-size="11" font-weight="700" fill="#166534" font-family="serif" font-style="italic">ፊደል</text>
-            </svg>
-            <div class="cup-card-label">Fidel Practice</div>
-<div class="cup-card-desc">Practice letters freely and track where you are</div>
-        </div>
- 
-        <!-- Challenge -->
-        <div class="cup-card" onclick="chooseModeChallenge()">
-            <span class="cup-card-badge amber">Team</span>
-            <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
-                <rect x="6" y="22" width="32" height="30" rx="7" fill="#fef3c7" stroke="#b45309" stroke-width="1.5"/>
-                <path d="M38 28 Q47 28 47 35 Q47 42 38 42" fill="none" stroke="#b45309" stroke-width="1.5" stroke-linecap="round"/>
-                <rect x="12" y="52" width="18" height="4" rx="2" fill="#b45309" opacity="0.25"/>
-                <path d="M16 17 Q16 13 19 15 Q22 17 19 20" fill="none" stroke="#b45309" stroke-width="1.1" stroke-linecap="round"/>
-                <path d="M23 15 Q23 11 26 13 Q29 15 26 18" fill="none" stroke="#b45309" stroke-width="1.1" stroke-linecap="round"/>
-                <text x="22" y="42" text-anchor="middle" font-size="9" font-weight="700" fill="#b45309" font-family="sans-serif">ውድድር</text>
-            </svg>
-            <div class="cup-card-label">Challenge</div>
-            <div class="cup-card-desc">Team competition, 12 levels</div>
-        </div>
- 
-        <!-- Reading -->
-        <div class="cup-card" onclick="chooseModeReading()">
-            <span class="cup-card-badge blue">Advanced</span>
-            <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
-                <rect x="6" y="22" width="32" height="30" rx="7" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.5"/>
-                <path d="M38 28 Q47 28 47 35 Q47 42 38 42" fill="none" stroke="#1d4ed8" stroke-width="1.5" stroke-linecap="round"/>
-                <rect x="12" y="52" width="18" height="4" rx="2" fill="#1d4ed8" opacity="0.25"/>
-                <path d="M16 17 Q16 13 19 15 Q22 17 19 20" fill="none" stroke="#1d4ed8" stroke-width="1.1" stroke-linecap="round"/>
-                <path d="M23 15 Q23 11 26 13 Q29 15 26 18" fill="none" stroke="#1d4ed8" stroke-width="1.1" stroke-linecap="round"/>
-                <text x="22" y="42" text-anchor="middle" font-size="9" font-weight="700" fill="#1d4ed8" font-family="sans-serif">ንባብ</text>
-            </svg>
-            <div class="cup-card-label">Reading</div>
-            <div class="cup-card-desc">Real Amharic sentences</div>
-        </div>
- 
-        <!-- Vocab -->
-        <div class="cup-card" onclick="chooseModeVocab()">
-            <span class="cup-card-badge purple">New</span>
-            <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
-                <rect x="6" y="22" width="32" height="30" rx="7" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
-                <path d="M38 28 Q47 28 47 35 Q47 42 38 42" fill="none" stroke="#7c3aed" stroke-width="1.5" stroke-linecap="round"/>
-                <rect x="12" y="52" width="18" height="4" rx="2" fill="#7c3aed" opacity="0.25"/>
-                <path d="M16 17 Q16 13 19 15 Q22 17 19 20" fill="none" stroke="#7c3aed" stroke-width="1.1" stroke-linecap="round"/>
-                <path d="M23 15 Q23 11 26 13 Q29 15 26 18" fill="none" stroke="#7c3aed" stroke-width="1.1" stroke-linecap="round"/>
-                <text x="22" y="42" text-anchor="middle" font-size="9" font-weight="700" fill="#7c3aed" font-family="sans-serif">ቃላት</text>
-            </svg>
-            <div class="cup-card-label">Vocab</div>
-            <div class="cup-card-desc">Words, phrases, conversation</div>
-        </div>
- 
-        <!-- Full board — wide -->
-        <div class="cup-card wide" onclick="chooseModePractice()">
-            <svg width="48" height="54" viewBox="0 0 48 54" fill="none" style="flex-shrink:0;">
-                <rect x="4" y="16" width="30" height="26" rx="6" fill="#f0fdf4" stroke="#166534" stroke-width="1.5"/>
-                <path d="M34 21 Q42 21 42 29 Q42 37 34 37" fill="none" stroke="#166534" stroke-width="1.4" stroke-linecap="round"/>
-                <rect x="9" y="42" width="16" height="3" rx="1.5" fill="#166534" opacity="0.2"/>
-                <path d="M11 12 Q11 9 14 10 Q16 12 14 14" fill="none" stroke="#166534" stroke-width="1" stroke-linecap="round"/>
-                <path d="M17 10 Q17 7 20 9 Q22 11 20 13" fill="none" stroke="#166534" stroke-width="1" stroke-linecap="round"/>
-                <rect x="10" y="22" width="4" height="4" rx="1" fill="#166534" opacity="0.5"/>
-                <rect x="16" y="22" width="4" height="4" rx="1" fill="#166534" opacity="0.4"/>
-                <rect x="22" y="22" width="4" height="4" rx="1" fill="#166534" opacity="0.3"/>
-                <rect x="10" y="28" width="4" height="4" rx="1" fill="#166534" opacity="0.4"/>
-                <rect x="16" y="28" width="4" height="4" rx="1" fill="#166534" opacity="0.5"/>
-                <rect x="22" y="28" width="4" height="4" rx="1" fill="#166534" opacity="0.35"/>
-            </svg>
-            <div class="cup-card-text">
-                <div class="cup-card-label">Full letter board</div>
-                <div class="cup-card-desc">Browse all 33 letter families freely — no levels, no progression. Great for review.</div>
-            </div>
-            <span class="cup-card-badge gray">Free play</span>
-        </div>
- 
-    </div>
- 
     <div class="mode-divider"><span>or jump back in</span></div>
+
     <div class="mode-jump-row">
         <button class="mode-jump-btn" id="modeContinueBtn" onclick="chooseModeChallenge()">
             Continue Level 1
         </button>
+
         <button class="mode-jump-btn" onclick="openChallengeMap()">
             Open map
         </button>
     </div>
- <!-- CHALLENGE DASHBOARD -->
-<div id="challengeDashboardScreen" style="display:none; min-height:100vh; padding:24px 16px 48px; background:linear-gradient(
-    180deg,
-    #fefce8 0%,
-    #f8fafc 40%,
-    #ffffff 100%
-);
+
+</div>
+<!-- END MODE SELECT -->
+
+
+<!-- ============================================================
+     CHALLENGE DASHBOARD
+     ============================================================ -->
+
+<div id="challengeDashboardScreen"
+     style="display:none; min-height:100vh; padding:24px 16px 48px; background:#f5f5f0;">
 
     <div class="challenge-dash-hero">
         <div>
@@ -443,213 +356,108 @@
             <h1>Team Challenge</h1>
             <p id="challengeDashSub">Loading your team...</p>
         </div>
-        <button class="challenge-back-home" onclick="enterModeSelect()">← Home</button>
+
+        <button class="challenge-back-home"
+                onclick="enterModeSelect()">
+            ← Home
+        </button>
     </div>
 
     <div class="challenge-dash-grid">
 
         <section class="challenge-dash-card challenge-map-card">
-            <div class="challenge-card-title">🗺️ Challenge Map</div>
+            <div class="challenge-card-title">
+                🗺️ Challenge Map
+            </div>
+
             <div id="challengeDashMapMount"></div>
         </section>
 
         <section class="challenge-dash-card">
-            <div class="challenge-card-title">🏁 Team Race</div>
+            <div class="challenge-card-title">
+                🏁 Team Race
+            </div>
+
             <div id="challengeDashRaceMount"></div>
         </section>
 
         <section class="challenge-dash-card">
-            <div class="challenge-card-title">☕ Your Team</div>
-            <button id="challengeYourTeamBtn" class="challenge-your-team-btn" onclick="enterTeamHub()">
+            <div class="challenge-card-title">
+                ☕ Your Team
+            </div>
+
+            <button id="challengeYourTeamBtn"
+                    class="challenge-your-team-btn"
+                    onclick="enterTeamHub()">
                 Open Team Dashboard →
             </button>
         </section>
 
         <section class="challenge-dash-card">
-            <div class="challenge-card-title">📚 Resources</div>
 
-            <button class="challenge-resource-btn" onclick="window.open('https://www.youtube.com/watch?v=QgssO7_WkSk&t=160s','_blank')">
+            <div class="challenge-card-title">
+                📚 Resources
+            </div>
+
+            <button class="challenge-resource-btn"
+                    onclick="window.open('https://www.youtube.com/watch?v=QgssO7_WkSk&t=160s','_blank')">
+
                 <span class="resource-play">▶</span>
+
                 <div>
                     <strong>Start Here Video</strong>
                     <small>Intro + ሀ ለ ሐ</small>
                 </div>
+
             </button>
 
-            <button class="challenge-resource-btn" onclick="showRulesCard()">
+            <button class="challenge-resource-btn"
+                    onclick="showRulesCard()">
+
                 <span>📋</span>
+
                 <div>
                     <strong>Challenge Rules</strong>
                     <small>How levels, writing, and approval work</small>
                 </div>
+
             </button>
 
-            <button class="challenge-resource-btn" onclick="showResourcesCard()">
+            <button class="challenge-resource-btn"
+                    onclick="showResourcesCard()">
+
                 <span>🔗</span>
+
                 <div>
                     <strong>Learning Resources</strong>
                     <small>Helpful Amharic tools</small>
                 </div>
+
             </button>
+
         </section>
 
         <section class="challenge-dash-card">
-            <div class="challenge-card-title">Coming Up</div>
-            <div id="challengeComingUpMount">
-                <p style="color:#94a3b8; font-size:13px;">Loading next rows...</p>
+
+            <div class="challenge-card-title">
+                Coming Up
             </div>
+
+            <div id="challengeComingUpMount">
+                <p style="color:#94a3b8;font-size:13px;">
+                    Loading next rows...
+                </p>
+            </div>
+
         </section>
 
     </div>
-</div>
+
 </div>
 
 <!-- ============================================================
      TEAM HUB
      ============================================================ -->
-<div id="teamHubScreen" style="display:none;">
-
-    <!-- Header: gradient, floating letters, Option B (bleeds down) -->
-    <div class="team-hub-header" id="teamHubHeaderEl">
-        <div class="team-hub-header-pattern"></div>
-        <div class="team-hub-header-content">
-
-        
-
-
-            <!-- Team name: Lora italic -->
-            <div class="team-hub-name" id="teamHubTeamName"
-                 style="font-family:'Lora',Georgia,serif; font-style:italic; text-align:center;">
-                Your Team
-            </div>
-
-            <div class="team-hub-level-tag">
-                <span>☕</span>
-                <span id="teamHubLevelLabel"
-                      style="font-family:'Lora',Georgia,serif; font-style:italic;">Level 1</span>
-                <span>•</span>
-                <span>🔥 <span id="teamHubStreakLabel">0</span> streak</span>
-            </div>
-
-            <!-- Avatar group -->
-            <div id="teamHubMembersRow" class="avatar-group-row"></div>
-        </div>
-    </div>
-
-    <!-- Body: overlaps header by 20px (Option B) -->
-   <div class="team-hub-body">
-
-    <!-- Start here video -->
-    <div class="team-video-card" onclick="window.open('https://www.youtube.com/watch?v=QgssO7_WkSk&t=160s','_blank')">
-        <div class="video-preview">
-            <span class="video-play">▶</span>
-        </div>
-        <div>
-            <strong>Start Here: Intro + ሀ ለ ሐ</strong>
-            <p>Watch this first lesson before practicing with your team.</p>
-        </div>
-    </div>
-
-    <!-- Today card -->
-    <div id="todayCardMount"></div>
-
-        <!-- Map button -->
-        <button class="map-entry-btn" onclick="openChallengeMap()">
-            <span class="map-btn-icon">☕</span>
-            Open Level Map
-            <span style="margin-left:auto; opacity:0.7; font-size:13px;">View all 12 levels →</span>
-        </button>
-
-        <!-- Level completion banner -->
-        <div id="levelCompletionMount" style="display:none;"></div>
-
-        <!-- Embedded level map -->
-        <div class="team-hub-section" style="margin-top:0;">
-            <div id="embeddedLevelMapMount"></div>
-        </div>
-
-        <!-- Team race (collapsed by default) -->
-        <div class="team-hub-section">
-            <div class="team-hub-section-title" onclick="toggleTeamRace()"
-                 style="cursor:pointer; user-select:none;">
-                <span>Team Race</span>
-                <span id="teamRaceToggleArrow" style="color:#94a3b8; font-size:12px;">▼</span>
-            </div>
-            <div id="teamRaceMount" style="display:none;"></div>
-        </div>
-
-        <!-- Help flags (captain only) -->
-        <div id="helpFlagsMount" style="display:none;"></div>
-
-        <!-- Practice feed (collapsed) -->
-        <div class="team-hub-section">
-            <div class="team-hub-section-title" onclick="toggleTeamFeed()"
-                 style="cursor:pointer; user-select:none;">
-                <span>Team Practice Feed</span>
-                <span id="teamFeedToggleArrow" style="color:#94a3b8; font-size:12px;">▼</span>
-            </div>
-            <div id="teamHubPracticeFeed" style="display:none;"></div>
-        </div>
-
-        <!-- Share / upload — ICON BUTTONS -->
-        <div class="team-hub-section">
-            <div class="team-hub-section-title">Share Your Practice</div>
-
-            <!-- Letter picker hidden until needed -->
-            <div id="teamHubLetterPickerWrap" style="display:none; margin-bottom:14px;">
-                <label style="font-size:12px; font-weight:700; color:#475569;
-                              display:block; margin-bottom:6px;">
-                    Which letter are you practicing?
-                </label>
-                <select id="teamHubLetterSelect" style="max-width:200px;"></select>
-            </div>
-
-            <!-- Student: icon buttons -->
-            <div id="teamHubStudentActions">
-                <p class="share-hint-text">
-                    Share a practice photo with your team, or submit writing for captain approval.
-                </p>
-                <div class="icon-action-row">
-                    <div class="icon-action-btn"
-                         onclick="revealLetterPickerThen('openTeamHubPracticePost')">
-                        <div class="icon-action-circle share-circle">📸</div>
-                        <div class="icon-action-label">Share</div>
-                    </div>
-                    <div class="icon-action-btn"
-                         onclick="revealLetterPickerThen('openTeamHubFinalSubmit')">
-                        <div class="icon-action-circle submit-circle">✍️</div>
-                        <div class="icon-action-label" style="color:white;background:#166534;
-                             padding:2px 10px;border-radius:10px;">Submit</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Captain: simpler version -->
-            <div id="teamHubCaptainActions" style="display:none;">
-                <p class="share-hint-text">
-                    Review your team's writing submissions and share encouragement.
-                </p>
-                <button class="btn-primary" onclick="enterCaptainDashboard()"
-                        style="margin-bottom:10px;">
-                    👑 Review Pending Submissions
-                </button>
-                <div class="icon-action-row" style="margin-top:4px;">
-                    <div class="icon-action-btn"
-                         onclick="revealLetterPickerThen('openTeamHubPracticePost')">
-                        <div class="icon-action-circle share-circle">📸</div>
-                        <div class="icon-action-label">Share</div>
-                    </div>
-                </div>
-            </div>
-
-            <input type="file" id="teamHubPhotoInput" accept="image/*" style="display:none;">
-        </div>
-
-    </div>
-    <!-- end .team-hub-body -->
-
-</div>
-<!-- end #teamHubScreen -->
 
 <!-- ============================================================
      CHALLENGE LEVELS (full map fallback)
