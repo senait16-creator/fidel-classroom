@@ -1960,23 +1960,18 @@ button:active,
     flex-direction: column;
 }
 
-#modeSelectScreen::before,
-#modeSelectScreen::after {
-    position: absolute;
-    font-family: 'Abyssinica SIL', Georgia, serif;
-    color: white;
-    opacity: 0.10;
-    pointer-events: none;
-    user-select: none;
-    line-height: 1;
-    z-index: 0;
-}
-
 #modeSelectScreen::before {
-    content: "áˆ€";
+    content: "\1200";
     font-size: 200px;
     top: -44px;
     left: -30px;
+}
+
+#modeSelectScreen::after {
+    content: "\1218";
+    font-size: 180px;
+    bottom: -44px;
+    right: 6px;
 }
 
 #modeSelectScreen::after {
