@@ -335,7 +335,7 @@ async function saveProfileData(event) {
     }
 }
 if (saveBtn) { saveBtn.disabled = false; saveBtn.innerText = "Save Changes"; }
-
+    }
 // ---------------------------------------------------------------------------
 // Team assignment
 // Auto-assignment disabled for July cohort — teacher assigns manually.
