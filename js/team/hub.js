@@ -117,11 +117,6 @@ async function renderTeamHub() {
         if (captainActions) captainActions.style.display = 'none';
     }
 
-    // ── Level advance notification banner (one-time, students only) ─
-    if (!isCaptain && typeof checkAndShowLevelAdvanceBanner === 'function') {
-        await checkAndShowLevelAdvanceBanner('levelAdvanceBannerMount');
-    }
-
     // ── Today card (students only) ───────────────────────────
     if (!isCaptain && typeof renderTodayCard === 'function') {
         await renderTodayCard('todayCardMount');
