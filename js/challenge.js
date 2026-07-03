@@ -92,11 +92,15 @@ async function renderChallengeDashboard() {
         sub.innerText = `${team.name} • Level ${team.current_level} • 🔥 ${team.streak_count || 0} streak`;
     }
 
-    const teamBtn = document.getElementById("challengeYourTeamBtn");
-    if (teamBtn) {
-        teamBtn.style.background = `linear-gradient(135deg, ${teamHex}, ${teamHex}cc)`;
-        teamBtn.innerText = `Open ${team.name} Dashboard →`;
-    }
+  const teamBtn = document.getElementById("challengeYourTeamBtn");
+if (teamBtn) {
+    teamBtn.style.background = `linear-gradient(135deg, ${teamHex}, ${teamHex}cc)`;
+    teamBtn.innerText = `Open ${team.name} Dashboard →`;
+
+    teamBtn.onclick = () => {
+        exitChallengeBackToDashboard();
+    };
+}
 
     await renderChallengeDashboardMap(levels, team);
     await renderChallengeDashboardRace();
