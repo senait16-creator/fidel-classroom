@@ -47,6 +47,17 @@ function enterTeamHub() {
     }
 }
 
+function exitTeamHub() {
+    const hub = document.getElementById("teamHubScreen");
+    if (hub) hub.style.display = "none";
+
+    const challenge = document.getElementById("challengeDashboardScreen");
+    if (challenge) challenge.style.display = "block";
+
+    if (typeof renderChallengeDashboard === "function") {
+        renderChallengeDashboard();
+    }
+}
 // ---------------------------------------------------------------------------
 // Main render
 // ---------------------------------------------------------------------------
