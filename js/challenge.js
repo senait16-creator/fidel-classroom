@@ -450,21 +450,22 @@ async function openChallengeFamilyPicker(level) {
 async function returnToChallengeFamilyPicker() {
     document.getElementById("gameWorkspace").style.display = "none";
 
-    if (!activeChallengeLevel) {
-        if (typeof embeddedActiveFamily !== "undefined" && embeddedActiveFamily) {
-            document.getElementById("familyPracticeSheet").style.display = "flex";
-        } else {
-            document.getElementById("teamHubScreen").style.display = "block";
-        }
+    // Letter Board / embedded practice-sheet games should return to that sheet,
+    // not to the Challenge dashboard or old Team Hub.
+    if (typeof embeddedActiveFamily !== "undefined" && embeddedActiveFamily) {
+        document.getElementById("familyPracticeSheet").style.display = "flex";
         return;
     }
 
     if (activeChallengeFamilyObj) {
         document.getElementById("challengeFamilyDetailScreen").style.display = "block";
         renderChallengeFamilyDetailGiantRow(activeChallengeFamilyObj);
-    } else {
+        await refreshChallengeDetailWritingGate(activeChallengeFamilyObj, activeChallengeFamilyLevel);
+    } else if (activeChallengeLevel) {
         document.getElementById("challengeFamilyScreen").style.display = "block";
         await renderChallengeFamilyPicker();
+    } else if (typeof chooseModeChallenge === "function") {
+        await chooseModeChallenge();
     }
 }
 
@@ -517,7 +518,7 @@ async function renderChallengeFamilyPicker() {
 
 const vowelSoundLabels = ["-ä", "-u", "-ee", "-a", "-ay", "-ih", "-o"];
 
-function openChallengeFamilyDetail(fidelObj, levelNumber) {
+async function openChallengeFamilyDetail(fidelObj, levelNumber) {
     activeChallengeFamilyObj = fidelObj;
     activeChallengeFamilyLevel = levelNumber;
     document.getElementById("challengeFamilyScreen").style.display = "none";
@@ -547,10 +548,42 @@ function openChallengeFamilyDetail(fidelObj, levelNumber) {
         });
         document.getElementById("challengeFamilyDetailScreen").style.display = "none";
     };
-    document.getElementById("challengeDetailWritingBtn").onclick = () => {
-        openWritingSubmitScreen(fidelObj.base, 'challengeDetail', levelNumber);
-        document.getElementById("challengeFamilyDetailScreen").style.display = "none";
-    };
+    await refreshChallengeDetailWritingGate(fidelObj, levelNumber);
+}
+
+// Enforce the actual 1 → 2 → 3 flow: writing stays locked until the
+// matching-game streak is passed for this family and level.
+async function refreshChallengeDetailWritingGate(fidelObj, levelNumber) {
+    const writeBtn = document.getElementById("challengeDetailWritingBtn");
+    if (!writeBtn || !fidelObj || !currentUser?.id) return;
+
+    const writeSub = document.getElementById("challengeDetailWritingSub");
+    const { data: progress, error } = await _supabase
+        .from('student_family_progress')
+        .select('streak_passed')
+        .eq('student_id', currentUser.id)
+        .eq('base_letter', fidelObj.base)
+        .eq('level_number', levelNumber)
+        .maybeSingle();
+
+    if (error) console.warn("Could not refresh writing gate:", error);
+
+    const streakDone = !!progress?.streak_passed;
+    writeBtn.classList.toggle('step-locked', !streakDone);
+    writeBtn.disabled = !streakDone;
+
+    if (writeSub) {
+        writeSub.innerText = streakDone
+            ? "Submit for captain review"
+            : `🔒 Unlocks after a streak of ${STREAK_THRESHOLD}`;
+    }
+
+    writeBtn.onclick = streakDone
+        ? () => {
+            openWritingSubmitScreen(fidelObj.base, 'challengeDetail', levelNumber);
+            document.getElementById("challengeFamilyDetailScreen").style.display = "none";
+        }
+        : null;
 }
 
 function exitChallengeFamilyDetail() {
@@ -652,6 +685,8 @@ window.exitChallengeFamilyPicker = exitChallengeFamilyPicker;
 window.returnToChallengeFamilyPicker = returnToChallengeFamilyPicker;
 window.launchChallengeStreakGame = launchChallengeStreakGame;
 window.exitChallengeFamilyDetail = exitChallengeFamilyDetail;
+window.openChallengeFamilyDetail = openChallengeFamilyDetail;
+window.refreshChallengeDetailWritingGate = refreshChallengeDetailWritingGate;
 
 window.getTeamHex = getTeamHex;
 
