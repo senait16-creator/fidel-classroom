@@ -414,18 +414,17 @@ function openTeamHubFinalSubmit() {
 // ---------------------------------------------------------------------------
 
 function enterCaptainDashboard() {
-    document.getElementById('teamHubScreen').style.display = 'none';
-    document.getElementById('studentDashboard').style.display = 'none';
-    document.getElementById('captainDashboardScreen').style.display = 'block';
+    const captainCard = document.getElementById("teamHubCaptainActions");
+
+    if (captainCard) {
+        captainCard.style.display = "block";
+        captainCard.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
     loadCaptainWritingQueue();
     loadCaptainTeamProgress();
 }
 
-
-function exitCaptainDashboard() {
-    document.getElementById("captainDashboardScreen").style.display = "none";
-    enterTeamHub();
-}
 
 async function loadCaptainWritingQueue() {
     const mount = document.getElementById('captainWritingQueueMount');
@@ -717,7 +716,6 @@ window.exitTeamHub = exitTeamHub;
 window.renderTeamHub = renderTeamHub;
 
 window.enterCaptainDashboard = enterCaptainDashboard;
-window.exitCaptainDashboard = exitCaptainDashboard;
 
 window.loadCaptainWritingQueue = loadCaptainWritingQueue;
 window.loadCaptainTeamProgress = loadCaptainTeamProgress;
