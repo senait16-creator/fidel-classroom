@@ -42,6 +42,32 @@ function enterModeSelect() {
 
 }
 
+function enterTeamHub() {
+    [
+        "modeSelectScreen",
+        "studentDashboard",
+        "challengeDashboardScreen",
+        "challengeLevelsScreen",
+        "challengeFamilyScreen",
+        "challengeFamilyDetailScreen",
+        "readingLevelsScreen",
+        "captainDashboardScreen",
+        "letterBoardScreen"
+    ].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = "none"; 
+    });
+
+    const hub = document.getElementById("teamHubScreen");
+    if (hub) hub.style.display = "block";
+
+    const hamburger = document.getElementById("hamburgerBtn");
+    if (hamburger) hamburger.style.display = "flex";
+
+    if (typeof renderTeamHub === "function") {
+        renderTeamHub();
+    }
+}
 function chooseModePractice() {
     document.getElementById("modeSelectScreen").style.display = "none";
     if (typeof openLetterBoard === 'function') {
