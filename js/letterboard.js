@@ -224,20 +224,26 @@ function renderLetterBoard(query) {
     }
 }
 
-function openFamilyFromBoard(baseLetter) {
+async function openFamilyFromBoard(baseLetter) {
     const fidelObj = alphabetData.find(item => item.base === baseLetter);
     if (!fidelObj) return;
 
-    // Open practice sheet directly
-    if (typeof openEmbeddedFamilyPractice === 'function') {
-        openEmbeddedFamilyPractice(fidelObj, null, () => {
-            document.getElementById('letterBoardScreen').style.display = 'flex';
-        });
-        document.getElementById('letterBoardScreen').style.display = 'none';
-    } else {
+    if (typeof openEmbeddedFamilyPractice !== 'function') {
         // Fallback: open matching game
-        openMatchingGameWorkspaceMode(fidelObj);
+        return openMatchingGameWorkspaceMode(fidelObj);
     }
+
+    // Look up this family's real progress so the practice sheet's writing
+    // step is gated correctly (locked until the matching-game streak passes).
+    const { data: progress } = await _supabase
+        .from('student_family_progress')
+        .select('best_streak, streak_passed, writing_passed')
+        .eq('student_id', currentUser.id)
+        .eq('base_letter', baseLetter)
+        .maybeSingle();
+
+    document.getElementById('letterBoardScreen').style.display = 'none';
+    openEmbeddedFamilyPractice(fidelObj, null, progress || {}, 'letterBoard');
 }
 window.openFamilyFromBoard = openFamilyFromBoard;
 
