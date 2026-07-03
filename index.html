@@ -425,26 +425,24 @@
             <div class="cup-card-desc">Words, phrases, conversation</div>
         </div>
 
-        <!-- Full board -->
-        <div class="cup-card wide" onclick="chooseModePractice()">
+        <!-- Team Leaders / Team Status -->
+        <div class="cup-card wide" onclick="chooseModeChallenge()">
             <svg width="48" height="54" viewBox="0 0 48 54" fill="none" style="flex-shrink:0;">
-                <rect x="4" y="16" width="30" height="26" rx="6" fill="#f0fdf4" stroke="#166534" stroke-width="1.5"/>
-                <path d="M34 21 Q42 21 42 29 Q42 37 34 37" fill="none" stroke="#166534" stroke-width="1.4" stroke-linecap="round"/>
-                <rect x="9" y="42" width="16" height="3" rx="1.5" fill="#166534" opacity="0.2"/>
-                <path d="M11 12 Q11 9 14 10 Q16 12 14 14" fill="none" stroke="#166534" stroke-width="1" stroke-linecap="round"/>
-                <path d="M17 10 Q17 7 20 9 Q22 11 20 13" fill="none" stroke="#166534" stroke-width="1" stroke-linecap="round"/>
-                <rect x="10" y="22" width="4" height="4" rx="1" fill="#166534" opacity="0.5"/>
-                <rect x="16" y="22" width="4" height="4" rx="1" fill="#166534" opacity="0.4"/>
-                <rect x="22" y="22" width="4" height="4" rx="1" fill="#166534" opacity="0.3"/>
-                <rect x="10" y="28" width="4" height="4" rx="1" fill="#166534" opacity="0.4"/>
-                <rect x="16" y="28" width="4" height="4" rx="1" fill="#166534" opacity="0.5"/>
-                <rect x="22" y="28" width="4" height="4" rx="1" fill="#166534" opacity="0.35"/>
+                <path d="M10 18L16 28L24 16L32 28L38 18L36 36H12L10 18Z"
+                      fill="#fbbf24" stroke="#b45309" stroke-width="1.5"/>
+                <circle cx="16" cy="20" r="2" fill="#fde68a"/>
+                <circle cx="24" cy="16" r="2" fill="#fde68a"/>
+                <circle cx="32" cy="20" r="2" fill="#fde68a"/>
+                <rect x="12" y="36" width="24" height="4" rx="2" fill="#b45309"/>
+                <circle cx="17" cy="46" r="3" fill="#166534"/>
+                <circle cx="24" cy="44" r="3.5" fill="#166534"/>
+                <circle cx="31" cy="46" r="3" fill="#166534"/>
             </svg>
             <div class="cup-card-text">
-                <div class="cup-card-label">Full letter board</div>
-                <div class="cup-card-desc">Browse all 33 letter families freely — no levels, no progression. Great for review.</div>
+                <div class="cup-card-label">Team Leaders</div>
+                <div class="cup-card-desc">See your team, captain, current mission, and class competition progress.</div>
             </div>
-            <span class="cup-card-badge gray">Free play</span>
+            <span class="cup-card-badge gold">👑 Team</span>
         </div>
 
     </div>
@@ -482,35 +480,41 @@
     <div class="challenge-dash-grid">
 
         <section class="challenge-dash-card challenge-map-card">
-            <div class="challenge-card-title">Levels </div>
-            <div id="challengeDashMapMount"></div>
+            <div class="challenge-card-title">🔥 Current Level</div>
+            <div id="challengeDashMapMount">
+                <p style="color:#94a3b8;font-size:13px;">Loading current level...</p>
+            </div>
         </section>
 
-<section class="challenge-dash-card">
-    <div class="challenge-card-title"> Your Team</div>
+        <section class="challenge-dash-card" id="challengeTeamStatusMount">
+            <div class="challenge-card-title">👥 Your Team</div>
 
-    <button id="challengeYourTeamBtn"
-            class="challenge-your-team-btn">
-        Open Team Dashboard →
-    </button>
-</section>
-
-<section class="challenge-dash-card">
-    <div class="challenge-card-title">🏁 Team Race</div>
-    <div id="challengeDashRaceMount"></div>
-</section>
+            <button id="challengeYourTeamBtn"
+                    class="challenge-your-team-btn">
+                View team status ↓
             </button>
+
+            <div id="challengeTeamStatusContent" class="challenge-team-status-content">
+                <p style="color:#94a3b8;font-size:13px;">Loading team status...</p>
+            </div>
         </section>
 
         <section class="challenge-dash-card">
-            <div class="challenge-card-title">📚 Resources</div>
+            <div class="challenge-card-title">🏁 Team Race</div>
+            <div id="challengeDashRaceMount">
+                <p style="color:#94a3b8;font-size:13px;">Loading race...</p>
+            </div>
+        </section>
+
+        <section class="challenge-dash-card">
+            <div class="challenge-card-title">📚 Start Here</div>
 
             <button class="challenge-resource-btn"
                     onclick="window.open('https://www.youtube.com/watch?v=QgssO7_WkSk&t=160s','_blank')">
                 <span class="resource-play">▶</span>
                 <div>
-                    <strong>Start Here Video</strong>
-                    <small>Intro + ሀ ለ ሐ</small>
+                    <strong>Level Video</strong>
+                    <small>Watch first, then practice the letters</small>
                 </div>
             </button>
 
@@ -540,7 +544,6 @@
 
     </div>
 </div>
-
 
 <!-- ============================================================
      TEAM HUB
@@ -643,19 +646,26 @@
 
             <div id="teamHubCaptainActions" style="display:none;">
                 <p class="share-hint-text">
-                    Review your team's writing submissions and share encouragement.
+                    👑 Captain tools live here now — no separate captain dashboard needed.
                 </p>
 
                 <button class="btn-primary"
                         onclick="enterCaptainDashboard()"
-                        style="margin-bottom:10px;">
-                    👑 Review Pending Submissions
+                        style="margin-bottom:12px;">
+                    Load Captain Review Tools
                 </button>
 
-                <div class="icon-action-row" style="margin-top:4px;">
-                    <div class="icon-action-btn" onclick="revealLetterPickerThen('openTeamHubPracticePost')">
-                        <div class="icon-action-circle share-circle">📸</div>
-                        <div class="icon-action-label">Share</div>
+                <div class="teacher-panel" style="margin-bottom:14px;">
+                    <h2 style="font-size:16px; color:var(--neutral-dark); margin-bottom:10px;">Pending Submissions</h2>
+                    <div id="captainWritingQueueMount">
+                        <p style="color:#94a3b8; font-size:13px;">Tap “Load Captain Review Tools” to load submissions.</p>
+                    </div>
+                </div>
+
+                <div class="teacher-panel">
+                    <h2 style="font-size:16px; color:var(--neutral-dark); margin-bottom:10px;">Team Progress</h2>
+                    <div id="captainTeamProgressMount">
+                        <p style="color:#94a3b8; font-size:13px;">Tap “Load Captain Review Tools” to load team progress.</p>
                     </div>
                 </div>
             </div>
@@ -716,11 +726,20 @@
     <div class="challenge-streak-rule-banner">
         <strong>Get a streak of 20 in a row</strong> to pass this letter's matching game.
     </div>
-    <div style="display:flex; gap:10px; margin-bottom:12px;">
-        <button id="challengeDetailPlayBtn" class="btn-primary" style="flex:1;">🎮 Matching Game</button>
-        <button id="challengeDetailFlashcardBtn" class="btn-primary" style="flex:1; background:#475569;">🗂️ Flashcards</button>
+    <div class="challenge-lesson-step-list" style="display:flex; flex-direction:column; gap:12px; margin-bottom:16px;">
+        <button id="challengeDetailFlashcardBtn" class="btn-primary challenge-step-btn flashcard-step" style="background:#475569;">
+            <span class="step-icon-circle">📚</span>
+            <span>1. Flashcards</span>
+        </button>
+        <button id="challengeDetailPlayBtn" class="btn-primary challenge-step-btn matching-step">
+            <span class="step-icon-circle">🎮</span>
+            <span>2. Matching Game</span>
+        </button>
+        <button id="challengeDetailWritingBtn" class="btn-primary challenge-step-btn writing-step" style="background:#7c3aed;">
+            <span class="step-icon-circle">✍️</span>
+            <span>3. Writing Submission</span>
+        </button>
     </div>
-    <button id="challengeDetailWritingBtn" class="btn-primary" style="width:100%; background:#7c3aed; margin-bottom:16px;">✍️ Submit Your Writing</button>
     <div id="challengeDetailWritingStatusBox" style="display:none;"></div>
 </div>
 
@@ -836,7 +855,7 @@
 <div id="captainDashboardScreen" style="display:none; max-width:700px; margin:40px auto; padding:0 16px;">
     <div class="workspace-title">
         <span>👑 Captain Review</span>
-        <button class="btn-secondary" onclick="exitCaptainDashboard()">← Back</button>
+        <button class="btn-secondary" onclick="enterTeamHub()">← Back</button>
     </div>
     <p class="subtitle" style="text-align:left; margin-bottom:16px;">Review your team's writing submissions and see how everyone's progressing.</p>
     <div class="teacher-panel" style="margin-bottom:20px;">
@@ -865,9 +884,9 @@
             <div id="challengeWritingStatusBox" style="display:none;"></div>
         </div>
         <div style="display:flex; flex-direction:column; gap:12px;">
-            <button id="practiceSheetFlashcardBtn" class="btn-primary" style="background:#475569; font-size:16px; padding:18px; border-radius:14px;">🗂️ Flashcards</button>
-            <button id="practiceSheetPlayBtn" class="btn-primary" style="font-size:16px; padding:18px; border-radius:14px;">🎮 Matching Game</button>
-            <button id="practiceSheetWriteBtn" class="btn-primary" style="background:#7c3aed; display:none; font-size:16px; padding:18px; border-radius:14px;">✍️ Submit My Writing</button>
+            <button id="practiceSheetFlashcardBtn" class="btn-primary" style="background:#475569; font-size:16px; padding:18px; border-radius:14px;">📚 1. Flashcards</button>
+            <button id="practiceSheetPlayBtn" class="btn-primary" style="font-size:16px; padding:18px; border-radius:14px;">🎮 2. Matching Game</button>
+            <button id="practiceSheetWriteBtn" class="btn-primary" style="background:#7c3aed; display:none; font-size:16px; padding:18px; border-radius:14px;">✍️ 3. Writing Submission</button>
         </div>
     </div>
 </div>
@@ -1066,6 +1085,7 @@
 <!-- ============================================================
      SCRIPT TAGS — order matters
      ============================================================ -->
+<script src="js/navigation.js?v=1" defer></script>
 <script src="js/app.js?v=9" defer></script>
 <script src="js/auth.js?v=9" defer></script>
 <script src="js/guide.js?v=10" defer></script>
@@ -1077,16 +1097,12 @@
 <script src="js/letterboard.js?v=9" defer></script>
 <script src="js/team/progress.js?v=9" defer></script>
 <script src="js/team/levels.js?v=9" defer></script>
-<script src="js/team/hub.js?v=9" defer></script>
 <script src="js/team/map.js?v=9" defer></script>
+<script src="js/team/hub.js?v=10" defer></script>
 <script src="js/wordle.js?v=9" defer></script>
-    <script src="js/navigation.js"></script>
-    <script src="js/intro.js"></script>
-<script src="js/challenge.js?v=11" defer></script>    
-    <script src="js/menu.js?v=9" defer></script>
-
-
-
+<script src="js/intro.js?v=1" defer></script>
+<script src="js/challenge.js?v=12" defer></script>
+<script src="js/menu.js?v=9" defer></script>
 
 </body>
 </html>
