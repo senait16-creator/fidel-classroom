@@ -521,6 +521,15 @@ async function renderChallengeFamilyPicker() {
 
     if (!level || !container) return;
 
+    const lessonVideo =
+        level.level_number === 1
+            ? "https://www.youtube.com/watch?v=QgssO7_WkSk&t=160s"
+            : level.level_number === 2
+                ? "https://www.youtube.com/watch?v=4pQggzd-vYE&t=61s"
+                : "https://www.youtube.com/@Jebena_Amharicfidel";
+
+    const jebenaChannel = "https://www.youtube.com/@Jebena_Amharicfidel";
+
     if (title) {
         title.innerText = level.title || `Level ${level.level_number}`;
     }
@@ -534,52 +543,66 @@ async function renderChallengeFamilyPicker() {
     container.innerHTML = `
         <div class="challenge-level-resource-panel">
             <div class="challenge-resource-eyebrow">Start here</div>
-            <h2 class="challenge-resource-title">Watch, sing, pronounce, then write</h2>
+
+            <h2 class="challenge-resource-title">
+                Level ${level.level_number}: ${(level.letter_families || []).join(" ")}
+            </h2>
+
             <p class="challenge-resource-copy">
-                Before choosing a letter family, review the lesson video and resources for this level.
+                Follow this order first: watch the lesson, sing the Fidel, practice pronunciation, then practice writing.
             </p>
 
-          <div class="challenge-resource-links">
+            <div class="challenge-resource-links">
 
-    <a href="${
-        level.level_number === 1
-            ? 'https://www.youtube.com/watch?v=QgssO7_WkSk&t=160s'
-            : level.level_number === 2
-                ? 'https://www.youtube.com/watch?v=4pQggzd-vYE&t=61s'
-                : 'https://www.youtube.com/@Jebena_Amharicfidel'
-    }"
-       target="_blank"
-       rel="noopener"
-       class="challenge-resource-link primary">
-        🎥 Lesson Video
-    </a>
+                <a href="${lessonVideo}"
+                   target="_blank"
+                   rel="noopener"
+                   class="challenge-resource-link primary">
+                    <span>🎥</span>
+                    <div>
+                        <strong>1. Lesson Video</strong>
+                        <small>Watch this first</small>
+                    </div>
+                </a>
 
-    <a href="https://www.youtube.com/@Jebena_Amharicfidel"
-       target="_blank"
-       rel="noopener"
-       class="challenge-resource-link">
-        🎵 Alphabet Songs
-    </a>
+                <a href="${jebenaChannel}"
+                   target="_blank"
+                   rel="noopener"
+                   class="challenge-resource-link">
+                    <span>🎵</span>
+                    <div>
+                        <strong>2. Sing the Fidel</strong>
+                        <small>Use the alphabet songs</small>
+                    </div>
+                </a>
 
-    <a href="https://www.youtube.com/@Jebena_Amharicfidel"
-       target="_blank"
-       rel="noopener"
-       class="challenge-resource-link">
-        🔊 Pronunciation Practice
-    </a>
+                <a href="${jebenaChannel}"
+                   target="_blank"
+                   rel="noopener"
+                   class="challenge-resource-link">
+                    <span>🔊</span>
+                    <div>
+                        <strong>3. Practice Pronunciation</strong>
+                        <small>Say each sound out loud</small>
+                    </div>
+                </a>
 
-    <a href="https://www.youtube.com/@Jebena_Amharicfidel"
-       target="_blank"
-       rel="noopener"
-       class="challenge-resource-link">
-        ✍️ Writing Practice
-    </a>
+                <a href="${jebenaChannel}"
+                   target="_blank"
+                   rel="noopener"
+                   class="challenge-resource-link">
+                    <span>✍️</span>
+                    <div>
+                        <strong>4. Practice Writing</strong>
+                        <small>Trace and write each row</small>
+                    </div>
+                </a>
 
-</div>
+            </div>
         </div>
 
         <div class="challenge-family-section-title">
-            Choose one family to practice
+            Now choose one family to practice
         </div>
     `;
 
@@ -595,18 +618,18 @@ async function renderChallengeFamilyPicker() {
         const fidelObj = alphabetData.find(item => item.base === baseLetter);
         if (!fidelObj) return;
 
-        const card = document.createElement('div');
-        card.className = `challenge-family-card pos-${idx + 1} ${progress.streak_passed && progress.writing_passed ? 'mastered' : ''}`;
+        const card = document.createElement("div");
+        card.className = `challenge-family-card pos-${idx + 1} ${progress.streak_passed && progress.writing_passed ? "mastered" : ""}`;
 
         card.innerHTML = `
             <span class="challenge-family-position-tag">${positionLabels[idx] || `#${idx + 1}`}</span>
             <div class="challenge-family-letter">${baseLetter}</div>
             <div class="challenge-family-progress-row">
-                <span class="challenge-family-pill ${progress.streak_passed ? 'done' : ''}">
-                    ${progress.streak_passed ? '✓' : ''} Streak ${progress.best_streak}/${STREAK_THRESHOLD}
+                <span class="challenge-family-pill ${progress.streak_passed ? "done" : ""}">
+                    ${progress.streak_passed ? "✓" : ""} Streak ${progress.best_streak}/${STREAK_THRESHOLD}
                 </span>
-                <span class="challenge-family-pill ${progress.writing_passed ? 'done' : ''}">
-                    ${progress.writing_passed ? '✓ Writing approved' : 'Writing pending'}
+                <span class="challenge-family-pill ${progress.writing_passed ? "done" : ""}">
+                    ${progress.writing_passed ? "✓ Writing approved" : "Writing pending"}
                 </span>
             </div>
         `;
