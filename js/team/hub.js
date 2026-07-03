@@ -427,10 +427,6 @@ function enterCaptainDashboard() {
     if (typeof chooseModeChallenge === 'function') chooseModeChallenge();
 }
 
-function exitCaptainDashboard() {
-    if (typeof chooseModeChallenge === 'function') chooseModeChallenge();
-}
-
 async function loadCaptainWritingQueue() {
     const mount = document.getElementById('captainWritingQueueMount');
     if (!mount) return;
@@ -709,7 +705,13 @@ async function checkCaptainInboxBadge() {
         showGobezToast(`👑 ${count} writing submission${count > 1 ? 's' : ''} waiting for your review!`);
     }
 }
-
+function exitCaptainDashboard() {
+  if (typeof chooseModeChallenge === 'function') {
+    chooseModeChallenge();
+  } else if (typeof enterTeamHub === 'function') {
+    enterTeamHub();
+  }
+}
 // ---------------------------------------------------------------------------
 // Expose
 // ---------------------------------------------------------------------------
