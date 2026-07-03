@@ -17,6 +17,7 @@
 
 let embeddedActiveFamily = null;     // fidelObj currently open in practice sheet
 let embeddedActiveLevelNumber = null;
+let embeddedPracticeReturnTo = null;  // e.g. 'letterBoard'
 
 // ---------------------------------------------------------------------------
 // Main render — called from hub.js
@@ -211,9 +212,10 @@ function renderCurrentLevelSection(mount, level, progressByLetter, currentLevel)
 // Flashcard-first: flashcards open automatically, game is one tap away
 // ---------------------------------------------------------------------------
 
-function openEmbeddedFamilyPractice(fidelObj, levelNumber, progress) {
+function openEmbeddedFamilyPractice(fidelObj, levelNumber, progress, returnTo = null) {
     embeddedActiveFamily = fidelObj;
     embeddedActiveLevelNumber = levelNumber;
+    embeddedPracticeReturnTo = returnTo;
 
     const sheet = document.getElementById('familyPracticeSheet');
     if (!sheet) return;
@@ -236,7 +238,7 @@ function openEmbeddedFamilyPractice(fidelObj, levelNumber, progress) {
 
     // Show writing status
     const statusBox = document.getElementById('practiceSheetWritingStatus');
-    if (statusBox) renderWritingStatusForFamily(fidelObj.base);
+    if (statusBox) renderWritingStatusForFamily(fidelObj.base, 'practiceSheetWritingStatusBox');
 
     // Streak status — writing step stays visible but locked until streak passed,
     // so students always see the full 1→2→3 path.
@@ -260,10 +262,7 @@ function openEmbeddedFamilyPractice(fidelObj, levelNumber, progress) {
 
     document.getElementById('practiceSheetWriteBtn').onclick = () => {
         sheet.style.display = "none";
-        openWritingSubmitScreen(fidelObj.base, () => {
-            sheet.style.display = "flex";
-            renderWritingStatusForFamily(fidelObj.base);
-        });
+        openWritingSubmitScreen(fidelObj.base, 'practiceSheet', levelNumber);
     };
 
     document.getElementById('practiceSheetFlashcardBtn').onclick = () => {
@@ -282,7 +281,15 @@ function closeEmbeddedFamilyPractice() {
     document.getElementById('familyPracticeSheet').style.display = "none";
     embeddedActiveFamily = null;
     embeddedActiveLevelNumber = null;
-    // Refresh level map to show updated progress
+
+    if (embeddedPracticeReturnTo === 'letterBoard') {
+        embeddedPracticeReturnTo = null;
+        const lb = document.getElementById('letterBoardScreen');
+        if (lb) lb.style.display = 'flex';
+        return;
+    }
+
+    embeddedPracticeReturnTo = null;
     renderEmbeddedLevelMap('embeddedLevelMapMount');
     renderLevelCompletionBanner('levelCompletionMount');
 }
@@ -394,7 +401,7 @@ function dismissPostStreakPrompt() {
     // Reopen the practice sheet if a family is still active
     if (embeddedActiveFamily) {
         document.getElementById('familyPracticeSheet').style.display = "flex";
-        renderWritingStatusForFamily(embeddedActiveFamily.base);
+        renderWritingStatusForFamily(embeddedActiveFamily.base, 'practiceSheetWritingStatusBox');
     }
 }
 
@@ -402,12 +409,8 @@ function submitFromPostStreak(baseLetter, levelNumber) {
     document.getElementById('postStreakPrompt')?.remove();
     const sheet = document.getElementById('familyPracticeSheet');
 
-    openWritingSubmitScreen(baseLetter, () => {
-        if (sheet) sheet.style.display = "flex";
-        renderWritingStatusForFamily(baseLetter);
-        renderEmbeddedLevelMap('embeddedLevelMapMount');
-        renderLevelCompletionBanner('levelCompletionMount');
-    });
+    const returnTo = embeddedActiveFamily ? 'practiceSheet' : 'challengeDetail';
+    openWritingSubmitScreen(baseLetter, returnTo, levelNumber);
     if (sheet) sheet.style.display = "none";
 }
 
