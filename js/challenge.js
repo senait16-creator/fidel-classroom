@@ -186,6 +186,28 @@ async function renderChallengeDashboardMap(levels, team) {
         continueBtn.onclick = () => openChallengeFamilyPicker(currentLevel);
     }
 }
+
+function toggleChallengeAllLevels() {
+    const list = document.getElementById("challengeAllLevelsList");
+    const chevron = document.getElementById("challengeAllLevelsChevron");
+    if (!list) return;
+
+    const isOpen = list.style.display === "block";
+    list.style.display = isOpen ? "none" : "block";
+
+    if (chevron) {
+        chevron.innerText = isOpen ? "▼" : "▲";
+    }
+}
+
+function openChallengeFamilyPickerByNumber(levelNumber) {
+    if (!challengeLevelsCache) return;
+
+    const level = challengeLevelsCache.find(l => l.level_number === levelNumber);
+    if (!level) return;
+
+    openChallengeFamilyPicker(level);
+}
 async function renderChallengeDashboardRace() {
     const mount = document.getElementById("challengeDashRaceMount");
     if (!mount) return;
@@ -508,12 +530,17 @@ window.enterModeSelect = enterModeSelect;
 window.chooseModePractice = chooseModePractice;
 window.chooseModeChallenge = chooseModeChallenge;
 window.chooseModeReading = chooseModeReading;
+
 window.exitChallengeBackToDashboard = exitChallengeBackToDashboard;
-window.openChallengeFamilyPicker = openChallengeFamilyPicker;
+
+window.openChallengeFamilyPickerByNumber = openChallengeFamilyPickerByNumber;
+window.toggleChallengeAllLevels = toggleChallengeAllLevels;
+
 window.exitChallengeFamilyPicker = exitChallengeFamilyPicker;
 window.returnToChallengeFamilyPicker = returnToChallengeFamilyPicker;
 window.launchChallengeStreakGame = launchChallengeStreakGame;
 window.exitChallengeFamilyDetail = exitChallengeFamilyDetail;
+
 window.getTeamHex = getTeamHex;
 
 window.renderChallengeDashboard = renderChallengeDashboard;
