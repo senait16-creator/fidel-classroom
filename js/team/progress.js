@@ -330,7 +330,7 @@ async function loadHelpFlags(mountId) {
     if (!mount) return;
 
     if (!currentProfile?.is_captain || !currentProfile?.team_id) {
-        mount.style.display = "none";
+        mount.innerHTML = "";
         return;
     }
 
@@ -341,7 +341,7 @@ async function loadHelpFlags(mountId) {
 
     const memberIds = (members || []).map(m => m.id);
     if (memberIds.length === 0) {
-        mount.style.display = "none";
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No teammates yet.</p>`;
         return;
     }
 
@@ -353,16 +353,15 @@ async function loadHelpFlags(mountId) {
         .order('created_at', { ascending: true });
 
     if (!flags || flags.length === 0) {
-        mount.style.display = "none";
+        mount.innerHTML = `
+            <div style="text-align:center; padding:16px 4px; color:#94a3b8;">
+                <div style="font-size:24px; margin-bottom:6px;">🙌</div>
+                <p style="font-size:13px; margin:0;">No help requests right now.</p>
+            </div>`;
         return;
     }
 
-    mount.style.display = "block";
-    mount.innerHTML = `
-        <h3 style="font-size:14px; font-weight:700; color:#166534; margin-bottom:10px;">
-            🙋 Help Requests from Your Team (${flags.length})
-        </h3>
-    `;
+    mount.innerHTML = "";
 
     flags.forEach(flag => {
         const member = (members || []).find(m => m.id === flag.student_id);
