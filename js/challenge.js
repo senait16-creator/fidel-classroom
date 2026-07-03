@@ -98,16 +98,17 @@ if (teamBtn) {
     teamBtn.innerText = `Open ${team.name} Dashboard →`;
 
     teamBtn.onclick = () => {
-    const challengeDashboard = document.getElementById("challengeDashboardScreen");
-    const teamHub = document.getElementById("teamHubScreen");
+        const challengeDashboard = document.getElementById("challengeDashboardScreen");
+        const teamHub = document.getElementById("teamHubScreen");
 
-    if (challengeDashboard) challengeDashboard.style.display = "none";
-    if (teamHub) teamHub.style.display = "block";
-};
+        if (challengeDashboard) challengeDashboard.style.display = "none";
+        if (teamHub) teamHub.style.display = "block";
+    };
+}
 
-    await renderChallengeDashboardMap(levels, team);
-    await renderChallengeDashboardRace();
-    renderChallengeComingUp(levels, team.current_level);
+   await renderChallengeDashboardMap(levels, team);
+await renderChallengeDashboardRace();
+renderChallengeComingUp(levels, team.current_level);
 }
 
 function enterTeamHub() {
