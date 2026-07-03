@@ -107,32 +107,85 @@ async function renderChallengeDashboardMap(levels, team) {
     const mount = document.getElementById("challengeDashMapMount");
     if (!mount) return;
 
-    mount.innerHTML = "";
+    const currentLevelNumber = team.current_level || 1;
+    const currentLevel = levels.find(l => l.level_number === currentLevelNumber) || levels[0];
+    const nextLevel = levels.find(l => l.level_number === currentLevelNumber + 1);
 
-    levels.forEach(level => {
-        const isCompleted = level.level_number < team.current_level;
-        const isCurrent = level.level_number === team.current_level;
-        const isLocked = level.level_number > team.current_level;
+    if (!currentLevel) {
+        mount.innerHTML = `<p style="font-size:13px; color:#94a3b8;">No challenge levels found yet.</p>`;
+        return;
+    }
 
-        const card = document.createElement("div");
-        card.className = `challenge-level-card ${isCompleted ? "completed" : isLocked ? "locked" : "unlocked"} ${isCurrent ? "current" : ""}`;
-        card.style.marginBottom = "10px";
+    const hiddenLevels = levels.filter(level =>
+        level.level_number !== currentLevel.level_number &&
+        (!nextLevel || level.level_number !== nextLevel.level_number)
+    );
 
-        card.innerHTML = `
-            <div class="challenge-level-number-badge">${isLocked ? "🔒" : level.level_number}</div>
-            <div class="challenge-level-title">${level.title || `Level ${level.level_number}`}</div>
-            <div class="challenge-level-families">${(level.letter_families || []).join(" ")}</div>
-            ${isCurrent ? '<div class="challenge-capstone-badge">Current Level</div>' : ''}
-        `;
+    mount.innerHTML = `
+        <div class="challenge-level-focus-card">
+            <div class="challenge-focus-label">Current Level</div>
+            <div class="challenge-focus-title">Level ${currentLevel.level_number}</div>
+            <div class="challenge-focus-families">${(currentLevel.letter_families || []).join(" ")}</div>
+            <p class="challenge-focus-copy">
+                Complete your streak and writing submission to help your team move forward.
+            </p>
+            <button class="challenge-focus-btn" id="challengeContinueLevelBtn">
+                Continue Level ${currentLevel.level_number}
+            </button>
+        </div>
 
-        if (!isLocked) {
-            card.onclick = () => openChallengeFamilyPicker(level);
+        ${
+            nextLevel
+                ? `
+                    <div class="challenge-next-card">
+                        <div class="challenge-next-icon">🔒</div>
+                        <div>
+                            <div class="challenge-next-label">Next Up</div>
+                            <div class="challenge-next-title">Level ${nextLevel.level_number} · ${(nextLevel.letter_families || []).join(" ")}</div>
+                            <div class="challenge-next-copy">Unlock by completing Level ${currentLevel.level_number}.</div>
+                        </div>
+                    </div>
+                `
+                : `
+                    <div class="challenge-next-card complete">
+                        <div class="challenge-next-icon">🏁</div>
+                        <div>
+                            <div class="challenge-next-label">Final Stretch</div>
+                            <div class="challenge-next-title">You are on the last level.</div>
+                            <div class="challenge-next-copy">Finish strong with your team.</div>
+                        </div>
+                    </div>
+                `
         }
 
-        mount.appendChild(card);
-    });
-}
+        <button class="challenge-levels-toggle" onclick="toggleChallengeAllLevels()">
+            🔒 View all levels <span id="challengeAllLevelsChevron">▼</span>
+        </button>
 
+        <div id="challengeAllLevelsList" class="challenge-all-levels-list" style="display:none;">
+            ${hiddenLevels.map(level => {
+                const isCompleted = level.level_number < currentLevelNumber;
+                const isLocked = level.level_number > currentLevelNumber;
+
+                return `
+                    <div class="challenge-mini-level ${isCompleted ? "completed" : isLocked ? "locked" : "unlocked"}"
+                         ${!isLocked ? `onclick="openChallengeFamilyPickerByNumber(${level.level_number})"` : ""}>
+                        <span>${isCompleted ? "✓" : isLocked ? "🔒" : level.level_number}</span>
+                        <div>
+                            <strong>Level ${level.level_number}</strong>
+                            <small>${(level.letter_families || []).join(" ")}</small>
+                        </div>
+                    </div>
+                `;
+            }).join("")}
+        </div>
+    `;
+
+    const continueBtn = document.getElementById("challengeContinueLevelBtn");
+    if (continueBtn) {
+        continueBtn.onclick = () => openChallengeFamilyPicker(currentLevel);
+    }
+}
 async function renderChallengeDashboardRace() {
     const mount = document.getElementById("challengeDashRaceMount");
     if (!mount) return;
