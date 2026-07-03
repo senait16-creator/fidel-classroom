@@ -97,7 +97,9 @@ if (teamBtn) {
     teamBtn.style.background = `linear-gradient(135deg, ${teamHex}, ${teamHex}cc)`;
     teamBtn.innerText = `Open ${team.name} Dashboard →`;
 
- teamBtn.onclick = enterTeamHub;
+teamBtn.onclick = () => {
+    enterTeamHub();
+};
 
    await renderChallengeDashboardMap(levels, team);
 await renderChallengeDashboardRace();
