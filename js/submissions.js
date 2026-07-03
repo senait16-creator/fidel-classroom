@@ -291,13 +291,13 @@ async function uploadSketchpadDrawingCanvasData() {
         const filename = `practice_${currentUser.id}_${Date.now()}.jpg`;
 
         const { error: uploadErr } = await _supabase.storage
-            .from('team_posts')
+            .from('team_practice_posts')
             .upload(filename, compressed, { contentType: 'image/jpeg', upsert: false });
         if (uploadErr) throw uploadErr;
 
-        const { data: urlData } = _supabase.storage.from('team_posts').getPublicUrl(filename);
+        const { data: urlData } = _supabase.storage.from('team_practice_posts').getPublicUrl(filename);
 
-        const { error: postErr } = await _supabase.from('team_posts').insert({
+        const { error: postErr } = await _supabase.from('team_practice_posts').insert({
             uploader_id: currentUser.id,
             team_id:     currentProfile?.team_id || null,
             image_url:   urlData.publicUrl,
