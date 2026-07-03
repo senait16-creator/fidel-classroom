@@ -20,7 +20,27 @@
 // ---------------------------------------------------------------------------
 
 function enterTeamHub() {
-    showScreen("teamHubScreen");
+    [
+        "modeSelectScreen",
+        "studentDashboard",
+        "challengeDashboardScreen",
+        "challengeLevelsScreen",
+        "challengeFamilyScreen",
+        "challengeFamilyDetailScreen",
+        "readingLevelsScreen",
+        "captainDashboardScreen",
+        "letterBoardScreen",
+        "gameWorkspace"
+    ].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = "none";
+    });
+
+    const hub = document.getElementById("teamHubScreen");
+    if (hub) hub.style.display = "block";
+
+    const hamburger = document.getElementById("hamburgerBtn");
+    if (hamburger) hamburger.style.display = "flex";
 
     if (typeof renderTeamHub === "function") {
         renderTeamHub();
@@ -28,7 +48,27 @@ function enterTeamHub() {
 }
 
 function exitTeamHub() {
-    showScreen("challengeDashboardScreen");
+    [
+        "teamHubScreen",
+        "captainDashboardScreen",
+        "challengeLevelsScreen",
+        "challengeFamilyScreen",
+        "challengeFamilyDetailScreen",
+        "readingLevelsScreen",
+        "letterBoardScreen",
+        "gameWorkspace"
+    ].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = "none";
+    });
+
+    const challenge = document.getElementById("challengeDashboardScreen");
+    if (challenge) challenge.style.display = "block";
+
+    if (typeof renderChallengeDashboard === "function") {
+        renderChallengeDashboard();
+    }
+}
 
     if (typeof renderChallengeDashboard === "function") {
         renderChallengeDashboard();
