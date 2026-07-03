@@ -612,3 +612,67 @@ async function exportProgressCSV() {
     a.click();
 }
 window.exportProgressCSV = exportProgressCSV;
+
+// ---------------------------------------------------------------------------
+// Full reset — wipes every student's progress and team/captain assignments
+// for a fresh start (e.g. Day One). Irreversible, so it's gated behind a
+// typed confirmation rather than a plain confirm() dialog.
+// ---------------------------------------------------------------------------
+
+async function resetEverythingForDayOne() {
+    const typed = prompt(
+        "This permanently erases EVERY student's streaks, writing submissions, help " +
+        "flags, and level-completion requests; resets every team to Level 1 with 0 " +
+        "streak; and unassigns everyone from teams and captain roles. This cannot be undone.\n\n" +
+        'Type RESET to confirm:'
+    );
+    if (typed !== 'RESET') {
+        showNotificationToast('Reset cancelled — nothing was changed.');
+        return;
+    }
+
+    showNotificationToast('Resetting everyone... this may take a moment.');
+
+    const deleteResults = await Promise.all([
+        _supabase.from('student_family_progress').delete().not('student_id', 'is', null),
+        _supabase.from('writing_submissions').delete().not('student_id', 'is', null),
+        _supabase.from('help_flags').delete().not('student_id', 'is', null),
+        _supabase.from('level_completion_requests').delete().not('student_id', 'is', null),
+        _supabase.from('team_level_status').delete().not('team_id', 'is', null),
+    ]);
+    const deleteError = deleteResults.find(r => r.error)?.error;
+    if (deleteError) {
+        console.error('Reset failed during progress wipe:', deleteError);
+        return showNotificationToast('Reset failed: ' + deleteError.message);
+    }
+
+    const [{ error: teamsError }, { error: profilesError }] = await Promise.all([
+        _supabase.from('teams').update({
+            current_level: 1,
+            streak_count: 0,
+            captain_id: null
+        }).not('id', 'is', null),
+        _supabase.from('profiles').update({
+            team_id: null,
+            is_captain: false
+        }).not('id', 'is', null)
+    ]);
+    if (teamsError || profilesError) {
+        console.error('Reset failed during team/profile wipe:', teamsError, profilesError);
+        return showNotificationToast('Reset partially failed: ' + (teamsError?.message || profilesError?.message));
+    }
+
+    showGobezToast('Everyone has been reset for Day One! 🌱');
+
+    // Refresh every teacher dashboard view so the reset is visible immediately
+    await loadTeacherRosterData();
+    await teacherRefreshConfigurationDropdowns();
+    await loadTeacherWritingQueue();
+    await loadTeacherTeamProgress();
+    if (typeof loadTeacherLevelCompletionQueue === 'function') {
+        await loadTeacherLevelCompletionQueue('levelCompletionQueueMount');
+    }
+    await populateCaptainTeamDropdown();
+    await loadCurrentCaptains();
+}
+window.resetEverythingForDayOne = resetEverythingForDayOne;
