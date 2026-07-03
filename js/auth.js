@@ -136,7 +136,13 @@ async function proceedFlowMap(user) {
         if (typeof showCharacterGuide === 'function') {
             showCharacterGuide();
         } else {
-            enterModeSelect();
+            const SHOW_INTRO = true;
+
+if (SHOW_INTRO) {
+    showIntroMascot();
+} else {
+    enterModeSelect();
+}
             setTimeout(() => {
                 if (typeof maybeShowWordleOnLogin === 'function') maybeShowWordleOnLogin();
             }, 600);
@@ -319,7 +325,13 @@ async function saveProfileData(event) {
         if (typeof showCharacterGuide === 'function') {
             showCharacterGuide();
         } else {
-            enterModeSelect();
+            const SHOW_INTRO = true;
+
+if (SHOW_INTRO) {
+    showIntroMascot();
+} else {
+    enterModeSelect();
+}
         }
     }
 }   // ← this closing brace was missing in the live file
