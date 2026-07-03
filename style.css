@@ -667,18 +667,29 @@ header {
 @keyframes streakBump { 0% { transform: scale(1); } 45% { transform: scale(1.25); color: var(--accent-gold); } 100% { transform: scale(1); } }
 #gameStreakProgressBar { transition: width 0.3s ease, background-color 0.3s ease; }
 
-/* â”€â”€ Mode select â€” coffee cup home screen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-/* MODE SELECT SCREEN — same background as login */
+/* MODE SELECT — coffee cup home screen */
 #modeSelectScreen {
     display: none;
     min-height: 100vh;
     width: 100%;
-    padding: 42px 20px 28px;
+    margin: 0 !important;
+    padding: 28px 20px 36px !important;
     position: relative;
     overflow: hidden;
-    background: linear-gradient(135deg, #14532d 0%, #166534 40%, #15803d 68%, #ca8a04 100%);
+    background: linear-gradient(135deg, #14532d 0%, #166534 40%, #15803d 68%, #ca8a04 100%) !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
 }
-/* Reuse login floating letter style on mode select */
+
+/* Remove old dark/stuck pseudo-symbols */
+#modeSelectScreen::before,
+#modeSelectScreen::after {
+    content: none !important;
+    display: none !important;
+}
+
+/* Floating letters inside Mode Select */
 #modeSelectScreen .bg-letter {
     position: absolute;
     font-family: 'Abyssinica SIL', serif;
@@ -690,65 +701,162 @@ header {
     line-height: 1;
 }
 
-/* Keep actual content above letters */
+/* Keep content above floating letters */
 .mode-greeting-sub,
 .mode-greeting-main,
 .cups-grid,
 .mode-jump-row {
     position: relative;
     z-index: 2;
+    max-width: 420px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-/* Prevent the page from starting too low */
 .mode-greeting-sub {
-    margin-top: 0;
-    color: rgba(255,255,255,0.75);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.72) !important;
+    text-align: center;
+    margin-top: 0 !important;
+    margin-bottom: 6px;
+    font-family: 'Inter', sans-serif;
 }
 
 .mode-greeting-main {
-    color: white;
+    font-family: 'Lora', Georgia, serif;
+    font-size: 28px;
+    font-weight: 700;
+    font-style: italic;
+    color: white !important;
+    text-align: center;
+    line-height: 1.35;
+    margin-bottom: 24px;
 }
 
 .mode-greeting-main span {
-    color: #fef9c3;
+    color: #fde68a !important;
 }
 
-.mode-greeting-sub { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #94a3b8; text-align: center; margin-bottom: 6px; font-family: 'Inter', sans-serif; }
-.mode-greeting-main { font-size: 26px; font-weight: 600; color: #1a1a18; font-family: 'Lora', Georgia, serif; font-style: italic; text-align: center; line-height: 1.35; margin-bottom: 28px; }
-.mode-greeting-main span { color: #166534; }
-
-.cups-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.cups-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 14px;
+}
 
 .cup-card {
-    background: white;
-    border: 1px solid #e8e5de;
+    background: rgba(255,255,255,0.96);
+    border: 1px solid rgba(255,255,255,0.4);
     border-radius: 18px;
-    padding: 18px 14px 16px;
+    padding: 16px 12px 14px;
     cursor: pointer;
     transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 10px;
+    gap: 9px;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
-.cup-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.09); border-color: #d0cdc6; }
-.cup-card:active { transform: translateY(0); box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
 
-.cup-card.wide { grid-column: 1 / -1; flex-direction: row; text-align: left; padding: 16px 18px; gap: 16px; align-items: center; }
-.cup-card.wide .cup-card-text { flex: 1; }
-.cup-card.wide .cup-card-label { margin-bottom: 3px; }
+.cup-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+}
 
-.cup-card-badge { position: absolute; top: 9px; right: 9px; font-size: 10px; font-weight: 700; padding: 3px 7px; border-radius: 20px; letter-spacing: 0.2px; font-family: 'Inter', sans-serif; line-height: 1; }
-.cup-card.wide .cup-card-badge { position: static; margin-left: auto; flex-shrink: 0; align-self: center; }
-.cup-card-badge.green  { background: #dcfce7; color: #166534; }
-.cup-card-badge.amber  { background: #fef3c7; color: #92400e; }
-.cup-card-badge.blue   { background: #dbeafe; color: #1d4ed8; }
+.cup-card.wide {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    text-align: left;
+    justify-content: flex-start;
+    padding: 14px;
+}
+
+.cup-card-text {
+    flex: 1;
+}
+
+.cup-card-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 9px;
+    font-weight: 800;
+    padding: 3px 7px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.cup-card-badge.green { background: #dcfce7; color: #166534; }
+.cup-card-badge.amber { background: #fef3c7; color: #92400e; }
+.cup-card-badge.blue { background: #dbeafe; color: #1d4ed8; }
 .cup-card-badge.purple { background: #ede9fe; color: #6d28d9; }
-.cup-card-badge.gray   { background: #f1f5f9; color: #64748b; }
+.cup-card-badge.gray { background: #f1f5f9; color: #475569; }
+
+.cup-card-label {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a1a18;
+    font-family: 'Inter', sans-serif;
+    line-height: 1.2;
+}
+
+.cup-card-desc {
+    font-size: 11px;
+    color: #64748b;
+    line-height: 1.45;
+    font-family: 'Inter', sans-serif;
+}
+
+.mode-jump-row {
+    display: flex;
+    gap: 10px;
+}
+
+.mode-jump-btn {
+    flex: 1;
+    background: rgba(255,255,255,0.16);
+    border: 1px solid rgba(255,255,255,0.32);
+    border-radius: 12px;
+    padding: 13px 10px;
+    font-size: 13px;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.12s, border-color 0.12s, color 0.12s;
+    font-family: 'Inter', sans-serif;
+}
+
+.mode-jump-btn:hover {
+    background: rgba(255,255,255,0.24);
+    border-color: rgba(255,255,255,0.5);
+    color: white;
+}
+
+@media (max-width: 640px) {
+    #modeSelectScreen {
+        padding: 24px 16px 32px !important;
+    }
+
+    .mode-greeting-main {
+        font-size: 26px;
+        margin-bottom: 20px;
+    }
+
+    .cups-grid {
+        gap: 10px;
+    }
+}
 
 .cup-card-label { font-size: 15px; font-weight: 600; color: #1a1a18; font-family: 'Inter', sans-serif; line-height: 1.2; }
 .cup-card-desc  { font-size: 11px; color: #94a3b8; line-height: 1.5; font-family: 'Inter', sans-serif; }
