@@ -272,7 +272,7 @@
                 <button class="workspace-action-btn" onclick="openMatchingGameWorkspaceMode('all')">Matching Game</button>
                 <button id="studyAllFlashcardsBtn" class="workspace-action-btn"> Study All Letters</button>
                 <button class="workspace-action-btn" style="background:#0369a1; color:white; border-color:#0369a1;" onclick="enterReadingPath()">📖 Reading Path</button>
-                <button id="captainDashboardEntryBtn" class="workspace-action-btn" style="background:#b45309; color:white; border-color:#b45309; display:none;" onclick="enterCaptainDashboard()">👑 Captain Dashboard</button>
+                <button id="captainDashboardEntryBtn" class="workspace-action-btn" style="background:#b45309; color:white; border-color:#b45309; display:none;" onclick="enterCaptainDashboard()">👑 Captain Review</button>
                 <button class="workspace-action-btn challenge-variant" onclick="enterModeSelect()">🏆 Fidel Challenge</button>
             </div>
         </div>
@@ -283,7 +283,7 @@
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; gap:8px;">
                 <h2 id="classroomFamilyTitle" style="font-size:22px;">Reviewing Row</h2>
                 <div style="display:flex; gap:8px;">
-                    <button class="btn-secondary" style="width:auto; padding:8px 14px; font-size:12px; border:1px solid var(--border-color);" id="classroomFlashcardBtn">🗂️ Flashcards</button>
+                    <button class="btn-secondary" style="width:auto; padding:8px 14px; font-size:12px; border:1px solid var(--border-color);" id="classroomFlashcardBtn"> Flashcards</button>
                     <button class="btn-primary" style="width:auto; padding:8px 14px; font-size:12px;" id="classroomRowGameBtn">Play Row Match</button>
                 </div>
             </div>
@@ -830,12 +830,12 @@
 </div>
 
 <!-- ============================================================
-     CAPTAIN DASHBOARD
+     CAPTAIN Review
      ============================================================ -->
 
 <div id="captainDashboardScreen" style="display:none; max-width:700px; margin:40px auto; padding:0 16px;">
     <div class="workspace-title">
-        <span>👑 Captain Dashboard</span>
+        <span>👑 Captain Review</span>
         <button class="btn-secondary" onclick="exitCaptainDashboard()">← Back</button>
     </div>
     <p class="subtitle" style="text-align:left; margin-bottom:16px;">Review your team's writing submissions and see how everyone's progressing.</p>
