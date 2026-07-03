@@ -128,6 +128,25 @@ async function renderChallengeDashboard() {
         }
     }
 
+    // ── Help requests (captains only, relocated from team hub) ──────
+    const helpCard = document.getElementById("challengeHelpFlagsCard");
+    if (helpCard) {
+        if (currentProfile?.is_captain) {
+            helpCard.style.display = "block";
+            if (typeof loadHelpFlags === "function") {
+                await loadHelpFlags('helpFlagsMount');
+            }
+        } else {
+            helpCard.style.display = "none";
+        }
+    }
+
+    // ── Level-completion approval banner (students only, relocated
+    //    from team hub) — the function self-gates on is_captain/team_id ──
+    if (typeof renderLevelCompletionBanner === "function") {
+        await renderLevelCompletionBanner('levelCompletionMount');
+    }
+
     // ── Render all dashboard sections ────────────────────────
     await renderChallengeDashboardMap(levels, team);
     await renderChallengeTeamStatus(team);
@@ -450,8 +469,9 @@ async function openChallengeFamilyPicker(level) {
 async function returnToChallengeFamilyPicker() {
     document.getElementById("gameWorkspace").style.display = "none";
 
-    // Letter Board / embedded practice-sheet games should return to that sheet,
-    // not to the Challenge dashboard or old Team Hub.
+    // Team-hub-launched games (Letter Board) return to their own practice
+    // sheet — check that context first, before falling back to the
+    // Competition flow's own state.
     if (typeof embeddedActiveFamily !== "undefined" && embeddedActiveFamily) {
         document.getElementById("familyPracticeSheet").style.display = "flex";
         return;
@@ -464,8 +484,10 @@ async function returnToChallengeFamilyPicker() {
     } else if (activeChallengeLevel) {
         document.getElementById("challengeFamilyScreen").style.display = "block";
         await renderChallengeFamilyPicker();
-    } else if (typeof chooseModeChallenge === "function") {
-        await chooseModeChallenge();
+    } else {
+        // Shouldn't happen given the current navigation graph, but fail
+        // safe to the Competition dashboard instead of a blank screen.
+        if (typeof chooseModeChallenge === "function") await chooseModeChallenge();
     }
 }
 
@@ -548,17 +570,19 @@ async function openChallengeFamilyDetail(fidelObj, levelNumber) {
         });
         document.getElementById("challengeFamilyDetailScreen").style.display = "none";
     };
+
     await refreshChallengeDetailWritingGate(fidelObj, levelNumber);
 }
 
-// Enforce the actual 1 → 2 → 3 flow: writing stays locked until the
-// matching-game streak is passed for this family and level.
+// Writing submission stays locked until the matching-game streak of
+// STREAK_THRESHOLD is passed, so the 1→2→3 lesson order is actually
+// enforced here (not just implied by the button numbering).
 async function refreshChallengeDetailWritingGate(fidelObj, levelNumber) {
     const writeBtn = document.getElementById("challengeDetailWritingBtn");
-    if (!writeBtn || !fidelObj || !currentUser?.id) return;
-
+    if (!writeBtn) return;
     const writeSub = document.getElementById("challengeDetailWritingSub");
-    const { data: progress, error } = await _supabase
+
+    const { data: progress } = await _supabase
         .from('student_family_progress')
         .select('streak_passed')
         .eq('student_id', currentUser.id)
@@ -566,12 +590,9 @@ async function refreshChallengeDetailWritingGate(fidelObj, levelNumber) {
         .eq('level_number', levelNumber)
         .maybeSingle();
 
-    if (error) console.warn("Could not refresh writing gate:", error);
-
     const streakDone = !!progress?.streak_passed;
     writeBtn.classList.toggle('step-locked', !streakDone);
     writeBtn.disabled = !streakDone;
-
     if (writeSub) {
         writeSub.innerText = streakDone
             ? "Submit for captain review"
