@@ -4540,3 +4540,28 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     font-size: 12px;
     line-height: 1.1;
 }
+
+.challenge-resource-card.lesson.writing{
+    background:linear-gradient(135deg,#b91c1c,#dc2626);
+    color:white;
+}
+
+.challenge-resource-card.lesson.writing h3{
+    color:white;
+}
+
+.challenge-resource-card.lesson.writing a{
+    background:rgba(255,255,255,.14);
+    backdrop-filter:blur(8px);
+    color:white;
+    border:1px solid rgba(255,255,255,.18);
+}
+
+.challenge-resource-card.lesson.writing a:hover{
+    background:rgba(255,255,255,.22);
+    transform:translateY(-2px);
+}
+
+.challenge-resource-card.lesson.writing a strong{
+    color:white;
+}
