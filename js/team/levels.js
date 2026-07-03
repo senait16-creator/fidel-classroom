@@ -238,12 +238,19 @@ function openEmbeddedFamilyPractice(fidelObj, levelNumber, progress) {
     const statusBox = document.getElementById('practiceSheetWritingStatus');
     if (statusBox) renderWritingStatusForFamily(fidelObj.base);
 
-    // Streak status
+    // Streak status — writing step stays visible but locked until streak passed,
+    // so students always see the full 1→2→3 path.
     const streakDone = progress?.streak_passed;
-    const writingDone = progress?.writing_passed;
-    const writeBtn = document.getElementById('practiceSheetWriteBtn');
+    const writeBtn  = document.getElementById('practiceSheetWriteBtn');
+    const writeHint = document.getElementById('practiceSheetWriteHint');
     if (writeBtn) {
-        writeBtn.style.display = streakDone ? "block" : "none";
+        writeBtn.classList.toggle('step-locked', !streakDone);
+        writeBtn.disabled = !streakDone;
+        if (writeHint) {
+            writeHint.innerText = streakDone
+                ? "Submit for your captain to review"
+                : "🔒 Unlocks after your streak of 20";
+        }
     }
 
     // Wire buttons
