@@ -521,15 +521,6 @@ async function renderChallengeFamilyPicker() {
 
     if (!level || !container) return;
 
-    const lessonVideo =
-        level.level_number === 1
-            ? "https://www.youtube.com/watch?v=QgssO7_WkSk&t=160s"
-            : level.level_number === 2
-                ? "https://www.youtube.com/watch?v=4pQggzd-vYE&t=61s"
-                : "https://www.youtube.com/@Jebena_Amharicfidel";
-
-    const jebenaChannel = "https://www.youtube.com/@Jebena_Amharicfidel";
-
     if (title) {
         title.innerText = level.title || `Level ${level.level_number}`;
     }
@@ -541,57 +532,32 @@ async function renderChallengeFamilyPicker() {
     progressRows.forEach(row => { progressByLetter[row.base_letter] = row; });
 
     container.innerHTML = `
-        <div class="challenge-level-resource-panel">
-            <div class="challenge-resource-eyebrow">Start here</div>
-
-            <h2 class="challenge-resource-title">
-                Level ${level.level_number}: ${(level.letter_families || []).join(" ")}
-            </h2>
-
-            <p class="challenge-resource-copy">
-                Follow this order first: watch the lesson, sing the Fidel, practice pronunciation, then practice writing.
-            </p>
-
-           <div class="challenge-resource-links">
-
-    <a href="https://www.youtube.com/watch?v=QgssO7_WkSk"
-       target="_blank"
-       rel="noopener"
-       class="challenge-resource-link primary">
-        <span>🎥</span>
-        <div>
-            <strong>Today's Lesson</strong>
-            <small>Watch this first</small>
-        </div>
-    </a>
-
-    <a href="https://www.youtube.com/watch?v=dWQQeHyIebk&list=RDdWQQeHyIebk&start_radio=1"
-       target="_blank"
-       rel="noopener"
-       class="challenge-resource-link">
-        <span>🎵</span>
-        <div>
-            <strong>Alphabet Song</strong>
-            <small>Sing along with the Fidel</small>
-        </div>
-    </a>
-
-    <a href="https://www.youtube.com/watch?v=4LIUwGr40dg&t=192s"
-       target="_blank"
-       rel="noopener"
-       class="challenge-resource-link">
-        <span>✍️</span>
-        <div>
-            <strong>Writing Practice</strong>
-            <small>Practice writing today's letters</small>
-        </div>
-    </a>
-
-</div>
+        <div class="challenge-lesson-briefing">
+            <div class="challenge-lesson-icon">📚</div>
+            <div class="challenge-lesson-level">Level ${level.level_number}</div>
+            <div class="challenge-lesson-families">${(level.letter_families || []).join(" ")}</div>
+            <p>Prepare with songs, today’s lesson, and writing practice before choosing a family.</p>
         </div>
 
-        <div class="challenge-family-section-title">
-            Now choose one family to practice
+        <div class="challenge-resource-card songs">
+            <h3>🎵 Songs & Listening</h3>
+            <a href="https://www.youtube.com/watch?v=dWQQeHyIebk&list=RDdWQQeHyIebk&start_radio=1" target="_blank" rel="noopener">🎵 Alphabet Song</a>
+            <a href="https://www.youtube.com/watch?v=gCXlWMXNfNw&list=RDdWQQeHyIebk&index=4" target="_blank" rel="noopener">🎶 Alphabet Song Version 2</a>
+            <a href="https://www.youtube.com/watch?v=MEhod-dvmCc&list=RDdWQQeHyIebk&index=10" target="_blank" rel="noopener">🎂 Happy Birthday Song</a>
+        </div>
+
+        <div class="challenge-resource-card lesson">
+            <h3>🎥 Today’s Lesson</h3>
+            <a href="https://www.youtube.com/watch?v=QgssO7_WkSk" target="_blank" rel="noopener">▶ Watch Lesson</a>
+        </div>
+
+        <div class="challenge-resource-card writing">
+            <h3>✍️ Writing Practice</h3>
+            <a href="https://www.youtube.com/watch?v=4LIUwGr40dg&t=192s" target="_blank" rel="noopener">📝 Watch Writing Video</a>
+        </div>
+
+        <div class="challenge-family-divider">
+            Choose Your Letter Family
         </div>
     `;
 
