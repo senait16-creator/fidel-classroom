@@ -539,28 +539,43 @@ async function renderChallengeFamilyPicker() {
                 Before choosing a letter family, review the lesson video and resources for this level.
             </p>
 
-            <div class="challenge-resource-links">
-                <a href="https://www.youtube.com/results?search_query=amharic+fidel+alphabet+song"
-                   target="_blank"
-                   rel="noopener"
-                   class="challenge-resource-link primary">
-                    🎥 Alphabet songs
-                </a>
+          <div class="challenge-resource-links">
 
-                <a href="https://www.youtube.com/results?search_query=amharic+fidel+pronunciation"
-                   target="_blank"
-                   rel="noopener"
-                   class="challenge-resource-link">
-                    🔊 Pronunciation practice
-                </a>
+    <a href="${
+        level.level_number === 1
+            ? 'https://www.youtube.com/watch?v=QgssO7_WkSk&t=160s'
+            : level.level_number === 2
+                ? 'https://www.youtube.com/watch?v=4pQggzd-vYE&t=61s'
+                : 'https://www.youtube.com/@Jebena_Amharicfidel'
+    }"
+       target="_blank"
+       rel="noopener"
+       class="challenge-resource-link primary">
+        🎥 Lesson Video
+    </a>
 
-                <a href="https://www.youtube.com/results?search_query=amharic+fidel+writing+practice"
-                   target="_blank"
-                   rel="noopener"
-                   class="challenge-resource-link">
-                    ✍🏽 Writing practice
-                </a>
-            </div>
+    <a href="https://www.youtube.com/@Jebena_Amharicfidel"
+       target="_blank"
+       rel="noopener"
+       class="challenge-resource-link">
+        🎵 Alphabet Songs
+    </a>
+
+    <a href="https://www.youtube.com/@Jebena_Amharicfidel"
+       target="_blank"
+       rel="noopener"
+       class="challenge-resource-link">
+        🔊 Pronunciation Practice
+    </a>
+
+    <a href="https://www.youtube.com/@Jebena_Amharicfidel"
+       target="_blank"
+       rel="noopener"
+       class="challenge-resource-link">
+        ✍️ Writing Practice
+    </a>
+
+</div>
         </div>
 
         <div class="challenge-family-section-title">
