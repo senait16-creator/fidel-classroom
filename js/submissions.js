@@ -453,8 +453,8 @@ async function shareApprovedWritingToClass(imageUrl, baseLetter, btnEl) {
 // Render writing status for a family (shown inside writingSubmitScreen)
 // ---------------------------------------------------------------------------
 
-async function renderWritingStatusForFamily(baseLetter) {
-    const box = document.getElementById("challengeWritingStatusBox");
+async function renderWritingStatusForFamily(baseLetter, targetId = "challengeWritingStatusBox") {
+    const box = document.getElementById(targetId);
     if (!box) return;
 
     const { data: submissions } = await _supabase
