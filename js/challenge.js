@@ -97,10 +97,14 @@ if (teamBtn) {
     teamBtn.style.background = `linear-gradient(135deg, ${teamHex}, ${teamHex}cc)`;
     teamBtn.innerText = `Open ${team.name} Dashboard →`;
 
-teamBtn.onclick = () => {
-    document.getElementById("challengeDashboardScreen").style.display = "none";
-    document.getElementById("teamHubScreen").style.display = "block";
-};
+    teamBtn.onclick = () => {
+        const challengeDashboard = document.getElementById("challengeDashboardScreen");
+        const teamHub = document.getElementById("teamHubScreen");
+
+        if (challengeDashboard) challengeDashboard.style.display = "none";
+        if (teamHub) teamHub.style.display = "block";
+    };
+}
 
    await renderChallengeDashboardMap(levels, team);
 await renderChallengeDashboardRace();
