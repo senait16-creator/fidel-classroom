@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 
 <html lang="am">
@@ -425,7 +426,25 @@
             <div class="cup-card-desc">Words, phrases, conversation</div>
         </div>
 
-        <!-- Team Leaders / Team Status -->
+        <!-- Community -->
+        <div class="cup-card wide" onclick="chooseModeCommunity()">
+            <svg width="48" height="54" viewBox="0 0 48 54" fill="none" style="flex-shrink:0;">
+                <rect x="8" y="12" width="32" height="26" rx="6" fill="#dcfce7" stroke="#166534" stroke-width="1.5"/>
+                <circle cx="17" cy="22" r="3.5" fill="#166534"/>
+                <path d="M12 34 Q17 27 22 34" fill="none" stroke="#166534" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M24 32 Q30 22 38 32" fill="none" stroke="#ca8a04" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="14" cy="46" r="3" fill="#ca8a04"/>
+                <circle cx="24" cy="46" r="3" fill="#166534"/>
+                <circle cx="34" cy="46" r="3" fill="#ca8a04"/>
+            </svg>
+            <div class="cup-card-text">
+                <div class="cup-card-label">Community</div>
+                <div class="cup-card-desc">See classmates' approved work, react, and celebrate together.</div>
+            </div>
+            <span class="cup-card-badge green">🎉 Class</span>
+        </div>
+
+        <!-- Team status → lives on the Competition page now -->
         <div class="cup-card wide" onclick="chooseModeChallenge()">
             <svg width="48" height="54" viewBox="0 0 48 54" fill="none" style="flex-shrink:0;">
                 <path d="M10 18L16 28L24 16L32 28L38 18L36 36H12L10 18Z"
@@ -535,6 +554,13 @@
             </button>
         </section>
 
+        <section class="challenge-dash-card" id="captainReviewDashCard" style="display:none;">
+            <div class="challenge-card-title">👑 Pending Submissions</div>
+            <div id="captainWritingQueueMount">
+                <p style="color:#94a3b8; font-size:13px;">Loading submissions...</p>
+            </div>
+        </section>
+
         <section class="challenge-dash-card">
             <div class="challenge-card-title">Coming Up</div>
             <div id="challengeComingUpMount">
@@ -625,7 +651,10 @@
 
             <div id="teamHubStudentActions">
                 <p class="share-hint-text">
-                    Share a practice photo with your team, or submit writing for captain approval.
+                    Share a practice photo with your class — everyone can react! 🎉<br>
+                    <span style="font-size:11px; color:#94a3b8;">
+                        (Writing submissions happen inside each letter, after you pass the matching game.)
+                    </span>
                 </p>
 
                 <div class="icon-action-row">
@@ -633,41 +662,13 @@
                         <div class="icon-action-circle share-circle">📸</div>
                         <div class="icon-action-label">Share</div>
                     </div>
-
-                    <div class="icon-action-btn" onclick="revealLetterPickerThen('openTeamHubFinalSubmit')">
-                        <div class="icon-action-circle submit-circle">✍️</div>
-                        <div class="icon-action-label"
-                             style="color:white;background:#166534; padding:2px 10px;border-radius:10px;">
-                            Submit
-                        </div>
-                    </div>
                 </div>
             </div>
 
             <div id="teamHubCaptainActions" style="display:none;">
                 <p class="share-hint-text">
-                    👑 Captain tools live here now — no separate captain dashboard needed.
+                    👑 Captain tools now live on the Competition page.
                 </p>
-
-                <button class="btn-primary"
-                        onclick="enterCaptainDashboard()"
-                        style="margin-bottom:12px;">
-                    Load Captain Review Tools
-                </button>
-
-                <div class="teacher-panel" style="margin-bottom:14px;">
-                    <h2 style="font-size:16px; color:var(--neutral-dark); margin-bottom:10px;">Pending Submissions</h2>
-                    <div id="captainWritingQueueMount">
-                        <p style="color:#94a3b8; font-size:13px;">Tap “Load Captain Review Tools” to load submissions.</p>
-                    </div>
-                </div>
-
-                <div class="teacher-panel">
-                    <h2 style="font-size:16px; color:var(--neutral-dark); margin-bottom:10px;">Team Progress</h2>
-                    <div id="captainTeamProgressMount">
-                        <p style="color:#94a3b8; font-size:13px;">Tap “Load Captain Review Tools” to load team progress.</p>
-                    </div>
-                </div>
             </div>
 
             <input type="file" id="teamHubPhotoInput" accept="image/*" style="display:none;">
@@ -727,17 +728,26 @@
         <strong>Get a streak of 20 in a row</strong> to pass this letter's matching game.
     </div>
     <div class="challenge-lesson-step-list" style="display:flex; flex-direction:column; gap:12px; margin-bottom:16px;">
-        <button id="challengeDetailFlashcardBtn" class="btn-primary challenge-step-btn flashcard-step" style="background:#475569;">
+        <button id="challengeDetailFlashcardBtn" class="challenge-step-btn flashcard-step">
             <span class="step-icon-circle">📚</span>
-            <span>1. Flashcards</span>
+            <span class="step-label-stack">
+                <span>1. Flashcards</span>
+                <small>Learn the sounds first</small>
+            </span>
         </button>
-        <button id="challengeDetailPlayBtn" class="btn-primary challenge-step-btn matching-step">
+        <button id="challengeDetailPlayBtn" class="challenge-step-btn matching-step">
             <span class="step-icon-circle">🎮</span>
-            <span>2. Matching Game</span>
+            <span class="step-label-stack">
+                <span>2. Matching Game</span>
+                <small>Get a streak of 20 to pass</small>
+            </span>
         </button>
-        <button id="challengeDetailWritingBtn" class="btn-primary challenge-step-btn writing-step" style="background:#7c3aed;">
+        <button id="challengeDetailWritingBtn" class="challenge-step-btn writing-step">
             <span class="step-icon-circle">✍️</span>
-            <span>3. Writing Submission</span>
+            <span class="step-label-stack">
+                <span>3. Writing Submission</span>
+                <small>Submit for captain review</small>
+            </span>
         </button>
     </div>
     <div id="challengeDetailWritingStatusBox" style="display:none;"></div>
@@ -779,6 +789,7 @@
         <div id="writingSketchpadArea" style="display:none;">
             <canvas id="writingSketchpad" class="sketch-canvas-element" style="height:260px;"></canvas>
             <div class="sketchpad-actions-row" style="margin-top:12px;">
+                <button class="btn-primary" style="padding:10px 20px; font-size:13px; background:#94a3b8; flex:1;" id="writingSketchUndoBtn">↩ Undo</button>
                 <button class="btn-primary" style="padding:10px 20px; font-size:13px; background:#64748b; flex:1;" id="writingSketchClearBtn">Clear</button>
                 <button class="btn-primary" style="padding:10px 20px; font-size:13px; flex:2;" id="writingSketchSubmitBtn">Submit Drawing ✓</button>
             </div>
@@ -852,21 +863,13 @@
      CAPTAIN Review
      ============================================================ -->
 
-<div id="captainDashboardScreen" style="display:none; max-width:700px; margin:40px auto; padding:0 16px;">
-    <div class="workspace-title">
-        <span>👑 Captain Review</span>
-        <button class="btn-secondary" onclick="enterTeamHub()">← Back</button>
-    </div>
-    <p class="subtitle" style="text-align:left; margin-bottom:16px;">Review your team's writing submissions and see how everyone's progressing.</p>
-    <div class="teacher-panel" style="margin-bottom:20px;">
-        <h2 style="font-size:16px; color:var(--neutral-dark); margin-bottom:10px;">Pending Submissions</h2>
-        <div id="captainWritingQueueMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
-    </div>
-    <div class="teacher-panel">
-        <h2 style="font-size:16px; color:var(--neutral-dark); margin-bottom:10px;">Team Progress</h2>
-        <div id="captainTeamProgressMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
-    </div>
-</div>
+<!-- ============================================================
+     CAPTAIN Review — retired as a screen.
+     The review queue now lives on the Competition page
+     (captainReviewDashCard). Kept as an empty shell so legacy
+     show/hide code referencing this id never crashes.
+     ============================================================ -->
+<div id="captainDashboardScreen" style="display:none;"></div>
 
 <!-- ============================================================
      FAMILY PRACTICE SHEET
@@ -884,9 +887,27 @@
             <div id="challengeWritingStatusBox" style="display:none;"></div>
         </div>
         <div style="display:flex; flex-direction:column; gap:12px;">
-            <button id="practiceSheetFlashcardBtn" class="btn-primary" style="background:#475569; font-size:16px; padding:18px; border-radius:14px;">📚 1. Flashcards</button>
-            <button id="practiceSheetPlayBtn" class="btn-primary" style="font-size:16px; padding:18px; border-radius:14px;">🎮 2. Matching Game</button>
-            <button id="practiceSheetWriteBtn" class="btn-primary" style="background:#7c3aed; display:none; font-size:16px; padding:18px; border-radius:14px;">✍️ 3. Writing Submission</button>
+            <button id="practiceSheetFlashcardBtn" class="challenge-step-btn flashcard-step">
+                <span class="step-icon-circle">📚</span>
+                <span class="step-label-stack">
+                    <span>1. Flashcards</span>
+                    <small>Learn the sounds first</small>
+                </span>
+            </button>
+            <button id="practiceSheetPlayBtn" class="challenge-step-btn matching-step">
+                <span class="step-icon-circle">🎮</span>
+                <span class="step-label-stack">
+                    <span>2. Matching Game</span>
+                    <small>Get a streak of 20 to pass</small>
+                </span>
+            </button>
+            <button id="practiceSheetWriteBtn" class="challenge-step-btn writing-step">
+                <span class="step-icon-circle">✍️</span>
+                <span class="step-label-stack">
+                    <span>3. Writing Submission</span>
+                    <small id="practiceSheetWriteHint">Unlocks after your streak</small>
+                </span>
+            </button>
         </div>
     </div>
 </div>
@@ -1085,6 +1106,25 @@
 <!-- ============================================================
      SCRIPT TAGS — order matters
      ============================================================ -->
+<!-- ============================================================
+     COMMUNITY — class-wide celebration feed
+     ============================================================ -->
+<div id="communityScreen" style="display:none; min-height:100vh; padding:24px 16px 48px; background:#f5f5f0;">
+    <div style="max-width:560px; margin:0 auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <h1 style="font-size:24px; font-weight:800; color:#166534; font-family:'Playfair Display',serif; font-style:italic;">
+                🎉 Community
+            </h1>
+            <button class="btn-secondary" onclick="exitCommunity()">← Home</button>
+        </div>
+        <p style="font-size:13px; color:#64748b; margin-bottom:20px;">
+            Approved work shared by your classmates. Tap an emoji to react!
+        </p>
+        <div id="communityFeedMount"></div>
+    </div>
+</div>
+<!-- END COMMUNITY -->
+
 <script src="js/navigation.js?v=1" defer></script>
 <script src="js/app.js?v=9" defer></script>
 <script src="js/auth.js?v=9" defer></script>
@@ -1099,6 +1139,7 @@
 <script src="js/team/levels.js?v=9" defer></script>
 <script src="js/team/map.js?v=9" defer></script>
 <script src="js/team/hub.js?v=10" defer></script>
+<script src="js/community.js?v=1" defer></script>
 <script src="js/wordle.js?v=9" defer></script>
 <script src="js/intro.js?v=1" defer></script>
 <script src="js/challenge.js?v=12" defer></script>
