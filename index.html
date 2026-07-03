@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html lang="am"> 
+<html lang="am">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -383,7 +383,7 @@
     <div class="cups-grid">
 
         <!-- Fidel Practice -->
-        <div class="cup-card" onclick="chooseModePractice()">
+        <div class="cup-card" data-mode="practice" onclick="enterModeIfUnlocked('practice', chooseModePractice)">
             <span class="cup-card-badge green">Alphabet</span>
             <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
                 <rect x="6" y="22" width="32" height="30" rx="7" fill="#dcfce7" stroke="#166534" stroke-width="1.5"/>
@@ -398,7 +398,8 @@
         </div>
 
         <!-- Challenge -->
-        <div class="cup-card" onclick="chooseModeChallenge()">
+        <div class="cup-card cup-card-featured" onclick="chooseModeChallenge()">
+<span class="cup-card-featured-tag">⭐ Start Here</span>
 <span class="cup-card-badge amber">Competition</span>
             <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
                 <rect x="6" y="22" width="32" height="30" rx="7" fill="#fef3c7" stroke="#b45309" stroke-width="1.5"/>
@@ -413,7 +414,7 @@
         </div>
 
         <!-- Reading -->
-        <div class="cup-card" onclick="chooseModeReading()">
+        <div class="cup-card" data-mode="reading" onclick="enterModeIfUnlocked('reading', chooseModeReading)">
             <span class="cup-card-badge blue">Advanced</span>
             <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
                 <rect x="6" y="22" width="32" height="30" rx="7" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.5"/>
@@ -428,7 +429,7 @@
         </div>
 
         <!-- Vocab -->
-        <div class="cup-card" onclick="chooseModeVocab()">
+        <div class="cup-card" data-mode="vocab" onclick="enterModeIfUnlocked('vocab', chooseModeVocab)">
             <span class="cup-card-badge purple">New</span>
             <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
                 <rect x="6" y="22" width="32" height="30" rx="7" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
@@ -443,7 +444,7 @@
         </div>
 
         <!-- Community -->
-        <div class="cup-card wide" onclick="chooseModeCommunity()">
+        <div class="cup-card wide" data-mode="community" onclick="enterModeIfUnlocked('community', chooseModeCommunity)">
             <svg width="48" height="54" viewBox="0 0 48 54" fill="none" style="flex-shrink:0;">
                 <rect x="8" y="12" width="32" height="26" rx="6" fill="#dcfce7" stroke="#166534" stroke-width="1.5"/>
                 <circle cx="17" cy="22" r="3.5" fill="#166534"/>
