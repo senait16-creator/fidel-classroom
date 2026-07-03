@@ -4451,3 +4451,54 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     font-weight: 950;
     color: #14532d;
 }
+
+.challenge-resource-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 28px 10px 28px 10px;
+}
+
+.challenge-resource-card::before {
+    content: "";
+    position: absolute;
+    top: -32px;
+    right: -28px;
+    width: 92px;
+    height: 92px;
+    background: rgba(255,255,255,0.35);
+    transform: rotate(45deg);
+}
+
+.challenge-resource-card::after {
+    content: "";
+    position: absolute;
+    bottom: -36px;
+    left: -30px;
+    width: 80px;
+    height: 80px;
+    border: 2px solid rgba(255,255,255,0.45);
+    transform: rotate(45deg);
+}
+
+.challenge-resource-card h3,
+.challenge-resource-card a {
+    position: relative;
+    z-index: 1;
+}
+
+.challenge-resource-card.songs {
+    background: linear-gradient(135deg, #fef3c7, #f59e0b);
+}
+
+.challenge-resource-card.lesson {
+    background: linear-gradient(135deg, #dcfce7, #16a34a);
+}
+
+.challenge-resource-card.writing {
+    background: linear-gradient(135deg, #f7e1c5, #92400e);
+}
+
+.challenge-resource-card.writing h3,
+.challenge-resource-card.writing a {
+    color: #3b1f0f;
+}
