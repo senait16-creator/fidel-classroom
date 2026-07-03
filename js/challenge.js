@@ -578,3 +578,4 @@ window.renderChallengeDashboard = renderChallengeDashboard;
 window.renderChallengeDashboardMap = renderChallengeDashboardMap;
 window.renderChallengeDashboardRace = renderChallengeDashboardRace;
 window.renderChallengeComingUp = renderChallengeComingUp;
+window.enterTeamHub = enterTeamHub;
