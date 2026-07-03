@@ -736,22 +736,33 @@ async function checkCaptainInboxBadge() {
 // Expose
 // ---------------------------------------------------------------------------
 
-window.enterTeamHub              = enterTeamHub;
-window.exitTeamHub               = exitTeamHub;
-window.renderTeamHub             = renderTeamHub;
-window.toggleTeamRace            = toggleTeamRace;
-window.toggleTeamFeed            = toggleTeamFeed;
-window.revealLetterPickerThen    = revealLetterPickerThen;
-window.loadTeamPracticeFeed      = loadTeamPracticeFeed;
-window.toggleReaction            = toggleReaction;
-window.deleteTeamPost            = deleteTeamPost;
-window.openTeamHubPracticePost   = openTeamHubPracticePost;
-window.uploadTeamPracticePhoto   = uploadTeamPracticePhoto;
-window.openTeamHubFinalSubmit    = openTeamHubFinalSubmit;
-window.enterCaptainDashboard     = enterCaptainDashboard;
-window.exitCaptainDashboard      = exitCaptainDashboard;
-window.loadCaptainWritingQueue   = loadCaptainWritingQueue;
-window.loadCaptainTeamProgress   = loadCaptainTeamProgress;
-window.captainApproveSubmission  = captainApproveSubmission;
-window.captainRejectSubmission   = captainRejectSubmission;
-window.checkCaptainInboxBadge    = checkCaptainInboxBadge;
+// ---------------------------------------------------------------------------
+// Expose
+// ---------------------------------------------------------------------------
+
+window.enterTeamHub = enterTeamHub;
+window.exitTeamHub = exitTeamHub;
+window.renderTeamHub = renderTeamHub;
+
+window.enterCaptainDashboard = enterCaptainDashboard;
+window.exitCaptainDashboard = exitCaptainDashboard;
+
+window.loadCaptainWritingQueue = loadCaptainWritingQueue;
+window.loadCaptainTeamProgress = loadCaptainTeamProgress;
+
+window.toggleTeamRace = toggleTeamRace;
+window.toggleTeamFeed = toggleTeamFeed;
+
+window.revealLetterPickerThen = revealLetterPickerThen;
+
+window.loadTeamPracticeFeed = loadTeamPracticeFeed;
+window.toggleReaction = toggleReaction;
+window.deleteTeamPost = deleteTeamPost;
+
+window.openTeamHubPracticePost = openTeamHubPracticePost;
+window.uploadTeamPracticePhoto = uploadTeamPracticePhoto;
+window.openTeamHubFinalSubmit = openTeamHubFinalSubmit;
+
+window.captainApproveSubmission = captainApproveSubmission;
+window.captainRejectSubmission = captainRejectSubmission;
+window.checkCaptainInboxBadge = checkCaptainInboxBadge;
