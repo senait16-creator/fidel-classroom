@@ -107,6 +107,33 @@ if (teamBtn) {
     renderChallengeComingUp(levels, team.current_level);
 }
 
+function enterTeamHub() {
+    [
+        "modeSelectScreen",
+        "studentDashboard",
+        "challengeDashboardScreen",
+        "challengeLevelsScreen",
+        "challengeFamilyScreen",
+        "challengeFamilyDetailScreen",
+        "readingLevelsScreen",
+        "captainDashboardScreen",
+        "letterBoardScreen"
+    ].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = "none";
+    });
+
+    const hub = document.getElementById("teamHubScreen");
+    if (hub) hub.style.display = "block";
+
+    const hamburger = document.getElementById("hamburgerBtn");
+    if (hamburger) hamburger.style.display = "flex";
+
+    if (typeof renderTeamHub === "function") {
+        renderTeamHub();
+    }
+}
+
 async function renderChallengeDashboardMap(levels, team) {
     const mount = document.getElementById("challengeDashMapMount");
     if (!mount) return;
