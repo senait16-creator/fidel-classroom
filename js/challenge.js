@@ -545,12 +545,12 @@ async function renderChallengeFamilyPicker() {
     <div class="challenge-resource-icons">
         <a href="https://www.youtube.com/watch?v=dWQQeHyIebk&list=RDdWQQeHyIebk&start_radio=1" target="_blank" rel="noopener">
             <span>🎵</span>
-            <strong>Alphabet</strong>
+            <strong>Fidel Song</strong>
         </a>
 
         <a href="https://www.youtube.com/watch?v=gCXlWMXNfNw&list=RDdWQQeHyIebk&index=4" target="_blank" rel="noopener">
             <span>🎶</span>
-            <strong>Version 2</strong>
+            <strong>Fidel Rap</strong>
         </a>
 
         <a href="https://www.youtube.com/watch?v=MEhod-dvmCc&list=RDdWQQeHyIebk&index=10" target="_blank" rel="noopener">
