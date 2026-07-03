@@ -163,7 +163,11 @@ async function renderChallengeMap() {
                 cupEl.onmouseleave = () => { cupEl.style.transform = ''; };
                 cupEl.onclick = () => {
                     closeChallengeMap();
-                    if (isCurrent && typeof enterTeamHub === 'function') enterTeamHub();
+                    if (isCurrent && typeof chooseModeChallenge === 'function') {
+                        chooseModeChallenge();
+                    } else if (isCompleted && typeof openChallengeFamilyPickerByNumber === 'function') {
+                        openChallengeFamilyPickerByNumber(levelNum);
+                    }
                 };
             }
 
