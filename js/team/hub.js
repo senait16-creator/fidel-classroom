@@ -723,7 +723,6 @@ window.openTeamHubPracticePost   = openTeamHubPracticePost;
 window.uploadTeamPracticePhoto   = uploadTeamPracticePhoto;
 window.openTeamHubFinalSubmit    = openTeamHubFinalSubmit;
 window.enterCaptainDashboard     = enterCaptainDashboard;
-window.exitCaptainDashboard      = exitCaptainDashboard;
 window.loadCaptainWritingQueue   = loadCaptainWritingQueue;
 window.loadCaptainTeamProgress   = loadCaptainTeamProgress;
 window.captainApproveSubmission  = captainApproveSubmission;
