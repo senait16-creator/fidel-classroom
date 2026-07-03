@@ -433,6 +433,11 @@ function exitTeamHub() {
     }
 }
 
+function exitCaptainDashboard() {
+    document.getElementById("captainDashboardScreen").style.display = "none";
+    enterTeamHub();
+}
+
 async function loadCaptainWritingQueue() {
     const mount = document.getElementById('captainWritingQueueMount');
     if (!mount) return;
