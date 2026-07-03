@@ -4502,3 +4502,41 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 .challenge-resource-card.writing a {
     color: #3b1f0f;
 }
+
+.challenge-resource-card.visual {
+    text-align: center;
+}
+
+.challenge-resource-icons {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.challenge-resource-icons a {
+    width: 86px;
+    min-height: 86px;
+    border-radius: 999px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(255,255,255,0.86);
+    color: #1e293b;
+    text-decoration: none;
+    font-weight: 900;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+}
+
+.challenge-resource-icons a span {
+    font-size: 28px;
+    margin-bottom: 4px;
+}
+
+.challenge-resource-icons a strong {
+    font-size: 12px;
+    line-height: 1.1;
+}
