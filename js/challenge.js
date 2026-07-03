@@ -536,7 +536,7 @@ async function renderChallengeFamilyPicker() {
             <div class="challenge-lesson-icon">📚</div>
             <div class="challenge-lesson-level">Level ${level.level_number}</div>
             <div class="challenge-lesson-families">${(level.letter_families || []).join(" ")}</div>
-            <p>Prepare with songs, today’s lesson, and writing practice before choosing a family.</p>
+            <p>Listen to the songs and SING along! Watch the lesson video and writing stroke videos to make your writing T and Pass this Level.</p>
         </div>
 
 <div class="challenge-resource-card songs visual">
