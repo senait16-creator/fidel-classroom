@@ -228,6 +228,24 @@
     </div>
 </div>
 
+<div class="teacher-panel" style="margin-bottom:20px; border:2px solid #fecaca;">
+    <div class="teacher-panel-header" onclick="toggleTeacherPanel('dangerZonePanelBody', this)">
+        <h2 style="font-size:18px; color:#991b1b;">⚠️ Danger Zone</h2>
+        <button class="teacher-panel-toggle collapsed">▼</button>
+    </div>
+    <div class="teacher-panel-body collapsed" id="dangerZonePanelBody">
+        <p style="font-size:13px; color:#64748b; margin-bottom:12px;">
+            Wipes every student's streaks, writing submissions, help flags, and level-completion
+            requests, resets every team back to Level 1 with 0 streak, and unassigns everyone from
+            teams and captain roles. Use this once, at the very start (e.g. Day One) — it cannot be undone.
+        </p>
+        <button class="btn-primary" style="width:auto; padding:10px 20px; font-size:13px; background:#991b1b;"
+                onclick="resetEverythingForDayOne()">
+            🔄 Reset Everyone (Day One)
+        </button>
+    </div>
+</div>
+
 <!-- logout kept on teacher dashboard only -->
 <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
 
