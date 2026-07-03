@@ -120,7 +120,7 @@ function enterTeamHub() {
         "letterBoardScreen"
     ].forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.style.display = "none";
+        if (el) el.style.display = "none"; 
     });
 
     const hub = document.getElementById("teamHubScreen");
