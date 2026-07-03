@@ -668,14 +668,50 @@ header {
 #gameStreakProgressBar { transition: width 0.3s ease, background-color 0.3s ease; }
 
 /* â”€â”€ Mode select â€” coffee cup home screen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* MODE SELECT SCREEN — same background as login */
 #modeSelectScreen {
-    background: #f5f5f0;
-    min-height: 100vh;
-    padding: 36px 20px 48px;
-    max-width: 480px;
-    margin: 0 auto;
     display: none;
-    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+    padding: 42px 20px 28px;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #14532d 0%, #166534 40%, #15803d 68%, #ca8a04 100%);
+}
+
+/* Reuse login floating letter style on mode select */
+#modeSelectScreen .bg-letter {
+    position: absolute;
+    font-family: 'Abyssinica SIL', serif;
+    color: white;
+    opacity: 0.14;
+    user-select: none;
+    pointer-events: none;
+    z-index: 1;
+    line-height: 1;
+}
+
+/* Keep actual content above letters */
+.mode-greeting-sub,
+.mode-greeting-main,
+.cups-grid,
+.mode-jump-row {
+    position: relative;
+    z-index: 2;
+}
+
+/* Prevent the page from starting too low */
+.mode-greeting-sub {
+    margin-top: 0;
+    color: rgba(255,255,255,0.75);
+}
+
+.mode-greeting-main {
+    color: white;
+}
+
+.mode-greeting-main span {
+    color: #fef9c3;
 }
 
 .mode-greeting-sub { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #94a3b8; text-align: center; margin-bottom: 6px; font-family: 'Inter', sans-serif; }
