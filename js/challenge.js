@@ -383,9 +383,22 @@ function chooseModeReading() {
     if (typeof renderReadingLevelsList === "function") renderReadingLevelsList();
 }
 
-function exitChallengeBackToDashboard() {
-    document.getElementById("challengeLevelsScreen").style.display = "none";
-    document.getElementById("teamHubScreen").style.display = "block";
+async function exitChallengeBackToDashboard() {
+    const challengeLevels = document.getElementById("challengeLevelsScreen");
+    const challengeDashboard = document.getElementById("challengeDashboardScreen");
+    const teamHub = document.getElementById("teamHubScreen");
+
+    if (challengeLevels) challengeLevels.style.display = "none";
+    if (teamHub) teamHub.style.display = "none";
+
+    if (challengeDashboard) {
+        challengeDashboard.style.display = "block";
+        if (typeof renderChallengeDashboard === "function") {
+            await renderChallengeDashboard();
+        }
+    } else if (typeof chooseModeChallenge === "function") {
+        await chooseModeChallenge();
+    }
 }
 
 // -----------------------------------------------------------------------------
