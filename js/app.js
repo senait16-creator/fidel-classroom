@@ -2,7 +2,7 @@
 // APP.JS — Core bootstrap, constants, shared state, utilities, dashboard,
 // letter grid, practice sketchpad, progress, leaderboard, team sidebar.
 //
-// Loads FIRST. All other files depend on globals defined here.
+// Loads FIRST. All other files depend on globals defined here. 
 // Load order in index.html:
 //   app.js → auth.js → game.js → submissions.js → teacher.js → reading.js → challenge.js
 // =============================================================================
