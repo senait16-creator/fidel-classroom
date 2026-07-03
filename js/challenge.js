@@ -540,7 +540,7 @@ async function renderChallengeFamilyPicker() {
         </div>
 
 <div class="challenge-resource-card songs visual">
-    <h3>🎵 Songs & Listening</h3>
+    <h3>🎵 Music First! Lets Jam 🎵</h3>
 
     <div class="challenge-resource-icons">
         <a href="https://www.youtube.com/watch?v=dWQQeHyIebk&list=RDdWQQeHyIebk&start_radio=1" target="_blank" rel="noopener">
