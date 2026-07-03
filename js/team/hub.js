@@ -20,27 +20,7 @@
 // ---------------------------------------------------------------------------
 
 function enterTeamHub() {
-    [
-        "modeSelectScreen",
-        "studentDashboard",
-        "challengeDashboardScreen",
-        "challengeLevelsScreen",
-        "challengeFamilyScreen",
-        "challengeFamilyDetailScreen",
-        "readingLevelsScreen",
-        "captainDashboardScreen",
-        "letterBoardScreen",
-        "gameWorkspace"
-    ].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = "none";
-    });
-
-    const hub = document.getElementById("teamHubScreen");
-    if (hub) hub.style.display = "block";
-
-    const hamburger = document.getElementById("hamburgerBtn");
-    if (hamburger) hamburger.style.display = "flex";
+    showScreen("teamHubScreen");
 
     if (typeof renderTeamHub === "function") {
         renderTeamHub();
@@ -445,9 +425,12 @@ function enterCaptainDashboard() {
     loadCaptainTeamProgress();
 }
 
-function exitCaptainDashboard() {
-    document.getElementById('captainDashboardScreen').style.display = 'none';
-    enterTeamHub();
+function exitTeamHub() {
+    showScreen("challengeDashboardScreen");
+
+    if (typeof renderChallengeDashboard === "function") {
+        renderChallengeDashboard();
+    }
 }
 
 async function loadCaptainWritingQueue() {
