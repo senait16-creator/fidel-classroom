@@ -52,7 +52,11 @@ async function renderTeamHub() {
 
     if (!team) return;
 
-    const isCaptain = !!currentProfile?.is_captain;
+    const captainCard = document.getElementById("teamHubCaptainActions");
+
+if (captainCard) {
+    captainCard.style.display = isCaptain ? "block" : "none";
+}
 
     // ── Header ──────────────────────────────────────────────
     const teamHex = getTeamHex(team.name);
