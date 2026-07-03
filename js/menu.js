@@ -57,20 +57,33 @@ function closeResourcesCard() {
 
 function switchModeFromMenu() {
     closeHamburgerMenu();
+
     setTimeout(() => {
-        // Hide all screens
-        document.getElementById('studentDashboard').style.display = 'none';
-        document.getElementById('teamHubScreen').style.display = 'none';
-        document.getElementById('challengeLevelsScreen').style.display = 'none';
-        document.getElementById('challengeFamilyScreen').style.display = 'none';
-        document.getElementById('challengeFamilyDetailScreen').style.display = 'none';
-        document.getElementById('readingLevelsScreen').style.display = 'none';
-        document.getElementById('captainDashboardScreen').style.display = 'none';
-        document.getElementById('familyPracticeSheet').style.display = 'none';
-        document.getElementById('gameWorkspace').style.display = 'none';
-        document.getElementById('flashcardScreen').style.display = 'none';
-        // Show mode select
-        document.getElementById('modeSelectScreen').style.display = 'block';
+        [
+            'studentDashboard',
+            'challengeDashboardScreen',
+            'challengeLevelsScreen',
+            'challengeFamilyScreen',
+            'challengeFamilyDetailScreen',
+            'readingLevelsScreen',
+            'letterBoardScreen',
+            'familyPracticeSheet',
+            'gameWorkspace',
+            'flashcardScreen',
+            'teamHubScreen',
+            'captainDashboardScreen'
+        ].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+
+        const modeSelect = document.getElementById('modeSelectScreen');
+        if (modeSelect) modeSelect.style.display = 'flex';
+
+        if (typeof applyModeLockStyling === 'function') {
+            applyModeLockStyling();
+        }
+
         const nickname = currentProfile?.nickname ? `, ${currentProfile.nickname}` : '';
         const nicknameEl = document.getElementById('modeSelectNickname');
         if (nicknameEl) nicknameEl.innerText = nickname;
