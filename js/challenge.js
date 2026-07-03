@@ -118,10 +118,44 @@ async function renderChallengeDashboard() {
         sub.innerText = `${team.name} • Level ${team.current_level} • 🔥 ${team.streak_count || 0} streak`;
     }
 
-    await renderChallengeDashboardMap(levels, team);
-    await renderChallengeTeamStatus(team);
-    await renderChallengeDashboardRace();
-    renderChallengeComingUp(levels, team.current_level);
+  const teamBtn = document.getElementById("challengeYourTeamBtn");
+if (teamBtn) {
+    teamBtn.style.background = `linear-gradient(135deg, ${teamHex}, ${teamHex}cc)`;
+    teamBtn.innerText = `Open ${team.name} Dashboard →`;
+
+    teamBtn.onclick = () => {
+        const challengeDashboard = document.getElementById("challengeDashboardScreen");
+        const teamHub = document.getElementById("teamHubScreen");
+
+        if (challengeDashboard) challengeDashboard.style.display = "none";
+        if (teamHub) teamHub.style.display = "block";
+    };
+}
+async function renderChallengeDashboard() { 
+    const [team, levels] = await Promise.all([
+        getTeamBoardInfo(),
+        fetchChallengeLevels()
+    ]);
+
+    const teamHex = getTeamHex(team.name);
+
+    const sub = document.getElementById("challengeDashSub");
+    if (sub) {
+        sub.innerText = `${team.name} • Level ${team.current_level} • 🔥 ${team.streak_count || 0} streak`;
+    }
+
+  const teamBtn = document.getElementById("challengeYourTeamBtn");
+if (teamBtn) {
+    teamBtn.style.background = `linear-gradient(135deg, ${teamHex}, ${teamHex}cc)`;
+    teamBtn.innerText = `Open ${team.name} Dashboard →`;
+
+    teamBtn.onclick = () => {
+        const challengeDashboard = document.getElementById("challengeDashboardScreen");
+        const teamHub = document.getElementById("teamHubScreen");
+
+        if (challengeDashboard) challengeDashboard.style.display = "none";
+        if (teamHub) teamHub.style.display = "block";
+    };
 }
 
 async function renderChallengeTeamStatus(team) {
