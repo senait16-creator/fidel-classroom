@@ -710,7 +710,7 @@ async function checkCaptainInboxBadge() {
 // Expose
 // ---------------------------------------------------------------------------
 
-window.enterTeamHub              = enterTeamHub;
+window.enterTeamHub              = enterTeamHub; 
 window.exitTeamHub               = exitTeamHub;
 window.renderTeamHub             = renderTeamHub;
 window.toggleTeamRace            = toggleTeamRace;
