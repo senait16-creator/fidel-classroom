@@ -560,31 +560,35 @@ async function renderChallengeFamilyPicker() {
     </div>
 </div>
 
-<div class="challenge-resource-card lesson visual">
-    <h3>🎥 Today's Lesson</h3>
+<div class="challenge-resource-card lesson writing visual">
 
-    <div class="challenge-resource-icons single">
-        <a href="https://www.youtube.com/watch?v=QgssO7_WkSk" target="_blank" rel="noopener">
-            <span>▶️</span>
-            <strong>Lesson</strong>
-        </a>
-    </div>
-</div>
-
-<div class="challenge-resource-card writing visual">
-    <h3>✍️ Writing Practice</h3>
+    <h3>🎥 Today's Lesson & Writing</h3>
 
     <div class="challenge-resource-icons">
-        <a href="https://www.youtube.com/watch?v=4LIUwGr40dg&t=192s" target="_blank" rel="noopener">
-            <span>📝</span>
-            <strong>Demo 1</strong>
+
+        <a href="https://www.youtube.com/watch?v=QgssO7_WkSk"
+           target="_blank"
+           rel="noopener">
+            <span>🎥</span>
+            <strong>Lesson</strong>
         </a>
 
-        <a href="https://www.youtube.com/watch?v=j0jaSbFA30w" target="_blank" rel="noopener">
-            <span>✏️</span>
-            <strong>Demo 2</strong>
+        <a href="https://www.youtube.com/watch?v=4LIUwGr40dg&t=192s"
+           target="_blank"
+           rel="noopener">
+            <span>📝</span>
+            <strong>Writing 1</strong>
         </a>
+
+        <a href="https://www.youtube.com/watch?v=j0jaSbFA30w"
+           target="_blank"
+           rel="noopener">
+            <span>✏️</span>
+            <strong>Writing 2</strong>
+        </a>
+
     </div>
+
 </div>
 
         <div class="challenge-family-divider">
