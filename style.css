@@ -667,17 +667,6 @@ header {
 @keyframes streakBump { 0% { transform: scale(1); } 45% { transform: scale(1.25); color: var(--accent-gold); } 100% { transform: scale(1); } }
 #gameStreakProgressBar { transition: width 0.3s ease, background-color 0.3s ease; }
 
-/* â”€â”€ Mode select â€” coffee cup home screen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-/* MODE SELECT SCREEN — same background as login */
-#modeSelectScreen {
-    display: none;
-    min-height: 100vh;
-    width: 100%;
-    padding: 42px 20px 28px;
-    position: relative;
-    overflow: hidden;
-    background: linear-gradient(135deg, #14532d 0%, #166534 40%, #15803d 68%, #ca8a04 100%);
-}
 
 /* Reuse login floating letter style on mode select */
 #modeSelectScreen .bg-letter {
