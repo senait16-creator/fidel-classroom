@@ -99,9 +99,12 @@ if (teamBtn) {
     teamBtn.innerText = `Open ${team.name} Dashboard →`;
 
     teamBtn.onclick = () => {
+    if (typeof window.enterTeamHub === "function") {
         window.enterTeamHub();
-    };
-}
+    } else {
+        console.error("enterTeamHub is not loaded");
+    }
+};
 
    await renderChallengeDashboardMap(levels, team);
 await renderChallengeDashboardRace();
