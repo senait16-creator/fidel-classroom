@@ -552,53 +552,42 @@ async function renderChallengeFamilyPicker() {
                 Follow this order first: watch the lesson, sing the Fidel, practice pronunciation, then practice writing.
             </p>
 
-            <div class="challenge-resource-links">
+           <div class="challenge-resource-links">
 
-                <a href="${lessonVideo}"
-                   target="_blank"
-                   rel="noopener"
-                   class="challenge-resource-link primary">
-                    <span>🎥</span>
-                    <div>
-                        <strong>1. Lesson Video</strong>
-                        <small>Watch this first</small>
-                    </div>
-                </a>
+    <a href="https://www.youtube.com/watch?v=QgssO7_WkSk"
+       target="_blank"
+       rel="noopener"
+       class="challenge-resource-link primary">
+        <span>🎥</span>
+        <div>
+            <strong>Today's Lesson</strong>
+            <small>Watch this first</small>
+        </div>
+    </a>
 
-                <a href="${jebenaChannel}"
-                   target="_blank"
-                   rel="noopener"
-                   class="challenge-resource-link">
-                    <span>🎵</span>
-                    <div>
-                        <strong>2. Sing the Fidel</strong>
-                        <small>Use the alphabet songs</small>
-                    </div>
-                </a>
+    <a href="https://www.youtube.com/watch?v=dWQQeHyIebk&list=RDdWQQeHyIebk&start_radio=1"
+       target="_blank"
+       rel="noopener"
+       class="challenge-resource-link">
+        <span>🎵</span>
+        <div>
+            <strong>Alphabet Song</strong>
+            <small>Sing along with the Fidel</small>
+        </div>
+    </a>
 
-                <a href="${jebenaChannel}"
-                   target="_blank"
-                   rel="noopener"
-                   class="challenge-resource-link">
-                    <span>🔊</span>
-                    <div>
-                        <strong>3. Practice Pronunciation</strong>
-                        <small>Say each sound out loud</small>
-                    </div>
-                </a>
+    <a href="https://www.youtube.com/watch?v=4LIUwGr40dg&t=192s"
+       target="_blank"
+       rel="noopener"
+       class="challenge-resource-link">
+        <span>✍️</span>
+        <div>
+            <strong>Writing Practice</strong>
+            <small>Practice writing today's letters</small>
+        </div>
+    </a>
 
-                <a href="${jebenaChannel}"
-                   target="_blank"
-                   rel="noopener"
-                   class="challenge-resource-link">
-                    <span>✍️</span>
-                    <div>
-                        <strong>4. Practice Writing</strong>
-                        <small>Trace and write each row</small>
-                    </div>
-                </a>
-
-            </div>
+</div>
         </div>
 
         <div class="challenge-family-section-title">
