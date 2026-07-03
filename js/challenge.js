@@ -92,25 +92,25 @@ async function renderChallengeDashboard() {
         sub.innerText = `${team.name} • Level ${team.current_level} • 🔥 ${team.streak_count || 0} streak`;
     }
 
-  const teamBtn = document.getElementById("challengeYourTeamBtn");
+    const teamBtn = document.getElementById("challengeYourTeamBtn");
 
-if (teamBtn) {
-    teamBtn.style.background = `linear-gradient(135deg, ${teamHex}, ${teamHex}cc)`;
-    teamBtn.innerText = `Open ${team.name} Dashboard →`;
+    if (teamBtn) {
+        teamBtn.style.background = `linear-gradient(135deg, ${teamHex}, ${teamHex}cc)`;
+        teamBtn.innerText = `Open ${team.name} Dashboard →`;
 
-    teamBtn.onclick = () => {
-    if (typeof window.enterTeamHub === "function") {
-        window.enterTeamHub();
-    } else {
-        console.error("enterTeamHub is not loaded");
+        teamBtn.onclick = () => {
+            if (typeof window.enterTeamHub === "function") {
+                window.enterTeamHub();
+            } else {
+                console.error("enterTeamHub is not loaded");
+            }
+        };
     }
-};
 
-   await renderChallengeDashboardMap(levels, team);
-await renderChallengeDashboardRace();
-renderChallengeComingUp(levels, team.current_level);
+    await renderChallengeDashboardMap(levels, team);
+    await renderChallengeDashboardRace();
+    renderChallengeComingUp(levels, team.current_level);
 }
-
 
 async function renderChallengeDashboardMap(levels, team) {
     const mount = document.getElementById("challengeDashMapMount");
