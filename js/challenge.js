@@ -516,20 +516,73 @@ async function fetchStudentFamilyProgressForLevel(levelNumber) {
 
 async function renderChallengeFamilyPicker() {
     const level = activeChallengeLevel;
-    document.getElementById("challengeFamilyTitle").innerText = level.title || `Level ${level.level_number}`;
+    const title = document.getElementById("challengeFamilyTitle");
     const container = document.getElementById("challengeFamilyGrid");
+
+    if (!level || !container) return;
+
+    if (title) {
+        title.innerText = level.title || `Level ${level.level_number}`;
+    }
+
     container.innerHTML = `<p style="color:#94a3b8;">Loading...</p>`;
+
     const progressRows = await fetchStudentFamilyProgressForLevel(level.level_number);
     const progressByLetter = {};
     progressRows.forEach(row => { progressByLetter[row.base_letter] = row; });
-    container.innerHTML = "";
+
+    container.innerHTML = `
+        <div class="challenge-level-resource-panel">
+            <div class="challenge-resource-eyebrow">Start here</div>
+            <h2 class="challenge-resource-title">Watch, sing, pronounce, then write</h2>
+            <p class="challenge-resource-copy">
+                Before choosing a letter family, review the lesson video and resources for this level.
+            </p>
+
+            <div class="challenge-resource-links">
+                <a href="https://www.youtube.com/results?search_query=amharic+fidel+alphabet+song"
+                   target="_blank"
+                   rel="noopener"
+                   class="challenge-resource-link primary">
+                    🎥 Alphabet songs
+                </a>
+
+                <a href="https://www.youtube.com/results?search_query=amharic+fidel+pronunciation"
+                   target="_blank"
+                   rel="noopener"
+                   class="challenge-resource-link">
+                    🔊 Pronunciation practice
+                </a>
+
+                <a href="https://www.youtube.com/results?search_query=amharic+fidel+writing+practice"
+                   target="_blank"
+                   rel="noopener"
+                   class="challenge-resource-link">
+                    ✍🏽 Writing practice
+                </a>
+            </div>
+        </div>
+
+        <div class="challenge-family-section-title">
+            Choose one family to practice
+        </div>
+    `;
+
     const positionLabels = ["1st", "2nd", "3rd"];
 
     (level.letter_families || []).forEach((baseLetter, idx) => {
-        const progress = progressByLetter[baseLetter] || { best_streak: 0, streak_passed: false, writing_passed: false };
+        const progress = progressByLetter[baseLetter] || {
+            best_streak: 0,
+            streak_passed: false,
+            writing_passed: false
+        };
+
         const fidelObj = alphabetData.find(item => item.base === baseLetter);
+        if (!fidelObj) return;
+
         const card = document.createElement('div');
         card.className = `challenge-family-card pos-${idx + 1} ${progress.streak_passed && progress.writing_passed ? 'mastered' : ''}`;
+
         card.innerHTML = `
             <span class="challenge-family-position-tag">${positionLabels[idx] || `#${idx + 1}`}</span>
             <div class="challenge-family-letter">${baseLetter}</div>
@@ -542,6 +595,7 @@ async function renderChallengeFamilyPicker() {
                 </span>
             </div>
         `;
+
         card.onclick = () => openChallengeFamilyDetail(fidelObj, level.level_number);
         container.appendChild(card);
     });
