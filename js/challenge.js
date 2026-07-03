@@ -552,9 +552,10 @@ async function renderChallengeFamilyPicker() {
         </div>
 
         <div class="challenge-resource-card writing">
-            <h3>✍️ Writing Practice</h3>
-            <a href="https://www.youtube.com/watch?v=4LIUwGr40dg&t=192s" target="_blank" rel="noopener">📝 Watch Writing Video</a>
-        </div>
+    <h3>✍️ Writing Practice</h3>
+    <a href="https://www.youtube.com/watch?v=4LIUwGr40dg&t=192s" target="_blank" rel="noopener">📝 Writing Demo 1</a>
+    <a href="https://www.youtube.com/watch?v=j0jaSbFA30w" target="_blank" rel="noopener">✏️ Writing Demo 2</a>
+</div>
 
         <div class="challenge-family-divider">
             Choose Your Letter Family
