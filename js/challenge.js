@@ -92,24 +92,91 @@ async function renderChallengeDashboard() {
         sub.innerText = `${team.name} • Level ${team.current_level} • 🔥 ${team.streak_count || 0} streak`;
     }
 
-    const teamBtn = document.getElementById("challengeYourTeamBtn");
-
-    if (teamBtn) {
-        teamBtn.style.background = `linear-gradient(135deg, ${teamHex}, ${teamHex}cc)`;
-        teamBtn.innerText = `Open ${team.name} Dashboard →`;
-
-        teamBtn.onclick = () => {
-    window.enterTeamHub();
-};
-            } else {
-                console.error("enterTeamHub is not loaded");
-            }
-        };
-    }
-
     await renderChallengeDashboardMap(levels, team);
+    await renderChallengeTeamStatus(team);
     await renderChallengeDashboardRace();
     renderChallengeComingUp(levels, team.current_level);
+}
+
+async function renderChallengeTeamStatus(team) {
+    const mount = document.getElementById("challengeTeamStatusMount");
+    if (!mount) return;
+
+    const currentLevel = team.current_level || 1;
+
+    const { data: members, error: memberError } = await _supabase
+        .from('profiles')
+        .select('id, nickname, avatar, is_captain')
+        .eq('team_id', currentProfile.team_id)
+        .order('is_captain', { ascending: false })
+        .order('nickname');
+
+    if (memberError) {
+        mount.innerHTML = `<p style="color:#ef4444;font-size:13px;">Could not load team: ${memberError.message}</p>`;
+        return;
+    }
+
+    const memberIds = (members || []).map(m => m.id);
+    const { data: level } = await _supabase
+        .from('challenge_levels')
+        .select('letter_families')
+        .eq('level_number', currentLevel)
+        .maybeSingle();
+
+    const families = level?.letter_families || [];
+
+    let progressRows = [];
+    if (memberIds.length > 0 && families.length > 0) {
+        const { data } = await _supabase
+            .from('student_family_progress')
+            .select('student_id, base_letter, streak_passed, writing_passed, best_streak')
+            .in('student_id', memberIds)
+            .eq('level_number', currentLevel);
+        progressRows = data || [];
+    }
+
+    const rows = (members || []).map(member => {
+        if (member.is_captain) {
+            return `
+                <div class="challenge-team-member-row captain">
+                    <span>${member.avatar || '👑'} ${member.nickname || 'Captain'}</span>
+                    <strong>Captain</strong>
+                </div>`;
+        }
+
+        const cleared = families.filter(letter => {
+            const row = progressRows.find(r => r.student_id === member.id && r.base_letter === letter);
+            return row?.streak_passed && row?.writing_passed;
+        }).length;
+
+        const nextNeeded = families.find(letter => {
+            const row = progressRows.find(r => r.student_id === member.id && r.base_letter === letter);
+            return !(row?.streak_passed && row?.writing_passed);
+        });
+
+        return `
+            <div class="challenge-team-member-row">
+                <span>${member.avatar || '🦁'} ${member.nickname || 'Student'}</span>
+                <strong>${cleared}/${families.length || 3} done${nextNeeded ? ` · next ${nextNeeded}` : ' ✓'}</strong>
+            </div>`;
+    }).join('');
+
+    mount.innerHTML = `
+        <div class="challenge-team-summary">
+            <div class="challenge-team-swatch" style="background:${teamHexForStatus(team.name)}"></div>
+            <div>
+                <strong>${team.name}</strong>
+                <small>Current mission: Level ${currentLevel}</small>
+            </div>
+        </div>
+        <div class="challenge-team-member-list">
+            ${rows || '<p style="color:#94a3b8;font-size:13px;">No teammates found yet.</p>'}
+        </div>
+    `;
+}
+
+function teamHexForStatus(teamName) {
+    return typeof getTeamHex === 'function' ? getTeamHex(teamName) : '#166534';
 }
 
 async function renderChallengeDashboardMap(levels, team) {
@@ -429,9 +496,9 @@ function openChallengeFamilyDetail(fidelObj, levelNumber) {
         return;
     }
 
-    document.getElementById("challengeDetailPlayBtn").style.display = "flex";
     document.getElementById("challengeDetailFlashcardBtn").style.display = "flex";
-    document.getElementById("challengeDetailWritingBtn").style.display = "block";
+    document.getElementById("challengeDetailPlayBtn").style.display = "flex";
+    document.getElementById("challengeDetailWritingBtn").style.display = "flex";
     renderWritingStatusForFamily(fidelObj.base);
 
     document.getElementById("challengeDetailPlayBtn").onclick = () => launchChallengeStreakGame(fidelObj, levelNumber);
@@ -442,10 +509,7 @@ function openChallengeFamilyDetail(fidelObj, levelNumber) {
         document.getElementById("challengeFamilyDetailScreen").style.display = "none";
     };
     document.getElementById("challengeDetailWritingBtn").onclick = () => {
-        openWritingSubmitScreen(fidelObj.base, () => {
-            document.getElementById("challengeFamilyDetailScreen").style.display = "block";
-            renderWritingStatusForFamily(fidelObj.base);
-        });
+        openWritingSubmitScreen(fidelObj.base, 'challengeDetail', levelNumber);
         document.getElementById("challengeFamilyDetailScreen").style.display = "none";
     };
 }
@@ -556,3 +620,5 @@ window.renderChallengeDashboard = renderChallengeDashboard;
 window.renderChallengeDashboardMap = renderChallengeDashboardMap;
 window.renderChallengeDashboardRace = renderChallengeDashboardRace;
 window.renderChallengeComingUp = renderChallengeComingUp;
+window.renderChallengeTeamStatus = renderChallengeTeamStatus;
+window.enterTeamHub = enterTeamHub;
