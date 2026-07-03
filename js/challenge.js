@@ -592,7 +592,7 @@ async function renderChallengeFamilyPicker() {
 </div>
 
         <div class="challenge-family-divider">
-            Choose Your Letter Family
+            
         </div>
     `;
 
