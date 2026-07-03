@@ -75,11 +75,17 @@ function openWritingSubmitScreen(baseLetter, returnToOrOnClose, levelNumber) {
         if (file) { uploadCard.style.border = "2px solid #166534"; submitWritingPhoto(file); }
     };
 
-    // Wire sketchpad action buttons
-    document.getElementById("writingSketchClearBtn").onclick  = clearWritingSketchpad;
-    document.getElementById("writingSketchUndoBtn").onclick   = undoWritingSketchpad;
-    document.getElementById("writingSketchSubmitBtn").onclick = submitWritingSketch;
-    document.getElementById("writingSubmitCloseBtn").onclick  = closeWritingSubmitScreen;
+    // Wire sketchpad action buttons (defensive — a missing button must never
+    // crash this function and leave the screen half-wired)
+    const wire = (id, fn) => {
+        const el = document.getElementById(id);
+        if (el) el.onclick = fn;
+        else console.warn(`openWritingSubmitScreen: #${id} not found in DOM`);
+    };
+    wire("writingSketchClearBtn",  clearWritingSketchpad);
+    wire("writingSketchUndoBtn",   undoWritingSketchpad);
+    wire("writingSketchSubmitBtn", submitWritingSketch);
+    wire("writingSubmitCloseBtn",  closeWritingSubmitScreen);
 
     // Show screen as its own focused page
     [
@@ -112,9 +118,7 @@ function closeWritingSubmitScreen() {
     }
 
     const returnTo = writingSubmitContext?.returnTo || 'teamHub';
-    if (returnTo === 'teamHub') {
-        if (typeof enterTeamHub === 'function') enterTeamHub();
-    } else if (returnTo === 'practiceSheet') {
+    if (returnTo === 'practiceSheet') {
         const sheet = document.getElementById('familyPracticeSheet');
         if (sheet) sheet.style.display = 'flex';
     } else if (returnTo === 'challengeDetail') {
@@ -124,7 +128,9 @@ function closeWritingSubmitScreen() {
             renderWritingStatusForFamily(writingSubmitContext.baseLetter);
         }
     } else {
-        if (typeof enterTeamHub === 'function') enterTeamHub();
+        // 'teamHub' and any unknown target now land on the Competition page —
+        // the team hub is retired as a destination.
+        if (typeof chooseModeChallenge === 'function') chooseModeChallenge();
     }
 }
 
@@ -413,6 +419,37 @@ async function finalizeWritingSubmission(imageUrl) {
 }
 
 // ---------------------------------------------------------------------------
+// Share approved writing to the class Community feed
+// The image already lives in storage (art_shares) — we just create a post
+// record pointing at it. post_type 'approved_share' marks it as captain-
+// approved work, which the Community feed badges with ✓ Approved.
+// ---------------------------------------------------------------------------
+
+async function shareApprovedWritingToClass(imageUrl, baseLetter, btnEl) {
+    if (btnEl) { btnEl.disabled = true; btnEl.innerText = "Sharing..."; }
+
+    const { error } = await _supabase.from('team_practice_posts').insert({
+        uploader_id: currentUser.id,
+        team_id:     currentProfile?.team_id || null,
+        image_url:   imageUrl,
+        base_letter: baseLetter,
+        post_type:   'approved_share',
+        created_at:  new Date().toISOString()
+    });
+
+    if (error) {
+        if (btnEl) { btnEl.disabled = false; btnEl.innerText = "🎉 Share with the class"; }
+        return showNotificationToast("Couldn't share: " + error.message);
+    }
+
+    showGobezToast("Shared with the class! 🎉");
+    if (btnEl) btnEl.outerHTML = `
+        <p style="font-size:12px; color:#047857; margin-top:8px;">
+            🎉 Shared with the class — check the Community feed!
+        </p>`;
+}
+
+// ---------------------------------------------------------------------------
 // Render writing status for a family (shown inside writingSubmitScreen)
 // ---------------------------------------------------------------------------
 
@@ -436,6 +473,32 @@ async function renderWritingStatusForFamily(baseLetter) {
 
     if (latest.status === 'approved') {
         statusHTML = `<div class="challenge-writing-status approved">✓ Your writing for "${baseLetter}" was approved!</div>`;
+
+        // Share-after-approval: only approved work can be shared to the class.
+        // Check whether this exact image was already shared (dedupe).
+        const { data: existingShare } = await _supabase
+            .from('team_practice_posts')
+            .select('id')
+            .eq('uploader_id', currentUser.id)
+            .eq('image_url', latest.image_url)
+            .limit(1);
+
+        if (existingShare && existingShare.length > 0) {
+            statusHTML += `
+                <p style="font-size:12px; color:#047857; margin-top:8px;">
+                    🎉 Shared with the class — check the Community feed!
+                </p>`;
+        } else {
+            statusHTML += `
+                <button class="btn-primary"
+                        style="margin-top:10px; font-size:13px; padding:10px 16px;"
+                        onclick="shareApprovedWritingToClass('${latest.image_url}', '${baseLetter}', this)">
+                    🎉 Share with the class
+                </button>
+                <p style="font-size:11px; color:#94a3b8; margin-top:6px;">
+                    Optional — post your approved work to the Community feed for reactions.
+                </p>`;
+        }
     } else if (latest.status === 'rejected') {
         statusHTML = `<div class="challenge-writing-status rejected">✗ Needs another try.${latest.reviewer_note ? `<br><strong>Captain's note:</strong> ${latest.reviewer_note}` : ''}</div>`;
     } else {
@@ -512,6 +575,7 @@ window.submitWritingPhoto             = submitWritingPhoto;
 window.submitWritingSketch            = submitWritingSketch;
 window.finalizeWritingSubmission      = finalizeWritingSubmission;
 window.renderWritingStatusForFamily   = renderWritingStatusForFamily;
+window.shareApprovedWritingToClass    = shareApprovedWritingToClass;
 window.chooseModeVocab                = chooseModeVocab;
 window.updateModeSelectCaptainButton  = updateModeSelectCaptainButton;
 window.bindSketchpadButtons           = bindSketchpadButtons;
