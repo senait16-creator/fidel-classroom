@@ -42,32 +42,10 @@ function enterModeSelect() {
 
 }
 
-function enterTeamHub() {
-    [
-        "modeSelectScreen",
-        "studentDashboard",
-        "challengeDashboardScreen",
-        "challengeLevelsScreen",
-        "challengeFamilyScreen",
-        "challengeFamilyDetailScreen",
-        "readingLevelsScreen",
-        "captainDashboardScreen",
-        "letterBoardScreen"
-    ].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = "none"; 
-    });
+// NOTE: enterTeamHub is owned by js/team/hub.js — do not redefine it here.
+// (challenge.js loads after hub.js, so a definition here would silently
+// override the more complete hub.js version.)
 
-    const hub = document.getElementById("teamHubScreen");
-    if (hub) hub.style.display = "block";
-
-    const hamburger = document.getElementById("hamburgerBtn");
-    if (hamburger) hamburger.style.display = "flex";
-
-    if (typeof renderTeamHub === "function") {
-        renderTeamHub();
-    }
-}
 function chooseModePractice() {
     document.getElementById("modeSelectScreen").style.display = "none";
     if (typeof openLetterBoard === 'function') {
@@ -105,7 +83,7 @@ async function chooseModeChallenge() {
     await renderChallengeDashboard();
 }
 
-async function renderChallengeDashboard() { 
+async function renderChallengeDashboard() {
     const [team, levels] = await Promise.all([
         getTeamBoardInfo(),
         fetchChallengeLevels()
@@ -113,53 +91,54 @@ async function renderChallengeDashboard() {
 
     const teamHex = getTeamHex(team.name);
 
+    // ── Hero subtitle ────────────────────────────────────────
     const sub = document.getElementById("challengeDashSub");
     if (sub) {
         sub.innerText = `${team.name} • Level ${team.current_level} • 🔥 ${team.streak_count || 0} streak`;
     }
 
-  const teamBtn = document.getElementById("challengeYourTeamBtn");
-if (teamBtn) {
-    teamBtn.style.background = `linear-gradient(135deg, ${teamHex}, ${teamHex}cc)`;
-    teamBtn.innerText = `Open ${team.name} Dashboard →`;
+    // ── "View team status" button — toggles the inline panel.
+    //    Team is information on this page, not a separate destination. ──
+    const teamBtn = document.getElementById("challengeYourTeamBtn");
+    const statusContent = document.getElementById("challengeTeamStatusContent");
+    if (teamBtn) {
+        teamBtn.style.background = `linear-gradient(135deg, ${teamHex}, ${teamHex}cc)`;
+        teamBtn.innerText = `View ${team.name} status ↓`;
+        teamBtn.onclick = () => {
+            if (!statusContent) return;
+            const isOpen = statusContent.style.display === "block";
+            statusContent.style.display = isOpen ? "none" : "block";
+            teamBtn.innerText = isOpen
+                ? `View ${team.name} status ↓`
+                : `Hide ${team.name} status ↑`;
+        };
+    }
+    if (statusContent) statusContent.style.display = "none";
 
-    teamBtn.onclick = () => {
-        const challengeDashboard = document.getElementById("challengeDashboardScreen");
-        const teamHub = document.getElementById("teamHubScreen");
-
-        if (challengeDashboard) challengeDashboard.style.display = "none";
-        if (teamHub) teamHub.style.display = "block";
-    };
-}
-async function renderChallengeDashboard() { 
-    const [team, levels] = await Promise.all([
-        getTeamBoardInfo(),
-        fetchChallengeLevels()
-    ]);
-
-    const teamHex = getTeamHex(team.name);
-
-    const sub = document.getElementById("challengeDashSub");
-    if (sub) {
-        sub.innerText = `${team.name} • Level ${team.current_level} • 🔥 ${team.streak_count || 0} streak`;
+    // ── Captain review queue (captains only, relocated from team hub) ──
+    const captainCard = document.getElementById("captainReviewDashCard");
+    if (captainCard) {
+        if (currentProfile?.is_captain) {
+            captainCard.style.display = "block";
+            if (typeof loadCaptainWritingQueue === "function") {
+                await loadCaptainWritingQueue();
+            }
+        } else {
+            captainCard.style.display = "none";
+        }
     }
 
-  const teamBtn = document.getElementById("challengeYourTeamBtn");
-if (teamBtn) {
-    teamBtn.style.background = `linear-gradient(135deg, ${teamHex}, ${teamHex}cc)`;
-    teamBtn.innerText = `Open ${team.name} Dashboard →`;
-
-    teamBtn.onclick = () => {
-        const challengeDashboard = document.getElementById("challengeDashboardScreen");
-        const teamHub = document.getElementById("teamHubScreen");
-
-        if (challengeDashboard) challengeDashboard.style.display = "none";
-        if (teamHub) teamHub.style.display = "block";
-    };
+    // ── Render all dashboard sections ────────────────────────
+    await renderChallengeDashboardMap(levels, team);
+    await renderChallengeTeamStatus(team);
+    await renderChallengeDashboardRace();
+    renderChallengeComingUp(levels, team.current_level || 1);
 }
 
 async function renderChallengeTeamStatus(team) {
-    const mount = document.getElementById("challengeTeamStatusMount");
+    // Render into the inner content div — NOT challengeTeamStatusMount,
+    // which is the whole card (writing there would destroy the toggle button).
+    const mount = document.getElementById("challengeTeamStatusContent");
     if (!mount) return;
 
     const currentLevel = team.current_level || 1;
@@ -681,4 +660,3 @@ window.renderChallengeDashboardMap = renderChallengeDashboardMap;
 window.renderChallengeDashboardRace = renderChallengeDashboardRace;
 window.renderChallengeComingUp = renderChallengeComingUp;
 window.renderChallengeTeamStatus = renderChallengeTeamStatus;
-window.enterTeamHub = enterTeamHub;
