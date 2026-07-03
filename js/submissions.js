@@ -121,6 +121,9 @@ function closeWritingSubmitScreen() {
     if (returnTo === 'practiceSheet') {
         const sheet = document.getElementById('familyPracticeSheet');
         if (sheet) sheet.style.display = 'flex';
+        if (writingSubmitContext?.baseLetter && typeof renderWritingStatusForFamily === 'function') {
+            renderWritingStatusForFamily(writingSubmitContext.baseLetter, 'practiceSheetWritingStatusBox');
+        }
     } else if (returnTo === 'challengeDetail') {
         const detail = document.getElementById('challengeFamilyDetailScreen');
         if (detail) detail.style.display = 'block';
