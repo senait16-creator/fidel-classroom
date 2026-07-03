@@ -99,8 +99,8 @@ async function renderChallengeDashboard() {
         teamBtn.innerText = `Open ${team.name} Dashboard →`;
 
         teamBtn.onclick = () => {
-            if (typeof window.enterTeamHub === "function") {
-                window.enterTeamHub();
+    window.enterTeamHub();
+};
             } else {
                 console.error("enterTeamHub is not loaded");
             }
