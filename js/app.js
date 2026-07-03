@@ -494,6 +494,52 @@ function toggleDropdownElement(elementId) {
 }
 
 // ---------------------------------------------------------------------------
+// Mode-select locks — flip a value to false once that mode is ready to
+// launch. Locked cards show a "🔒 Coming Soon" overlay and do nothing when
+// tapped; unlocked cards behave exactly as before.
+// ---------------------------------------------------------------------------
+
+const LOCKED_MODES = {
+    practice:  true,
+    reading:   true,
+    vocab:     true,
+    community: false
+};
+
+function enterModeIfUnlocked(modeKey, enterFn) {
+    if (LOCKED_MODES[modeKey]) {
+        showNotificationToast('🔒 Not available yet — coming soon!');
+        return;
+    }
+    enterFn();
+}
+
+// Applies the locked look to any cup-card whose data-mode is locked —
+// called each time the mode select screen is shown, so it stays in sync
+// even if LOCKED_MODES changes without a page reload.
+function applyModeLockStyling() {
+    Object.keys(LOCKED_MODES).forEach(key => {
+        const card = document.querySelector(`.cup-card[data-mode="${key}"]`);
+        if (!card) return;
+        card.classList.toggle('cup-card-locked', LOCKED_MODES[key]);
+        let overlay = card.querySelector('.cup-card-lock-badge');
+        if (LOCKED_MODES[key]) {
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.className = 'cup-card-lock-badge';
+                overlay.innerText = '🔒 Coming Soon';
+                card.appendChild(overlay);
+            }
+        } else if (overlay) {
+            overlay.remove();
+        }
+    });
+}
+window.LOCKED_MODES = LOCKED_MODES;
+window.enterModeIfUnlocked = enterModeIfUnlocked;
+window.applyModeLockStyling = applyModeLockStyling;
+
+// ---------------------------------------------------------------------------
 // Letter grid + classroom workspace
 // ---------------------------------------------------------------------------
 
