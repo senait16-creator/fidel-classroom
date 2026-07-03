@@ -136,7 +136,7 @@ async function proceedFlowMap(user) {
         if (typeof showCharacterGuide === 'function') {
             showCharacterGuide();
         } else {
-            const SHOW_INTRO = true;
+            const SHOW_INTRO = false;
 
 if (SHOW_INTRO) {
     showIntroMascot();
@@ -260,7 +260,7 @@ function selectAvatar(symbol, element) {
 
 function openProfileEdit() {
     if (!currentUser) return;
-    isEditingProfile = true;
+    isEditingProfile = false;
 
     document.getElementById("studentDashboard").style.display  = "none";
     document.getElementById("teacherOnlyDashboard").style.display = "none";
