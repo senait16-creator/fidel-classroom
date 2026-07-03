@@ -562,7 +562,7 @@ async function renderChallengeFamilyPicker() {
 
 <div class="challenge-resource-card lesson writing visual">
 
-    <h3>🎥 Today's Lesson & Writing</h3>
+    <h3>🎥 Lesson & Writing Videos</h3>
 
     <div class="challenge-resource-icons">
 
