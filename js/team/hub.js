@@ -19,29 +19,25 @@
 // Entry / Exit
 // ---------------------------------------------------------------------------
 
-async function enterTeamHub() {
-    // Hide all other screens
-    [
-        'studentDashboard', 'modeSelectScreen', 'challengeDashboardScreen',
-        'challengeLevelsScreen', 'challengeFamilyScreen', 'challengeFamilyDetailScreen',
-        'readingLevelsScreen', 'captainDashboardScreen', 'letterBoardScreen',
-        'writingSubmitScreen', 'familyPracticeSheet'
-    ].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = 'none';
-    });
+function enterTeamHub() {
+    showScreen("teamHubScreen");
 
-    document.getElementById('teamHubScreen').style.display = 'block';
-    document.getElementById('hamburgerBtn').style.display = 'flex';
-    await renderTeamHub();
+    if (typeof renderTeamHub === "function") {
+        renderTeamHub();
+    }
 }
 
 function exitTeamHub() {
-    document.getElementById('teamHubScreen').style.display = 'none';
-    document.getElementById('familyPracticeSheet').style.display = 'none';
-    launchDashboard('student');
-}
+    const hub = document.getElementById("teamHubScreen");
+    if (hub) hub.style.display = "none";
 
+    const challenge = document.getElementById("challengeDashboardScreen");
+    if (challenge) challenge.style.display = "block";
+
+    if (typeof renderChallengeDashboard === "function") {
+        renderChallengeDashboard();
+    }
+}
 // ---------------------------------------------------------------------------
 // Main render
 // ---------------------------------------------------------------------------
@@ -228,7 +224,7 @@ function toggleTeamFeed() {
 }
 
 // ---------------------------------------------------------------------------
-// Practice feed — reads from team_practice_posts (unified table)
+// Practice feed — reads from team_posts (unified table)
 // ---------------------------------------------------------------------------
 
 async function loadTeamPracticeFeed() {
@@ -346,7 +342,7 @@ async function toggleReaction(postId, emoji, buttonEl) {
 async function deleteTeamPost(postId, imageUrl) {
     if (!confirm('Delete this post?')) return;
 
-    const pathMatch = imageUrl.match(/team_practice_posts\/(.+)$/);
+    const pathMatch = imageUrl.match(/team_posts\/(.+)$/);
     const storagePath = pathMatch ? pathMatch[1] : null;
 
     const { error } = await _supabase.from('team_practice_posts').delete().eq('id', postId);
@@ -422,9 +418,19 @@ function openTeamHubFinalSubmit() {
 // ---------------------------------------------------------------------------
 
 function enterCaptainDashboard() {
-    // The captain dashboard is retired — the review queue lives on the
-    // Competition page now. Redirect any legacy callers there.
-    if (typeof chooseModeChallenge === 'function') chooseModeChallenge();
+    document.getElementById('teamHubScreen').style.display = 'none';
+    document.getElementById('studentDashboard').style.display = 'none';
+    document.getElementById('captainDashboardScreen').style.display = 'block';
+    loadCaptainWritingQueue();
+    loadCaptainTeamProgress();
+}
+
+function exitTeamHub() {
+    showScreen("challengeDashboardScreen");
+
+    if (typeof renderChallengeDashboard === "function") {
+        renderChallengeDashboard();
+    }
 }
 
 async function loadCaptainWritingQueue() {
@@ -553,12 +559,6 @@ async function captainApproveSubmission(submissionId, studentId, baseLetter) {
     showGobezToast('Submission approved! ✓');
     await loadCaptainWritingQueue();
     await loadCaptainTeamProgress();
-
-    // Refresh the Competition page team status if it's the visible screen
-    const dash = document.getElementById('challengeDashboardScreen');
-    if (dash && dash.style.display !== 'none' && typeof renderChallengeDashboard === 'function') {
-        await renderChallengeDashboard();
-    }
 
     if (typeof checkAndUpdateTeamLevelCompletion === 'function') {
         await checkAndUpdateTeamLevelCompletion(studentId);
@@ -705,13 +705,7 @@ async function checkCaptainInboxBadge() {
         showGobezToast(`👑 ${count} writing submission${count > 1 ? 's' : ''} waiting for your review!`);
     }
 }
-function exitCaptainDashboard() {
-  if (typeof chooseModeChallenge === 'function') {
-    chooseModeChallenge();
-  } else if (typeof enterTeamHub === 'function') {
-    enterTeamHub();
-  }
-}
+
 // ---------------------------------------------------------------------------
 // Expose
 // ---------------------------------------------------------------------------
