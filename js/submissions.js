@@ -81,7 +81,24 @@ function openWritingSubmitScreen(baseLetter, returnToOrOnClose, levelNumber) {
     document.getElementById("writingSketchSubmitBtn").onclick = submitWritingSketch;
     document.getElementById("writingSubmitCloseBtn").onclick  = closeWritingSubmitScreen;
 
-    // Show screen
+    // Show screen as its own focused page
+    [
+        "modeSelectScreen",
+        "studentDashboard",
+        "challengeDashboardScreen",
+        "challengeLevelsScreen",
+        "challengeFamilyScreen",
+        "challengeFamilyDetailScreen",
+        "teamHubScreen",
+        "captainDashboardScreen",
+        "readingLevelsScreen",
+        "letterBoardScreen",
+        "gameWorkspace"
+    ].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = "none";
+    });
+
     document.getElementById("writingSubmitScreen").style.display = "flex";
 }
 
@@ -103,6 +120,9 @@ function closeWritingSubmitScreen() {
     } else if (returnTo === 'challengeDetail') {
         const detail = document.getElementById('challengeFamilyDetailScreen');
         if (detail) detail.style.display = 'block';
+        if (writingSubmitContext?.baseLetter && typeof renderWritingStatusForFamily === 'function') {
+            renderWritingStatusForFamily(writingSubmitContext.baseLetter);
+        }
     } else {
         if (typeof enterTeamHub === 'function') enterTeamHub();
     }
@@ -324,8 +344,12 @@ async function uploadSketchpadDrawingCanvasData() {
 // ---------------------------------------------------------------------------
 
 async function submitWritingPhoto(file) {
+    if (!file) return;
+    if (!writingSubmitContext?.baseLetter) return showNotificationToast("Choose a letter before submitting.");
+    if (file.size > 25 * 1024 * 1024) return showNotificationToast("Photo is too large — please use one under 25MB.");
+
     showNotificationToast("Compressing and uploading...");
-    const compressed = await compressImage(file);
+    const compressed = typeof compressImage === 'function' ? await compressImage(file) : file;
     const letterIndex = alphabetData.findIndex(item => item.base === writingSubmitContext.baseLetter);
     const storagePath = `writing-${currentUser.id}-fam${letterIndex}-${Date.now()}.jpg`;
 
