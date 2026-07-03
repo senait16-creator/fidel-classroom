@@ -237,7 +237,7 @@ async function loadTeamPracticeFeed() {
     mount.innerHTML = `<p style="color:#94a3b8; font-size:13px; padding:4px 0;">Loading team feed...</p>`;
 
     const { data: posts, error } = await _supabase
-        .from('team_posts')
+        .from('team_practice_posts')
         .select(`
             id, base_letter, image_url, created_at, post_type, uploader_id,
             profiles!team_posts_uploader_id_fkey(nickname, avatar)
@@ -349,11 +349,11 @@ async function deleteTeamPost(postId, imageUrl) {
     const pathMatch = imageUrl.match(/team_posts\/(.+)$/);
     const storagePath = pathMatch ? pathMatch[1] : null;
 
-    const { error } = await _supabase.from('team_posts').delete().eq('id', postId);
+    const { error } = await _supabase.from('team_practice_posts').delete().eq('id', postId);
     if (error) return showNotificationToast("Couldn't delete: " + error.message);
 
     if (storagePath) {
-        await _supabase.storage.from('team_posts').remove([storagePath]);
+        await _supabase.storage.from('team_practice_posts').remove([storagePath]);
     }
     showNotificationToast('Post deleted.');
     await loadTeamPracticeFeed();
@@ -385,14 +385,14 @@ async function uploadTeamPracticePhoto(file, baseLetter) {
     const filename = `practice_${currentUser.id}_${Date.now()}.jpg`;
 
     const { error: uploadError } = await _supabase.storage
-        .from('team_posts')
+        .from('team_practice_posts')
         .upload(filename, compressed, { contentType: 'image/jpeg' });
 
     if (uploadError) return showNotificationToast('Upload failed: ' + uploadError.message);
 
-    const { data: urlData } = _supabase.storage.from('team_posts').getPublicUrl(filename);
+    const { data: urlData } = _supabase.storage.from('team_practice_posts').getPublicUrl(filename);
 
-    const { error: insertError } = await _supabase.from('team_posts').insert({
+    const { error: insertError } = await _supabase.from('team_practice_posts').insert({
         uploader_id: currentUser.id,
         team_id:     currentProfile.team_id,
         base_letter: baseLetter || null,
