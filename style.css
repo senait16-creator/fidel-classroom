@@ -4265,3 +4265,101 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     margin: 12px 0 2px;
     text-align: center;
 }
+
+.challenge-level-resource-panel {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, #fff7ed 0%, #ecfdf5 55%, #fef3c7 100%);
+    border: 2px solid rgba(22, 101, 52, 0.18);
+    border-radius: 28px;
+    padding: 24px;
+    margin-bottom: 18px;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+}
+
+.challenge-resource-eyebrow {
+    display: inline-flex;
+    background: #facc15;
+    color: #422006;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 12px;
+}
+
+.challenge-resource-title {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 950;
+    color: #14532d;
+}
+
+.challenge-resource-copy {
+    margin: 10px 0 20px;
+    color: #475569;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.challenge-resource-links {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.challenge-resource-link {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 14px;
+    background: white;
+    color: #14532d;
+    text-decoration: none;
+    border-radius: 20px;
+    padding: 16px 18px;
+    border: 1px solid rgba(22, 101, 52, 0.16);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.07);
+    font-weight: 800;
+}
+
+.challenge-resource-link span {
+    font-size: 28px;
+    width: 38px;
+    text-align: center;
+}
+
+.challenge-resource-link strong {
+    display: block;
+    font-size: 15px;
+    color: inherit;
+}
+
+.challenge-resource-link small {
+    display: block;
+    margin-top: 3px;
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 700;
+}
+
+.challenge-resource-link.primary {
+    background: linear-gradient(135deg, #166534, #22c55e);
+    color: white;
+    border-color: transparent;
+}
+
+.challenge-resource-link.primary small {
+    color: rgba(255,255,255,0.85);
+}
+
+.challenge-family-section-title {
+    grid-column: 1 / -1;
+    margin: 4px 0 12px;
+    padding-top: 4px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 950;
+    color: #334155;
+}
