@@ -19,27 +19,32 @@
 // Entry / Exit
 // ---------------------------------------------------------------------------
 
-async function enterTeamHub() {
-    // Hide all other screens
+function enterTeamHub() {
     [
-        'studentDashboard', 'modeSelectScreen', 'challengeLevelsScreen',
-        'challengeFamilyScreen', 'challengeFamilyDetailScreen',
-        'readingLevelsScreen', 'captainDashboardScreen',
-        'writingSubmitScreen', 'familyPracticeSheet'
+        "modeSelectScreen",
+        "studentDashboard",
+        "challengeDashboardScreen",
+        "challengeLevelsScreen",
+        "challengeFamilyScreen",
+        "challengeFamilyDetailScreen",
+        "readingLevelsScreen",
+        "captainDashboardScreen",
+        "letterBoardScreen",
+        "gameWorkspace"
     ].forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.style.display = 'none';
+        if (el) el.style.display = "none";
     });
 
-    document.getElementById('teamHubScreen').style.display = 'block';
-    document.getElementById('hamburgerBtn').style.display = 'flex';
-    await renderTeamHub();
-}
+    const hub = document.getElementById("teamHubScreen");
+    if (hub) hub.style.display = "block";
 
-function exitTeamHub() {
-    document.getElementById('teamHubScreen').style.display = 'none';
-    document.getElementById('familyPracticeSheet').style.display = 'none';
-    launchDashboard('student');
+    const hamburger = document.getElementById("hamburgerBtn");
+    if (hamburger) hamburger.style.display = "flex";
+
+    if (typeof renderTeamHub === "function") {
+        renderTeamHub();
+    }
 }
 
 // ---------------------------------------------------------------------------
