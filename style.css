@@ -2817,3 +2817,97 @@ button:active,
     flex-direction: column;
   }
 }
+
+.intro-mascot-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: linear-gradient(135deg, #fff7ed, #fef3c7, #dcfce7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.intro-mascot-content {
+    width: 100%;
+    max-width: 420px;
+    min-height: 100vh;
+    padding: 32px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+    animation: introPopIn 0.7s ease both;
+}
+
+.intro-mascot-img {
+    width: 85%;
+    max-width: 330px;
+    animation: mascotFloat 2.8s ease-in-out infinite;
+}
+
+.intro-card {
+    width: 100%;
+    background: rgba(255,255,255,0.92);
+    border-radius: 28px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: 0 20px 45px rgba(15, 23, 42, 0.18);
+}
+
+.intro-card h2 {
+    margin: 0 0 8px;
+    font-size: 28px;
+}
+
+.intro-card p {
+    color: #475569;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.intro-card button {
+    margin-top: 16px;
+    width: 100%;
+    border: none;
+    border-radius: 999px;
+    padding: 14px 18px;
+    background: #166534;
+    color: white;
+    font-weight: 800;
+    font-size: 16px;
+}
+
+.intro-mascot-screen.exit {
+    animation: introFadeOut 0.6s ease forwards;
+}
+
+@keyframes introPopIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes mascotFloat {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes introFadeOut {
+    to {
+        opacity: 0;
+        transform: scale(1.04);
+        pointer-events: none;
+    }
+}
