@@ -22,9 +22,9 @@
 async function enterTeamHub() {
     // Hide all other screens
     [
-        'studentDashboard', 'modeSelectScreen', 'challengeLevelsScreen',
-        'challengeFamilyScreen', 'challengeFamilyDetailScreen',
-        'readingLevelsScreen', 'captainDashboardScreen',
+        'studentDashboard', 'modeSelectScreen', 'challengeDashboardScreen',
+        'challengeLevelsScreen', 'challengeFamilyScreen', 'challengeFamilyDetailScreen',
+        'readingLevelsScreen', 'captainDashboardScreen', 'letterBoardScreen',
         'writingSubmitScreen', 'familyPracticeSheet'
     ].forEach(id => {
         const el = document.getElementById(id);
@@ -422,16 +422,13 @@ function openTeamHubFinalSubmit() {
 // ---------------------------------------------------------------------------
 
 function enterCaptainDashboard() {
-    document.getElementById('teamHubScreen').style.display = 'none';
-    document.getElementById('studentDashboard').style.display = 'none';
-    document.getElementById('captainDashboardScreen').style.display = 'block';
-    loadCaptainWritingQueue();
-    loadCaptainTeamProgress();
+    // The captain dashboard is retired — the review queue lives on the
+    // Competition page now. Redirect any legacy callers there.
+    if (typeof chooseModeChallenge === 'function') chooseModeChallenge();
 }
 
 function exitCaptainDashboard() {
-    document.getElementById('captainDashboardScreen').style.display = 'none';
-    enterTeamHub();
+    if (typeof chooseModeChallenge === 'function') chooseModeChallenge();
 }
 
 async function loadCaptainWritingQueue() {
@@ -560,6 +557,12 @@ async function captainApproveSubmission(submissionId, studentId, baseLetter) {
     showGobezToast('Submission approved! ✓');
     await loadCaptainWritingQueue();
     await loadCaptainTeamProgress();
+
+    // Refresh the Competition page team status if it's the visible screen
+    const dash = document.getElementById('challengeDashboardScreen');
+    if (dash && dash.style.display !== 'none' && typeof renderChallengeDashboard === 'function') {
+        await renderChallengeDashboard();
+    }
 
     if (typeof checkAndUpdateTeamLevelCompletion === 'function') {
         await checkAndUpdateTeamLevelCompletion(studentId);
