@@ -334,7 +334,7 @@ if (SHOW_INTRO) {
 }
         }
     }
-}   // ← this closing brace was missing in the live file
+}
 
 // ---------------------------------------------------------------------------
 // Team assignment
