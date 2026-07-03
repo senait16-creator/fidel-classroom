@@ -4201,3 +4201,67 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     padding-top: 12px;
     border-top: 1px solid #f1f5f9;
 }
+
+.challenge-level-resource-panel {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, #fff7ed, #ecfdf5);
+    border: 1px solid rgba(22, 101, 52, 0.16);
+    border-radius: 24px;
+    padding: 22px;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+    margin-bottom: 8px;
+}
+
+.challenge-resource-eyebrow {
+    font-size: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #a16207;
+    margin-bottom: 6px;
+}
+
+.challenge-resource-title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 900;
+    color: #166534;
+}
+
+.challenge-resource-copy {
+    margin: 8px 0 16px;
+    color: #475569;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.challenge-resource-links {
+    display: grid;
+    gap: 10px;
+}
+
+.challenge-resource-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    border-radius: 16px;
+    padding: 13px 14px;
+    background: white;
+    color: #166534;
+    font-weight: 900;
+    border: 1px solid rgba(22, 101, 52, 0.14);
+}
+
+.challenge-resource-link.primary {
+    background: #166534;
+    color: white;
+}
+
+.challenge-family-section-title {
+    grid-column: 1 / -1;
+    font-weight: 900;
+    color: #334155;
+    margin: 12px 0 2px;
+    text-align: center;
+}
