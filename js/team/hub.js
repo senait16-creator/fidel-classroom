@@ -425,13 +425,6 @@ function enterCaptainDashboard() {
     loadCaptainTeamProgress();
 }
 
-function exitTeamHub() {
-    showScreen("challengeDashboardScreen");
-
-    if (typeof renderChallengeDashboard === "function") {
-        renderChallengeDashboard();
-    }
-}
 
 function exitCaptainDashboard() {
     document.getElementById("captainDashboardScreen").style.display = "none";
@@ -691,25 +684,6 @@ async function loadCaptainTeamProgress() {
 // Captain inbox badge on hub load
 // ---------------------------------------------------------------------------
 
-async function checkCaptainInboxBadge() {
-    if (!currentProfile?.is_captain || !currentProfile?.team_id) return;
-
-    const { data: members } = await _supabase
-        .from('profiles').select('id').eq('team_id', currentProfile.team_id);
-
-    const memberIds = (members || []).map(m => m.id).filter(id => id !== currentUser.id);
-    if (memberIds.length === 0) return;
-
-    const { count } = await _supabase
-        .from('writing_submissions')
-        .select('id', { count: 'exact', head: true })
-        .in('student_id', memberIds)
-        .eq('status', 'pending');
-
-    if (count && count > 0) {
-        showGobezToast(`👑 ${count} writing submission${count > 1 ? 's' : ''} waiting for your review!`);
-    }
-}
 
 async function checkCaptainInboxBadge() {
     if (!currentProfile?.is_captain || !currentProfile?.team_id) return;
