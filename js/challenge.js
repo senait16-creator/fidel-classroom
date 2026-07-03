@@ -245,8 +245,15 @@ async function renderChallengeLevelsView() {
 
 async function openChallengeFamilyPicker(level) {
     activeChallengeLevel = level;
-    document.getElementById("challengeLevelsScreen").style.display = "none";
-    document.getElementById("challengeFamilyScreen").style.display = "block";
+
+    const challengeDashboard = document.getElementById("challengeDashboardScreen");
+    const challengeLevels = document.getElementById("challengeLevelsScreen");
+    const challengeFamily = document.getElementById("challengeFamilyScreen");
+
+    if (challengeDashboard) challengeDashboard.style.display = "none";
+    if (challengeLevels) challengeLevels.style.display = "none";
+    if (challengeFamily) challengeFamily.style.display = "block";
+
     await renderChallengeFamilyPicker();
 }
 
@@ -424,10 +431,20 @@ function launchChallengeStreakGame(fidelObj, levelNumber) {
     });
 }
 
-function exitChallengeFamilyPicker() {
-    document.getElementById("challengeFamilyScreen").style.display = "none";
-    document.getElementById("challengeLevelsScreen").style.display = "block";
-    renderChallengeLevelsView();
+async function exitChallengeFamilyPicker() {
+    const challengeFamily = document.getElementById("challengeFamilyScreen");
+    const challengeDashboard = document.getElementById("challengeDashboardScreen");
+    const challengeLevels = document.getElementById("challengeLevelsScreen");
+
+    if (challengeFamily) challengeFamily.style.display = "none";
+
+    if (challengeDashboard) {
+        challengeDashboard.style.display = "block";
+        await renderChallengeDashboard();
+    } else if (challengeLevels) {
+        challengeLevels.style.display = "block";
+        renderChallengeLevelsView();
+    }
 }
 
 // -----------------------------------------------------------------------------
