@@ -98,9 +98,12 @@ if (teamBtn) {
     teamBtn.innerText = `Open ${team.name} Dashboard →`;
 
     teamBtn.onclick = () => {
-        exitChallengeBackToDashboard();
-    };
-}
+    const challengeDashboard = document.getElementById("challengeDashboardScreen");
+    const teamHub = document.getElementById("teamHubScreen");
+
+    if (challengeDashboard) challengeDashboard.style.display = "none";
+    if (teamHub) teamHub.style.display = "block";
+};
 
     await renderChallengeDashboardMap(levels, team);
     await renderChallengeDashboardRace();
