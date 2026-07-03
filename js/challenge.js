@@ -98,12 +98,8 @@ if (teamBtn) {
     teamBtn.innerText = `Open ${team.name} Dashboard →`;
 
     teamBtn.onclick = () => {
-        const challengeDashboard = document.getElementById("challengeDashboardScreen");
-        const teamHub = document.getElementById("teamHubScreen");
-
-        if (challengeDashboard) challengeDashboard.style.display = "none";
-        if (teamHub) teamHub.style.display = "block";
-    };
+    enterTeamHub();
+};
 }
 
    await renderChallengeDashboardMap(levels, team);
