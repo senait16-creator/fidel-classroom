@@ -559,6 +559,13 @@
             </div>
         </section>
 
+        <section class="challenge-dash-card" id="challengeHelpFlagsCard" style="display:none;">
+            <div class="challenge-card-title">🙋 Help Requests</div>
+            <div id="helpFlagsMount"></div>
+        </section>
+
+        <div id="levelCompletionMount" style="display:none;"></div>
+
         <section class="challenge-dash-card">
             <div class="challenge-card-title">Coming Up</div>
             <div id="challengeComingUpMount">
@@ -570,111 +577,14 @@
 </div>
 
 <!-- ============================================================
-     TEAM HUB
+     TEAM HUB — retired as a screen.
+     Independent practice lives inside each Level (flashcards → matching
+     game → writing), class-wide sharing lives on the Community page, and
+     the two features that had no other home — Level-completion approval
+     and Help flags — now live on the Competition page. Kept as an empty
+     shell so legacy show/hide code referencing this id never crashes.
      ============================================================ -->
-<div id="teamHubScreen" style="display:none;">
-
-    <div class="team-hub-header" id="teamHubHeaderEl">
-        <div class="team-hub-header-pattern"></div>
-
-        <div class="team-hub-header-content">
-
-            <div class="team-hub-name"
-                 id="teamHubTeamName"
-                 style="font-family:'Lora',Georgia,serif; font-style:italic; text-align:center;">
-                Your Team
-            </div>
-
-            <div class="team-hub-level-tag">
-                <span>☕</span>
-                <span id="teamHubLevelLabel"
-                      style="font-family:'Lora',Georgia,serif; font-style:italic;">
-                    Level 1
-                </span>
-                <span>•</span>
-                <span>🔥 <span id="teamHubStreakLabel">0</span> streak</span>
-            </div>
-
-            <div id="teamHubMembersRow" class="avatar-group-row"></div>
-
-        </div>
-    </div>
-
-    <div class="team-hub-body">
-
-        <!-- Start here video -->
-        <div class="team-video-card"
-             onclick="window.open('https://www.youtube.com/watch?v=QgssO7_WkSk&t=160s','_blank')">
-            <div class="video-preview">
-                <span class="video-play">▶</span>
-            </div>
-            <div>
-                <strong>Start Here: Intro + ሀ ለ ሐ</strong>
-                <p>Watch this first lesson before practicing with your team.</p>
-            </div>
-        </div>
-
-        <!-- Today card -->
-        <div id="todayCardMount"></div>
-
-        <!-- Level completion banner -->
-        <div id="levelCompletionMount" style="display:none;"></div>
-
-        <!-- Hidden compatibility mounts -->
-        <div id="embeddedLevelMapMount" style="display:none;"></div>
-        <div id="teamRaceMount" style="display:none;"></div>
-
-        <!-- Help flags -->
-        <div id="helpFlagsMount" style="display:none;"></div>
-
-        <!-- Practice feed -->
-        <div class="team-hub-section">
-            <div class="team-hub-section-title" onclick="toggleTeamFeed()" style="cursor:pointer; user-select:none;">
-                <span>📸 Team Practice Feed</span>
-                <span id="teamFeedToggleArrow" style="color:#94a3b8; font-size:12px;">▼</span>
-            </div>
-            <div id="teamHubPracticeFeed" style="display:none;"></div>
-        </div>
-
-        <!-- Share / submit -->
-        <div class="team-hub-section">
-            <div class="team-hub-section-title">Share Your Practice</div>
-
-            <div id="teamHubLetterPickerWrap" style="display:none; margin-bottom:14px;">
-                <label style="font-size:12px; font-weight:700; color:#475569; display:block; margin-bottom:6px;">
-                    Which letter are you practicing?
-                </label>
-                <select id="teamHubLetterSelect" style="max-width:200px;"></select>
-            </div>
-
-            <div id="teamHubStudentActions">
-                <p class="share-hint-text">
-                    Share a practice photo with your class — everyone can react! 🎉<br>
-                    <span style="font-size:11px; color:#94a3b8;">
-                        (Writing submissions happen inside each letter, after you pass the matching game.)
-                    </span>
-                </p>
-
-                <div class="icon-action-row">
-                    <div class="icon-action-btn" onclick="revealLetterPickerThen('openTeamHubPracticePost')">
-                        <div class="icon-action-circle share-circle">📸</div>
-                        <div class="icon-action-label">Share</div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="teamHubCaptainActions" style="display:none;">
-                <p class="share-hint-text">
-                    👑 Captain tools now live on the Competition page.
-                </p>
-            </div>
-
-            <input type="file" id="teamHubPhotoInput" accept="image/*" style="display:none;">
-        </div>
-
-    </div>
-</div>
-<!-- END TEAM HUB -->
+<div id="teamHubScreen" style="display:none;"></div>
 
 <!-- ============================================================
      CHALLENGE LEVELS (full map fallback)
@@ -1124,24 +1034,25 @@
 <!-- END COMMUNITY -->
 
 <script src="js/navigation.js?v=1" defer></script>
-<script src="js/app.js?v=9" defer></script>              
-<script src="js/auth.js?v=10" defer></script>           
+<script src="js/app.js?v=9" defer></script>
+<script src="js/auth.js?v=9" defer></script>
 <script src="js/guide.js?v=10" defer></script>
 <script src="js/utils/compress.js?v=9" defer></script>
 <script src="js/game.js?v=9" defer></script>
-<script src="js/submissions.js?v=10" defer></script>    
+<script src="js/submissions.js?v=9" defer></script>
 <script src="js/teacher.js?v=9" defer></script>
 <script src="js/reading.js?v=9" defer></script>
-<script src="js/letterboard.js?v=10" defer></script>     
-<script src="js/team/progress.js?v=10" defer></script>   
-<script src="js/team/levels.js?v=10" defer></script>      
-<script src="js/team/map.js?v=10" defer></script>         
-<script src="js/team/hub.js?v=10" defer></script>         
-<script src="js/community.js?v=1" defer></script>
+<script src="js/letterboard.js?v=9" defer></script>
+<script src="js/team/progress.js?v=9" defer></script>
+<script src="js/team/levels.js?v=9" defer></script>
+<script src="js/team/map.js?v=9" defer></script>
+<script src="js/team/hub.js?v=12" defer></script>
+    <script src="js/community.js?v=1" defer></script>
 <script src="js/wordle.js?v=9" defer></script>
-<script src="js/intro.js?v=1" defer></script>
-<script src="js/challenge.js?v=13" defer></script>       
+<script src="intro.js?v=1" defer></script>
+<script src="js/challenge.js?v=12" defer></script>
 <script src="js/menu.js?v=9" defer></script>
+
 
 </body>
 </html>
