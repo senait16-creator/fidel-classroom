@@ -14,66 +14,34 @@
 // Loads AFTER: app.js, auth.js, compress.js, submissions.js,
 //   teacher_merged.js, team/progress.js, team/levels.js, team/map.js
 // =============================================================================
- 
+
 // ---------------------------------------------------------------------------
-// Entry / Exit 
+// Entry / Exit
 // ---------------------------------------------------------------------------
 
-function enterTeamHub() {
+async function enterTeamHub() {
+    // Hide all other screens
     [
-        "modeSelectScreen",
-        "studentDashboard",
-        "challengeDashboardScreen",
-        "challengeLevelsScreen",
-        "challengeFamilyScreen",
-        "challengeFamilyDetailScreen",
-        "readingLevelsScreen",
-        "captainDashboardScreen",
-        "letterBoardScreen",
-        "gameWorkspace"
+        'studentDashboard', 'modeSelectScreen', 'challengeLevelsScreen',
+        'challengeFamilyScreen', 'challengeFamilyDetailScreen',
+        'readingLevelsScreen', 'captainDashboardScreen',
+        'writingSubmitScreen', 'familyPracticeSheet'
     ].forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.style.display = "none";
+        if (el) el.style.display = 'none';
     });
 
-    const hub = document.getElementById("teamHubScreen");
-    if (hub) hub.style.display = "block";
-
-    const hamburger = document.getElementById("hamburgerBtn");
-    if (hamburger) hamburger.style.display = "flex";
-
-    if (typeof renderTeamHub === "function") {
-        renderTeamHub();
-    }
+    document.getElementById('teamHubScreen').style.display = 'block';
+    document.getElementById('hamburgerBtn').style.display = 'flex';
+    await renderTeamHub();
 }
 
 function exitTeamHub() {
-    [
-        "teamHubScreen",
-        "captainDashboardScreen",
-        "challengeLevelsScreen",
-        "challengeFamilyScreen",
-        "challengeFamilyDetailScreen",
-        "readingLevelsScreen",
-        "letterBoardScreen",
-        "gameWorkspace"
-    ].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = "none";
-    });
-
-    const challenge = document.getElementById("challengeDashboardScreen");
-    if (challenge) challenge.style.display = "block";
-
-    if (typeof renderChallengeDashboard === "function") {
-        renderChallengeDashboard();
-    }
+    document.getElementById('teamHubScreen').style.display = 'none';
+    document.getElementById('familyPracticeSheet').style.display = 'none';
+    launchDashboard('student');
 }
 
-    if (typeof renderChallengeDashboard === "function") {
-        renderChallengeDashboard();
-    }
-}
 // ---------------------------------------------------------------------------
 // Main render
 // ---------------------------------------------------------------------------
@@ -92,11 +60,7 @@ async function renderTeamHub() {
 
     if (!team) return;
 
-    const captainCard = document.getElementById("teamHubCaptainActions");
-
-if (captainCard) {
-    captainCard.style.display = isCaptain ? "block" : "none";
-}
+    const isCaptain = !!currentProfile?.is_captain;
 
     // ── Header ──────────────────────────────────────────────
     const teamHex = getTeamHex(team.name);
@@ -264,7 +228,7 @@ function toggleTeamFeed() {
 }
 
 // ---------------------------------------------------------------------------
-// Practice feed — reads from team_posts (unified table)
+// Practice feed — reads from team_practice_posts (unified table)
 // ---------------------------------------------------------------------------
 
 async function loadTeamPracticeFeed() {
@@ -382,7 +346,7 @@ async function toggleReaction(postId, emoji, buttonEl) {
 async function deleteTeamPost(postId, imageUrl) {
     if (!confirm('Delete this post?')) return;
 
-    const pathMatch = imageUrl.match(/team_posts\/(.+)$/);
+    const pathMatch = imageUrl.match(/team_practice_posts\/(.+)$/);
     const storagePath = pathMatch ? pathMatch[1] : null;
 
     const { error } = await _supabase.from('team_practice_posts').delete().eq('id', postId);
@@ -458,17 +422,17 @@ function openTeamHubFinalSubmit() {
 // ---------------------------------------------------------------------------
 
 function enterCaptainDashboard() {
-    const captainCard = document.getElementById("teamHubCaptainActions");
-
-    if (captainCard) {
-        captainCard.style.display = "block";
-        captainCard.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-
+    document.getElementById('teamHubScreen').style.display = 'none';
+    document.getElementById('studentDashboard').style.display = 'none';
+    document.getElementById('captainDashboardScreen').style.display = 'block';
     loadCaptainWritingQueue();
     loadCaptainTeamProgress();
 }
 
+function exitCaptainDashboard() {
+    document.getElementById('captainDashboardScreen').style.display = 'none';
+    enterTeamHub();
+}
 
 async function loadCaptainWritingQueue() {
     const mount = document.getElementById('captainWritingQueueMount');
@@ -723,19 +687,13 @@ async function loadCaptainTeamProgress() {
 // Captain inbox badge on hub load
 // ---------------------------------------------------------------------------
 
-
 async function checkCaptainInboxBadge() {
     if (!currentProfile?.is_captain || !currentProfile?.team_id) return;
 
     const { data: members } = await _supabase
-        .from('profiles')
-        .select('id')
-        .eq('team_id', currentProfile.team_id);
+        .from('profiles').select('id').eq('team_id', currentProfile.team_id);
 
-    const memberIds = (members || [])
-        .map(m => m.id)
-        .filter(id => id !== currentUser.id);
-
+    const memberIds = (members || []).map(m => m.id).filter(id => id !== currentUser.id);
     if (memberIds.length === 0) return;
 
     const { count } = await _supabase
@@ -745,9 +703,7 @@ async function checkCaptainInboxBadge() {
         .eq('status', 'pending');
 
     if (count && count > 0) {
-        showGobezToast(
-            `👑 ${count} writing submission${count > 1 ? 's' : ''} waiting for your review!`
-        );
+        showGobezToast(`👑 ${count} writing submission${count > 1 ? 's' : ''} waiting for your review!`);
     }
 }
 
@@ -755,28 +711,22 @@ async function checkCaptainInboxBadge() {
 // Expose
 // ---------------------------------------------------------------------------
 
-window.enterTeamHub = enterTeamHub;
-window.exitTeamHub = exitTeamHub;
-window.renderTeamHub = renderTeamHub;
-
-window.enterCaptainDashboard = enterCaptainDashboard;
-
-window.loadCaptainWritingQueue = loadCaptainWritingQueue;
-window.loadCaptainTeamProgress = loadCaptainTeamProgress;
-
-window.toggleTeamRace = toggleTeamRace;
-window.toggleTeamFeed = toggleTeamFeed;
-
-window.revealLetterPickerThen = revealLetterPickerThen;
-
-window.loadTeamPracticeFeed = loadTeamPracticeFeed;
-window.toggleReaction = toggleReaction;
-window.deleteTeamPost = deleteTeamPost;
-
-window.openTeamHubPracticePost = openTeamHubPracticePost;
-window.uploadTeamPracticePhoto = uploadTeamPracticePhoto;
-window.openTeamHubFinalSubmit = openTeamHubFinalSubmit;
-
-window.captainApproveSubmission = captainApproveSubmission;
-window.captainRejectSubmission = captainRejectSubmission;
-window.checkCaptainInboxBadge = checkCaptainInboxBadge;
+window.enterTeamHub              = enterTeamHub;
+window.exitTeamHub               = exitTeamHub;
+window.renderTeamHub             = renderTeamHub;
+window.toggleTeamRace            = toggleTeamRace;
+window.toggleTeamFeed            = toggleTeamFeed;
+window.revealLetterPickerThen    = revealLetterPickerThen;
+window.loadTeamPracticeFeed      = loadTeamPracticeFeed;
+window.toggleReaction            = toggleReaction;
+window.deleteTeamPost            = deleteTeamPost;
+window.openTeamHubPracticePost   = openTeamHubPracticePost;
+window.uploadTeamPracticePhoto   = uploadTeamPracticePhoto;
+window.openTeamHubFinalSubmit    = openTeamHubFinalSubmit;
+window.enterCaptainDashboard     = enterCaptainDashboard;
+window.exitCaptainDashboard      = exitCaptainDashboard;
+window.loadCaptainWritingQueue   = loadCaptainWritingQueue;
+window.loadCaptainTeamProgress   = loadCaptainTeamProgress;
+window.captainApproveSubmission  = captainApproveSubmission;
+window.captainRejectSubmission   = captainRejectSubmission;
+window.checkCaptainInboxBadge    = checkCaptainInboxBadge;
