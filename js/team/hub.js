@@ -240,7 +240,7 @@ async function loadTeamPracticeFeed() {
         .from('team_practice_posts')
         .select(`
             id, base_letter, image_url, created_at, post_type, uploader_id,
-            profiles!team_posts_uploader_id_fkey(nickname, avatar)
+            profiles!uploader_id(nickname, avatar)
         `)
         .eq('team_id', currentProfile.team_id)
         .order('created_at', { ascending: false })
