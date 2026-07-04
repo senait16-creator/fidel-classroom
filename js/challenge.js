@@ -128,6 +128,18 @@ async function renderChallengeDashboard() {
         }
     }
 
+    // ── Star of the Week picker (captains only) ─────────────────
+    const starCard = document.getElementById("starOfWeekCard");
+    if (starCard) {
+        if (currentProfile?.is_captain) {
+            starCard.style.display = "block";
+            if (typeof renderStarPicker === "function") {
+                await renderStarPicker("starPickerMount");
+            }
+        } else {
+            starCard.style.display = "none";
+        }
+    }
     // ── Help requests (captains only, relocated from team hub) ──────
     const helpCard = document.getElementById("challengeHelpFlagsCard");
     if (helpCard) {
