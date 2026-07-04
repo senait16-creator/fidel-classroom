@@ -35,6 +35,8 @@ function chooseModeCommunity() {
     const hamburger = document.getElementById("hamburgerBtn");
     if (hamburger) hamburger.style.display = "flex";
 
+        if (typeof renderStarBoard === 'function') renderStarBoard('starBoardMount');
+
     renderCommunityFeed();
 }
 
