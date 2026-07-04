@@ -2,7 +2,7 @@
 // CHALLENGE.JS
 // =============================================================================
 
-let challengeLevelsCache = null;
+let challengeLevelsCache = null; 
 let activeChallengeLevel = null;
 let activeChallengeFamilyObj = null;
 let activeChallengeFamilyLevel = null;
