@@ -710,6 +710,19 @@ header {
     font-weight: 700;
 }
 
+.leaderboard-toggle-btn {
+    display: block;
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 8px 0 2px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--brand-primary);
+    cursor: pointer;
+    text-align: center;
+}
+
 /* Ã¢â€â‚¬Ã¢â€â‚¬ Workspace Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
 
 .workspace-title {
@@ -5095,200 +5108,56 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 
 /* ==========================================================================
-   INSTALL APP CARD
+   COMMUNITY PAGE LAYOUT — sidebar leaderboard (reuses .leaderboard-row from
+   the Practice-mode leaderboard) + main column for the sharing feed.
+   Side-by-side on wider screens; stacks on phones, where the sidebar would
+   otherwise be too narrow to read.
    ========================================================================== */
 
-.install-pwa-card{
+.community-shell{
+    max-width:900px;
+    margin:0 auto;
+}
 
+.community-layout{
     display:flex;
-    align-items:center;
-    gap:18px;
-
-    margin:18px auto 28px;
-    padding:18px 20px;
-
-    max-width:720px;
-
-    background:linear-gradient(135deg,#166534,#22c55e);
-
-    color:white;
-
-    border-radius:24px;
-
-    box-shadow:0 14px 30px rgba(22,101,52,.22);
-
-    border:2px solid rgba(255,255,255,.12);
-
-    transition:.25s ease;
+    gap:20px;
+    align-items:flex-start;
 }
 
-.install-pwa-card:hover{
-    transform:translateY(-2px);
-}
-
-.install-pwa-icon{
-
-    width:62px;
-    height:62px;
-
-    flex-shrink:0;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    border-radius:50%;
-
-    background:rgba(255,255,255,.18);
-
-    font-size:30px;
-
-    backdrop-filter:blur(10px);
-}
-
-.install-pwa-text{
-
-    flex:1;
-}
-
-.install-pwa-text strong{
-
-    display:block;
-
-    font-size:17px;
-    font-weight:900;
-
-    margin-bottom:4px;
-}
-
-.install-pwa-text p{
-
-    margin:0;
-
-    opacity:.9;
-
-    font-size:14px;
-    line-height:1.4;
-}
-
-.install-pwa-card button{
-
-    border:none;
-
+.community-sidebar{
+    flex:0 0 30%;
+    max-width:260px;
     background:white;
-
-    color:#166534;
-
-    padding:12px 22px;
-
-    border-radius:999px;
-
-    font-size:15px;
-    font-weight:900;
-
-    cursor:pointer;
-
-    transition:.2s;
+    border:1px solid #f1f5f9;
+    border-radius:16px;
+    padding:16px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.04);
+    position:sticky;
+    top:24px;
 }
 
-.install-pwa-card button:hover{
-
-    transform:scale(1.05);
-
-    background:#f8fafc;
-}
-
-/* ==========================================================================
-   MOBILE
-   ========================================================================== */
-
-@media (max-width:700px){
-
-    .install-pwa-card{
-
-        flex-direction:column;
-        text-align:center;
-
-        padding:22px 18px;
-    }
-
-    .install-pwa-text{
-
-        order:2;
-    }
-
-    .install-pwa-card button{
-
-        width:100%;
-        max-width:240px;
-
-        order:3;
-    }
-
-}
-
-.install-pwa-card{
-    display:flex;
-    align-items:center;
-    gap:18px;
-    margin:18px auto 28px;
-    padding:18px 20px;
-    max-width:720px;
-    background:linear-gradient(135deg,#166534,#22c55e);
-    color:white;
-    border-radius:24px;
-    box-shadow:0 14px 30px rgba(22,101,52,.22);
-}
-
-.install-pwa-icon{
-    width:62px;
-    height:62px;
-    flex-shrink:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    border-radius:50%;
-    background:rgba(255,255,255,.18);
-    font-size:30px;
-}
-
-.install-pwa-text{
-    flex:1;
-}
-
-.install-pwa-text strong{
-    display:block;
-    font-size:17px;
-    font-weight:900;
-    margin-bottom:4px;
-}
-
-.install-pwa-text p{
-    margin:0;
-    opacity:.9;
+.community-sidebar-header{
     font-size:14px;
-    line-height:1.4;
-}
-
-.install-pwa-card button{
-    border:none;
-    background:white;
+    font-weight:800;
     color:#166534;
-    padding:12px 22px;
-    border-radius:999px;
-    font-size:15px;
-    font-weight:900;
-    cursor:pointer;
+    margin-bottom:12px;
 }
 
-@media (max-width:700px){
-    .install-pwa-card{
+.community-main{
+    flex:1;
+    min-width:0;
+}
+
+@media (max-width:640px){
+    .community-layout{
         flex-direction:column;
-        text-align:center;
     }
 
-    .install-pwa-card button{
+    .community-sidebar{
+        flex:1 1 auto;
+        max-width:none;
         width:100%;
-        max-width:260px;
+        position:static;
     }
 }
