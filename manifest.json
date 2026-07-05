@@ -1,0 +1,20 @@
+{
+  "name": "Fidel Classroom",
+  "short_name": "Fidel",
+  "description": "Learn Amharic through games, challenges, and community.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#166534",
+  "theme_color": "#166534",
+
+  "icons": [
+    {
+      "src": "icons/fidel_classroom_icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
