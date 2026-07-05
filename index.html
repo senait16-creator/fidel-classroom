@@ -10,11 +10,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="style.css?v=12">
-       <link rel="icon" href="data:,">
-        <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#166534">
-<link rel="apple-touch-icon" href="IMG_2514.png">
-    
+    <link rel="icon" href="IMG_2514.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#166534">
+    <link rel="apple-touch-icon" href="IMG_2514.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Fidel">
 </head>
 <body>
 
@@ -321,11 +324,11 @@
             </div>
             <div class="embedded-classroom-sketchpad">
                 <h3 style="font-size:14px; font-weight:700; margin-bottom:4px; color:var(--neutral-dark);">Practice Writing Pad</h3>
-                <p style="font-size:12px; color:#64748b; margin-bottom:10px;">Draw the characters — sharing goes to your team feed!</p>
+                <p style="font-size:12px; color:#64748b; margin-bottom:10px;">Draw the characters — sharing posts it to the class Community page!</p>
                 <canvas id="sketchpad" class="sketch-canvas-element"></canvas>
                 <div class="sketchpad-actions-row">
                     <button class="btn-primary" style="padding:6px 12px; font-size:12px; background:#64748b;" onclick="clearSketchpadCanvas()">Clear</button>
-                    <button class="btn-primary" style="padding:6px 12px; font-size:12px;" onclick="uploadSketchpadDrawingCanvasData()">Share My Drawing</button>
+                    <button class="btn-primary" style="padding:6px 12px; font-size:12px;" onclick="uploadSketchpadDrawingCanvasData()">📸 Share to Community</button>
                 </div>
             </div>
             <button class="btn-secondary" style="margin-top:16px;" onclick="exitClassroomViewBackToGrid()">← Back to Letter Board</button>
@@ -1102,6 +1105,15 @@
 <script src="js/challenge.js?v=12" defer></script>
 <script src="js/menu.js?v=9" defer></script>
 
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').catch((err) => {
+                console.warn('Service worker registration failed:', err);
+            });
+        });
+    }
+</script>
 
 </body>
 </html>
