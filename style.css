@@ -5093,3 +5093,137 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     font-family: 'Inter', system-ui, sans-serif;
     white-space: nowrap;
 }
+
+/* ==========================================================================
+   INSTALL APP CARD
+   ========================================================================== */
+
+.install-pwa-card{
+
+    display:flex;
+    align-items:center;
+    gap:18px;
+
+    margin:18px auto 28px;
+    padding:18px 20px;
+
+    max-width:720px;
+
+    background:linear-gradient(135deg,#166534,#22c55e);
+
+    color:white;
+
+    border-radius:24px;
+
+    box-shadow:0 14px 30px rgba(22,101,52,.22);
+
+    border:2px solid rgba(255,255,255,.12);
+
+    transition:.25s ease;
+}
+
+.install-pwa-card:hover{
+    transform:translateY(-2px);
+}
+
+.install-pwa-icon{
+
+    width:62px;
+    height:62px;
+
+    flex-shrink:0;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:50%;
+
+    background:rgba(255,255,255,.18);
+
+    font-size:30px;
+
+    backdrop-filter:blur(10px);
+}
+
+.install-pwa-text{
+
+    flex:1;
+}
+
+.install-pwa-text strong{
+
+    display:block;
+
+    font-size:17px;
+    font-weight:900;
+
+    margin-bottom:4px;
+}
+
+.install-pwa-text p{
+
+    margin:0;
+
+    opacity:.9;
+
+    font-size:14px;
+    line-height:1.4;
+}
+
+.install-pwa-card button{
+
+    border:none;
+
+    background:white;
+
+    color:#166534;
+
+    padding:12px 22px;
+
+    border-radius:999px;
+
+    font-size:15px;
+    font-weight:900;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+.install-pwa-card button:hover{
+
+    transform:scale(1.05);
+
+    background:#f8fafc;
+}
+
+/* ==========================================================================
+   MOBILE
+   ========================================================================== */
+
+@media (max-width:700px){
+
+    .install-pwa-card{
+
+        flex-direction:column;
+        text-align:center;
+
+        padding:22px 18px;
+    }
+
+    .install-pwa-text{
+
+        order:2;
+    }
+
+    .install-pwa-card button{
+
+        width:100%;
+        max-width:240px;
+
+        order:3;
+    }
+
+}
+
