@@ -37,6 +37,7 @@ function chooseModeCommunity() {
 
         if (typeof renderStarBoard === 'function') renderStarBoard('starBoardMount');
 
+    if (typeof renderLiveLeaderboard === 'function') renderLiveLeaderboard('communityLeaderboardMount');
     renderCommunityFeed();
 }
 
