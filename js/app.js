@@ -503,9 +503,8 @@ function toggleDropdownElement(elementId) {
 
 const LOCKED_MODES = {
     practice:  true,
-    reading:   true,
-    vocab:     true,
-    community: false
+    community: false,
+    explore:   false
 };
 
 function enterModeIfUnlocked(modeKey, enterFn) {
