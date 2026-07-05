@@ -11,7 +11,7 @@
 
   "icons": [
     {
-      "src": "fidel_classroom_icon.png",
+      "src": "fidel_icon Small.png",
       "sizes": "1024x1024",
       "type": "image/png",
       "purpose": "any maskable"
