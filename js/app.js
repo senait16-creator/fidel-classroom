@@ -132,6 +132,8 @@ window.addEventListener('DOMContentLoaded', async () => {
     });
     document.getElementById('setCaptainBtn')?.addEventListener('click', setTeamCaptain);
 
+    syncInstallPromptVisibility();
+
     // Supabase redirects back with type=recovery after the user clicks a
     // password reset link — skip sign-out and show the new-password screen.
     const isPasswordRecovery = window.location.hash.includes('type=recovery');
@@ -663,7 +665,7 @@ function renderUIProgressUpdates() {
     document.getElementById("progressText").innerText = `${percent}% Complete`;
 }
 
-async function renderLiveLeaderboard() {
+async function renderLiveLeaderboard(targetId = "liveLeaderboardContent") {
     const { data: profiles } = await _supabase
         .from('public_profiles')
         .select('id, nickname, avatar');
@@ -683,7 +685,8 @@ async function renderLiveLeaderboard() {
         percentage: Math.round(((progressMap[p.id] || []).length / 34) * 100)
     })).sort((a, b) => b.percentage - a.percentage);
 
-    const container = document.getElementById("liveLeaderboardContent");
+    const container = document.getElementById(targetId);
+    if (!container) return;
     container.innerHTML = "";
 
     if (leaderList.length === 0) {
@@ -691,14 +694,14 @@ async function renderLiveLeaderboard() {
         return;
     }
 
-    leaderList.forEach((player, idx) => {
+    const renderRow = (player, idx) => {
         const isSelf = currentUser && player.id === currentUser.id;
         const isTopFive = idx < 5;
         const rowClasses = ['leaderboard-row'];
         if (isSelf) rowClasses.push('current-user');
         if (isTopFive) rowClasses.push('top-five');
 
-        container.innerHTML += `
+        return `
             <div class="${rowClasses.join(' ')}">
                 <div class="player-info">
                     <span class="leaderboard-rank">#${idx + 1}</span>
@@ -707,7 +710,36 @@ async function renderLiveLeaderboard() {
                 </div>
                 <span class="player-score-badge">${player.percentage}%</span>
             </div>`;
-    });
+    };
+
+    // Only the top 5 show by default — the rest of the class is one tap
+    // away behind a "Show more" toggle instead of a long always-open list.
+    const topFive = leaderList.slice(0, 5);
+    const rest = leaderList.slice(5);
+
+    let html = topFive.map(renderRow).join('');
+
+    if (rest.length > 0) {
+        const restId = `${targetId}-rest`;
+        html += `
+            <div id="${restId}" style="display:none;">
+                ${rest.map((player, idx) => renderRow(player, idx + 5)).join('')}
+            </div>
+            <button type="button" class="leaderboard-toggle-btn" onclick="toggleLeaderboardRest('${targetId}', this)">
+                ▼ Show ${rest.length} more
+            </button>`;
+    }
+
+    container.innerHTML = html;
+}
+
+function toggleLeaderboardRest(targetId, btnEl) {
+    const restEl = document.getElementById(`${targetId}-rest`);
+    if (!restEl) return;
+    const isOpen = restEl.style.display !== 'none';
+    const count = restEl.children.length;
+    restEl.style.display = isOpen ? 'none' : 'block';
+    btnEl.innerText = isOpen ? `▼ Show ${count} more` : '▲ Show less';
 }
 
 async function fetchDisappearingImageCanvasBoard() {
@@ -891,6 +923,20 @@ window.addEventListener("beforeinstallprompt", (event) => {
     deferredInstallPrompt = event;
 });
 
+// "Add to Home Screen" lives in two spots — the mode-select bottom bar
+// (modeInstallBtn) and the hamburger menu (installMenuRow). Already-installed
+// (standalone) sessions have no use for either, so both hide automatically.
+function syncInstallPromptVisibility() {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+        || window.navigator.standalone === true;
+
+    const jumpBtn = document.getElementById('modeInstallBtn');
+    if (jumpBtn) jumpBtn.style.display = isStandalone ? 'none' : '';
+
+    const menuRow = document.getElementById('installMenuRow');
+    if (menuRow) menuRow.style.display = isStandalone ? 'none' : 'flex';
+}
+
 function installFidelApp() {
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
 
@@ -937,3 +983,4 @@ window.showGobezToast = showGobezToast;
 window.maybeShowStreakExplainer = maybeShowStreakExplainer;
 window.executeVictoryConfettiCelebration = executeVictoryConfettiCelebration;
 window.installFidelApp = installFidelApp;
+window.syncInstallPromptVisibility = syncInstallPromptVisibility;
