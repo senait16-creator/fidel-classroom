@@ -183,6 +183,37 @@ function playTwinkleSound() {
     }
 }
 
+function installFidelApp() {
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isAndroid = /android/i.test(navigator.userAgent);
+
+    if (isIOS) {
+        alert(
+            "To add Fidel Classroom to your Home Screen:\n\n" +
+            "1. Tap the Share button in Safari\n" +
+            "2. Scroll down\n" +
+            "3. Tap 'Add to Home Screen'\n" +
+            "4. Tap Add"
+        );
+        return;
+    }
+
+    if (window.deferredPrompt) {
+        window.deferredPrompt.prompt();
+        window.deferredPrompt.userChoice.then(() => {
+            window.deferredPrompt = null;
+        });
+    } else {
+        alert("Open this site in Chrome or Safari, then choose Add to Home Screen from your browser menu.");
+    }
+}
+
+window.installFidelApp = installFidelApp;
+
+window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    window.deferredPrompt = event;
+});
 function showGobezToast(message) {
     const container = document.getElementById("toastContainer");
     const el = document.createElement("div");
