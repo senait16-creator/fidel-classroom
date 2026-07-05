@@ -2,7 +2,7 @@
 // APP.JS — Core bootstrap, constants, shared state, utilities, dashboard,
 // letter grid, practice sketchpad, progress, leaderboard, team sidebar.
 //
-// Loads FIRST. All other files depend on globals defined here. 
+// Loads FIRST. All other files depend on globals defined here.
 // Load order in index.html:
 //   app.js → auth.js → game.js → submissions.js → teacher.js → reading.js → challenge.js
 // =============================================================================
@@ -183,37 +183,6 @@ function playTwinkleSound() {
     }
 }
 
-function installFidelApp() {
-    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    const isAndroid = /android/i.test(navigator.userAgent);
-
-    if (isIOS) {
-        alert(
-            "To add Fidel Classroom to your Home Screen:\n\n" +
-            "1. Tap the Share button in Safari\n" +
-            "2. Scroll down\n" +
-            "3. Tap 'Add to Home Screen'\n" +
-            "4. Tap Add"
-        );
-        return;
-    }
-
-    if (window.deferredPrompt) {
-        window.deferredPrompt.prompt();
-        window.deferredPrompt.userChoice.then(() => {
-            window.deferredPrompt = null;
-        });
-    } else {
-        alert("Open this site in Chrome or Safari, then choose Add to Home Screen from your browser menu.");
-    }
-}
-
-window.installFidelApp = installFidelApp;
-
-window.addEventListener("beforeinstallprompt", (event) => {
-    event.preventDefault();
-    window.deferredPrompt = event;
-});
 function showGobezToast(message) {
     const container = document.getElementById("toastContainer");
     const el = document.createElement("div");
@@ -907,6 +876,14 @@ window.addEventListener('beforeunload', () => {
     );
 });
 
+// ---------------------------------------------------------------------------
+// PWA install prompt — Chrome/Android fire beforeinstallprompt; we stash the
+// event and trigger it from our own "Add to Home Screen" button so it isn't
+// tied to the browser's own (often-hidden) install icon. iOS has no such
+// event — Safari only supports the manual Share > Add to Home Screen flow,
+// so installFidelApp() just shows those steps as an alert there instead.
+// ---------------------------------------------------------------------------
+
 let deferredInstallPrompt = null;
 
 window.addEventListener("beforeinstallprompt", (event) => {
@@ -938,7 +915,6 @@ function installFidelApp() {
 
     alert("To install Fidel Classroom, open this site in Chrome or Safari and choose Add to Home Screen from the browser menu.");
 }
-
 
 // ---------------------------------------------------------------------------
 // Expose to inline onclick="" handlers in index.html
