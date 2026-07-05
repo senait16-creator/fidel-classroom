@@ -165,6 +165,18 @@ async function renderTeamRaceView(mountId) {
 // Shows when a student has cleared all 3 families in the current level.
 // ---------------------------------------------------------------------------
 
+// Live-test scheduling — one shared Calendly event, prefilled with the
+// student's name/email so they don't have to retype it.
+const LIVE_TEST_SCHEDULING_URL = 'https://calendly.com/senaitrichmond16/fidel-test';
+
+function buildLiveTestSchedulingLink() {
+    const params = new URLSearchParams();
+    if (currentProfile?.nickname) params.set('name', currentProfile.nickname);
+    if (currentProfile?.email) params.set('email', currentProfile.email);
+    const query = params.toString();
+    return query ? `${LIVE_TEST_SCHEDULING_URL}?${query}` : LIVE_TEST_SCHEDULING_URL;
+}
+
 async function checkLevelCompletionStatus() {
     if (!currentProfile?.team_id || currentProfile?.is_captain) return null;
 
@@ -244,11 +256,20 @@ async function renderLevelCompletionBanner(mountId) {
                         padding:20px; text-align:center; margin-bottom:16px;">
                 <div style="font-size:36px; margin-bottom:8px;">⏳</div>
                 <p style="font-size:15px; font-weight:700; color:#92400e; margin-bottom:4px;">
-                    Waiting for Teacher Approval
+                    Your Teacher Has Been Notified
                 </p>
-                <p style="font-size:13px; color:#b45309;">
-                    You've cleared all 3 families in Level ${status.level}!
-                    Your teacher will sign off soon.
+                <p style="font-size:13px; color:#b45309; margin-bottom:16px;">
+                    You've cleared all 3 families in Level ${status.level}! Book your live
+                    test now — read a letter aloud, then write a few from memory.
+                </p>
+                <a href="${buildLiveTestSchedulingLink()}" target="_blank" rel="noopener"
+                   class="btn-primary"
+                   style="max-width:280px; margin:0 auto; display:block; text-decoration:none;">
+                    📅 Schedule Your Live Test
+                </a>
+                <p style="font-size:12px; color:#92400e; margin-top:12px;">
+                    While you wait for your teammates, keep practicing —
+                    check the Community page for the class streak board!
                 </p>
             </div>`;
     } else {
