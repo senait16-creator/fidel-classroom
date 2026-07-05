@@ -388,21 +388,6 @@
     What are you<br>practicing <span>today?</span>
 </div>
 
-<div id="installPromptCard" class="install-pwa-card">
-
-    <div class="install-pwa-icon">📱</div>
-
-    <div class="install-pwa-text">
-        <strong>Add Fidel Classroom to your Home Screen</strong>
-        <p>Open Fidel Classroom in one tap!</p>
-    </div>
-
-    <button type="button" onclick="installFidelApp()">
-        📱 Add to Home Screen
-    </button>
-
-</div>
-
 
 <div class="cups-grid">
 
@@ -508,8 +493,8 @@
     </div>
 
     <div class="mode-jump-row">
-        <button class="mode-jump-btn" id="modeContinueBtn" onclick="chooseModeChallenge()">
-            Continue Level 1
+        <button class="mode-jump-btn" id="modeInstallBtn" onclick="installFidelApp()">
+            📱 Add to Home Screen
         </button>
 
         <button class="mode-jump-btn" onclick="openChallengeMap()">
@@ -902,6 +887,10 @@
             <span style="font-size:22px; width:32px; text-align:center;">🔄</span>
             <div><div>Switch Mode</div><div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">Practice, Challenge, or Reading</div></div>
         </button>
+        <button id="installMenuRow" onclick="installFidelApp()" style="width:100%; background:none; border:none; padding:16px 20px; display:flex; align-items:center; gap:14px; cursor:pointer; font-size:15px; font-weight:600; color:#1e293b; text-align:left; transition:background 0.15s; border-bottom:1px solid #f1f5f9;">
+            <span style="font-size:22px; width:32px; text-align:center;">📱</span>
+            <div><div>Add to Home Screen</div><div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">Install Fidel Classroom on your phone</div></div>
+        </button>
         <a href="mailto:senaitrichmond16@gmail.com?subject=Fidel Classroom Question"
            style="display:flex; align-items:center; gap:14px; padding:16px 20px; text-decoration:none; color:#1e293b; font-size:15px; font-weight:600; border-bottom:1px solid #f1f5f9;">
             <span style="font-size:22px; width:32px; text-align:center;">✉️</span>
@@ -1067,7 +1056,7 @@
      COMMUNITY — class-wide celebration feed
      ============================================================ -->
 <div id="communityScreen" style="display:none; min-height:100vh; padding:24px 16px 48px; background:#f5f5f0;">
-    <div style="max-width:560px; margin:0 auto;">
+    <div class="community-shell">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
             <h1 style="font-size:24px; font-weight:800; color:#166534; font-family:'Playfair Display',serif; font-style:italic;">
                 🎉 Community
@@ -1077,9 +1066,18 @@
         <p style="font-size:13px; color:#64748b; margin-bottom:20px;">
             Approved work shared by your classmates. Tap an emoji to react!
         </p>
-            <div id="starBoardMount" style="margin-bottom:24px;"></div>
 
-        <div id="communityFeedMount"></div>
+        <div class="community-layout">
+            <aside class="community-sidebar">
+                <div class="community-sidebar-header">Class Leaderboard</div>
+                <div id="communityLeaderboardMount"></div>
+            </aside>
+
+            <div class="community-main">
+                <div id="starBoardMount" style="margin-bottom:24px;"></div>
+                <div id="communityFeedMount"></div>
+            </div>
+        </div>
     </div>
 </div>
 <!-- END COMMUNITY -->
