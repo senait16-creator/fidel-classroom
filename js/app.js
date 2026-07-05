@@ -907,6 +907,39 @@ window.addEventListener('beforeunload', () => {
     );
 });
 
+let deferredInstallPrompt = null;
+
+window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+});
+
+function installFidelApp() {
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+    if (isIOS) {
+        alert(
+            "To add Fidel Classroom to your Home Screen:\n\n" +
+            "1. Tap the Share button in Safari\n" +
+            "2. Scroll down\n" +
+            "3. Tap Add to Home Screen\n" +
+            "4. Tap Add"
+        );
+        return;
+    }
+
+    if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        deferredInstallPrompt.userChoice.finally(() => {
+            deferredInstallPrompt = null;
+        });
+        return;
+    }
+
+    alert("To install Fidel Classroom, open this site in Chrome or Safari and choose Add to Home Screen from the browser menu.");
+}
+
+
 // ---------------------------------------------------------------------------
 // Expose to inline onclick="" handlers in index.html
 // (Auth functions exported from auth.js, game from game.js,
@@ -927,3 +960,4 @@ window.deleteSharedDrawing = deleteSharedDrawing;
 window.showGobezToast = showGobezToast;
 window.maybeShowStreakExplainer = maybeShowStreakExplainer;
 window.executeVictoryConfettiCelebration = executeVictoryConfettiCelebration;
+window.installFidelApp = installFidelApp;
