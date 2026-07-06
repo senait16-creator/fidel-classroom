@@ -464,7 +464,7 @@
         </div>
 
         <!-- Team status → lives on the Competition page now -->
-        <div class="cup-card wide" onclick="chooseModeChallenge()">
+        <div class="cup-card wide" onclick="enterCaptainDashboard()">
             <svg width="48" height="54" viewBox="0 0 48 54" fill="none" style="flex-shrink:0;">
                 <path d="M10 18L16 28L24 16L32 28L38 18L36 36H12L10 18Z"
                       fill="#fbbf24" stroke="#b45309" stroke-width="1.5"/>
@@ -478,7 +478,7 @@
             </svg>
             <div class="cup-card-text">
                 <div class="cup-card-label">Team Leaders</div>
-                <div class="cup-card-desc">See your team, captain, current mission, and class competition progress.</div>
+<div class="cup-card-desc">Reserved for captains: review teammate requests, help flags, and team progress.</div>
             </div>
             <span class="cup-card-badge gold">👑 Team</span>
         </div>
@@ -804,7 +804,27 @@
      (captainReviewDashCard). Kept as an empty shell so legacy
      show/hide code referencing this id never crashes.
      ============================================================ -->
-<div id="captainDashboardScreen" style="display:none;"></div>
+<div id="captainDashboardScreen" style="display:none;">
+  <div class="workspace-title">
+    <span>👑 Team Leaders</span>
+    <button class="btn-secondary" onclick="enterModeSelect()">← Back</button>
+  </div>
+
+  <section class="challenge-dash-card">
+    <div class="challenge-card-title">Pending Approval Requests</div>
+    <div id="captainWritingQueueMount"></div>
+  </section>
+
+  <section class="challenge-dash-card">
+    <div class="challenge-card-title">Help Flags</div>
+    <div id="captainHelpFlagsMount"></div>
+  </section>
+
+  <section class="challenge-dash-card">
+    <div class="challenge-card-title">Team Progress</div>
+    <div id="captainTeamProgressMount"></div>
+  </section>
+</div>
 
 <!-- ============================================================
      FAMILY PRACTICE SHEET
