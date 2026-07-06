@@ -401,12 +401,18 @@ function openTeamHubFinalSubmit() {
 // Captain dashboard
 // ---------------------------------------------------------------------------
 
-function enterCaptainDashboard() {
-    // The captain dashboard is retired — the review queue lives on the
-    // Competition page now. Redirect any legacy callers there.
-    if (typeof chooseModeChallenge === 'function') chooseModeChallenge();
-}
+async function enterCaptainDashboard() {
+    if (!currentProfile?.is_captain) {
+        showNotificationToast("Reserved for captains.");
+        return;
+    }
 
+    showScreen("captainDashboardScreen");
+
+    await loadCaptainWritingQueue();
+    await loadHelpFlags("captainHelpFlagsMount");
+    await loadCaptainTeamProgress();
+}
 async function loadCaptainWritingQueue() {
     const mount = document.getElementById('captainWritingQueueMount');
     if (!mount) return;
