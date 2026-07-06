@@ -57,33 +57,9 @@ function closeResourcesCard() {
 
 function switchModeFromMenu() {
     closeHamburgerMenu();
-
     setTimeout(() => {
-        [
-            'studentDashboard',
-            'challengeDashboardScreen',
-            'challengeLevelsScreen',
-            'challengeFamilyScreen',
-            'challengeFamilyDetailScreen',
-            'readingLevelsScreen',
-            'letterBoardScreen',
-            'familyPracticeSheet',
-            'gameWorkspace',
-            'flashcardScreen',
-            'teamHubScreen',
-            'captainDashboardScreen'
-        ].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.style.display = 'none';
-        });
-
-        const modeSelect = document.getElementById('modeSelectScreen');
-        if (modeSelect) modeSelect.style.display = 'flex';
-
-        if (typeof applyModeLockStyling === 'function') {
-            applyModeLockStyling();
-        }
-
+        showScreen('modeSelectScreen', 'flex');
+        if (typeof applyModeLockStyling === 'function') applyModeLockStyling();
         const nickname = currentProfile?.nickname ? `, ${currentProfile.nickname}` : '';
         const nicknameEl = document.getElementById('modeSelectNickname');
         if (nicknameEl) nicknameEl.innerText = nickname;
