@@ -70,7 +70,7 @@ async function renderChallengeMap() {
                          background:${getTeamHex(team.name)}; display:inline-block;
                          ${team.id === currentProfile?.team_id ? 'box-shadow:0 0 0 2px white, 0 0 0 3px ' + getTeamHex(team.name) + ';' : ''}">
             </span>
-            ${team.name.replace(' Team', '').replace(/[🔴🔵🟢🟡🟣]/g, '').trim()}
+            ${team.name.replace(' Team', '').replace(/[🔴🔵🟢🟡🟣⚫]/g, '').trim()} 
             ${team.id === currentProfile?.team_id ? '<span style="color:#166534;">(you)</span>' : ''}
         `;
         legend.appendChild(dot);
