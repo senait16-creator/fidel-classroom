@@ -89,12 +89,7 @@ async function openLetterBoard() {
     const screen = document.getElementById('letterBoardScreen');
     if (!screen) return;
 
-    // Hide other screens
-    document.getElementById('modeSelectScreen').style.display = 'none';
-    document.getElementById('studentDashboard').style.display = 'none';
-    document.getElementById('teamHubScreen').style.display = 'none';
-
-    screen.style.display = 'flex';
+    showScreen('letterBoardScreen', 'flex');
 
     // Load progress
     await loadLetterBoardProgress();
