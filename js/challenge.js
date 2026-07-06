@@ -2,7 +2,7 @@
 // CHALLENGE.JS
 // =============================================================================
 
-let challengeLevelsCache = null; 
+let challengeLevelsCache = null;
 let activeChallengeLevel = null;
 let activeChallengeFamilyObj = null;
 let activeChallengeFamilyLevel = null;
@@ -24,30 +24,14 @@ function getTeamHex(teamName) {
 // -----------------------------------------------------------------------------
 
 function enterModeSelect() {
-    document.getElementById("studentDashboard").style.display = "none";
-    document.getElementById("readingLevelsScreen").style.display = "none";
-    document.getElementById("challengeLevelsScreen").style.display = "none";
-    document.getElementById("challengeFamilyScreen").style.display = "none";
-    document.getElementById("challengeFamilyDetailScreen").style.display = "none";
-    document.getElementById("teamHubScreen").style.display = "none";
-    document.getElementById("captainDashboardScreen").style.display = "none";
+    showScreen("modeSelectScreen", "flex");
 
-    // Close letter board and other full-screen overlays
-    const lb = document.getElementById("letterBoardScreen");
-    if (lb) lb.style.display = "none";
-
-    document.getElementById("modeSelectScreen").style.display = "flex";
+    if (typeof applyModeLockStyling === 'function') applyModeLockStyling();
 
     localStorage.setItem('fidel_has_visited', '1');
-
 }
 
-// NOTE: enterTeamHub is owned by js/team/hub.js — do not redefine it here.
-// (challenge.js loads after hub.js, so a definition here would silently
-// override the more complete hub.js version.)
-
 function chooseModePractice() {
-    document.getElementById("modeSelectScreen").style.display = "none";
     if (typeof openLetterBoard === 'function') {
         openLetterBoard();
     } else {
@@ -61,25 +45,7 @@ async function chooseModeChallenge() {
         return;
     }
 
-    [
-        "modeSelectScreen",
-        "studentDashboard",
-        "teamHubScreen",
-        "readingLevelsScreen",
-        "challengeLevelsScreen",
-        "challengeFamilyScreen",
-        "challengeFamilyDetailScreen",
-        "captainDashboardScreen"
-    ].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = "none";
-    });
-
-    const dash = document.getElementById("challengeDashboardScreen");
-    if (dash) dash.style.display = "block";
-
-    document.getElementById("hamburgerBtn").style.display = "flex";
-
+    showScreen("challengeDashboardScreen");
     await renderChallengeDashboard();
 }
 
@@ -128,18 +94,6 @@ async function renderChallengeDashboard() {
         }
     }
 
-    // ── Star of the Week picker (captains only) ─────────────────
-    const starCard = document.getElementById("starOfWeekCard");
-    if (starCard) {
-        if (currentProfile?.is_captain) {
-            starCard.style.display = "block";
-            if (typeof renderStarPicker === "function") {
-                await renderStarPicker("starPickerMount");
-            }
-        } else {
-            starCard.style.display = "none";
-        }
-    }
     // ── Help requests (captains only, relocated from team hub) ──────
     const helpCard = document.getElementById("challengeHelpFlagsCard");
     if (helpCard) {
@@ -528,114 +482,32 @@ async function fetchStudentFamilyProgressForLevel(levelNumber) {
 
 async function renderChallengeFamilyPicker() {
     const level = activeChallengeLevel;
-    const title = document.getElementById("challengeFamilyTitle");
+    document.getElementById("challengeFamilyTitle").innerText = level.title || `Level ${level.level_number}`;
     const container = document.getElementById("challengeFamilyGrid");
-
-    if (!level || !container) return;
-
-    if (title) {
-        title.innerText = level.title || `Level ${level.level_number}`;
-    }
-
     container.innerHTML = `<p style="color:#94a3b8;">Loading...</p>`;
-
     const progressRows = await fetchStudentFamilyProgressForLevel(level.level_number);
     const progressByLetter = {};
     progressRows.forEach(row => { progressByLetter[row.base_letter] = row; });
-
-    container.innerHTML = `
-        <div class="challenge-lesson-briefing">
-            <div class="challenge-lesson-icon">📚</div>
-            <div class="challenge-lesson-level">Level ${level.level_number}</div>
-            <div class="challenge-lesson-families">${(level.letter_families || []).join(" ")}</div>
-            <p>Listen to the songs and SING along! Watch the lesson video and writing stroke videos to make your writing T and Pass this Level.</p>
-        </div>
-
-<div class="challenge-resource-card songs visual">
-    <h3>🎵 Music First! Lets Jam 🎵</h3>
-
-    <div class="challenge-resource-icons">
-        <a href="https://www.youtube.com/watch?v=dWQQeHyIebk&list=RDdWQQeHyIebk&start_radio=1" target="_blank" rel="noopener">
-            <span>🎵</span>
-            <strong>Fidel Song</strong>
-        </a>
-
-        <a href="https://www.youtube.com/watch?v=gCXlWMXNfNw&list=RDdWQQeHyIebk&index=4" target="_blank" rel="noopener">
-            <span>🎶</span>
-            <strong>Fidel Rap</strong>
-        </a>
-
-        <a href="https://www.youtube.com/watch?v=MEhod-dvmCc&list=RDdWQQeHyIebk&index=10" target="_blank" rel="noopener">
-            <span>🎂</span>
-            <strong>Birthday</strong>
-        </a>
-    </div>
-</div>
-
-<div class="challenge-resource-card lesson writing visual">
-
-    <h3>🎥 Lesson & Writing Videos</h3>
-
-    <div class="challenge-resource-icons">
-
-        <a href="https://www.youtube.com/watch?v=QgssO7_WkSk"
-           target="_blank"
-           rel="noopener">
-            <span>🎥</span>
-            <strong>Lesson</strong>
-        </a>
-
-        <a href="https://www.youtube.com/watch?v=4LIUwGr40dg&t=192s"
-           target="_blank"
-           rel="noopener">
-            <span>📝</span>
-            <strong>Writing 1</strong>
-        </a>
-
-        <a href="https://www.youtube.com/watch?v=j0jaSbFA30w"
-           target="_blank"
-           rel="noopener">
-            <span>✏️</span>
-            <strong>Writing 2</strong>
-        </a>
-
-    </div>
-
-</div>
-
-        <div class="challenge-family-divider">
-            
-        </div>
-    `;
-
+    container.innerHTML = "";
     const positionLabels = ["1st", "2nd", "3rd"];
 
     (level.letter_families || []).forEach((baseLetter, idx) => {
-        const progress = progressByLetter[baseLetter] || {
-            best_streak: 0,
-            streak_passed: false,
-            writing_passed: false
-        };
-
+        const progress = progressByLetter[baseLetter] || { best_streak: 0, streak_passed: false, writing_passed: false };
         const fidelObj = alphabetData.find(item => item.base === baseLetter);
-        if (!fidelObj) return;
-
-        const card = document.createElement("div");
-        card.className = `challenge-family-card pos-${idx + 1} ${progress.streak_passed && progress.writing_passed ? "mastered" : ""}`;
-
+        const card = document.createElement('div');
+        card.className = `challenge-family-card pos-${idx + 1} ${progress.streak_passed && progress.writing_passed ? 'mastered' : ''}`;
         card.innerHTML = `
             <span class="challenge-family-position-tag">${positionLabels[idx] || `#${idx + 1}`}</span>
             <div class="challenge-family-letter">${baseLetter}</div>
             <div class="challenge-family-progress-row">
-                <span class="challenge-family-pill ${progress.streak_passed ? "done" : ""}">
-                    ${progress.streak_passed ? "✓" : ""} Streak ${progress.best_streak}/${STREAK_THRESHOLD}
+                <span class="challenge-family-pill ${progress.streak_passed ? 'done' : ''}">
+                    ${progress.streak_passed ? '✓' : ''} Streak ${progress.best_streak}/${STREAK_THRESHOLD}
                 </span>
-                <span class="challenge-family-pill ${progress.writing_passed ? "done" : ""}">
-                    ${progress.writing_passed ? "✓ Writing approved" : "Writing pending"}
+                <span class="challenge-family-pill ${progress.writing_passed ? 'done' : ''}">
+                    ${progress.writing_passed ? '✓ Writing approved' : 'Writing pending'}
                 </span>
             </div>
         `;
-
         card.onclick = () => openChallengeFamilyDetail(fidelObj, level.level_number);
         container.appendChild(card);
     });
