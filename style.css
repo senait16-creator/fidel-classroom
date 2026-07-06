@@ -5161,3 +5161,306 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
         position:static;
     }
 }
+
+/* ==========================================================================
+   EXPLORE — content library. Reuses .challenge-resource-link for individual
+   rows; only adds the category wrapper/title and the locked-row look.
+   ========================================================================== */
+
+.explore-category{
+    margin-bottom:22px;
+}
+
+.explore-category:last-child{
+    margin-bottom:0;
+}
+
+.explore-category-title{
+    font-size:14px;
+    font-weight:800;
+    color:#166534;
+    margin-bottom:10px;
+}
+
+.challenge-resource-link.explore-link-locked{
+    background:#f8fafc;
+    color:#94a3b8;
+    cursor:default;
+}
+
+.challenge-resource-link.explore-link-locked strong{
+    color:#64748b;
+}
+
+.challenge-resource-link.explore-link-locked small{
+    color:#94a3b8;
+}
+
+/* ==========================================================================
+   COMMUNITY DAILY FEED — Verse of the Day, Daily Wordle status, Question
+   of the Day, and the today-banners row at the bottom of Community.
+   ========================================================================== */
+
+.card{
+    background:white;
+    border:1px solid #f1f5f9;
+    border-radius:16px;
+    padding:16px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.04);
+}
+
+.eyebrow{
+    font-size:10.5px;
+    font-weight:800;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:#94a3b8;
+    margin-bottom:10px;
+}
+
+.verse-card{
+    background:linear-gradient(155deg,#166534,#22c55e);
+    border:none;
+    color:#eafff1;
+}
+
+.verse-card .eyebrow{ color:rgba(234,255,241,0.75); }
+
+.verse-amharic{
+    font-family:"Abyssinica SIL", serif;
+    font-size:18px;
+    line-height:1.7;
+    margin:0 0 8px;
+}
+
+.verse-translit{
+    font-size:12px;
+    color:rgba(234,255,241,0.8);
+    font-style:italic;
+    margin:0 0 6px;
+}
+
+.verse-en{
+    font-size:13px;
+    color:rgba(234,255,241,0.92);
+    margin:0;
+    line-height:1.5;
+}
+
+.wordle-status-card{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    cursor:pointer;
+}
+
+.wordle-status-icon{
+    width:34px;
+    height:34px;
+    flex-shrink:0;
+    border-radius:10px;
+    background:#fffbeb;
+    border:1px solid #fde68a;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:17px;
+}
+
+.wordle-status-text{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+}
+
+.wordle-status-text strong{ font-size:13.5px; }
+
+.mini-sub{
+    font-size:11px;
+    color:#64748b;
+}
+
+.mini-status{
+    font-size:10.5px;
+    font-weight:800;
+    padding:4px 10px;
+    border-radius:999px;
+    white-space:nowrap;
+    flex-shrink:0;
+}
+
+.mini-status.done{ background:#fffbeb; color:#92400e; }
+.mini-status.open{ background:#f0f9ff; color:#0369a1; }
+
+.qotd-amharic{
+    font-family:"Abyssinica SIL", serif;
+    font-size:16px;
+    color:#1e293b;
+    margin:0 0 4px;
+}
+
+.qotd-en{
+    font-size:12.5px;
+    color:#64748b;
+    font-style:italic;
+    margin:0 0 12px;
+}
+
+.qotd-textarea{
+    width:100%;
+    min-height:64px;
+    border:1px solid #e2e8f0;
+    border-radius:12px;
+    padding:10px 12px;
+    font-size:13px;
+    font-family:inherit;
+    resize:vertical;
+    margin-bottom:10px;
+    box-sizing:border-box;
+}
+
+.qotd-answered{
+    background:#f0fdf4;
+    border:1px solid #bbf7d0;
+    border-radius:12px;
+    padding:10px 12px;
+    font-size:13px;
+    color:#166534;
+    margin-bottom:8px;
+}
+
+.qotd-edit-btn{
+    background:none;
+    border:none;
+    color:#64748b;
+    font-size:12px;
+    font-weight:700;
+    cursor:pointer;
+    padding:0;
+}
+
+.banner-row{
+    display:flex;
+    gap:10px;
+}
+
+.banner-card{
+    flex:1;
+    border-radius:16px;
+    padding:13px 12px;
+    border:1px solid #f1f5f9;
+    background:white;
+    text-decoration:none;
+    display:block;
+}
+
+.banner-icon{ font-size:18px; margin-bottom:6px; }
+
+.banner-title{
+    font-size:12px;
+    font-weight:800;
+    color:#1e293b;
+    margin:0 0 3px;
+}
+
+.banner-sub{
+    font-size:10.5px;
+    color:#64748b;
+    line-height:1.4;
+    margin:0;
+}
+
+@media (max-width:480px){
+    .banner-row{ flex-direction:column; }
+}
+
+/* ==========================================================================
+   SONG OF THE WEEK
+   ========================================================================== */
+
+.song-my-pick{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    text-decoration:none;
+    padding:10px;
+    border-radius:12px;
+    background:#f0fdf4;
+    border:1px solid #bbf7d0;
+    margin-bottom:8px;
+}
+
+.song-platform-icon{
+    width:34px;
+    height:34px;
+    flex-shrink:0;
+    border-radius:10px;
+    background:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:17px;
+}
+
+.song-my-pick-text{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+}
+
+.song-my-pick-text strong{
+    font-size:13.5px;
+    color:#166534;
+}
+
+.song-input-row{
+    display:flex;
+    gap:8px;
+}
+
+.song-url-input{
+    flex:1;
+    min-width:0;
+    border:1px solid #e2e8f0;
+    border-radius:10px;
+    padding:9px 12px;
+    font-size:12.5px;
+    font-family:inherit;
+    box-sizing:border-box;
+}
+
+.song-other-teams{
+    margin-top:12px;
+    padding-top:10px;
+    border-top:1px solid #f1f5f9;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+
+.song-other-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    text-decoration:none;
+    font-size:12.5px;
+    padding:6px 4px;
+    border-radius:8px;
+}
+
+.song-other-team-name{
+    flex:1;
+    font-weight:700;
+    color:#1e293b;
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.song-other-open{
+    font-size:11px;
+    color:#64748b;
+    font-weight:700;
+}
