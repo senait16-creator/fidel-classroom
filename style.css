@@ -1,7 +1,7 @@
 /* =============================================================================
-   FIDEL CLASSROOM Ã¢â‚¬â€ style.css  (cleaned Jul 2026)
+   FIDEL CLASSROOM style.css  (cleaned Jul 2026)
    =============================================================================
-   TABLE OF CONTENTS (order preserved from original Ã¢â‚¬â€ do not re-sort;
+   TABLE OF CONTENTS (order preserved from original do not re-sort;
    later rules intentionally override earlier ones)
 
      1. Variables & reset            (:root, *, body)
@@ -23,7 +23,7 @@
 
    CLEANUP NOTES:
    - 116 dead classes removed (old daily-decode, reading-path, vocab-path,
-     fidel-map, plc-* level cards Ã¢â‚¬â€ features redesigned or never shipped)
+     fidel-map, plc-* level cards features redesigned or never shipped)
    - 44 duplicate selectors merged property-by-property, last value wins
      (identical computed styles verified before/after)
    ============================================================================= */
@@ -2459,7 +2459,7 @@ header {
     transition: width 0.3s ease, background-color 0.3s ease;
 }
 
-/* MODE SELECT Ã¢â‚¬â€ coffee cup home screen */
+/* MODE SELECT coffee cup home screen */
 
 /* Remove old dark/stuck pseudo-symbols */
 
@@ -4217,12 +4217,12 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 
 /* =============================================================================
-   LESSON STEP BUTTONS Ã¢â‚¬â€ flashcards Ã¢â€ â€™ matching game Ã¢â€ â€™ writing submission
+   LESSON STEP BUTTONS  flashcards Ã¢â€ â€™ matching game Ã¢â€ â€™ writing submission
    Used on both challengeFamilyDetailScreen and familyPracticeSheet.
    Each step gets an icon in a circle and its own color identity:
-     Step 1 Flashcards  Ã¢â‚¬â€ gold  (study / warm-up)
-     Step 2 Matching    Ã¢â‚¬â€ forest green (the brand "play" moment)
-     Step 3 Writing     Ã¢â‚¬â€ deep purple (final proof)
+     Step 1 Flashcards gold  (study / warm-up)
+     Step 2 Matching   forest green (the brand "play" moment)
+     Step 3 Writing      deep purple (final proof)
    ============================================================================= */
 
 .challenge-step-btn {
@@ -4312,7 +4312,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     transform: none;
 }
 
-/* Team status content Ã¢â‚¬â€ hidden until toggled on Competition page */
+/* Team status content hidden until toggled on Competition page */
 
 .challenge-team-status-content {
     display: none;
