@@ -23,7 +23,7 @@
 
    CLEANUP NOTES:
    - 116 dead classes removed (old daily-decode, reading-path, vocab-path,
-     fidel-map, plc-* level cards features redesigned or never shipped)
+     fidel-map, plc-* level cards Ã¢â‚¬â€ features redesigned or never shipped)
    - 44 duplicate selectors merged property-by-property, last value wins
      (identical computed styles verified before/after)
    ============================================================================= */
@@ -2459,7 +2459,7 @@ header {
     transition: width 0.3s ease, background-color 0.3s ease;
 }
 
-/* MODE SELECT coffee cup home screen */
+/* MODE SELECT Ã¢â‚¬â€ coffee cup home screen */
 
 /* Remove old dark/stuck pseudo-symbols */
 
@@ -3212,13 +3212,13 @@ header {
 
 .letter-board-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 280px;
+    grid-template-columns: 1fr;
     gap: 14px;
     margin-top: 0;
     position: relative;
     z-index: 1;
     padding: 14px 14px 80px;
-    max-width: 1120px;
+    max-width: 820px;
     margin-left: auto;
     margin-right: auto;
     width: 100%;
@@ -3229,9 +3229,8 @@ header {
 }
 
 .lb-library-panel {
-    align-self: start;
-    position: sticky;
-    top: 14px;
+    position: static;
+    order: -1;
 }
 
 .lb-library-details {
@@ -3268,6 +3267,7 @@ header {
 
 .lb-library-list {
     display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
     padding: 0 10px 12px;
 }
@@ -3368,14 +3368,9 @@ header {
     }
 }
 
-@media (max-width: 760px) {
-    .letter-board-layout {
+@media (max-width: 600px) {
+    .lb-library-list {
         grid-template-columns: 1fr;
-    }
-
-    .lb-library-panel {
-        position: static;
-        order: -1;
     }
 }
 
@@ -4217,12 +4212,12 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 
 /* =============================================================================
-   LESSON STEP BUTTONS  flashcards Ã¢â€ â€™ matching game Ã¢â€ â€™ writing submission
+   LESSON STEP BUTTONS Ã¢â‚¬â€ flashcards Ã¢â€ â€™ matching game Ã¢â€ â€™ writing submission
    Used on both challengeFamilyDetailScreen and familyPracticeSheet.
    Each step gets an icon in a circle and its own color identity:
-     Step 1 Flashcards gold  (study / warm-up)
-     Step 2 Matching   forest green (the brand "play" moment)
-     Step 3 Writing      deep purple (final proof)
+     Step 1 Flashcards  Ã¢â‚¬â€ gold  (study / warm-up)
+     Step 2 Matching    Ã¢â‚¬â€ forest green (the brand "play" moment)
+     Step 3 Writing     Ã¢â‚¬â€ deep purple (final proof)
    ============================================================================= */
 
 .challenge-step-btn {
@@ -4312,7 +4307,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     transform: none;
 }
 
-/* Team status content hidden until toggled on Competition page */
+/* Team status content Ã¢â‚¬â€ hidden until toggled on Competition page */
 
 .challenge-team-status-content {
     display: none;
@@ -5269,7 +5264,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 
 /* ==========================================================================
-   EXPLORE â€” content library. Reuses .challenge-resource-link for individual
+   EXPLORE content library. Reuses .challenge-resource-link for individual
    rows; only adds the category wrapper/title and the locked-row look.
    ========================================================================== */
 
@@ -5303,7 +5298,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 
 /* ==========================================================================
-   COMMUNITY DAILY FEED â€” Verse of the Day, Daily Wordle status, Question
+   COMMUNITY DAILY FEED Verse of the Day, Daily Wordle status, Question
    of the Day, and the today-banners row at the bottom of Community.
    ========================================================================== */
 
