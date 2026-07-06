@@ -124,6 +124,17 @@ async function renderChallengeDashboard() {
         }
     }
 
+    const teamLeadersCard = document.getElementById("teamLeadersDashCard");
+if (teamLeadersCard) {
+    if (currentProfile?.is_captain) {
+        teamLeadersCard.style.display = "block";
+        if (typeof loadCaptainTeamProgress === "function") {
+            await loadCaptainTeamProgress();
+        }
+    } else {
+        teamLeadersCard.style.display = "none";
+    }
+}
     // ── Level-completion approval banner (students only, relocated
     //    from team hub) — the function self-gates on is_captain/team_id ──
     if (typeof renderLevelCompletionBanner === "function") {
