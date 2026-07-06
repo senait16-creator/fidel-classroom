@@ -12,11 +12,14 @@
 // ---------------------------------------------------------------------------
 
 function resetToGate() {
+    // Defensive: if the user logs out from deep inside some other screen
+    // (Community, Explore, mid-game, etc.), make sure none of it is still
+    // sitting behind the auth gate.
+    if (typeof hideAllScreens === 'function') hideAllScreens();
+
     document.getElementById("authScreen").style.display = "block";
     document.getElementById("onboardingGate").style.display = "flex";
     document.getElementById("credentialFields").style.display = "none";
-    document.getElementById("studentDashboard").style.display = "none";
-    document.getElementById("teacherOnlyDashboard").style.display = "none";
     const adminGate = document.getElementById("adminViewSelectorGate");
     if (adminGate) adminGate.style.display = "none";
 
