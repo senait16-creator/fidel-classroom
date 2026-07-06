@@ -18,24 +18,9 @@
 // ---------------------------------------------------------------------------
 
 function chooseModeCommunity() {
-    [
-        "modeSelectScreen", "studentDashboard", "teamHubScreen",
-        "challengeDashboardScreen", "challengeLevelsScreen",
-        "challengeFamilyScreen", "challengeFamilyDetailScreen",
-        "readingLevelsScreen", "captainDashboardScreen",
-        "letterBoardScreen", "writingSubmitScreen"
-    ].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = "none";
-    });
+    showScreen("communityScreen");
 
-    const screen = document.getElementById("communityScreen");
-    if (screen) screen.style.display = "block";
-
-    const hamburger = document.getElementById("hamburgerBtn");
-    if (hamburger) hamburger.style.display = "flex";
-
-        if (typeof renderStarBoard === 'function') renderStarBoard('starBoardMount');
+    if (typeof renderStarBoard === 'function') renderStarBoard('starBoardMount');
 
     if (typeof renderVerseOfDay === 'function') renderVerseOfDay('verseOfDayMount');
     if (typeof renderWordleStatusMini === 'function') renderWordleStatusMini('wordleStatusMount');
