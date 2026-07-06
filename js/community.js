@@ -37,6 +37,12 @@ function chooseModeCommunity() {
 
         if (typeof renderStarBoard === 'function') renderStarBoard('starBoardMount');
 
+    if (typeof renderVerseOfDay === 'function') renderVerseOfDay('verseOfDayMount');
+    if (typeof renderWordleStatusMini === 'function') renderWordleStatusMini('wordleStatusMount');
+    if (typeof renderQuestionOfDay === 'function') renderQuestionOfDay('questionOfDayMount');
+    if (typeof renderTodayBanners === 'function') renderTodayBanners('todayBannersMount');
+    if (typeof renderSongOfWeek === 'function') renderSongOfWeek('songOfWeekMount');
+
     if (typeof renderLiveLeaderboard === 'function') renderLiveLeaderboard('communityLeaderboardMount');
     renderCommunityFeed();
 }
