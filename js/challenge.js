@@ -8,8 +8,12 @@ let activeChallengeFamilyObj = null;
 let activeChallengeFamilyLevel = null;
 
 const TEAM_COLORS = {
-    Red: '#b91c1c', Blue: '#1d4ed8', Green: '#166534',
-    Yellow: '#a16207', Purple: '#7e22ce'
+    Red: '#b91c1c',
+    Blue: '#1d4ed8',
+    Green: '#166534',
+    Yellow: '#a16207',
+    Purple: '#7e22ce',
+    Black: '#111827'
 };
 
 function getTeamHex(teamName) {
