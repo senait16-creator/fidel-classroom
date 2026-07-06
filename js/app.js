@@ -420,16 +420,17 @@ function launchDashboard(viewMode) {
     }
 
 if (viewMode === "teacher") {
-    document.getElementById("teacherOnlyDashboard").style.display = "block";
+    showScreen("teacherOnlyDashboard");
     loadTeacherRosterData();
     teacherRefreshConfigurationDropdowns();
     loadTeacherWritingQueue();
     loadTeacherTeamProgress();
     loadTeacherLevelCompletionQueue('levelCompletionQueueMount');
+    if (typeof loadCanDoVerificationQueue === 'function') loadCanDoVerificationQueue('canDoVerificationQueueMount');
     populateCaptainTeamDropdown();
     loadCurrentCaptains();
     } else {
-        document.getElementById("studentDashboard").style.display = "block";
+        showScreen("studentDashboard");
         fetchUserProgress();
         renderLiveLeaderboard();
         fetchDisappearingImageCanvasBoard();
