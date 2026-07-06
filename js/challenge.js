@@ -94,6 +94,19 @@ async function renderChallengeDashboard() {
         }
     }
 
+    // ── Star of the Week picker (captains only) ─────────────────
+    const starCard = document.getElementById("starOfWeekCard");
+    if (starCard) {
+        if (currentProfile?.is_captain) {
+            starCard.style.display = "block";
+            if (typeof renderStarPicker === "function") {
+                await renderStarPicker("starPickerMount");
+            }
+        } else {
+            starCard.style.display = "none";
+        }
+    }
+
     // ── Help requests (captains only, relocated from team hub) ──────
     const helpCard = document.getElementById("challengeHelpFlagsCard");
     if (helpCard) {
@@ -482,18 +495,90 @@ async function fetchStudentFamilyProgressForLevel(levelNumber) {
 
 async function renderChallengeFamilyPicker() {
     const level = activeChallengeLevel;
-    document.getElementById("challengeFamilyTitle").innerText = level.title || `Level ${level.level_number}`;
+    const title = document.getElementById("challengeFamilyTitle");
     const container = document.getElementById("challengeFamilyGrid");
+
+    if (!level || !container) return;
+
+    if (title) {
+        title.innerText = level.title || `Level ${level.level_number}`;
+    }
+
     container.innerHTML = `<p style="color:#94a3b8;">Loading...</p>`;
+
     const progressRows = await fetchStudentFamilyProgressForLevel(level.level_number);
     const progressByLetter = {};
     progressRows.forEach(row => { progressByLetter[row.base_letter] = row; });
-    container.innerHTML = "";
+
+    container.innerHTML = `
+        <div class="challenge-lesson-briefing">
+            <div class="challenge-lesson-icon">📚</div>
+            <div class="challenge-lesson-level">Level ${level.level_number}</div>
+            <div class="challenge-lesson-families">${(level.letter_families || []).join(" ")}</div>
+            <p>Listen to the songs and SING along! Watch the lesson video and writing stroke videos to make your writing T and Pass this Level.</p>
+        </div>
+
+<div class="challenge-resource-card songs visual">
+    <h3>🎵 Music First! Lets Jam 🎵</h3>
+
+    <div class="challenge-resource-icons">
+        <a href="https://www.youtube.com/watch?v=dWQQeHyIebk&list=RDdWQQeHyIebk&start_radio=1" target="_blank" rel="noopener">
+            <span>🎵</span>
+            <strong>Fidel Song</strong>
+        </a>
+
+        <a href="https://www.youtube.com/watch?v=gCXlWMXNfNw&list=RDdWQQeHyIebk&index=4" target="_blank" rel="noopener">
+            <span>🎶</span>
+            <strong>Fidel Rap</strong>
+        </a>
+
+        <a href="https://www.youtube.com/watch?v=MEhod-dvmCc&list=RDdWQQeHyIebk&index=10" target="_blank" rel="noopener">
+            <span>🎂</span>
+            <strong>Birthday</strong>
+        </a>
+    </div>
+</div>
+
+<div class="challenge-resource-card lesson writing visual">
+
+    <h3>🎥 Lesson & Writing Videos</h3>
+
+    <div class="challenge-resource-icons">
+
+        <a href="https://www.youtube.com/watch?v=QgssO7_WkSk"
+           target="_blank"
+           rel="noopener">
+            <span>🎥</span>
+            <strong>Lesson</strong>
+        </a>
+
+        <a href="https://www.youtube.com/watch?v=4LIUwGr40dg&t=192s"
+           target="_blank"
+           rel="noopener">
+            <span>📝</span>
+            <strong>Writing 1</strong>
+        </a>
+
+        <a href="https://www.youtube.com/watch?v=j0jaSbFA30w"
+           target="_blank"
+           rel="noopener">
+            <span>✏️</span>
+            <strong>Writing 2</strong>
+        </a>
+
+    </div>
+
+</div>
+
+        <div class="challenge-family-divider"></div>
+    `;
+
     const positionLabels = ["1st", "2nd", "3rd"];
 
     (level.letter_families || []).forEach((baseLetter, idx) => {
         const progress = progressByLetter[baseLetter] || { best_streak: 0, streak_passed: false, writing_passed: false };
         const fidelObj = alphabetData.find(item => item.base === baseLetter);
+        if (!fidelObj) return;
         const card = document.createElement('div');
         card.className = `challenge-family-card pos-${idx + 1} ${progress.streak_passed && progress.writing_passed ? 'mastered' : ''}`;
         card.innerHTML = `
