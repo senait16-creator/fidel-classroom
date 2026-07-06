@@ -20,7 +20,7 @@ const STREAK_THRESHOLD = 20;
 
 // Record of which teams exist — actual membership reads live from the
 // `teams` table, not this array. Update teams via Supabase, not here.
-const TEAMS = ["Red Team 🔴", "Blue Team 🔵", "Green Team 🟢", "Yellow Team 🟡", "Purple Team 🟣", "Black Team ⚫"];
+const TEAMS = ["Red Team 🔴", "Blue Team 🔵", "Green Team 🟢", "Yellow Team 🟡", "Purple Team 🟣", "Black Team ⚫", "White Team ⚪ - Test"];
 
 // ---------------------------------------------------------------------------
 // Global state — shared across all JS files
