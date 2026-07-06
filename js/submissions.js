@@ -88,24 +88,7 @@ function openWritingSubmitScreen(baseLetter, returnToOrOnClose, levelNumber) {
     wire("writingSubmitCloseBtn",  closeWritingSubmitScreen);
 
     // Show screen as its own focused page
-    [
-        "modeSelectScreen",
-        "studentDashboard",
-        "challengeDashboardScreen",
-        "challengeLevelsScreen",
-        "challengeFamilyScreen",
-        "challengeFamilyDetailScreen",
-        "teamHubScreen",
-        "captainDashboardScreen",
-        "readingLevelsScreen",
-        "letterBoardScreen",
-        "gameWorkspace"
-    ].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = "none";
-    });
-
-    document.getElementById("writingSubmitScreen").style.display = "flex";
+    showScreen("writingSubmitScreen", "flex");
 }
 
 function closeWritingSubmitScreen() {
@@ -441,7 +424,7 @@ async function shareApprovedWritingToClass(imageUrl, baseLetter, btnEl) {
     });
 
     if (error) {
-        if (btnEl) { btnEl.disabled = false; btnEl.innerText = "🎉 Share with the class"; }
+        if (btnEl) { btnEl.disabled = false; btnEl.innerText = "🎉 Share to Community"; }
         return showNotificationToast("Couldn't share: " + error.message);
     }
 
@@ -496,7 +479,7 @@ async function renderWritingStatusForFamily(baseLetter, targetId = "challengeWri
                 <button class="btn-primary"
                         style="margin-top:10px; font-size:13px; padding:10px 16px;"
                         onclick="shareApprovedWritingToClass('${latest.image_url}', '${baseLetter}', this)">
-                    🎉 Share with the class
+                    🎉 Share to Community
                 </button>
                 <p style="font-size:11px; color:#94a3b8; margin-top:6px;">
                     Optional — post your approved work to the Community feed for reactions.
@@ -518,27 +501,6 @@ async function renderWritingStatusForFamily(baseLetter, targetId = "challengeWri
         statusHTML += `<div style="margin-top:8px;">${history}</div>`;
     }
     box.innerHTML = statusHTML;
-}
-
-// ---------------------------------------------------------------------------
-// Mode routing — Vocab + Wordle
-// ---------------------------------------------------------------------------
-
-function chooseModeVocab() {
-    if (typeof hideAllScreens === 'function') hideAllScreens();
-
-    const vocabScreen = document.getElementById('vocabScreen');
-    if (vocabScreen) {
-        vocabScreen.style.display = 'block';
-    } else {
-        // Vocab screen not yet built — fall back to reading path as placeholder
-        if (typeof enterReadingPath === 'function') enterReadingPath();
-    }
-
-    // Trigger Wordle if available
-    setTimeout(() => {
-        if (typeof maybeShowWordleOnLogin === 'function') maybeShowWordleOnLogin();
-    }, 100);
 }
 
 // Captain button on mode select — show/hide based on profile
@@ -579,6 +541,5 @@ window.submitWritingSketch            = submitWritingSketch;
 window.finalizeWritingSubmission      = finalizeWritingSubmission;
 window.renderWritingStatusForFamily   = renderWritingStatusForFamily;
 window.shareApprovedWritingToClass    = shareApprovedWritingToClass;
-window.chooseModeVocab                = chooseModeVocab;
 window.updateModeSelectCaptainButton  = updateModeSelectCaptainButton;
 window.bindSketchpadButtons           = bindSketchpadButtons;
