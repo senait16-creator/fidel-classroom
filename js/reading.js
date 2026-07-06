@@ -19,18 +19,15 @@ let activeReadingItemIndex = 0;
 // -----------------------------------------------------------------------------
 
 function enterReadingPath() {
-    document.getElementById("modeSelectScreen").style.display = "none";
-    document.getElementById("studentDashboard").style.display = "none";
-    document.getElementById("readingLevelsScreen").style.display = "block";
+    showScreen("readingLevelsScreen");
     renderReadingLevelsList();
 }
 
 function exitReadingPath() {
-    document.getElementById("readingLevelsScreen").style.display = "none";
     if (typeof enterModeSelect === "function") {
         enterModeSelect();
     } else {
-        document.getElementById("studentDashboard").style.display = "block";
+        showScreen("studentDashboard");
     }
 }
 
