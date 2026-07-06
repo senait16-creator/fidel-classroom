@@ -511,64 +511,61 @@ async function renderChallengeFamilyPicker() {
     progressRows.forEach(row => { progressByLetter[row.base_letter] = row; });
 
     container.innerHTML = `
-        <div class="challenge-lesson-briefing">
-            <div class="challenge-lesson-icon">📚</div>
-            <div class="challenge-lesson-level">Level ${level.level_number}</div>
-            <div class="challenge-lesson-families">${(level.letter_families || []).join(" ")}</div>
-            <p>Listen to the songs and SING along! Watch the lesson video and writing stroke videos to make your writing T and Pass this Level.</p>
-        </div>
+        <details class="challenge-start-here">
+            <summary>
+                <span>📚 Start Here</span>
+                <small>songs + lesson + writing videos</small>
+            </summary>
 
-<div class="challenge-resource-card songs visual">
-    <h3>🎵 Music First! Lets Jam 🎵</h3>
+            <div class="challenge-lesson-briefing">
+                <div class="challenge-lesson-icon">📚</div>
+                <div class="challenge-lesson-level">Level ${level.level_number}</div>
+                <div class="challenge-lesson-families">${(level.letter_families || []).join(" ")}</div>
+                <p>Listen to the songs and SING along! Watch the lesson video and writing stroke videos to make your writing T and pass this level.</p>
+            </div>
 
-    <div class="challenge-resource-icons">
-        <a href="https://www.youtube.com/watch?v=dWQQeHyIebk&list=RDdWQQeHyIebk&start_radio=1" target="_blank" rel="noopener">
-            <span>🎵</span>
-            <strong>Fidel Song</strong>
-        </a>
+            <div class="challenge-resource-card songs visual">
+                <h3>🎵 Music First! Lets Jam 🎵</h3>
 
-        <a href="https://www.youtube.com/watch?v=gCXlWMXNfNw&list=RDdWQQeHyIebk&index=4" target="_blank" rel="noopener">
-            <span>🎶</span>
-            <strong>Fidel Rap</strong>
-        </a>
+                <div class="challenge-resource-icons">
+                    <a href="https://www.youtube.com/watch?v=dWQQeHyIebk&list=RDdWQQeHyIebk&start_radio=1" target="_blank" rel="noopener">
+                        <span>🎵</span>
+                        <strong>Fidel Song</strong>
+                    </a>
 
-        <a href="https://www.youtube.com/watch?v=MEhod-dvmCc&list=RDdWQQeHyIebk&index=10" target="_blank" rel="noopener">
-            <span>🎂</span>
-            <strong>Birthday</strong>
-        </a>
-    </div>
-</div>
+                    <a href="https://www.youtube.com/watch?v=gCXlWMXNfNw&list=RDdWQQeHyIebk&index=4" target="_blank" rel="noopener">
+                        <span>🎶</span>
+                        <strong>Fidel Rap</strong>
+                    </a>
 
-<div class="challenge-resource-card lesson writing visual">
+                    <a href="https://www.youtube.com/watch?v=MEhod-dvmCc&list=RDdWQQeHyIebk&index=10" target="_blank" rel="noopener">
+                        <span>🎂</span>
+                        <strong>Birthday</strong>
+                    </a>
+                </div>
+            </div>
 
-    <h3>🎥 Lesson & Writing Videos</h3>
+            <div class="challenge-resource-card lesson writing visual">
+                <h3>🎥 Lesson & Writing Videos</h3>
 
-    <div class="challenge-resource-icons">
+                <div class="challenge-resource-icons">
+                    <a href="https://www.youtube.com/watch?v=QgssO7_WkSk" target="_blank" rel="noopener">
+                        <span>🎥</span>
+                        <strong>Lesson</strong>
+                    </a>
 
-        <a href="https://www.youtube.com/watch?v=QgssO7_WkSk"
-           target="_blank"
-           rel="noopener">
-            <span>🎥</span>
-            <strong>Lesson</strong>
-        </a>
+                    <a href="https://www.youtube.com/watch?v=4LIUwGr40dg&t=192s" target="_blank" rel="noopener">
+                        <span>📝</span>
+                        <strong>Writing 1</strong>
+                    </a>
 
-        <a href="https://www.youtube.com/watch?v=4LIUwGr40dg&t=192s"
-           target="_blank"
-           rel="noopener">
-            <span>📝</span>
-            <strong>Writing 1</strong>
-        </a>
-
-        <a href="https://www.youtube.com/watch?v=j0jaSbFA30w"
-           target="_blank"
-           rel="noopener">
-            <span>✏️</span>
-            <strong>Writing 2</strong>
-        </a>
-
-    </div>
-
-</div>
+                    <a href="https://www.youtube.com/watch?v=j0jaSbFA30w" target="_blank" rel="noopener">
+                        <span>✏️</span>
+                        <strong>Writing 2</strong>
+                    </a>
+                </div>
+            </div>
+        </details>
 
         <div class="challenge-family-divider"></div>
     `;
