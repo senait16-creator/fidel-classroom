@@ -16,34 +16,14 @@
 // =============================================================================
 
 // ---------------------------------------------------------------------------
-// Entry / Exit
-// ---------------------------------------------------------------------------
-
-async function enterTeamHub() {
-    // Hide all other screens
-    [
-        'studentDashboard', 'modeSelectScreen', 'challengeDashboardScreen',
-        'challengeLevelsScreen', 'challengeFamilyScreen', 'challengeFamilyDetailScreen',
-        'readingLevelsScreen', 'captainDashboardScreen', 'letterBoardScreen',
-        'writingSubmitScreen', 'familyPracticeSheet'
-    ].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = 'none';
-    });
-
-    document.getElementById('teamHubScreen').style.display = 'block';
-    document.getElementById('hamburgerBtn').style.display = 'flex';
-    await renderTeamHub();
-}
-
-function exitTeamHub() {
-    document.getElementById('teamHubScreen').style.display = 'none';
-    document.getElementById('familyPracticeSheet').style.display = 'none';
-    launchDashboard('student');
-}
-
-// ---------------------------------------------------------------------------
 // Main render
+//
+// NOTE: unreachable now that enterTeamHub() (its only caller) is gone —
+// the Team Hub screen itself was retired earlier in favor of the
+// Competition dashboard. Left in place rather than deleted in this pass;
+// worth a closer look before removing outright since it's a large
+// function and this file also holds formatTimeAgo, which community.js
+// still depends on.
 // ---------------------------------------------------------------------------
 
 async function renderTeamHub() {
@@ -708,16 +688,14 @@ async function checkCaptainInboxBadge() {
 function exitCaptainDashboard() {
   if (typeof chooseModeChallenge === 'function') {
     chooseModeChallenge();
-  } else if (typeof enterTeamHub === 'function') {
-    enterTeamHub();
+  } else if (typeof enterModeSelect === 'function') {
+    enterModeSelect();
   }
 }
 // ---------------------------------------------------------------------------
 // Expose
 // ---------------------------------------------------------------------------
 
-window.enterTeamHub              = enterTeamHub;
-window.exitTeamHub               = exitTeamHub;
 window.renderTeamHub             = renderTeamHub;
 window.toggleTeamRace            = toggleTeamRace;
 window.toggleTeamFeed            = toggleTeamFeed;
