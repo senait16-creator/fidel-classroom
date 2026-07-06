@@ -97,6 +97,7 @@ async function renderCommunityFeed() {
         const postReactions = (reactions || []).filter(r => r.post_id === post.id);
         const myReaction = postReactions.find(r => r.reactor_id === currentUser.id)?.reaction || null;
         const isOwn = post.uploader_id === currentUser.id;
+        const canDelete = isOwn || currentProfile?.is_admin;
         const isApprovedWork = post.post_type === 'approved_share';
 
         const reactionTypes = ['👍', '🔥', '💪', '❤️'];
@@ -131,11 +132,11 @@ async function renderCommunityFeed() {
                     </div>
                 </div>
                 <div class="reaction-row">${reactionHTML}</div>
-                ${isOwn ? `
+                ${canDelete ? `
                     <button class="btn-secondary"
                             style="font-size:11px; color:#ef4444; padding:2px 0; text-align:left;"
                             onclick="deleteCommunityPost('${post.id}', '${post.image_url}')">
-                        🗑️ Delete
+                        🗑️ Delete${!isOwn ? ' (Teacher)' : ''}
                     </button>` : ''}
             </div>
         `;
