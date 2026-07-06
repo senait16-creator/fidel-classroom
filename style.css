@@ -5464,3 +5464,51 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     color:#64748b;
     font-weight:700;
 }
+
+.challenge-start-here {
+    grid-column: 1 / -1;
+    background: #ffffff;
+    border: 1px solid rgba(22,101,52,.12);
+    border-radius: 22px;
+    padding: 0;
+    box-shadow: 0 10px 25px rgba(15,23,42,.06);
+    overflow: hidden;
+}
+
+.challenge-start-here summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-weight: 950;
+    color: #166534;
+}
+
+.challenge-start-here summary::-webkit-details-marker {
+    display: none;
+}
+
+.challenge-start-here summary::after {
+    content: "⌄";
+    font-size: 22px;
+    font-weight: 900;
+    transition: transform .2s ease;
+}
+
+.challenge-start-here[open] summary::after {
+    transform: rotate(180deg);
+}
+
+.challenge-start-here summary small {
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.challenge-start-here .challenge-lesson-briefing,
+.challenge-start-here .challenge-resource-card {
+    margin: 12px;
+}
