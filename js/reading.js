@@ -482,7 +482,18 @@ async function goToNextLesson() {
         exitReadingLevelDetail();
     }
 }
+function goToPrevLesson() {
+    if (activeLessonIndex > 0) {
+        activeLessonIndex--;
+        openCurrentLesson();
+    }
+}
 
+function restartCurrentChapter() {
+    activeLessonIndex = 0;
+    activeStepIndex = 0;
+    openCurrentLesson();
+}
 function goToPrevLesson() {
     if (activeLessonIndex > 0) {
         activeLessonIndex--;
@@ -1465,25 +1476,40 @@ async function submitCheckpoint(levelNumber) {
         </div>
     `;
 
-    if (passed) {
-        const lesson = activeLessons[activeLessonIndex];
-        if (lesson) {
-            await _supabase.from('chapter_lesson_progress').upsert({
-                student_id: currentUser.id,
-                lesson_id: lesson.id,
-                completed_at: new Date().toISOString()
-            }, { onConflict: 'student_id,lesson_id' });
-        }
-        html += `<button class="btn-primary" style="margin-top:12px;" onclick="exitReadingLevelDetail()">Back to Chapters ✓</button>`;
-    } else {
-        html += `<button class="btn-secondary" style="margin-top:12px;" onclick="renderCheckpointSection(${levelNumber})">Retake Checkpoint</button>`;
+ if (passed) {
+    const lesson = activeLessons[activeLessonIndex];
+    if (lesson) {
+        await _supabase.from('chapter_lesson_progress').upsert({
+            student_id: currentUser.id,
+            lesson_id: lesson.id,
+            completed_at: new Date().toISOString()
+        }, { onConflict: 'student_id,lesson_id' });
     }
 
-    mount.innerHTML = html;
-
-    if (passed) executeVictoryConfettiCelebration();
+    html += `
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+            <button class="btn-secondary" onclick="restartCurrentChapter()">↻ Restart Chapter 1</button>
+            <button class="btn-primary" onclick="exitReadingLevelDetail()">Back to Chapters ✓</button>
+        </div>
+    `;
+} else {
+    html += `
+        <button class="btn-secondary" style="margin-top:12px;" onclick="renderCheckpointSection(${levelNumber})">
+            Retake Checkpoint
+        </button>
+    `;
 }
 
+html += `
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+        <button class="btn-secondary" onclick="goToPrevLesson()">← Previous Lesson</button>
+    </div>
+`;
+
+mount.innerHTML = html;
+
+if (passed) executeVictoryConfettiCelebration();
+    }
 // -----------------------------------------------------------------------------
 // Expose functions used via inline onclick="" handlers in index.html
 // -----------------------------------------------------------------------------
@@ -1494,3 +1520,4 @@ window.exitReadingLevelDetail = exitReadingLevelDetail;
 window.renderCheckpointSection = renderCheckpointSection;
 window.closeChapterGoals = closeChapterGoals;
 window.goToPrevLesson = goToPrevLesson;
+window.restartCurrentChapter = restartCurrentChapter;
