@@ -355,7 +355,7 @@ if (step === 'goal') {
     else if (step === 'speaking') renderSpeakingSection(levelNumber, lessonOrder);
     else if (step === 'practice') renderPracticeSection(levelNumber, lessonOrder);
 }
-
+}
 function goToNextStep() {
     if (activeStepIndex < LESSON_STEPS.length - 1) {
         activeStepIndex++;
