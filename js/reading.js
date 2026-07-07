@@ -494,12 +494,8 @@ function restartCurrentChapter() {
     activeStepIndex = 0;
     openCurrentLesson();
 }
-function goToPrevLesson() {
-    if (activeLessonIndex > 0) {
-        activeLessonIndex--;
-        openCurrentLesson();
-    }
-}
+
+
 function exitReadingLevelDetail() {
     document.getElementById("readingLevelDetailScreen").style.display = "none";
     document.getElementById("readingLevelsScreen").style.display = "block";
