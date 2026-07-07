@@ -320,9 +320,11 @@ function exitReadingLevelDetail() {
 // -----------------------------------------------------------------------------
 
 function renderCurrentStep() {
-    const step = LESSON_STEPS[activeStepIndex];
 
-    LESSON_STEPS.forEach(s => {
+    const steps = getActiveLessonSteps();
+    const step = steps[activeStepIndex];
+
+    BASE_LESSON_STEPS.concat(['deepdive', 'quiz']).forEach(s => {
         const panel = document.getElementById(`lessonStep_${s}`);
         if (panel) panel.style.display = (s === step) ? 'block' : 'none';
     });
