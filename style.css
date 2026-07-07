@@ -1954,28 +1954,103 @@ header {
 }
 
 /* ── My Amharic Path — chapter list cards ───────────────────── */
+/* Stacked, one per row — these cards carry a title, lesson count, and
+   two side-by-side buttons, which never fit the tight multi-column
+   grid built for the plain number-badge Fidel Challenge tiles. */
+
+.chapter-list-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 20px;
+}
+
+.chapter-list-card {
+    position: relative;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-standard);
+    box-shadow: var(--shadow-premium);
+    padding: 18px 20px;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.chapter-list-card.completed {
+    border-color: #bbf7d0;
+}
+
+.chapter-list-card .challenge-level-number-badge {
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.chapter-list-card-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.chapter-list-card-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--neutral-dark);
+}
+
+.chapter-list-card-meta {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 4px;
+}
 
 .chapter-card-actions {
     display: flex;
     gap: 8px;
+    margin-top: 12px;
 }
 
 .chapter-card-actions button {
     flex: 1;
     font-size: 12px;
     padding: 9px 8px;
+    white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+    .chapter-list-card {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+    }
 }
 
 /* ── My Amharic Path — step progress indicator ──────────────── */
+
+.lesson-step-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.lesson-prev-lesson-link {
+    font-size: 11px;
+    font-weight: 700;
+    color: #4338ca;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
 
 .lesson-step-progress {
     font-size: 11px;
     font-weight: 700;
     color: #94a3b8;
     text-align: center;
-    margin-bottom: 12px;
     text-transform: uppercase;
     letter-spacing: 0.4px;
+    flex: 1;
 }
 
 /* ── My Amharic Path — Chapter Goals card ("what will I learn") ── */
