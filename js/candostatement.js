@@ -70,18 +70,14 @@ function candoStatusPill(status) {
     return `<span class="candoo-status-pill not-started">⬜ Not Started</span>`;
 }
 
-async function renderCanDoScreen(targetId = 'canDoStatementsMount') {
-    const mount = document.getElementById(targetId);
-    if (!mount) return;
-    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
-
+// Auto-assess path — statements the app can already tell are probably
+// true. Pre-fills self_assessed (never verified — the database won't
+// allow a student-owned write to set 'verified' regardless of what this
+// code sends) so it lands in the teacher's queue automatically instead
+// of waiting on the student to tap "I think I can" themselves.
+async function loadCanDoProgressMapWithAutoCheck() {
     const progressMap = await loadCanDoProgressMap();
 
-    // Auto-assess path — statements the app can already tell are probably
-    // true. Pre-fills self_assessed (never verified — the database won't
-    // allow a student-owned write to set 'verified' regardless of what
-    // this code sends) so it lands in the teacher's queue automatically
-    // instead of waiting on the student to tap "I think I can" themselves.
     const { data: progressRow } = await _supabase
         .from('user_progress')
         .select('mastered_letters')
@@ -103,13 +99,28 @@ async function renderCanDoScreen(targetId = 'canDoStatementsMount') {
         }
     }
 
-    const categories = [...new Set(CAN_DO_STATEMENTS.map(s => s.category))];
+    return progressMap;
+}
+
+// Shared renderer — used by both the full Can-Do Statements screen and
+// the per-chapter "Chapter Goals" card (My Amharic Path), which passes a
+// categoryFilter so only that chapter's related statements show up.
+async function renderCanDoRows(targetId, categoryFilter) {
+    const mount = document.getElementById(targetId);
+    if (!mount) return;
+    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
+
+    const progressMap = await loadCanDoProgressMapWithAutoCheck();
+    const statements = categoryFilter
+        ? CAN_DO_STATEMENTS.filter(s => s.category === categoryFilter)
+        : CAN_DO_STATEMENTS;
+    const categories = [...new Set(statements.map(s => s.category))];
 
     mount.innerHTML = categories.map(category => {
-        const rows = CAN_DO_STATEMENTS.filter(s => s.category === category).map(statement => {
+        const rows = statements.filter(s => s.category === category).map(statement => {
             const status = progressMap[statement.key] || 'not_started';
             const actionHTML = status === 'not_started'
-                ? `<button type="button" class="candoo-assess-btn" onclick="selfAssessCanDo('${statement.key}', '${targetId}')">I think I can</button>`
+                ? `<button type="button" class="candoo-assess-btn" onclick="selfAssessCanDo('${statement.key}', '${targetId}', ${categoryFilter ? `'${categoryFilter}'` : 'null'})">I think I can</button>`
                 : '';
             return `
                 <div class="candoo-row">
@@ -129,7 +140,11 @@ async function renderCanDoScreen(targetId = 'canDoStatementsMount') {
     }).join('');
 }
 
-async function selfAssessCanDo(statementKey, targetId) {
+function renderCanDoScreen(targetId = 'canDoStatementsMount') {
+    return renderCanDoRows(targetId, null);
+}
+
+async function selfAssessCanDo(statementKey, targetId, categoryFilter) {
     const { error } = await _supabase.from('can_do_progress').upsert({
         student_id: currentUser.id,
         statement_key: statementKey,
@@ -140,7 +155,7 @@ async function selfAssessCanDo(statementKey, targetId) {
     if (error) return showNotificationToast("Couldn't save: " + error.message);
 
     showGobezToast('Marked as self-assessed!');
-    renderCanDoScreen(targetId);
+    renderCanDoRows(targetId, categoryFilter || null);
 }
 
 // ---------------------------------------------------------------------------
@@ -164,6 +179,7 @@ function exitCanDo() {
 // ---------------------------------------------------------------------------
 
 window.renderCanDoScreen  = renderCanDoScreen;
+window.renderCanDoRows    = renderCanDoRows;
 window.selfAssessCanDo    = selfAssessCanDo;
 window.chooseModeCanDo    = chooseModeCanDo;
 window.exitCanDo          = exitCanDo;
