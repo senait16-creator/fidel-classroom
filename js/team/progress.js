@@ -21,6 +21,8 @@ async function renderTeamRaceView(mountId) {
         const { data: teams } = await _supabase
             .from('teams')
             .select('id, name, current_level')
+            .eq('is_active', true)
+            .eq('is_test', false)
             .order('name');
 
         if (!teams || teams.length === 0) {
