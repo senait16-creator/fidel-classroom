@@ -401,7 +401,7 @@ function sectionTypeLabel(type) {
 // the rest of the app), Continue just always moves forward.
 // -----------------------------------------------------------------------------
 
-function renderCurrentStep() {
+async function renderCurrentStep() {
     const step = activeStepList[activeStepIndex];
     const mount = document.getElementById('lessonStepMount');
 
@@ -425,13 +425,16 @@ function renderCurrentStep() {
     } else if (step === 'complete') {
         renderLessonCompleteStep(mount);
     } else {
+        // These sections are async and replace mount.innerHTML wholesale
+        // once their data loads, so the nav has to be appended AFTER they
+        // finish — appending it first just gets wiped out by that replace.
+        if (step === 'conversation') await renderConversationSection(mount, levelNumber, lessonOrder);
+        else if (step === 'vocab') await renderVocabSection(mount, levelNumber, lessonOrder);
+        else if (step === 'grammar') await renderConjugationSection(mount, levelNumber, lessonOrder);
+        else if (step === 'reading') await renderLessonReadingSection(mount, levelNumber, lessonOrder);
+        else if (step === 'speaking') await renderSpeakingSection(mount, levelNumber, lessonOrder);
+        else if (step === 'practice') await renderPracticeSection(mount, levelNumber, lessonOrder);
         appendStepNav(mount, { showBack: true });
-        if (step === 'conversation') renderConversationSection(mount, levelNumber, lessonOrder);
-        else if (step === 'vocab') renderVocabSection(mount, levelNumber, lessonOrder);
-        else if (step === 'grammar') renderConjugationSection(mount, levelNumber, lessonOrder);
-        else if (step === 'reading') renderLessonReadingSection(mount, levelNumber, lessonOrder);
-        else if (step === 'speaking') renderSpeakingSection(mount, levelNumber, lessonOrder);
-        else if (step === 'practice') renderPracticeSection(mount, levelNumber, lessonOrder);
     }
 }
 
