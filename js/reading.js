@@ -145,16 +145,18 @@ async function renderReadingLevelsList() {
         const isComplete = !!passedByLevel[level.level_number];
 
         const card = document.createElement('div');
-        card.className = `challenge-level-card unlocked ${isComplete ? 'completed' : ''}`;
+        card.className = `chapter-list-card ${isComplete ? 'completed' : ''}`;
         card.innerHTML = `
             <div class="challenge-level-number-badge">${level.level_number}</div>
-            <div class="challenge-level-title">${level.title}</div>
-            <div style="font-size:11px; color:#94a3b8; margin:6px 0 12px;">
-                ${lessonsForLevel.length || 0} lesson${lessonsForLevel.length === 1 ? '' : 's'}${isComplete ? ' • Chapter complete ✓' : ''}
-            </div>
-            <div class="chapter-card-actions">
-                <button type="button" class="btn-secondary chapter-goals-btn">🎯 Chapter Goals</button>
-                <button type="button" class="btn-primary chapter-start-btn">▶️ Start Chapter</button>
+            <div class="chapter-list-card-body">
+                <div class="chapter-list-card-title">${level.title}</div>
+                <div class="chapter-list-card-meta">
+                    ${lessonsForLevel.length || 0} lesson${lessonsForLevel.length === 1 ? '' : 's'}${isComplete ? ' • Chapter complete ✓' : ''}
+                </div>
+                <div class="chapter-card-actions">
+                    <button type="button" class="btn-secondary chapter-goals-btn">🎯 Chapter Goals</button>
+                    <button type="button" class="btn-primary chapter-start-btn">▶️ Start Chapter</button>
+                </div>
             </div>
         `;
 
@@ -266,6 +268,9 @@ async function openCurrentLesson() {
     document.getElementById("lessonStepProgress").innerText = "Loading...";
     document.getElementById("lessonStepMount").innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
 
+    const prevLink = document.getElementById("lessonPrevLessonLink");
+    if (prevLink) prevLink.style.display = activeLessonIndex > 0 ? "inline" : "none";
+
     const [sections, quiz] = await Promise.all([
         fetchLessonSections(activeReadingLevel.level_number, lesson.lesson_order),
         fetchLessonQuiz(activeReadingLevel.level_number, lesson.lesson_order)
@@ -306,9 +311,29 @@ function goToPrevLesson() {
     }
 }
 
-function restartCurrentChapter() {
+async function restartCurrentChapter() {
+    const levelNumber = activeReadingLevel.level_number;
+    const lessonIds = activeLessons.map(l => l.id);
+
+    const { error } = await _supabase
+        .from('chapter_lesson_progress')
+        .delete()
+        .eq('student_id', currentUser.id)
+        .in('lesson_id', lessonIds);
+
+    if (error) {
+        console.error("Failed to reset chapter progress:", error);
+        return showNotificationToast("Couldn't restart: " + error.message);
+    }
+
+    await _supabase
+        .from('reading_chapter_progress')
+        .delete()
+        .eq('student_id', currentUser.id)
+        .eq('level_number', levelNumber);
+
     activeLessonIndex = 0;
-    openCurrentLesson();
+    await openCurrentLesson();
 }
 
 function exitReadingLevelDetail() {
