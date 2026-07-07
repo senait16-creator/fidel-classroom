@@ -454,6 +454,8 @@ async function renderStudentTeamProgress() {
     const { data: teams } = await _supabase
         .from('teams')
         .select('id, name, current_level, streak_count')
+        .eq('is_active', true)
+        .eq('is_test', false)
         .order('name');
 
     if (!teams || teams.length === 0) {
@@ -503,9 +505,9 @@ function toggleDropdownElement(elementId) {
 // ---------------------------------------------------------------------------
 
 const LOCKED_MODES = {
-    learnPractice: false,
-    community: false,
-    amharicPath: true
+    practice:    true,
+    community:   false,
+    amharicPath: false
 };
 
 function enterModeIfUnlocked(modeKey, enterFn) {
