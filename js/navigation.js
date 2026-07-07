@@ -39,7 +39,6 @@ const ALL_SCREENS = [
     "letterBoardScreen",
     "writingSubmitScreen",
     "communityScreen",
-    "exploreScreen",
     "canDoScreen",
     "gameWorkspace",
     "flashcardScreen",
