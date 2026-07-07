@@ -58,7 +58,12 @@ async function renderSongOfWeek(targetId = 'songOfWeekMount') {
     const weekKey = getSongWeekKey();
     const myTeamId = currentProfile?.team_id;
 
-    const { data: teams } = await _supabase.from('teams').select('id, name').order('name');
+    const { data: teams } = await _supabase
+        .from('teams')
+        .select('id, name')
+        .eq('is_active', true)
+        .eq('is_test', false)
+        .order('name');
     const { data: songs, error } = await _supabase
         .from('team_song_of_week')
         .select('team_id, song_url, platform')
