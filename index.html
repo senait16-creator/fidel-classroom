@@ -786,14 +786,16 @@
     <div id="readingLevelsGrid" class="challenge-levels-grid"></div>
 </div>
 
-<!-- Chapter Goals card — shared by "🎯 Chapter Goals" and "▶️ Start Chapter" -->
+<!-- Chapter intro card — shared by "🎯 Chapter Goals" and "▶️ Start Chapter".
+     Answers "what am I about to learn?" — NOT a Can-Do mastery check. Can-Do
+     statements now show up after finishing the chapter, not before. -->
 <div id="chapterGoalsOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9983; align-items:center; justify-content:center; padding:24px;">
     <div style="background:white; border-radius:20px; padding:28px 24px; max-width:420px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.3); max-height:90vh; overflow-y:auto;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h2 id="chapterGoalsTitle" style="font-size:18px; font-weight:800; color:#4338ca; font-family:'Playfair Display',serif; margin:0;">🎯 Chapter Goals</h2>
+            <h2 id="chapterGoalsTitle" style="font-size:18px; font-weight:800; color:#4338ca; font-family:'Playfair Display',serif; margin:0;">📘 Chapter</h2>
             <button onclick="closeChapterGoals()" style="background:#f1f5f9; border:none; border-radius:50%; width:32px; height:32px; font-size:16px; cursor:pointer;">✕</button>
         </div>
-        <div id="chapterGoalsMount" style="margin-bottom:20px;"></div>
+        <div id="chapterGoalsSummary" style="margin-bottom:20px;"></div>
         <button id="chapterGoalsCtaBtn" class="btn-primary" style="width:100%;">Got it ✓</button>
     </div>
 </div>
@@ -804,46 +806,13 @@
         <button class="btn-secondary" onclick="exitReadingLevelDetail()">← Back to Chapters</button>
     </div>
 
-    <!-- Regular lesson: one step at a time, like a real class -->
+    <!-- Regular lesson: one step at a time, like a real class. A single
+         mount instead of one div per step type — the number of teaching
+         sections varies per lesson (data-driven), so the panels can't be
+         pre-declared in HTML anymore. -->
     <div id="lessonNormalView">
-        <div id="lessonStep_goal" class="chapter-tab-panel"></div>
-        <div id="lessonStep_teach" class="chapter-tab-panel" style="display:none;"></div>
-<div id="lessonStep_pattern" class="chapter-tab-panel" style="display:none;"></div>
-<div id="lessonStep_examples" class="chapter-tab-panel" style="display:none;"></div>
-        <div id="lessonStep_deepdive" class="chapter-tab-panel" style="display:none;"></div>
-<div id="lessonStep_quiz" class="chapter-tab-panel" style="display:none;"></div>
-
-        <div id="lessonStep_conversation" class="chapter-tab-panel" style="display:none;">
-<div class="eyebrow">💬 Conversation</div>
-            <div id="lessonConversationMount"></div>
-        </div>
-
-        <div id="lessonStep_vocab" class="chapter-tab-panel" style="display:none;">
-            <div class="eyebrow">📖 Today's Words</div>
-            <div id="lessonVocabMount"></div>
-        </div>
-
-        <div id="lessonStep_grammar" class="chapter-tab-panel" style="display:none;">
-            <div class="eyebrow">🧠 Grammar Spotlight</div>
-            <div id="lessonGrammarMount"></div>
-        </div>
-
-        <div id="lessonStep_reading" class="chapter-tab-panel" style="display:none;">
-            <div class="eyebrow">📚 Read the Conversation Again</div>
-            <div id="lessonReadingMount"></div>
-        </div>
-
-        <div id="lessonStep_speaking" class="chapter-tab-panel" style="display:none;">
-            <div class="eyebrow">🎙 Speaking</div>
-            <div id="lessonSpeakingMount"></div>
-        </div>
-
-        <div id="lessonStep_practice" class="chapter-tab-panel" style="display:none;">
-            <div class="eyebrow">✍ Practice</div>
-            <div id="lessonPracticeMount"></div>
-        </div>
-
-        <div id="lessonStep_complete" class="chapter-tab-panel" style="display:none;"></div>
+        <div id="lessonStepProgress" class="lesson-step-progress"></div>
+        <div id="lessonStepMount" class="chapter-tab-panel"></div>
     </div>
 
     <!-- Final lesson: Chapter Challenge quiz -->
@@ -1182,7 +1151,7 @@
 <script src="js/game.js?v=9" defer></script>
 <script src="js/submissions.js?v=11" defer></script>
 <script src="js/teacher.js?v=10" defer></script>
-<script src="js/reading.js?v=14" defer></script>
+<script src="js/reading.js?v=15" defer></script>
     <script src="js/letterboard.js?v=10" defer></script>
 <script src="js/team/progress.js?v=9" defer></script>
 <script src="js/team/levels.js?v=9" defer></script>
