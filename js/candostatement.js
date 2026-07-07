@@ -114,8 +114,8 @@ async function renderCanDoRows(targetId, categoryFilter) {
 
     const progressMap = await loadCanDoProgressMapWithAutoCheck();
     const statements = categoryFilter
-        ? CAN_DO_STATEMENTS.filter(s => s.category === categoryFilter)
-        : CAN_DO_STATEMENTS;
+    ? CAN_DO_STATEMENTS.filter(s => s.category === categoryFilter)
+    : CAN_DO_STATEMENTS;
     const categories = [...new Set(statements.map(s => s.category))];
 
     mount.innerHTML = categories.map(category => {
