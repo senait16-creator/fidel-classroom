@@ -23,7 +23,7 @@ async function renderChallengeMap() {
         </div>`;
 
     const [teamsRes, levelsRes, myTeamRes] = await Promise.all([
-        _supabase.from('teams').select('id, name, current_level').order('name'),
+        _supabase.from('teams').select('id, name, current_level').eq('is_active', true).eq('is_test', false).order('name'),
         _supabase.from('challenge_levels').select('level_number, title, letter_families').order('level_number'),
         currentProfile?.team_id
             ? _supabase.from('teams').select('current_level').eq('id', currentProfile.team_id).maybeSingle()
