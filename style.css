@@ -6366,3 +6366,89 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
         grid-template-columns: 1fr;
     }
 }
+
+/* =========================================================
+   MY AMHARIC PATH — CLEAN VISUAL RESET
+   Less gradient, more polished course feel
+========================================================= */
+
+.chapter-list-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
+}
+
+.chapter-list-card::before {
+    content: "ፊደል";
+    color: rgba(22, 101, 52, 0.045);
+}
+
+.chapter-list-card.completed {
+    background: #f8fff9;
+    border-color: #bbf7d0;
+}
+
+.chapter-list-card::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 18px;
+    bottom: 18px;
+    width: 5px;
+    border-radius: 999px;
+    background: #166534;
+}
+
+.chapter-list-card-title {
+    color: #111827;
+}
+
+.chapter-list-card-meta {
+    color: #64748b;
+}
+
+/* Cleaner badge */
+.chapter-list-card .challenge-level-number-badge {
+    background: #166534;
+    box-shadow: none;
+}
+
+/* Buttons cleaner */
+.chapter-card-actions .chapter-start-btn {
+    background: #166534;
+    box-shadow: none;
+}
+
+.chapter-card-actions .chapter-goals-btn {
+    background: #ffffff;
+    border: 1px solid #dbeafe;
+}
+
+/* Inside chapter panels */
+.chapter-tab-panel {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+/* Lesson cards cleaner */
+.lesson-section-card,
+.lesson-goal-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+}
+
+.lesson-goal-card {
+    background: #f8fff9;
+    border-color: #bbf7d0;
+}
+
+/* Remove overly colorful resource blocks */
+.lesson-notice {
+    background: #fffdf5;
+}
+
+.lesson-resource-link {
+    background: #f8fafc;
+}
