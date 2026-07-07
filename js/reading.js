@@ -37,7 +37,55 @@ let activeLessonIndex = 0;
 let activeReadingItems = [];
 let activeReadingItemIndex = 0;
 
-const LESSON_STEPS = ['goal', 'conversation', 'vocab', 'grammar', 'reading', 'speaking', 'practice', 'complete'];
+const LESSON_STEPS = [
+    'goal',
+    'teach',
+    'pattern',
+    'examples',
+    'conversation',
+    'vocab',
+    'grammar',
+    'reading',
+    'speaking',
+    'practice',
+    'complete'
+];
+
+const LESSON_TEACHING_CONTENT = {
+    "1-1": {
+        conceptTitle: "What is a greeting?",
+        conceptBody: `
+            <p><strong>ሰላም</strong> means hello, peace, or greeting.</p>
+            <p>It is the easiest greeting to start with because it works for men, women, elders, and groups.</p>
+            <p>In Amharic, many greetings change depending on who you are speaking to.</p>
+        `,
+        resourceUrl: "https://amharicteacher.com/module/greetings",
+        resourceLabel: "Study greetings on AmharicTeacher",
+        patternTitle: "Greeting forms change by audience",
+        patternBody: `
+            <p>Many Amharic phrases have different forms for:</p>
+            <ul>
+                <li>one man</li>
+                <li>one woman</li>
+                <li>an elder or polite/formal person</li>
+                <li>a group</li>
+            </ul>
+        `,
+        examplesTitle: "How are you?",
+        examples: [
+            { label: "Male", amharic: "እንዴት ነህ?", transliteration: "endaet neh", english: "How are you?"},
+            { label: "Female", amharic: "እንዴት ነሽ?", transliteration: "endaet nesh", english: "How are you?"},
+            { label: "Polite / Elder", amharic: "እንዴት ነዎት?", transliteration: "endaet newot", english: "How are you?"},
+            { label: "Group", amharic: "እንዴት ናችሁ?", transliteration: "endaet nachhu", english: "How are you?"}
+        ],
+        notice: "Notice how the ending changes: ነህ, ነሽ, ነዎት, ናችሁ."
+    }
+};
+
+function getLessonTeachingContent(levelNumber, lessonOrder) {
+    return LESSON_TEACHING_CONTENT[`${levelNumber}-${lessonOrder}`] || null;
+} 
+
 let activeStepIndex = 0;
 
 // -----------------------------------------------------------------------------
@@ -284,20 +332,28 @@ function renderCurrentStep() {
     const lessonOrder = lesson.lesson_order;
     const panelId = `lessonStep_${step}`;
 
-    if (step === 'goal') {
-        renderGoalStep(lesson);
-        appendStepNav(panelId, { showBack: false, continueLabel: 'Start Lesson →' });
-    } else if (step === 'complete') {
-        renderLessonCompleteStep();
-    } else {
-        appendStepNav(panelId, { showBack: true });
-        if (step === 'conversation') renderConversationSection(levelNumber, lessonOrder);
-        else if (step === 'vocab') renderVocabSection(levelNumber, lessonOrder);
-        else if (step === 'grammar') renderConjugationSection(levelNumber, lessonOrder);
-        else if (step === 'reading') renderLessonReadingSection(levelNumber, lessonOrder);
-        else if (step === 'speaking') renderSpeakingSection(levelNumber, lessonOrder);
-        else if (step === 'practice') renderPracticeSection(levelNumber, lessonOrder);
-    }
+if (step === 'goal') {
+    renderGoalStep(lesson);
+    appendStepNav(panelId, { showBack: false, continueLabel: 'Start Lesson →' });
+} else if (step === 'teach') {
+    renderTeachStep(levelNumber, lessonOrder);
+    appendStepNav(panelId, { showBack: true });
+} else if (step === 'pattern') {
+    renderPatternStep(levelNumber, lessonOrder);
+    appendStepNav(panelId, { showBack: true });
+} else if (step === 'examples') {
+    renderExamplesStep(levelNumber, lessonOrder);
+    appendStepNav(panelId, { showBack: true });
+} else if (step === 'complete') {
+    renderLessonCompleteStep();
+} else {
+    appendStepNav(panelId, { showBack: true });
+    if (step === 'conversation') renderConversationSection(levelNumber, lessonOrder);
+    else if (step === 'vocab') renderVocabSection(levelNumber, lessonOrder);
+    else if (step === 'grammar') renderConjugationSection(levelNumber, lessonOrder);
+    else if (step === 'reading') renderLessonReadingSection(levelNumber, lessonOrder);
+    else if (step === 'speaking') renderSpeakingSection(levelNumber, lessonOrder);
+    else if (step === 'practice') renderPracticeSection(levelNumber, lessonOrder);
 }
 
 function goToNextStep() {
