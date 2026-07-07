@@ -3645,10 +3645,7 @@ header {
 }
 
 .letter-board-header {
-    background: linear-gradient(155deg, #14532d 0%, #166534 45%, #15803d 75%, #ca8a04 100%);
-    padding: 20px 18px 44px;
-    position: relative;
-    overflow: hidden;
+    padding: 20px 18px 24px;
 }
 
 .letter-board-header-pattern {
@@ -3698,7 +3695,7 @@ header {
 }
 
 .letter-board-body {
-    margin-top: -20px;
+    margin-top: 18px;
     position: relative;
     z-index: 1;
     padding: 0 14px 80px;
