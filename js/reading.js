@@ -332,30 +332,31 @@ function renderCurrentStep() {
     const lessonOrder = lesson.lesson_order;
     const panelId = `lessonStep_${step}`;
 
-if (step === 'goal') {
-    renderGoalStep(lesson);
-    appendStepNav(panelId, { showBack: false, continueLabel: 'Start Lesson →' });
-} else if (step === 'teach') {
-    renderTeachStep(levelNumber, lessonOrder);
-    appendStepNav(panelId, { showBack: true });
-} else if (step === 'pattern') {
-    renderPatternStep(levelNumber, lessonOrder);
-    appendStepNav(panelId, { showBack: true });
-} else if (step === 'examples') {
-    renderExamplesStep(levelNumber, lessonOrder);
-    appendStepNav(panelId, { showBack: true });
-} else if (step === 'complete') {
-    renderLessonCompleteStep();
-} else {
-    appendStepNav(panelId, { showBack: true });
-    if (step === 'conversation') renderConversationSection(levelNumber, lessonOrder);
-    else if (step === 'vocab') renderVocabSection(levelNumber, lessonOrder);
-    else if (step === 'grammar') renderConjugationSection(levelNumber, lessonOrder);
-    else if (step === 'reading') renderLessonReadingSection(levelNumber, lessonOrder);
-    else if (step === 'speaking') renderSpeakingSection(levelNumber, lessonOrder);
-    else if (step === 'practice') renderPracticeSection(levelNumber, lessonOrder);
+    if (step === 'goal') {
+        renderGoalStep(lesson);
+        appendStepNav(panelId, { showBack: false, continueLabel: 'Start Lesson →' });
+    } else if (step === 'teach') {
+        renderTeachStep(levelNumber, lessonOrder);
+        appendStepNav(panelId, { showBack: true });
+    } else if (step === 'pattern') {
+        renderPatternStep(levelNumber, lessonOrder);
+        appendStepNav(panelId, { showBack: true });
+    } else if (step === 'examples') {
+        renderExamplesStep(levelNumber, lessonOrder);
+        appendStepNav(panelId, { showBack: true });
+    } else if (step === 'complete') {
+        renderLessonCompleteStep();
+    } else {
+        appendStepNav(panelId, { showBack: true });
+        if (step === 'conversation') renderConversationSection(levelNumber, lessonOrder);
+        else if (step === 'vocab') renderVocabSection(levelNumber, lessonOrder);
+        else if (step === 'grammar') renderConjugationSection(levelNumber, lessonOrder);
+        else if (step === 'reading') renderLessonReadingSection(levelNumber, lessonOrder);
+        else if (step === 'speaking') renderSpeakingSection(levelNumber, lessonOrder);
+        else if (step === 'practice') renderPracticeSection(levelNumber, lessonOrder);
+    }
 }
-}
+
 function goToNextStep() {
     if (activeStepIndex < LESSON_STEPS.length - 1) {
         activeStepIndex++;
@@ -398,7 +399,7 @@ function renderGoalStep(lesson) {
     `;
 }
 
-    function renderTeachStep(levelNumber, lessonOrder) {
+function renderTeachStep(levelNumber, lessonOrder) {
     const mount = document.getElementById('lessonStep_teach');
     const content = getLessonTeachingContent(levelNumber, lessonOrder);
 
