@@ -24,53 +24,55 @@ const FIDEL_BOARD_GROUPS = [
         ]
     },
     {
-        label: 'Group 3 · ቀ በ',
+        label: 'Group 3 · ቀ ቐ በ ቨ',
         families: [
             { base: 'ቀ', sound: 'qe' },
+            { base: 'ቐ', sound: 'qʷe' },
             { base: 'በ', sound: 'be' },
-            { base: 'ተ', sound: 'te' },
-            { base: 'ቸ', sound: 'che' },
+            { base: 'ቨ', sound: 've' },
         ]
     },
     {
         label: 'Group 4 · ተ ቸ ኀ ነ',
         families: [
+            { base: 'ተ', sound: 'te' },
+            { base: 'ቸ', sound: 'che' },
             { base: 'ኀ', sound: 'ḫa' },
             { base: 'ነ', sound: 'ne' },
-            { base: 'ኘ', sound: 'ñe' },
-            { base: 'አ', sound: 'a' },
         ]
     },
     {
         label: 'Group 5 · ኘ አ ከ ኸ',
         families: [
+            { base: 'ኘ', sound: 'ñe' },
+            { base: 'አ', sound: 'a' },
             { base: 'ከ', sound: 'ke' },
             { base: 'ኸ', sound: 'ḵe' },
-             { base: 'ወ', sound: 'we' },
-            { base: 'ዐ', sound: 'ʿa' },
         ]
     },
     {
         label: 'Group 6 · ወ ዐ ዘ ዠ',
         families: [
+            { base: 'ወ', sound: 'we' },
+            { base: 'ዐ', sound: 'ʿa' },
             { base: 'ዘ', sound: 'ze' },
             { base: 'ዠ', sound: 'zhe' },
-             { base: 'የ', sound: 'ye' },
-            { base: 'ደ', sound: 'de' },
         ]
     },
     {
         label: 'Group 7 · የ ደ ጀ ገ',
         families: [
+            { base: 'የ', sound: 'ye' },
+            { base: 'ደ', sound: 'de' },
             { base: 'ጀ', sound: 'je' },
             { base: 'ገ', sound: 'ge' },
-             { base: 'ጠ', sound: 'ṭe' },
-            { base: 'ጨ', sound: 'č̣e' },
         ]
     },
     {
         label: 'Group 8 · ጠ ጨ ጰ ጸ ፀ ፈ ፐ',
         families: [
+            { base: 'ጠ', sound: 'ṭe' },
+            { base: 'ጨ', sound: 'č̣e' },
             { base: 'ጰ', sound: 'p̣e' },
             { base: 'ጸ', sound: 'ṣe' },
             { base: 'ፀ', sound: 'ṣ́e' },
@@ -83,6 +85,73 @@ const FIDEL_BOARD_GROUPS = [
 let _lbProgressCache = null;
 let _lbSearchQuery = '';
 
+// Carried over from the retired Explore page — external/quick-access links
+// that don't belong to a specific letter family, so they live below the
+// board itself rather than needing their own destination screen.
+const LETTER_BOARD_QUICK_LINKS = [
+    {
+        icon: '🗂️', label: 'Flashcards',
+        desc: 'Flip through the full Fidel alphabet',
+        action: () => {
+            document.getElementById('letterBoardScreen').style.display = 'none';
+            openFlashcardStudy(buildFlashcardDeckForFullAlphabet(), 'All Letters', () => {
+                document.getElementById('letterBoardScreen').style.display = 'flex';
+            });
+        }
+    },
+    {
+        icon: '🟩', label: 'Daily Wordle',
+        desc: "Today's Amharic word puzzle",
+        action: () => openWordleOverlay(true)
+    },
+    {
+        icon: '▶️', label: 'Start Here Video',
+        desc: 'Watch the intro before starting the challenge',
+        href: 'https://www.youtube.com/watch?v=QgssO7_WkSk&t=160s'
+    },
+    {
+        icon: '🔊', label: 'Letter Sounds',
+        desc: 'Hear Fidel sounds pronounced out loud',
+        href: 'https://amharicteacher.com/hahu'
+    },
+    {
+        icon: '🎵', label: 'Alphabet Songs',
+        desc: 'Use music for extra letter review',
+        href: 'https://www.youtube.com/results?search_query=amharic+alphabet+song'
+    },
+    {
+        icon: '🌐', label: 'AmharicTeacher.com',
+        desc: 'Full external course library',
+        href: 'https://amharicteacher.com'
+    }
+];
+
+function renderLetterBoardQuickLinks() {
+    const mount = document.getElementById('lbQuickLinksMount');
+    if (!mount) return;
+
+    mount.innerHTML = '';
+    LETTER_BOARD_QUICK_LINKS.forEach(item => {
+        const el = document.createElement(item.href ? 'a' : 'div');
+        el.className = 'challenge-resource-link';
+        if (item.href) {
+            el.href = item.href;
+            el.target = '_blank';
+            el.rel = 'noopener';
+        } else {
+            el.style.cursor = 'pointer';
+            el.onclick = item.action;
+        }
+        el.innerHTML = `
+            <span>${item.icon}</span>
+            <div>
+                <strong>${item.label}</strong>
+                <small>${item.desc}</small>
+            </div>`;
+        mount.appendChild(el);
+    });
+}
+
 async function openLetterBoard() {
     const screen = document.getElementById('letterBoardScreen');
     if (!screen) return;
@@ -92,6 +161,7 @@ async function openLetterBoard() {
     // Load progress
     await loadLetterBoardProgress();
     renderLetterBoard('');
+    renderLetterBoardQuickLinks();
 
     // Wire search
     const search = document.getElementById('lbSearchInput');
@@ -111,23 +181,6 @@ function closeLetterBoard() {
     if (typeof enterModeSelect === 'function') enterModeSelect();
 }
 window.closeLetterBoard = closeLetterBoard;
-
-function openLetterBoardFlashcards() {
-    const screen = document.getElementById('letterBoardScreen');
-    if (screen) screen.style.display = 'none';
-
-    if (typeof openFlashcardStudy === 'function') {
-        const boardLetters = FIDEL_BOARD_GROUPS.flatMap(group => group.families.map(fam => fam.base));
-        const boardDeck = alphabetData
-            .filter(item => boardLetters.includes(item.base))
-            .flatMap(item => item.family.map((char, idx) => ({ char, sound: subs[idx] })));
-
-        openFlashcardStudy(boardDeck, 'All Letters', () => {
-            if (screen) screen.style.display = 'flex';
-        });
-    }
-}
-window.openLetterBoardFlashcards = openLetterBoardFlashcards;
 
 async function loadLetterBoardProgress() {
     if (!currentUser) return;
