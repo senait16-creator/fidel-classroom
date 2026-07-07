@@ -483,6 +483,12 @@ async function goToNextLesson() {
     }
 }
 
+function goToPrevLesson() {
+    if (activeLessonIndex > 0) {
+        activeLessonIndex--;
+        openCurrentLesson();
+    }
+}
 function exitReadingLevelDetail() {
     document.getElementById("readingLevelDetailScreen").style.display = "none";
     document.getElementById("readingLevelsScreen").style.display = "block";
@@ -1376,9 +1382,17 @@ async function renderCheckpointSection(levelNumber) {
     ]);
 
     if (questions.length === 0) {
-        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No checkpoint added for this chapter yet.</p>`;
-        return;
-    }
+    mount.innerHTML = `
+        <div class="lesson-goal-card">
+            <div class="eyebrow">🏁 Chapter Challenge</div>
+            <h3>Checkpoint coming soon</h3>
+            <p>You finished the Chapter 1 lessons. The final quiz has not been added yet.</p>
+            <button class="btn-secondary" onclick="goToPrevLesson()">← Previous Lesson</button>
+            <button class="btn-primary" onclick="exitReadingLevelDetail()" style="margin-top:10px;">Back to Chapters</button>
+        </div>
+    `;
+    return;
+}
 
     activeCheckpointQuestions = questions;
     checkpointAnswers = {};
@@ -1479,3 +1493,4 @@ window.exitAmharicPath = exitAmharicPath;
 window.exitReadingLevelDetail = exitReadingLevelDetail;
 window.renderCheckpointSection = renderCheckpointSection;
 window.closeChapterGoals = closeChapterGoals;
+window.goToPrevLesson = goToPrevLesson;
