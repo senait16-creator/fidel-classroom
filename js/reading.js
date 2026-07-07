@@ -398,6 +398,82 @@ function renderGoalStep(lesson) {
     `;
 }
 
+    function renderTeachStep(levelNumber, lessonOrder) {
+    const mount = document.getElementById('lessonStep_teach');
+    const content = getLessonTeachingContent(levelNumber, lessonOrder);
+
+    if (!content) {
+        mount.innerHTML = `
+            <div class="lesson-teach-card">
+                <div class="eyebrow">📘 Learn</div>
+                <h3>Teacher Note</h3>
+                <p>This lesson introduces a new Amharic skill. Read the examples carefully, then practice using them.</p>
+            </div>
+        `;
+        return;
+    }
+
+    mount.innerHTML = `
+        <div class="lesson-teach-card">
+            <div class="eyebrow">📘 Learn</div>
+            <h3>${content.conceptTitle}</h3>
+            ${content.conceptBody}
+            ${content.resourceUrl ? `
+                <a class="lesson-resource-link" href="${content.resourceUrl}" target="_blank" rel="noopener">
+                    🔗 ${content.resourceLabel || 'Open resource'}
+                </a>
+            ` : ''}
+        </div>
+    `;
+}
+
+function renderPatternStep(levelNumber, lessonOrder) {
+    const mount = document.getElementById('lessonStep_pattern');
+    const content = getLessonTeachingContent(levelNumber, lessonOrder);
+
+    mount.innerHTML = `
+        <div class="lesson-pattern-card">
+            <div class="eyebrow">🧠 Pattern</div>
+            <h3>${content?.patternTitle || 'Notice the pattern'}</h3>
+            ${content?.patternBody || '<p>Look for how the Amharic words change depending on who is speaking or being spoken to.</p>'}
+        </div>
+    `;
+}
+
+function renderExamplesStep(levelNumber, lessonOrder) {
+    const mount = document.getElementById('lessonStep_examples');
+    const content = getLessonTeachingContent(levelNumber, lessonOrder);
+
+    if (!content?.examples?.length) {
+        mount.innerHTML = `
+            <div class="lesson-examples-card">
+                <div class="eyebrow">📌 Examples</div>
+                <p>No example table has been added for this lesson yet.</p>
+            </div>
+        `;
+        return;
+    }
+
+    mount.innerHTML = `
+        <div class="lesson-examples-card">
+            <div class="eyebrow">📌 Examples</div>
+            <h3>${content.examplesTitle || 'Examples'}</h3>
+            <div class="lesson-example-list">
+                ${content.examples.map(ex => `
+                    <div class="lesson-example-row">
+                        <div class="lesson-example-label">${ex.label}</div>
+                        <div class="lesson-example-main">
+                            <div class="lesson-example-amharic">${ex.amharic}</div>
+                            <div class="lesson-example-translit">${ex.transliteration || ''}</div>
+                            <div class="lesson-example-english">${ex.english || ''}</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            ${content.notice ? `<div class="lesson-notice">💡 ${content.notice}</div>` : ''}
+        </div>
+    `;
+}
 function renderLessonCompleteStep() {
     const mount = document.getElementById('lessonStep_complete');
     mount.innerHTML = `
