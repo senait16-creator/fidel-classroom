@@ -783,7 +783,7 @@
         <button class="btn-secondary" onclick="exitAmharicPath()">← Back</button>
     </div>
     <p class="subtitle" style="text-align:left; margin-bottom:16px;">You know the Fidel — now build real Amharic, chapter by chapter, lesson by lesson.</p>
-    <div id="readingLevelsGrid" class="challenge-levels-grid"></div>
+    <div id="readingLevelsGrid" class="chapter-list-grid"></div>
 </div>
 
 <!-- Chapter intro card — shared by "🎯 Chapter Goals" and "▶️ Start Chapter".
@@ -811,7 +811,10 @@
          sections varies per lesson (data-driven), so the panels can't be
          pre-declared in HTML anymore. -->
     <div id="lessonNormalView">
-        <div id="lessonStepProgress" class="lesson-step-progress"></div>
+        <div class="lesson-step-header-row">
+            <a href="javascript:void(0)" id="lessonPrevLessonLink" class="lesson-prev-lesson-link" onclick="goToPrevLesson()" style="display:none;">← Previous Lesson</a>
+            <div id="lessonStepProgress" class="lesson-step-progress"></div>
+        </div>
         <div id="lessonStepMount" class="chapter-tab-panel"></div>
     </div>
 
