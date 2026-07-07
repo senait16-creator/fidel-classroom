@@ -108,14 +108,15 @@ async function loadCanDoProgressMapWithAutoCheck() {
 // the per-chapter "Chapter Goals" card (My Amharic Path), which passes a
 // categoryFilter so only that chapter's related statements show up.
 async function renderCanDoRows(targetId, categoryFilter) {
+
     const mount = document.getElementById(targetId);
     if (!mount) return;
-    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
 
-    const progressMap = await loadCanDoProgressMapWithAutoCheck();
+    const allStatements = await fetchCanDoStatements();
+
     const statements = categoryFilter
-    ? CAN_DO_STATEMENTS.filter(s => s.category === categoryFilter)
-    : CAN_DO_STATEMENTS;
+        ? allStatements.filter(s => s.category === categoryFilter)
+        : allStatements;
     const categories = [...new Set(statements.map(s => s.category))];
 
     mount.innerHTML = categories.map(category => {
