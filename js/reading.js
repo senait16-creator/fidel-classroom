@@ -37,7 +37,7 @@ let activeLessonIndex = 0;
 let activeReadingItems = [];
 let activeReadingItemIndex = 0;
 
-const LESSON_STEPS = [
+const BASE_LESSON_STEPS = [
     'goal',
     'teach',
     'pattern',
@@ -50,6 +50,22 @@ const LESSON_STEPS = [
     'practice',
     'complete'
 ];
+
+function getActiveLessonSteps() {
+    const lesson = activeLessons[activeLessonIndex];
+    const levelNumber = activeReadingLevel?.level_number;
+    const lessonOrder = lesson?.lesson_order;
+    const content = getLessonTeachingContent(levelNumber, lessonOrder);
+
+    const steps = ['goal', 'teach', 'pattern', 'examples'];
+
+    if (content?.deepDiveSections?.length) steps.push('deepdive');
+    if (content?.quiz?.length) steps.push('quiz');
+
+    steps.push('conversation', 'vocab', 'grammar', 'reading', 'speaking', 'practice', 'complete');
+
+    return steps;
+}
 
 const LESSON_TEACHING_CONTENT = {
     "1-1": {
@@ -509,6 +525,12 @@ function renderCurrentStep() {
     } else if (step === 'examples') {
         renderExamplesStep(levelNumber, lessonOrder);
         appendStepNav(panelId, { showBack: true });
+        } else if (step === 'deepdive') {
+    renderDeepDiveStep(levelNumber, lessonOrder);
+    appendStepNav(panelId, { showBack: true });
+} else if (step === 'quiz') {
+    renderMiniQuizStep(levelNumber, lessonOrder);
+    appendStepNav(panelId, { showBack: true });
     } else if (step === 'complete') {
         renderLessonCompleteStep();
     } else {
