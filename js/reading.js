@@ -57,10 +57,11 @@ const LESSON_TEACHING_CONTENT = {
         conceptBody: `
             <p><strong>ሰላም</strong> means hello, peace, or greeting.</p>
             <p>It is the easiest greeting to start with because it works for men, women, elders, and groups.</p>
-            <p>In Amharic, many greetings change depending on who you are speaking to.</p>
+            <p>In Amharic, greetings often change depending on who you are speaking to: male, female, polite/elder, or group.</p>
         `,
         resourceUrl: "https://amharicteacher.com/module/greetings",
-        resourceLabel: "Study greetings on AmharicTeacher",
+        resourceLabel: "Study the full greetings lesson on AmharicTeacher",
+
         patternTitle: "Greeting forms change by audience",
         patternBody: `
             <p>Many Amharic phrases have different forms for:</p>
@@ -71,14 +72,176 @@ const LESSON_TEACHING_CONTENT = {
                 <li>a group</li>
             </ul>
         `,
+
         examplesTitle: "How are you?",
         examples: [
-            { label: "Male", amharic: "እንዴት ነህ?", transliteration: "endaet neh", english: "How are you?"},
-            { label: "Female", amharic: "እንዴት ነሽ?", transliteration: "endaet nesh", english: "How are you?"},
-            { label: "Polite / Elder", amharic: "እንዴት ነዎት?", transliteration: "endaet newot", english: "How are you?"},
-            { label: "Group", amharic: "እንዴት ናችሁ?", transliteration: "endaet nachhu", english: "How are you?"}
+            { label: "Male", amharic: "እንዴት ነህ?", transliteration: "endaet neh", english: "How are you?" },
+            { label: "Female", amharic: "እንዴት ነሽ?", transliteration: "endaet nesh", english: "How are you?" },
+            { label: "Polite / Elder", amharic: "እንዴት ነዎት?", transliteration: "endaet newot", english: "How are you?" },
+            { label: "Group", amharic: "እንዴት ናችሁ?", transliteration: "endaet nachhu", english: "How are you?" }
         ],
-        notice: "Notice how the ending changes: ነህ, ነሽ, ነዎት, ናችሁ."
+        notice: "Notice how the ending changes: ነህ, ነሽ, ነዎት, ናችሁ.",
+
+        deepDiveSections: [
+            {
+                title: "Good morning",
+                rows: [
+                    { label: "Male", amharic: "ደህና አደርክ?", transliteration: "dehna aderk", english: "Good morning" },
+                    { label: "Female", amharic: "ደህና አደርሽ?", transliteration: "dehna adershi", english: "Good morning" },
+                    { label: "Polite / Elder", amharic: "ደህና አደሩ?", transliteration: "dehna aderoo", english: "Good morning" },
+                    { label: "Group", amharic: "ደህና አደራችሁ?", transliteration: "dehna aderachhu", english: "Good morning" }
+                ],
+                response: "Common response: ደህና እግዚአብሔር ይመስገን — I am well, thanks be to God."
+            },
+            {
+                title: "Good afternoon",
+                rows: [
+                    { label: "Male", amharic: "ደህና ዋልክ?", transliteration: "dehna walk", english: "Good afternoon" },
+                    { label: "Female", amharic: "ደህና ዋልሽ?", transliteration: "dehna walshi", english: "Good afternoon" },
+                    { label: "Polite / Elder", amharic: "ደህና ዋሉ?", transliteration: "dehna waloo", english: "Good afternoon" },
+                    { label: "Group", amharic: "ደህና ዋላችሁ?", transliteration: "dehna walachhu", english: "Good afternoon" }
+                ],
+                response: "Common response: ደህና እግዚአብሔር ይመስገን."
+            },
+            {
+                title: "Good evening",
+                rows: [
+                    { label: "Male", amharic: "ደህና አመሸህ?", transliteration: "dehna amesheh", english: "Good evening" },
+                    { label: "Female", amharic: "ደህና አመሸሽ?", transliteration: "dehna ameshesh", english: "Good evening" },
+                    { label: "Polite / Elder", amharic: "ደህና አመሹ?", transliteration: "dehna ameshu", english: "Good evening" },
+                    { label: "Group", amharic: "ደህና አመሻችሁ?", transliteration: "dehna ameshachhu", english: "Good evening" }
+                ],
+                response: "Common response: ደህና እግዚአብሔር ይመስገን."
+            },
+            {
+                title: "Good night",
+                rows: [
+                    { label: "Male", amharic: "ደህና እደር", transliteration: "dehna eder", english: "Good night" },
+                    { label: "Female", amharic: "ደህና እደሪ", transliteration: "dehna ederi", english: "Good night" },
+                    { label: "Polite / Elder", amharic: "ደህና እደሩ", transliteration: "dehna ederoo", english: "Good night" },
+                    { label: "Group", amharic: "ደህና እደሩ", transliteration: "dehna ederoo", english: "Good night" }
+                ]
+            },
+            {
+                title: "Goodbye",
+                rows: [
+                    { label: "Male", amharic: "ደህና ሁን", transliteration: "dehna hun", english: "Goodbye" },
+                    { label: "Female", amharic: "ደህና ሁኚ", transliteration: "dehna huñi", english: "Goodbye" },
+                    { label: "Polite / Group", amharic: "ደህና ሁኑ", transliteration: "dehna hunu", english: "Goodbye" },
+                    { label: "General", amharic: "ቻዎ", transliteration: "chawo", english: "Bye / Ciao" }
+                ]
+            }
+        ],
+
+        quiz: [
+            {
+                prompt: "What does ደህና አደርሽ? mean?",
+                answer: "Good morning, said to a woman."
+            },
+            {
+                prompt: "Who are you speaking to if you say እንዴት ነዎት?",
+                answer: "An elder, someone formal, or someone you are addressing politely."
+            },
+            {
+                prompt: "Which greeting would you say to a group in the afternoon?",
+                answer: "ደህና ዋላችሁ?"
+            }
+        ]
+    },
+
+    "1-2": {
+        conceptTitle: "Asking and saying names",
+        conceptBody: `
+            <p>In this lesson, you learn how to say your name and ask someone else's name.</p>
+            <p><strong>ስም</strong> means name. When you add endings, it becomes my name, your name, his name, her name, and so on.</p>
+            <p>This is one of the first places where Amharic shows how much meaning can be built into one word.</p>
+        `,
+        resourceUrl: "https://amharicteacher.com/pronouns",
+        resourceLabel: "Study pronouns and related forms",
+
+        patternTitle: "Name changes with possession",
+        patternBody: `
+            <p>In English, we usually say two words: <strong>my name</strong>.</p>
+            <p>In Amharic, the possession is attached to the word:</p>
+            <ul>
+                <li>ስሜ — my name</li>
+                <li>ስምህ — your name, to a man</li>
+                <li>ስምሽ — your name, to a woman</li>
+            </ul>
+        `,
+
+        examplesTitle: "Name forms",
+        examples: [
+            { label: "My name", amharic: "ስሜ", transliteration: "simē", english: "my name" },
+            { label: "Your name, male", amharic: "ስምህ", transliteration: "simih", english: "your name" },
+            { label: "Your name, female", amharic: "ስምሽ", transliteration: "simish", english: "your name" },
+            { label: "His name", amharic: "ስሙ", transliteration: "simu", english: "his name" },
+            { label: "Her name", amharic: "ስሟ", transliteration: "simwa", english: "her name" }
+        ],
+        notice: "Notice how ስም stays as the root, but the ending changes.",
+
+        deepDiveSections: [
+            {
+                title: "Introducing yourself",
+                rows: [
+                    { label: "Sentence", amharic: "ስሜ ሰናይት ነው።", transliteration: "simē Senait new", english: "My name is Senait." },
+                    { label: "Question to male", amharic: "ስምህ ማን ነው?", transliteration: "simih man new?", english: "What is your name?" },
+                    { label: "Question to female", amharic: "ስምሽ ማን ነው?", transliteration: "simish man new?", english: "What is your name?" }
+                ]
+            }
+        ],
+
+        quiz: [
+            {
+                prompt: "What does ስሜ mean?",
+                answer: "My name."
+            },
+            {
+                prompt: "Which form means your name when speaking to a woman?",
+                answer: "ስምሽ"
+            }
+        ]
+    },
+
+    "1-3": {
+        conceptTitle: "Personal pronouns",
+        conceptBody: `
+            <p>Pronouns tell us who is speaking or who we are talking about.</p>
+            <p>In Amharic, pronouns matter because the verb often changes to match the person.</p>
+        `,
+        patternTitle: "Pronoun + to be",
+        patternBody: `
+            <p>The word for “is/am/are” changes depending on the subject.</p>
+            <p>This is why “he is” and “she is” do not use the exact same form.</p>
+        `,
+        examplesTitle: "Pronoun pairings",
+        examples: [
+            { label: "I am", amharic: "እኔ ... ነኝ", transliteration: "ene ... neñ", english: "I am ..." },
+            { label: "You are, male", amharic: "አንተ ... ነህ", transliteration: "ante ... neh", english: "You are ..." },
+            { label: "You are, female", amharic: "አንቺ ... ነሽ", transliteration: "anchi ... nesh", english: "You are ..." },
+            { label: "He is", amharic: "እሱ ... ነው", transliteration: "issu ... new", english: "He is ..." },
+            { label: "She is", amharic: "እሷ ... ናት", transliteration: "iswa ... nat", english: "She is ..." }
+        ],
+        notice: "This is the pattern you need for identifying who someone is."
+    },
+
+    "1-4": {
+        conceptTitle: "Introducing other people",
+        conceptBody: `
+            <p>Now you can use greetings, names, pronouns, and “to be” together.</p>
+            <p>This lesson teaches you how to introduce someone else: “This is my friend...”</p>
+        `,
+        patternTitle: "This is...",
+        patternBody: `
+            <p>Use <strong>ይህ</strong> when introducing a male person or masculine subject.</p>
+            <p>Use <strong>ይህቺ</strong> when introducing a female person or feminine subject.</p>
+        `,
+        examplesTitle: "Introducing a person",
+        examples: [
+            { label: "Male friend", amharic: "ይህ ጓደኛዬ ከበደ ነው።", transliteration: "yih guadeñayē Kebede new", english: "This is my friend Kebede." },
+            { label: "Female friend", amharic: "ይህቺ ጓደኛዬ ሳራ ናት።", transliteration: "yihchi guadeñayē Sara nat", english: "This is my friend Sara." }
+        ],
+        notice: "ይህ pairs naturally with ነው. ይህቺ pairs naturally with ናት."
     }
 };
 
@@ -360,12 +523,13 @@ function renderCurrentStep() {
 }
 
 function goToNextStep() {
-    if (activeStepIndex < LESSON_STEPS.length - 1) {
+    const steps = getActiveLessonSteps();
+
+    if (activeStepIndex < steps.length - 1) {
         activeStepIndex++;
         renderCurrentStep();
     }
 }
-
 function goToPrevStep() {
     if (activeStepIndex > 0) {
         activeStepIndex--;
@@ -474,6 +638,78 @@ function renderExamplesStep(levelNumber, lessonOrder) {
                 `).join('')}
             </div>
             ${content.notice ? `<div class="lesson-notice">💡 ${content.notice}</div>` : ''}
+        </div>
+    `;
+}
+
+function renderDeepDiveStep(levelNumber, lessonOrder) {
+    const mount = document.getElementById('lessonStep_deepdive');
+    const content = getLessonTeachingContent(levelNumber, lessonOrder);
+
+    if (!content?.deepDiveSections?.length) {
+        mount.innerHTML = `
+            <div class="lesson-examples-card">
+                <div class="eyebrow">📚 More Practice</div>
+                <p>No extended lesson content has been added yet.</p>
+            </div>
+        `;
+        return;
+    }
+
+    mount.innerHTML = `
+        <div class="lesson-examples-card">
+            <div class="eyebrow">📚 More Patterns</div>
+            ${content.deepDiveSections.map(section => `
+                <div class="lesson-deep-section">
+                    <h3>${section.title}</h3>
+                    <div class="lesson-example-list">
+                        ${section.rows.map(row => `
+                            <div class="lesson-example-row">
+                                <div class="lesson-example-label">${row.label}</div>
+                                <div class="lesson-example-main">
+                                    <div class="lesson-example-amharic">${row.amharic}</div>
+                                    <div class="lesson-example-translit">${row.transliteration || ''}</div>
+                                    <div class="lesson-example-english">${row.english || ''}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    ${section.response ? `<div class="lesson-notice">💬 ${section.response}</div>` : ''}
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+function renderMiniQuizStep(levelNumber, lessonOrder) {
+    const mount = document.getElementById('lessonStep_quiz');
+    const content = getLessonTeachingContent(levelNumber, lessonOrder);
+
+    if (!content?.quiz?.length) {
+        mount.innerHTML = `
+            <div class="lesson-examples-card">
+                <div class="eyebrow">🧩 Quick Check</div>
+                <p>No quick check has been added for this lesson yet.</p>
+            </div>
+        `;
+        return;
+    }
+
+    mount.innerHTML = `
+        <div class="lesson-examples-card">
+            <div class="eyebrow">🧩 Quick Check</div>
+            <h3>Can you understand it?</h3>
+            <p class="subtitle" style="text-align:left; margin-bottom:12px;">
+                Read each prompt first. Tap to reveal the answer.
+            </p>
+            <div class="lesson-quiz-list">
+                ${content.quiz.map((q, index) => `
+                    <div class="lesson-quiz-card" onclick="this.classList.toggle('revealed')">
+                        <div class="lesson-quiz-question">${index + 1}. ${q.prompt}</div>
+                        <div class="lesson-quiz-answer">Answer: ${q.answer}</div>
+                    </div>
+                `).join('')}
+            </div>
         </div>
     `;
 }
