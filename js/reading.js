@@ -1,20 +1,33 @@
 // =============================================================================
 // MY AMHARIC PATH — reading.js
-// The flagship guided course. A chapter (reading_levels row) is a sequence
-// of LESSONS (chapter_lessons), each walked through like a real class, one
-// step at a time, in a fixed order:
-//   🎯 Today's Goal -> 💬 Conversation -> 📖 Today's Words -> 🧠 Grammar
-//   Spotlight -> 📚 Read the Conversation Again -> 🎙 Speaking -> ✍ Practice
-//   -> ✅ Lesson Complete
+// The flagship guided course. reading.js is the ENGINE ONLY — navigation,
+// rendering, progress, quizzes, lesson flow. The CURRICULUM lives entirely
+// in Supabase: the app asks "what does Lesson 3 contain?" and renders
+// whatever comes back. Adding Chapters 2-12 is a content/SQL job, not a
+// JavaScript job.
+//
+// A chapter (reading_levels row) is a sequence of LESSONS (chapter_lessons),
+// each walked through one step at a time, like a real class:
+//   🎯 Today's Goal -> [lesson_sections, however many exist] -> [Quick Check
+//   quiz, if any exists] -> 💬 Conversation -> 📖 Today's Words ->
+//   🧠 Grammar Spotlight -> 📚 Read the Conversation Again -> 🎙 Speaking ->
+//   ✍ Practice -> ✅ Lesson Complete
 // followed by a final "Chapter Challenge" lesson (a short multiple-choice
 // checkpoint quiz) once every regular lesson in the chapter is done.
 //
+// Sections and quiz questions are fully data-driven (lesson_sections /
+// lesson_quiz_blocks) — the number of steps in a lesson varies, so the step
+// container is a single reusable mount rather than one HTML panel per step
+// type. Teach/Pattern/Examples/"deep dive" all turned out to be the same
+// shape (heading + prose + optional phrase table + optional callout/link),
+// so they're one generic section renderer now, distinguished only by
+// section_type for future styling/analytics — not by separate code.
+//
 // Entry flow: Chapter List -> "🎯 Chapter Goals" or "▶️ Start Chapter" opens
-// the same Can-Do goals card (js/candostatement.js, filtered to the
-// chapter's can_do_category); Start Chapter's card continues into the
-// chapter's first not-yet-completed lesson. There's no separate lesson-list
-// screen — lessons play out linearly, one step at a time, resuming at the
-// first not-yet-completed lesson (chapter_lesson_progress).
+// a chapter-intro card (what you're about to learn, ~20 seconds) — NOT a
+// Can-Do mastery check anymore. Can-Do statements (js/candostatement.js)
+// now surface after passing the Chapter Challenge, to track mastery of
+// what was just learned, not to preview it.
 //
 // The "Read the Conversation Again" step reuses the original Reading Path
 // flow verbatim (reading_items/reading_item_progress: read -> translate ->
@@ -31,240 +44,15 @@
 // =============================================================================
 
 let readingLevelsCache = null;
-let activeReadingLevel = null;   // current chapter row: {level_number, title, can_do_category}
+let activeReadingLevel = null;   // current chapter row: {level_number, title, can_do_category, intro_summary, intro_highlights}
 let activeLessons = [];          // chapter_lessons rows for the current chapter, in order
 let activeLessonIndex = 0;
 let activeReadingItems = [];
 let activeReadingItemIndex = 0;
 
-const BASE_LESSON_STEPS = [
-    'goal',
-    'teach',
-    'pattern',
-    'examples',
-    'conversation',
-    'vocab',
-    'grammar',
-    'reading',
-    'speaking',
-    'practice',
-    'complete'
-];
-
-function getActiveLessonSteps() {
-    const lesson = activeLessons[activeLessonIndex];
-    const levelNumber = activeReadingLevel?.level_number;
-    const lessonOrder = lesson?.lesson_order;
-    const content = getLessonTeachingContent(levelNumber, lessonOrder);
-
-    const steps = ['goal', 'teach', 'pattern', 'examples'];
-
-    if (content?.deepDiveSections?.length) steps.push('deepdive');
-    if (content?.quiz?.length) steps.push('quiz');
-
-    steps.push('conversation', 'vocab', 'grammar', 'reading', 'speaking', 'practice', 'complete');
-
-    return steps;
-}
-
-const LESSON_TEACHING_CONTENT = {
-    "1-1": {
-        conceptTitle: "What is a greeting?",
-        conceptBody: `
-            <p><strong>ሰላም</strong> means hello, peace, or greeting.</p>
-            <p>It is the easiest greeting to start with because it works for men, women, elders, and groups.</p>
-            <p>In Amharic, greetings often change depending on who you are speaking to: male, female, polite/elder, or group.</p>
-        `,
-        resourceUrl: "https://amharicteacher.com/module/greetings",
-        resourceLabel: "Study the full greetings lesson on AmharicTeacher",
-
-        patternTitle: "Greeting forms change by audience",
-        patternBody: `
-            <p>Many Amharic phrases have different forms for:</p>
-            <ul>
-                <li>one man</li>
-                <li>one woman</li>
-                <li>an elder or polite/formal person</li>
-                <li>a group</li>
-            </ul>
-        `,
-
-        examplesTitle: "How are you?",
-        examples: [
-            { label: "Male", amharic: "እንዴት ነህ?", transliteration: "endaet neh", english: "How are you?" },
-            { label: "Female", amharic: "እንዴት ነሽ?", transliteration: "endaet nesh", english: "How are you?" },
-            { label: "Polite / Elder", amharic: "እንዴት ነዎት?", transliteration: "endaet newot", english: "How are you?" },
-            { label: "Group", amharic: "እንዴት ናችሁ?", transliteration: "endaet nachhu", english: "How are you?" }
-        ],
-        notice: "Notice how the ending changes: ነህ, ነሽ, ነዎት, ናችሁ.",
-
-        deepDiveSections: [
-            {
-                title: "Good morning",
-                rows: [
-                    { label: "Male", amharic: "ደህና አደርክ?", transliteration: "dehna aderk", english: "Good morning" },
-                    { label: "Female", amharic: "ደህና አደርሽ?", transliteration: "dehna adershi", english: "Good morning" },
-                    { label: "Polite / Elder", amharic: "ደህና አደሩ?", transliteration: "dehna aderoo", english: "Good morning" },
-                    { label: "Group", amharic: "ደህና አደራችሁ?", transliteration: "dehna aderachhu", english: "Good morning" }
-                ],
-                response: "Common response: ደህና እግዚአብሔር ይመስገን — I am well, thanks be to God."
-            },
-            {
-                title: "Good afternoon",
-                rows: [
-                    { label: "Male", amharic: "ደህና ዋልክ?", transliteration: "dehna walk", english: "Good afternoon" },
-                    { label: "Female", amharic: "ደህና ዋልሽ?", transliteration: "dehna walshi", english: "Good afternoon" },
-                    { label: "Polite / Elder", amharic: "ደህና ዋሉ?", transliteration: "dehna waloo", english: "Good afternoon" },
-                    { label: "Group", amharic: "ደህና ዋላችሁ?", transliteration: "dehna walachhu", english: "Good afternoon" }
-                ],
-                response: "Common response: ደህና እግዚአብሔር ይመስገን."
-            },
-            {
-                title: "Good evening",
-                rows: [
-                    { label: "Male", amharic: "ደህና አመሸህ?", transliteration: "dehna amesheh", english: "Good evening" },
-                    { label: "Female", amharic: "ደህና አመሸሽ?", transliteration: "dehna ameshesh", english: "Good evening" },
-                    { label: "Polite / Elder", amharic: "ደህና አመሹ?", transliteration: "dehna ameshu", english: "Good evening" },
-                    { label: "Group", amharic: "ደህና አመሻችሁ?", transliteration: "dehna ameshachhu", english: "Good evening" }
-                ],
-                response: "Common response: ደህና እግዚአብሔር ይመስገን."
-            },
-            {
-                title: "Good night",
-                rows: [
-                    { label: "Male", amharic: "ደህና እደር", transliteration: "dehna eder", english: "Good night" },
-                    { label: "Female", amharic: "ደህና እደሪ", transliteration: "dehna ederi", english: "Good night" },
-                    { label: "Polite / Elder", amharic: "ደህና እደሩ", transliteration: "dehna ederoo", english: "Good night" },
-                    { label: "Group", amharic: "ደህና እደሩ", transliteration: "dehna ederoo", english: "Good night" }
-                ]
-            },
-            {
-                title: "Goodbye",
-                rows: [
-                    { label: "Male", amharic: "ደህና ሁን", transliteration: "dehna hun", english: "Goodbye" },
-                    { label: "Female", amharic: "ደህና ሁኚ", transliteration: "dehna huñi", english: "Goodbye" },
-                    { label: "Polite / Group", amharic: "ደህና ሁኑ", transliteration: "dehna hunu", english: "Goodbye" },
-                    { label: "General", amharic: "ቻዎ", transliteration: "chawo", english: "Bye / Ciao" }
-                ]
-            }
-        ],
-
-        quiz: [
-            {
-                prompt: "What does ደህና አደርሽ? mean?",
-                answer: "Good morning, said to a woman."
-            },
-            {
-                prompt: "Who are you speaking to if you say እንዴት ነዎት?",
-                answer: "An elder, someone formal, or someone you are addressing politely."
-            },
-            {
-                prompt: "Which greeting would you say to a group in the afternoon?",
-                answer: "ደህና ዋላችሁ?"
-            }
-        ]
-    },
-
-    "1-2": {
-        conceptTitle: "Asking and saying names",
-        conceptBody: `
-            <p>In this lesson, you learn how to say your name and ask someone else's name.</p>
-            <p><strong>ስም</strong> means name. When you add endings, it becomes my name, your name, his name, her name, and so on.</p>
-            <p>This is one of the first places where Amharic shows how much meaning can be built into one word.</p>
-        `,
-        resourceUrl: "https://amharicteacher.com/pronouns",
-        resourceLabel: "Study pronouns and related forms",
-
-        patternTitle: "Name changes with possession",
-        patternBody: `
-            <p>In English, we usually say two words: <strong>my name</strong>.</p>
-            <p>In Amharic, the possession is attached to the word:</p>
-            <ul>
-                <li>ስሜ — my name</li>
-                <li>ስምህ — your name, to a man</li>
-                <li>ስምሽ — your name, to a woman</li>
-            </ul>
-        `,
-
-        examplesTitle: "Name forms",
-        examples: [
-            { label: "My name", amharic: "ስሜ", transliteration: "simē", english: "my name" },
-            { label: "Your name, male", amharic: "ስምህ", transliteration: "simih", english: "your name" },
-            { label: "Your name, female", amharic: "ስምሽ", transliteration: "simish", english: "your name" },
-            { label: "His name", amharic: "ስሙ", transliteration: "simu", english: "his name" },
-            { label: "Her name", amharic: "ስሟ", transliteration: "simwa", english: "her name" }
-        ],
-        notice: "Notice how ስም stays as the root, but the ending changes.",
-
-        deepDiveSections: [
-            {
-                title: "Introducing yourself",
-                rows: [
-                    { label: "Sentence", amharic: "ስሜ ሰናይት ነው።", transliteration: "simē Senait new", english: "My name is Senait." },
-                    { label: "Question to male", amharic: "ስምህ ማን ነው?", transliteration: "simih man new?", english: "What is your name?" },
-                    { label: "Question to female", amharic: "ስምሽ ማን ነው?", transliteration: "simish man new?", english: "What is your name?" }
-                ]
-            }
-        ],
-
-        quiz: [
-            {
-                prompt: "What does ስሜ mean?",
-                answer: "My name."
-            },
-            {
-                prompt: "Which form means your name when speaking to a woman?",
-                answer: "ስምሽ"
-            }
-        ]
-    },
-
-    "1-3": {
-        conceptTitle: "Personal pronouns",
-        conceptBody: `
-            <p>Pronouns tell us who is speaking or who we are talking about.</p>
-            <p>In Amharic, pronouns matter because the verb often changes to match the person.</p>
-        `,
-        patternTitle: "Pronoun + to be",
-        patternBody: `
-            <p>The word for “is/am/are” changes depending on the subject.</p>
-            <p>This is why “he is” and “she is” do not use the exact same form.</p>
-        `,
-        examplesTitle: "Pronoun pairings",
-        examples: [
-            { label: "I am", amharic: "እኔ ... ነኝ", transliteration: "ene ... neñ", english: "I am ..." },
-            { label: "You are, male", amharic: "አንተ ... ነህ", transliteration: "ante ... neh", english: "You are ..." },
-            { label: "You are, female", amharic: "አንቺ ... ነሽ", transliteration: "anchi ... nesh", english: "You are ..." },
-            { label: "He is", amharic: "እሱ ... ነው", transliteration: "issu ... new", english: "He is ..." },
-            { label: "She is", amharic: "እሷ ... ናት", transliteration: "iswa ... nat", english: "She is ..." }
-        ],
-        notice: "This is the pattern you need for identifying who someone is."
-    },
-
-    "1-4": {
-        conceptTitle: "Introducing other people",
-        conceptBody: `
-            <p>Now you can use greetings, names, pronouns, and “to be” together.</p>
-            <p>This lesson teaches you how to introduce someone else: “This is my friend...”</p>
-        `,
-        patternTitle: "This is...",
-        patternBody: `
-            <p>Use <strong>ይህ</strong> when introducing a male person or masculine subject.</p>
-            <p>Use <strong>ይህቺ</strong> when introducing a female person or feminine subject.</p>
-        `,
-        examplesTitle: "Introducing a person",
-        examples: [
-            { label: "Male friend", amharic: "ይህ ጓደኛዬ ከበደ ነው።", transliteration: "yih guadeñayē Kebede new", english: "This is my friend Kebede." },
-            { label: "Female friend", amharic: "ይህቺ ጓደኛዬ ሳራ ናት።", transliteration: "yihchi guadeñayē Sara nat", english: "This is my friend Sara." }
-        ],
-        notice: "ይህ pairs naturally with ነው. ይህቺ pairs naturally with ናት."
-    }
-};
-
-function getLessonTeachingContent(levelNumber, lessonOrder) {
-    return LESSON_TEACHING_CONTENT[`${levelNumber}-${lessonOrder}`] || null;
-} 
-
+let activeLessonSections = [];   // lesson_sections rows for the current lesson, in order
+let activeLessonQuiz = [];       // lesson_quiz_blocks rows for the current lesson
+let activeStepList = [];         // computed once per lesson entry: ['goal', 'section-0', 'section-1', 'quiz'?, 'conversation', ...]
 let activeStepIndex = 0;
 
 // -----------------------------------------------------------------------------
@@ -293,7 +81,7 @@ async function fetchReadingLevels() {
 
     const { data, error } = await _supabase
         .from('reading_levels')
-        .select('level_number, title, can_do_category')
+        .select('level_number, title, can_do_category, intro_summary, intro_highlights')
         .order('level_number', { ascending: true });
 
     if (error) {
@@ -309,7 +97,7 @@ async function fetchReadingLevels() {
 async function fetchAllLessons() {
     const { data, error } = await _supabase
         .from('chapter_lessons')
-        .select('id, level_number, lesson_order, title, is_challenge, learning_objective, estimated_minutes')
+        .select('id, level_number, lesson_order, title, is_challenge, learning_objective, estimated_minutes, difficulty, xp_value, lesson_focus')
         .order('level_number', { ascending: true })
         .order('lesson_order', { ascending: true });
 
@@ -384,11 +172,24 @@ async function renderReadingLevelsList() {
 }
 
 // -----------------------------------------------------------------------------
-// Chapter Goals card — shared by "🎯 Chapter Goals" and "▶️ Start Chapter"
+// Chapter intro card — shared by "🎯 Chapter Goals" and "▶️ Start Chapter".
+// Answers "what am I about to learn?" in ~20 seconds. Can-Do mastery
+// tracking happens later, after the Chapter Challenge is passed (see
+// submitCheckpoint below) — not here.
 // -----------------------------------------------------------------------------
 
 function openChapterGoals(level, mode) {
-    document.getElementById('chapterGoalsTitle').innerText = `🎯 ${level.title} — Goals`;
+    document.getElementById('chapterGoalsTitle').innerText = `📘 ${level.title}`;
+
+    const summaryEl = document.getElementById('chapterGoalsSummary');
+    summaryEl.innerHTML = `
+        <p class="chapter-goals-intro">${level.intro_summary || 'Get ready to learn something new!'}</p>
+        ${level.intro_highlights?.length ? `
+            <ul class="chapter-goals-highlights">
+                ${level.intro_highlights.map(h => `<li>${h}</li>`).join('')}
+            </ul>
+        ` : ''}
+    `;
 
     const ctaBtn = document.getElementById('chapterGoalsCtaBtn');
     if (mode === 'start') {
@@ -400,7 +201,6 @@ function openChapterGoals(level, mode) {
     }
 
     document.getElementById('chapterGoalsOverlay').style.display = 'flex';
-    renderCanDoRows('chapterGoalsMount', level.can_do_category || null);
 }
 
 function closeChapterGoals() {
@@ -419,7 +219,7 @@ async function enterChapter(levelNumber) {
 
     const { data: lessons, error } = await _supabase
         .from('chapter_lessons')
-        .select('id, level_number, lesson_order, title, is_challenge, learning_objective, estimated_minutes')
+        .select('id, level_number, lesson_order, title, is_challenge, learning_objective, estimated_minutes, difficulty, xp_value, lesson_focus')
         .eq('level_number', levelNumber)
         .order('lesson_order', { ascending: true });
 
@@ -445,10 +245,10 @@ async function enterChapter(levelNumber) {
     document.getElementById("readingLevelsScreen").style.display = "none";
     document.getElementById("readingLevelDetailScreen").style.display = "block";
 
-    openCurrentLesson();
+    await openCurrentLesson();
 }
 
-function openCurrentLesson() {
+async function openCurrentLesson() {
     const lesson = activeLessons[activeLessonIndex];
 
     document.getElementById("readingLevelDetailTitle").innerText =
@@ -458,12 +258,28 @@ function openCurrentLesson() {
         document.getElementById("lessonNormalView").style.display = "none";
         document.getElementById("lessonChallengeView").style.display = "block";
         renderCheckpointSection(activeReadingLevel.level_number);
-    } else {
-        document.getElementById("lessonChallengeView").style.display = "none";
-        document.getElementById("lessonNormalView").style.display = "block";
-        activeStepIndex = 0;
-        renderCurrentStep();
+        return;
     }
+
+    document.getElementById("lessonChallengeView").style.display = "none";
+    document.getElementById("lessonNormalView").style.display = "block";
+    document.getElementById("lessonStepProgress").innerText = "Loading...";
+    document.getElementById("lessonStepMount").innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
+
+    const [sections, quiz] = await Promise.all([
+        fetchLessonSections(activeReadingLevel.level_number, lesson.lesson_order),
+        fetchLessonQuiz(activeReadingLevel.level_number, lesson.lesson_order)
+    ]);
+
+    activeLessonSections = sections;
+    activeLessonQuiz = quiz;
+
+    activeStepList = ['goal', ...sections.map((_, i) => `section-${i}`)];
+    if (quiz.length) activeStepList.push('quiz');
+    activeStepList.push('conversation', 'vocab', 'grammar', 'reading', 'speaking', 'practice', 'complete');
+
+    activeStepIndex = 0;
+    renderCurrentStep();
 }
 
 async function goToNextLesson() {
@@ -477,11 +293,12 @@ async function goToNextLesson() {
 
     if (activeLessonIndex < activeLessons.length - 1) {
         activeLessonIndex++;
-        openCurrentLesson();
+        await openCurrentLesson();
     } else {
         exitReadingLevelDetail();
     }
 }
+
 function goToPrevLesson() {
     if (activeLessonIndex > 0) {
         activeLessonIndex--;
@@ -491,10 +308,8 @@ function goToPrevLesson() {
 
 function restartCurrentChapter() {
     activeLessonIndex = 0;
-    activeStepIndex = 0;
     openCurrentLesson();
 }
-
 
 function exitReadingLevelDetail() {
     document.getElementById("readingLevelDetailScreen").style.display = "none";
@@ -503,68 +318,105 @@ function exitReadingLevelDetail() {
 }
 
 // -----------------------------------------------------------------------------
+// Lesson sections and quiz — data-driven curriculum content
+// -----------------------------------------------------------------------------
+
+async function fetchLessonSections(levelNumber, lessonOrder) {
+    const { data, error } = await _supabase
+        .from('lesson_sections')
+        .select('id, section_order, section_type, icon, heading, body_html, rows, notice, resource_url, resource_label')
+        .eq('level_number', levelNumber)
+        .eq('lesson_order', lessonOrder)
+        .order('section_order', { ascending: true });
+
+    if (error) {
+        console.error("Failed to load lesson sections:", error);
+        return [];
+    }
+    return data || [];
+}
+
+async function fetchLessonQuiz(levelNumber, lessonOrder) {
+    const { data, error } = await _supabase
+        .from('lesson_quiz_blocks')
+        .select('id, prompt, answer')
+        .eq('level_number', levelNumber)
+        .eq('lesson_order', lessonOrder)
+        .order('block_order', { ascending: true });
+
+    if (error) {
+        console.error("Failed to load lesson quiz:", error);
+        return [];
+    }
+    return data || [];
+}
+
+const SECTION_TYPE_LABELS = {
+    teach: 'Learn',
+    pattern: 'Pattern',
+    examples: 'Examples',
+    culture: 'Culture',
+    story: 'Story',
+    video: 'Video',
+    verse: 'Verse',
+    historical_note: 'History'
+};
+
+function sectionTypeLabel(type) {
+    return SECTION_TYPE_LABELS[type] || 'Learn';
+}
+
+// -----------------------------------------------------------------------------
 // Lesson steps — walked through in a fixed order, one at a time, like a real
-// class: Today's Goal -> Conversation -> Today's Words -> Grammar Spotlight
-// -> Read the Conversation Again -> Speaking -> Practice -> Lesson Complete.
-// Each step appends its own Continue/Back nav below its content — sections
-// aren't gated on completion (consistent with the rest of the app), Continue
-// just always moves forward.
+// class. Everything before "conversation" (Today's Goal, however many
+// lesson_sections exist, the quiz if one exists) is fully data-driven — the
+// step COUNT varies per lesson, so there's one reusable mount instead of one
+// HTML panel per step type. Each step appends its own Continue/Back nav
+// below its content — sections aren't gated on completion (consistent with
+// the rest of the app), Continue just always moves forward.
 // -----------------------------------------------------------------------------
 
 function renderCurrentStep() {
+    const step = activeStepList[activeStepIndex];
+    const mount = document.getElementById('lessonStepMount');
 
-    const steps = getActiveLessonSteps();
-    const step = steps[activeStepIndex];
-
-    BASE_LESSON_STEPS.concat(['deepdive', 'quiz']).forEach(s => {
-        const panel = document.getElementById(`lessonStep_${s}`);
-        if (panel) panel.style.display = (s === step) ? 'block' : 'none';
-    });
+    document.getElementById('lessonStepProgress').innerText =
+        `Step ${activeStepIndex + 1} of ${activeStepList.length}`;
 
     const lesson = activeLessons[activeLessonIndex];
     const levelNumber = activeReadingLevel.level_number;
     const lessonOrder = lesson.lesson_order;
-    const panelId = `lessonStep_${step}`;
 
     if (step === 'goal') {
-        renderGoalStep(lesson);
-        appendStepNav(panelId, { showBack: false, continueLabel: 'Start Lesson →' });
-    } else if (step === 'teach') {
-        renderTeachStep(levelNumber, lessonOrder);
-        appendStepNav(panelId, { showBack: true });
-    } else if (step === 'pattern') {
-        renderPatternStep(levelNumber, lessonOrder);
-        appendStepNav(panelId, { showBack: true });
-    } else if (step === 'examples') {
-        renderExamplesStep(levelNumber, lessonOrder);
-        appendStepNav(panelId, { showBack: true });
-        } else if (step === 'deepdive') {
-    renderDeepDiveStep(levelNumber, lessonOrder);
-    appendStepNav(panelId, { showBack: true });
-} else if (step === 'quiz') {
-    renderMiniQuizStep(levelNumber, lessonOrder);
-    appendStepNav(panelId, { showBack: true });
+        renderGoalStep(mount, lesson);
+        appendStepNav(mount, { showBack: false, continueLabel: 'Start Lesson →' });
+    } else if (step.startsWith('section-')) {
+        const section = activeLessonSections[Number(step.split('-')[1])];
+        renderSectionStep(mount, section);
+        appendStepNav(mount, { showBack: true });
+    } else if (step === 'quiz') {
+        renderQuizStep(mount, activeLessonQuiz);
+        appendStepNav(mount, { showBack: true });
     } else if (step === 'complete') {
-        renderLessonCompleteStep();
+        renderLessonCompleteStep(mount);
     } else {
-        appendStepNav(panelId, { showBack: true });
-        if (step === 'conversation') renderConversationSection(levelNumber, lessonOrder);
-        else if (step === 'vocab') renderVocabSection(levelNumber, lessonOrder);
-        else if (step === 'grammar') renderConjugationSection(levelNumber, lessonOrder);
-        else if (step === 'reading') renderLessonReadingSection(levelNumber, lessonOrder);
-        else if (step === 'speaking') renderSpeakingSection(levelNumber, lessonOrder);
-        else if (step === 'practice') renderPracticeSection(levelNumber, lessonOrder);
+        appendStepNav(mount, { showBack: true });
+        if (step === 'conversation') renderConversationSection(mount, levelNumber, lessonOrder);
+        else if (step === 'vocab') renderVocabSection(mount, levelNumber, lessonOrder);
+        else if (step === 'grammar') renderConjugationSection(mount, levelNumber, lessonOrder);
+        else if (step === 'reading') renderLessonReadingSection(mount, levelNumber, lessonOrder);
+        else if (step === 'speaking') renderSpeakingSection(mount, levelNumber, lessonOrder);
+        else if (step === 'practice') renderPracticeSection(mount, levelNumber, lessonOrder);
     }
 }
 
 function goToNextStep() {
-    const steps = getActiveLessonSteps();
-
-    if (activeStepIndex < steps.length - 1) {
+    if (activeStepIndex < activeStepList.length - 1) {
         activeStepIndex++;
         renderCurrentStep();
     }
 }
+
 function goToPrevStep() {
     if (activeStepIndex > 0) {
         activeStepIndex--;
@@ -572,9 +424,8 @@ function goToPrevStep() {
     }
 }
 
-function appendStepNav(panelId, { showBack = true, continueLabel = 'Continue →' } = {}) {
-    const panel = document.getElementById(panelId);
-    const existingNav = panel.querySelector('.lesson-step-nav');
+function appendStepNav(mount, { showBack = true, continueLabel = 'Continue →' } = {}) {
+    const existingNav = mount.querySelector('.lesson-step-nav');
     if (existingNav) existingNav.remove();
 
     const nav = document.createElement('div');
@@ -586,11 +437,10 @@ function appendStepNav(panelId, { showBack = true, continueLabel = 'Continue →
     nav.querySelector('.lesson-step-continue').onclick = goToNextStep;
     const backBtn = nav.querySelector('.lesson-step-back');
     if (backBtn) backBtn.onclick = goToPrevStep;
-    panel.appendChild(nav);
+    mount.appendChild(nav);
 }
 
-function renderGoalStep(lesson) {
-    const mount = document.getElementById('lessonStep_goal');
+function renderGoalStep(mount, lesson) {
     mount.innerHTML = `
         <div class="lesson-goal-card">
             <div class="eyebrow">🎯 Today's Goal</div>
@@ -600,129 +450,48 @@ function renderGoalStep(lesson) {
     `;
 }
 
-function renderTeachStep(levelNumber, lessonOrder) {
-    const mount = document.getElementById('lessonStep_teach');
-    const content = getLessonTeachingContent(levelNumber, lessonOrder);
-
-    if (!content) {
-        mount.innerHTML = `
-            <div class="lesson-teach-card">
-                <div class="eyebrow">📘 Learn</div>
-                <h3>Teacher Note</h3>
-                <p>This lesson introduces a new Amharic skill. Read the examples carefully, then practice using them.</p>
-            </div>
-        `;
-        return;
-    }
-
-    mount.innerHTML = `
-        <div class="lesson-teach-card">
-            <div class="eyebrow">📘 Learn</div>
-            <h3>${content.conceptTitle}</h3>
-            ${content.conceptBody}
-            ${content.resourceUrl ? `
-                <a class="lesson-resource-link" href="${content.resourceUrl}" target="_blank" rel="noopener">
-                    🔗 ${content.resourceLabel || 'Open resource'}
-                </a>
-            ` : ''}
-        </div>
-    `;
-}
-
-function renderPatternStep(levelNumber, lessonOrder) {
-    const mount = document.getElementById('lessonStep_pattern');
-    const content = getLessonTeachingContent(levelNumber, lessonOrder);
-
-    mount.innerHTML = `
-        <div class="lesson-pattern-card">
-            <div class="eyebrow">🧠 Pattern</div>
-            <h3>${content?.patternTitle || 'Notice the pattern'}</h3>
-            ${content?.patternBody || '<p>Look for how the Amharic words change depending on who is speaking or being spoken to.</p>'}
-        </div>
-    `;
-}
-
-function renderExamplesStep(levelNumber, lessonOrder) {
-    const mount = document.getElementById('lessonStep_examples');
-    const content = getLessonTeachingContent(levelNumber, lessonOrder);
-
-    if (!content?.examples?.length) {
-        mount.innerHTML = `
-            <div class="lesson-examples-card">
-                <div class="eyebrow">📌 Examples</div>
-                <p>No example table has been added for this lesson yet.</p>
-            </div>
-        `;
-        return;
-    }
-
-    mount.innerHTML = `
-        <div class="lesson-examples-card">
-            <div class="eyebrow">📌 Examples</div>
-            <h3>${content.examplesTitle || 'Examples'}</h3>
-            <div class="lesson-example-list">
-                ${content.examples.map(ex => `
-                    <div class="lesson-example-row">
-                        <div class="lesson-example-label">${ex.label}</div>
-                        <div class="lesson-example-main">
-                            <div class="lesson-example-amharic">${ex.amharic}</div>
-                            <div class="lesson-example-translit">${ex.transliteration || ''}</div>
-                            <div class="lesson-example-english">${ex.english || ''}</div>
-                        </div>
+function renderExampleRows(rows) {
+    return `
+        <div class="lesson-example-list">
+            ${rows.map(row => `
+                <div class="lesson-example-row">
+                    <div class="lesson-example-label">${row.label}</div>
+                    <div class="lesson-example-main">
+                        <div class="lesson-example-amharic">${row.amharic}</div>
+                        <div class="lesson-example-translit">${row.transliteration || ''}</div>
+                        <div class="lesson-example-english">${row.english || ''}</div>
                     </div>
-                `).join('')}
-            </div>
-            ${content.notice ? `<div class="lesson-notice">💡 ${content.notice}</div>` : ''}
-        </div>
-    `;
-}
-
-function renderDeepDiveStep(levelNumber, lessonOrder) {
-    const mount = document.getElementById('lessonStep_deepdive');
-    const content = getLessonTeachingContent(levelNumber, lessonOrder);
-
-    if (!content?.deepDiveSections?.length) {
-        mount.innerHTML = `
-            <div class="lesson-examples-card">
-                <div class="eyebrow">📚 More Practice</div>
-                <p>No extended lesson content has been added yet.</p>
-            </div>
-        `;
-        return;
-    }
-
-    mount.innerHTML = `
-        <div class="lesson-examples-card">
-            <div class="eyebrow">📚 More Patterns</div>
-            ${content.deepDiveSections.map(section => `
-                <div class="lesson-deep-section">
-                    <h3>${section.title}</h3>
-                    <div class="lesson-example-list">
-                        ${section.rows.map(row => `
-                            <div class="lesson-example-row">
-                                <div class="lesson-example-label">${row.label}</div>
-                                <div class="lesson-example-main">
-                                    <div class="lesson-example-amharic">${row.amharic}</div>
-                                    <div class="lesson-example-translit">${row.transliteration || ''}</div>
-                                    <div class="lesson-example-english">${row.english || ''}</div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                    ${section.response ? `<div class="lesson-notice">💬 ${section.response}</div>` : ''}
                 </div>
             `).join('')}
         </div>
     `;
 }
 
-function renderMiniQuizStep(levelNumber, lessonOrder) {
-    const mount = document.getElementById('lessonStep_quiz');
-    const content = getLessonTeachingContent(levelNumber, lessonOrder);
+// One generic renderer for every "teaching" section type (teach, pattern,
+// examples, culture, story, ...) — they're all the same shape: a heading,
+// some prose, an optional phrase table, an optional callout, an optional
+// external link. New section types are a content decision, not a code one.
+function renderSectionStep(mount, section) {
+    mount.innerHTML = `
+        <div class="lesson-section-card">
+            <div class="eyebrow">${section.icon || '📘'} ${sectionTypeLabel(section.section_type)}</div>
+            <h3>${section.heading}</h3>
+            ${section.body_html || ''}
+            ${section.rows?.length ? renderExampleRows(section.rows) : ''}
+            ${section.notice ? `<div class="lesson-notice">💡 ${section.notice}</div>` : ''}
+            ${section.resource_url ? `
+                <a class="lesson-resource-link" href="${section.resource_url}" target="_blank" rel="noopener">
+                    🔗 ${section.resource_label || 'Open resource'}
+                </a>
+            ` : ''}
+        </div>
+    `;
+}
 
-    if (!content?.quiz?.length) {
+function renderQuizStep(mount, quiz) {
+    if (!quiz.length) {
         mount.innerHTML = `
-            <div class="lesson-examples-card">
+            <div class="lesson-section-card">
                 <div class="eyebrow">🧩 Quick Check</div>
                 <p>No quick check has been added for this lesson yet.</p>
             </div>
@@ -731,14 +500,14 @@ function renderMiniQuizStep(levelNumber, lessonOrder) {
     }
 
     mount.innerHTML = `
-        <div class="lesson-examples-card">
+        <div class="lesson-section-card">
             <div class="eyebrow">🧩 Quick Check</div>
             <h3>Can you understand it?</h3>
             <p class="subtitle" style="text-align:left; margin-bottom:12px;">
                 Read each prompt first. Tap to reveal the answer.
             </p>
             <div class="lesson-quiz-list">
-                ${content.quiz.map((q, index) => `
+                ${quiz.map((q, index) => `
                     <div class="lesson-quiz-card" onclick="this.classList.toggle('revealed')">
                         <div class="lesson-quiz-question">${index + 1}. ${q.prompt}</div>
                         <div class="lesson-quiz-answer">Answer: ${q.answer}</div>
@@ -748,8 +517,8 @@ function renderMiniQuizStep(levelNumber, lessonOrder) {
         </div>
     `;
 }
-function renderLessonCompleteStep() {
-    const mount = document.getElementById('lessonStep_complete');
+
+function renderLessonCompleteStep(mount) {
     mount.innerHTML = `
         <div style="text-align:center; padding:24px 0;">
             <p style="font-size:48px;">✅</p>
@@ -765,9 +534,8 @@ function renderLessonCompleteStep() {
 // Conversation step — a short dialogue (listen first), marked read when done
 // -----------------------------------------------------------------------------
 
-async function renderConversationSection(levelNumber, lessonOrder) {
-    const mount = document.getElementById("lessonConversationMount");
-    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading conversation...</p>`;
+async function renderConversationSection(mount, levelNumber, lessonOrder) {
+    mount.innerHTML = `<div class="eyebrow">💬 Conversation</div><p style="color:#94a3b8; font-size:13px;">Loading conversation...</p>`;
 
     const { data: lines, error } = await _supabase
         .from('lesson_conversations')
@@ -777,7 +545,7 @@ async function renderConversationSection(levelNumber, lessonOrder) {
         .order('item_order', { ascending: true });
 
     if (error || !lines || lines.length === 0) {
-        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No conversation added for this lesson yet.</p>`;
+        mount.innerHTML = `<div class="eyebrow">💬 Conversation</div><p style="color:#94a3b8; font-size:13px;">No conversation added for this lesson yet.</p>`;
         return;
     }
 
@@ -792,6 +560,7 @@ async function renderConversationSection(levelNumber, lessonOrder) {
     const hasRead = !!progress?.has_read;
 
     mount.innerHTML = `
+        <div class="eyebrow">💬 Conversation</div>
         <div class="conversation-lines">
             ${lines.map(line => `
                 <div class="conversation-line">
@@ -875,19 +644,21 @@ async function saveVocabKnown(vocabId, isKnown) {
     }, { onConflict: 'student_id,vocab_id' });
 }
 
-async function renderVocabSection(levelNumber, lessonOrder) {
-    const mount = document.getElementById("lessonVocabMount");
-    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading vocabulary...</p>`;
+async function renderVocabSection(mount, levelNumber, lessonOrder) {
+    mount.innerHTML = `<div class="eyebrow">📖 Today's Words</div><p style="color:#94a3b8; font-size:13px;">Loading vocabulary...</p>`;
 
     const words = await fetchChapterVocab(levelNumber, lessonOrder);
     if (words.length === 0) {
-        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No vocabulary added for this lesson yet.</p>`;
+        mount.innerHTML = `<div class="eyebrow">📖 Today's Words</div><p style="color:#94a3b8; font-size:13px;">No vocabulary added for this lesson yet.</p>`;
         return;
     }
 
     const knownById = await fetchMyVocabProgress(words.map(w => w.id));
 
-    mount.innerHTML = `<p class="subtitle" style="text-align:left; margin-bottom:12px;">Tap a word to reveal its meaning. Mark it known once you've got it down.</p>`;
+    mount.innerHTML = `
+        <div class="eyebrow">📖 Today's Words</div>
+        <p class="subtitle" style="text-align:left; margin-bottom:12px;">Tap a word to reveal its meaning. Mark it known once you've got it down.</p>
+    `;
 
     words.forEach(word => {
         const isKnown = !!knownById[word.id];
@@ -973,19 +744,18 @@ async function fetchMyConjugationProgress(conjugationIds) {
     return byId;
 }
 
-async function renderConjugationSection(levelNumber, lessonOrder) {
-    const mount = document.getElementById("lessonGrammarMount");
-    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading grammar...</p>`;
+async function renderConjugationSection(mount, levelNumber, lessonOrder) {
+    mount.innerHTML = `<div class="eyebrow">🧠 Grammar Spotlight</div><p style="color:#94a3b8; font-size:13px;">Loading grammar...</p>`;
 
     const verbs = await fetchChapterConjugations(levelNumber, lessonOrder);
     if (verbs.length === 0) {
-        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No grammar added for this lesson yet.</p>`;
+        mount.innerHTML = `<div class="eyebrow">🧠 Grammar Spotlight</div><p style="color:#94a3b8; font-size:13px;">No grammar added for this lesson yet.</p>`;
         return;
     }
 
     const practicedById = await fetchMyConjugationProgress(verbs.map(v => v.id));
 
-    mount.innerHTML = "";
+    mount.innerHTML = `<div class="eyebrow">🧠 Grammar Spotlight</div>`;
 
     verbs.forEach(verb => {
         const isPracticed = !!practicedById[verb.id];
@@ -1036,9 +806,8 @@ async function markConjugationPracticed(conjugationId, card) {
 // instead of a whole chapter.
 // -----------------------------------------------------------------------------
 
-async function renderLessonReadingSection(levelNumber, lessonOrder) {
-    const mount = document.getElementById("lessonReadingMount");
-    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
+async function renderLessonReadingSection(mount, levelNumber, lessonOrder) {
+    mount.innerHTML = `<div class="eyebrow">📚 Read the Conversation Again</div><p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
 
     const { data: items, error } = await _supabase
         .from('reading_items')
@@ -1048,7 +817,7 @@ async function renderLessonReadingSection(levelNumber, lessonOrder) {
         .order('item_order', { ascending: true });
 
     if (error || !items || items.length === 0) {
-        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No reading passages added for this lesson yet.</p>`;
+        mount.innerHTML = `<div class="eyebrow">📚 Read the Conversation Again</div><p style="color:#94a3b8; font-size:13px;">No reading passages added for this lesson yet.</p>`;
         return;
     }
 
@@ -1070,7 +839,7 @@ async function renderLessonReadingSection(levelNumber, lessonOrder) {
     if (resumeIndex === -1) resumeIndex = items.length - 1; // all done — show the last item
     activeReadingItemIndex = resumeIndex;
 
-    mount.innerHTML = `<div id="readingStepContent"></div>`;
+    mount.innerHTML = `<div class="eyebrow">📚 Read the Conversation Again</div><div id="readingStepContent"></div>`;
     renderCurrentReadingItem(progressByItemId);
 }
 
@@ -1222,9 +991,8 @@ function checkReadingTranslation(item, progress, progressByItemId) {
 // self-reports having practiced, same self-assessment pattern as Can-Do)
 // -----------------------------------------------------------------------------
 
-async function renderSpeakingSection(levelNumber, lessonOrder) {
-    const mount = document.getElementById("lessonSpeakingMount");
-    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading speaking prompts...</p>`;
+async function renderSpeakingSection(mount, levelNumber, lessonOrder) {
+    mount.innerHTML = `<div class="eyebrow">🎙 Speaking</div><p style="color:#94a3b8; font-size:13px;">Loading speaking prompts...</p>`;
 
     const { data: prompts, error } = await _supabase
         .from('lesson_speaking')
@@ -1234,7 +1002,7 @@ async function renderSpeakingSection(levelNumber, lessonOrder) {
         .order('item_order', { ascending: true });
 
     if (error || !prompts || prompts.length === 0) {
-        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No speaking prompts added for this lesson yet.</p>`;
+        mount.innerHTML = `<div class="eyebrow">🎙 Speaking</div><p style="color:#94a3b8; font-size:13px;">No speaking prompts added for this lesson yet.</p>`;
         return;
     }
 
@@ -1246,7 +1014,7 @@ async function renderSpeakingSection(levelNumber, lessonOrder) {
 
     const practicedIds = new Set((progressRows || []).map(r => r.prompt_id));
 
-    mount.innerHTML = "";
+    mount.innerHTML = `<div class="eyebrow">🎙 Speaking</div>`;
     prompts.forEach(prompt => {
         const isPracticed = practicedIds.has(prompt.id);
         const card = document.createElement('div');
@@ -1281,25 +1049,25 @@ async function markSpeakingPracticed(promptId, card) {
 // -----------------------------------------------------------------------------
 // Practice step — quick flip-through review drill over this lesson's own
 // vocabulary. Not new authored content: reuses reading_vocab / the same
-// reading_vocab_progress "known" flag as the Vocabulary tab.
+// reading_vocab_progress "known" flag as the Vocabulary step.
 // -----------------------------------------------------------------------------
 
 let practiceDeck = [];
 let practiceIndex = 0;
 
-async function renderPracticeSection(levelNumber, lessonOrder) {
-    const mount = document.getElementById("lessonPracticeMount");
-    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading practice...</p>`;
+async function renderPracticeSection(mount, levelNumber, lessonOrder) {
+    mount.innerHTML = `<div class="eyebrow">✍ Practice</div><p style="color:#94a3b8; font-size:13px;">Loading practice...</p>`;
 
     const words = await fetchChapterVocab(levelNumber, lessonOrder);
     if (words.length === 0) {
-        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Add vocabulary to this lesson to unlock a practice drill.</p>`;
+        mount.innerHTML = `<div class="eyebrow">✍ Practice</div><p style="color:#94a3b8; font-size:13px;">Add vocabulary to this lesson to unlock a practice drill.</p>`;
         return;
     }
 
     practiceDeck = words;
     practiceIndex = 0;
-    renderPracticeCard(mount);
+    mount.innerHTML = `<div class="eyebrow">✍ Practice</div><div id="practiceCardMount"></div>`;
+    renderPracticeCard(document.getElementById('practiceCardMount'));
 }
 
 function renderPracticeCard(mount) {
@@ -1344,7 +1112,9 @@ function renderPracticeCard(mount) {
 
 // -----------------------------------------------------------------------------
 // Chapter Challenge — short multiple-choice quiz, scored on submit. Chapter-
-// wide (not per-lesson), so it keeps the original level-only scoping.
+// wide (not per-lesson), so it keeps the original level-only scoping. On a
+// pass, this is also where Can-Do statements now surface (mastery check
+// AFTER learning, not a preview before it).
 // -----------------------------------------------------------------------------
 
 let activeCheckpointQuestions = [];
@@ -1389,17 +1159,17 @@ async function renderCheckpointSection(levelNumber) {
     ]);
 
     if (questions.length === 0) {
-    mount.innerHTML = `
-        <div class="lesson-goal-card">
-            <div class="eyebrow">🏁 Chapter Challenge</div>
-            <h3>Checkpoint coming soon</h3>
-            <p>You finished the Chapter 1 lessons. The final quiz has not been added yet.</p>
-            <button class="btn-secondary" onclick="goToPrevLesson()">← Previous Lesson</button>
-            <button class="btn-primary" onclick="exitReadingLevelDetail()" style="margin-top:10px;">Back to Chapters</button>
-        </div>
-    `;
-    return;
-}
+        mount.innerHTML = `
+            <div class="lesson-goal-card">
+                <div class="eyebrow">🏁 Chapter Challenge</div>
+                <h3>Checkpoint coming soon</h3>
+                <p>You finished this chapter's lessons. The final quiz hasn't been added yet.</p>
+                <button class="btn-secondary" onclick="goToPrevLesson()">← Previous Lesson</button>
+                <button class="btn-primary" onclick="exitReadingLevelDetail()" style="margin-top:10px;">Back to Chapters</button>
+            </div>
+        `;
+        return;
+    }
 
     activeCheckpointQuestions = questions;
     checkpointAnswers = {};
@@ -1472,40 +1242,43 @@ async function submitCheckpoint(levelNumber) {
         </div>
     `;
 
- if (passed) {
-    const lesson = activeLessons[activeLessonIndex];
-    if (lesson) {
-        await _supabase.from('chapter_lesson_progress').upsert({
-            student_id: currentUser.id,
-            lesson_id: lesson.id,
-            completed_at: new Date().toISOString()
-        }, { onConflict: 'student_id,lesson_id' });
+    if (passed) {
+        const lesson = activeLessons[activeLessonIndex];
+        if (lesson) {
+            await _supabase.from('chapter_lesson_progress').upsert({
+                student_id: currentUser.id,
+                lesson_id: lesson.id,
+                completed_at: new Date().toISOString()
+            }, { onConflict: 'student_id,lesson_id' });
+        }
+
+        html += `
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+                <button class="btn-secondary" onclick="restartCurrentChapter()">↻ Restart Chapter ${levelNumber}</button>
+                <button class="btn-primary" onclick="exitReadingLevelDetail()">Back to Chapters ✓</button>
+            </div>
+            <div class="eyebrow" style="margin-top:22px;">🎯 What You Can Now Do</div>
+            <div id="chapterCompleteCanDoMount"></div>
+        `;
+    } else {
+        html += `
+            <button class="btn-secondary" style="margin-top:12px;" onclick="renderCheckpointSection(${levelNumber})">Retake Checkpoint</button>
+            <div style="margin-top:12px;">
+                <button class="btn-secondary" onclick="goToPrevLesson()">← Previous Lesson</button>
+            </div>
+        `;
     }
 
-    html += `
-        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
-            <button class="btn-secondary" onclick="restartCurrentChapter()">↻ Restart Chapter 1</button>
-            <button class="btn-primary" onclick="exitReadingLevelDetail()">Back to Chapters ✓</button>
-        </div>
-    `;
-} else {
-    html += `
-        <button class="btn-secondary" style="margin-top:12px;" onclick="renderCheckpointSection(${levelNumber})">
-            Retake Checkpoint
-        </button>
-    `;
+    mount.innerHTML = html;
+
+    if (passed) {
+        executeVictoryConfettiCelebration();
+        if (activeReadingLevel?.can_do_category) {
+            renderCanDoRows('chapterCompleteCanDoMount', activeReadingLevel.can_do_category);
+        }
+    }
 }
 
-html += `
-    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
-        <button class="btn-secondary" onclick="goToPrevLesson()">← Previous Lesson</button>
-    </div>
-`;
-
-mount.innerHTML = html;
-
-if (passed) executeVictoryConfettiCelebration();
-    }
 // -----------------------------------------------------------------------------
 // Expose functions used via inline onclick="" handlers in index.html
 // -----------------------------------------------------------------------------
