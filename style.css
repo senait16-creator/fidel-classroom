@@ -6484,3 +6484,76 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     color: #64748b;
     font-size: 12px;
 }
+.challenge-mission-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 26px;
+    padding: 22px;
+    margin-bottom: 18px;
+    background: linear-gradient(135deg, #166534 0%, #2d7a3e 58%, #ca8a04 100%);
+    color: white;
+    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.18);
+}
+
+.challenge-mission-bg-letter {
+    position: absolute;
+    right: 18px;
+    top: -12px;
+    font-size: 96px;
+    opacity: 0.08;
+    font-family: 'Abyssinica SIL', serif;
+    pointer-events: none;
+}
+
+.challenge-mission-kicker {
+    font-size: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+    opacity: 0.85;
+}
+
+.challenge-mission-card h2 {
+    margin: 4px 0;
+    font-size: 34px;
+    font-family: 'Abyssinica SIL', serif;
+}
+
+.challenge-mission-card p {
+    margin: 0 0 18px;
+    font-size: 13px;
+    opacity: 0.92;
+    line-height: 1.5;
+}
+
+.challenge-resource-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.challenge-glass-link {
+    text-decoration: none;
+    color: white;
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 20px;
+    padding: 15px 12px;
+    backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.challenge-glass-link span {
+    font-size: 26px;
+}
+
+.challenge-glass-link strong {
+    font-size: 14px;
+    font-weight: 900;
+}
+
+.challenge-glass-link small {
+    font-size: 11px;
+    opacity: 0.85;
+}
