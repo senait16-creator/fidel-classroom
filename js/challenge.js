@@ -133,13 +133,11 @@ async function renderChallengeDashboard() {
     }
 
     // ── Captains lead, they don't need their own "Current Level" practice
-    //    card or "Coming Up" preview taking up the top of this page — the
-    //    Captain Dashboard above covers what they need here. Team Race and
-    //    Start Here stay visible for everyone. ──
+    //    card taking up the top of this page — the Captain Dashboard above
+    //    covers what they need here. Team Race and Start Here stay visible
+    //    for everyone. ──
     const currentLevelCard = document.getElementById("challengeCurrentLevelCard");
-    const comingUpCard     = document.getElementById("challengeComingUpCard");
     if (currentLevelCard) currentLevelCard.style.display = currentProfile?.is_captain ? "none" : "";
-    if (comingUpCard)     comingUpCard.style.display     = currentProfile?.is_captain ? "none" : "";
 
     // ── Level-completion approval banner (students only, relocated
     //    from team hub) — the function self-gates on is_captain/team_id ──
@@ -151,7 +149,6 @@ async function renderChallengeDashboard() {
     await renderChallengeDashboardMap(levels, team);
     await renderChallengeTeamStatus(team);
     await renderChallengeDashboardRace();
-    renderChallengeComingUp(levels, team.current_level || 1);
 }
 
 async function renderChallengeTeamStatus(team) {
@@ -351,30 +348,6 @@ async function renderChallengeDashboardRace() {
     } else {
         mount.innerHTML = `<p style="font-size:13px; color:#94a3b8;">Team race loading soon.</p>`;
     }
-}
-
-function renderChallengeComingUp(levels, currentLevel) {
-    const mount = document.getElementById("challengeComingUpMount");
-    if (!mount) return;
-
-    const next = levels.find(l => l.level_number === currentLevel + 1)
-            || levels.find(l => l.level_number === currentLevel);
-
-    if (!next) {
-        mount.innerHTML = `<p style="font-size:13px; color:#94a3b8;">No upcoming level found.</p>`;
-        return;
-    }
-
-    mount.innerHTML = `
-        <p style="font-size:12px; color:#64748b; margin-bottom:10px;">
-            ${next.level_number === currentLevel ? "Current rows:" : `Next: Level ${next.level_number}`}
-        </p>
-        <div class="coming-up-row">
-            ${(next.letter_families || []).map(letter => `
-                <div class="coming-up-letter">${letter}</div>
-            `).join("")}
-        </div>
-    `;
 }
 
 async function exitChallengeBackToDashboard() {
@@ -614,7 +587,7 @@ async function renderChallengeFamilyPicker() {
 // Family detail
 // -----------------------------------------------------------------------------
 
-const vowelSoundLabels = ["-ä", "-u", "-ee", "-a", "-ay", "-ih", "-o"];
+const vowelSoundLabels = ["eh", "oo", "ee", "ah", "ay", "ih", "o"];
 
 async function openChallengeFamilyDetail(fidelObj, levelNumber) {
     activeChallengeFamilyObj = fidelObj;
@@ -692,7 +665,7 @@ function renderChallengeFamilyDetailGiantRow(fidelObj) {
     const mount = document.getElementById("challengeFamilyDetailGiantRow");
     mount.innerHTML = "";
     const subs = (fidelObj.prefix === "h" || fidelObj.prefix === "ḥ")
-        ? ["hä", "hu", "hee", "ha", "hay", "hih", "ho"]
+        ? vowelFrameworkLabels
         : vowelSoundLabels.map(sub => `${fidelObj.prefix}${sub}`);
     fidelObj.family.forEach((char, idx) => {
         const card = document.createElement('div');
@@ -789,5 +762,4 @@ window.getTeamHex = getTeamHex;
 window.renderChallengeDashboard = renderChallengeDashboard;
 window.renderChallengeDashboardMap = renderChallengeDashboardMap;
 window.renderChallengeDashboardRace = renderChallengeDashboardRace;
-window.renderChallengeComingUp = renderChallengeComingUp;
 window.renderChallengeTeamStatus = renderChallengeTeamStatus;
