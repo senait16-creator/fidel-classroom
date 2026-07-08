@@ -424,49 +424,108 @@ async function rejectWritingSubmission(submissionId, note) {
 // After any approval, check whether the approved student's whole team has
 // now cleared every family in their current level — if so, flag the team
 // as ready for the live quiz on the teacher dashboard.
+//
+// TEMPORARY DIAGNOSTIC LOGGING — remove once the White Team issue is
+// confirmed fixed. Wrapped in try/catch so a thrown error (e.g. from
+// letter_families coming back as something unexpected) surfaces in the
+// console instead of silently dying as an unhandled promise rejection.
 async function checkAndUpdateTeamLevelCompletion(studentId) {
-    const { data: student } = await _supabase.from('profiles').select('team_id').eq('id', studentId).maybeSingle();
-    if (!student?.team_id) return;
+    console.log('[checkAndUpdateTeamLevelCompletion] called with studentId =', studentId);
+    try {
+        const { data: student, error: studentError } = await _supabase.from('profiles').select('team_id').eq('id', studentId).maybeSingle();
+        if (studentError) console.error('[checkAndUpdateTeamLevelCompletion] student lookup error:', studentError);
+        console.log('[checkAndUpdateTeamLevelCompletion] student =', student);
+        if (!student?.team_id) { console.log('[checkAndUpdateTeamLevelCompletion] EXIT: student has no team_id'); return; }
 
-    const { data: team } = await _supabase.from('teams').select('id, current_level').eq('id', student.team_id).maybeSingle();
-    if (!team) return;
+        const { data: team, error: teamError } = await _supabase.from('teams').select('id, current_level').eq('id', student.team_id).maybeSingle();
+        if (teamError) console.error('[checkAndUpdateTeamLevelCompletion] team lookup error:', teamError);
+        console.log('[checkAndUpdateTeamLevelCompletion] team =', team);
+        if (!team) { console.log('[checkAndUpdateTeamLevelCompletion] EXIT: no team found'); return; }
 
-    const { data: level } = await _supabase.from('challenge_levels').select('letter_families').eq('level_number', team.current_level).maybeSingle();
-    if (!level) return;
+        const { data: level, error: levelError } = await _supabase.from('challenge_levels').select('letter_families').eq('level_number', team.current_level).maybeSingle();
+        if (levelError) console.error('[checkAndUpdateTeamLevelCompletion] level lookup error:', levelError);
+        console.log('[checkAndUpdateTeamLevelCompletion] current_level =', team.current_level, 'level =', level);
+        console.log('[checkAndUpdateTeamLevelCompletion] letter_families =', level?.letter_families,
+            '| isArray =', Array.isArray(level?.letter_families),
+            '| typeof =', typeof level?.letter_families);
+        if (!level) { console.log('[checkAndUpdateTeamLevelCompletion] EXIT: no challenge_levels row for this level_number'); return; }
 
-    // Captains are exempt from Fidel Challenge gates entirely (they already
-    // know Amharic — their job is leading the team, not racing through
-    // levels), so they're excluded from the "did everyone clear every
-    // family" check. Without this, a team with a captain could never
-    // advance, since the captain would never have student_family_progress
-    // rows to begin with.
-    const { data: members } = await _supabase.from('profiles').select('id, is_captain').eq('team_id', team.id);
-    const memberIds = (members || []).filter(m => !m.is_captain).map(m => m.id);
-    if (memberIds.length === 0) return;
+        // Captains are exempt from Fidel Challenge gates entirely (they already
+        // know Amharic — their job is leading the team, not racing through
+        // levels), so they're excluded from the "did everyone clear every
+        // family" check. Without this, a team with a captain could never
+        // advance, since the captain would never have student_family_progress
+        // rows to begin with.
+        const { data: members, error: membersError } = await _supabase.from('profiles').select('id, is_captain').eq('team_id', team.id);
+        if (membersError) console.error('[checkAndUpdateTeamLevelCompletion] members lookup error:', membersError);
+        const memberIds = (members || []).filter(m => !m.is_captain).map(m => m.id);
+        console.log('[checkAndUpdateTeamLevelCompletion] all members =', members, '| non-captain memberIds =', memberIds);
+        if (memberIds.length === 0) { console.log('[checkAndUpdateTeamLevelCompletion] EXIT: no non-captain members'); return; }
 
-    const { data: progressRows } = await _supabase
-        .from('student_family_progress')
-        .select('student_id, base_letter, streak_passed, writing_passed')
-        .in('student_id', memberIds)
-        .eq('level_number', team.current_level);
+        const { data: progressRows, error: progressError } = await _supabase
+            .from('student_family_progress')
+            .select('student_id, base_letter, level_number, streak_passed, writing_passed')
+            .in('student_id', memberIds)
+            .eq('level_number', team.current_level);
+        if (progressError) console.error('[checkAndUpdateTeamLevelCompletion] progress lookup error:', progressError);
+        console.log('[checkAndUpdateTeamLevelCompletion] progressRows (filtered to level_number =', team.current_level, ') =', progressRows);
 
-    const allCleared = memberIds.every(memberId =>
-        (level.letter_families || []).every(letter => {
-            const row = (progressRows || []).find(r => r.student_id === memberId && r.base_letter === letter);
-            return row?.streak_passed && row?.writing_passed;
-        })
-    );
+        // Also fetch WITHOUT the level_number filter, purely for diagnosis —
+        // if a member's rows exist but have a different/null level_number,
+        // this will show it even though the real query above found nothing.
+        const { data: allProgressRowsForMembers } = await _supabase
+            .from('student_family_progress')
+            .select('student_id, base_letter, level_number, streak_passed, writing_passed')
+            .in('student_id', memberIds);
+        console.log('[checkAndUpdateTeamLevelCompletion] ALL progress rows for these members (any level_number) =', allProgressRowsForMembers);
 
-    if (allCleared) {
-        await _supabase.from('team_level_status').upsert({
-            team_id: team.id,
-            level_number: team.current_level,
-            all_members_cleared: true,
-            all_members_cleared_at: new Date().toISOString()
-        }, { onConflict: 'team_id,level_number' });
+        const requiredLetters = level.letter_families || [];
+        const allCleared = memberIds.every(memberId =>
+            requiredLetters.every(letter => {
+                const row = (progressRows || []).find(r => r.student_id === memberId && r.base_letter === letter);
+                return row?.streak_passed && row?.writing_passed;
+            })
+        );
+        console.log('[checkAndUpdateTeamLevelCompletion] requiredLetters =', requiredLetters, '| allCleared =', allCleared);
 
-        await loadTeacherTeamProgress();
+        if (allCleared) {
+            console.log('[checkAndUpdateTeamLevelCompletion] allCleared is true — upserting team_level_status for team_id =', team.id, 'level_number =', team.current_level);
+            const { data: upsertData, error: upsertError } = await _supabase.from('team_level_status').upsert({
+                team_id: team.id,
+                level_number: team.current_level,
+                all_members_cleared: true,
+                all_members_cleared_at: new Date().toISOString()
+            }, { onConflict: 'team_id,level_number' }).select();
+
+            if (upsertError) {
+                console.error('[checkAndUpdateTeamLevelCompletion] UPSERT ERROR:', upsertError);
+            } else {
+                console.log('[checkAndUpdateTeamLevelCompletion] upsert succeeded, returned row(s):', upsertData);
+            }
+
+            await loadTeacherTeamProgress();
+        } else {
+            console.log('[checkAndUpdateTeamLevelCompletion] allCleared is false — no upsert attempted.');
+        }
+    } catch (err) {
+        console.error('[checkAndUpdateTeamLevelCompletion] THREW AN EXCEPTION:', err);
     }
+}
+
+// Manually re-runs the check above for a team, without needing a brand new
+// approval action to trigger it. Useful when a team's progress already
+// satisfied the "all cleared" condition before this check last ran (e.g.
+// the underlying approvals happened before this function — or a fix to
+// it — was deployed), since the check only ever runs reactively.
+async function recheckTeamReadiness(teamId) {
+    showNotificationToast("Rechecking team readiness...");
+    const { data: members } = await _supabase.from('profiles').select('id, is_captain').eq('team_id', teamId);
+    const nonCaptain = (members || []).find(m => !m.is_captain);
+    if (!nonCaptain) return showNotificationToast("No competing students on this team.");
+
+    await checkAndUpdateTeamLevelCompletion(nonCaptain.id);
+    showNotificationToast("Recheck complete — see console for details.");
+    if (typeof loadTeacherClassroomOverview === 'function') await loadTeacherClassroomOverview();
 }
 
 async function loadTeacherTeamProgress() {
@@ -495,6 +554,7 @@ async function loadTeacherTeamProgress() {
                     <span>Level ${team.current_level} • Streak: ${team.streak_count || 0}${isReady ? ' • Ready for live quiz! 🎉' : ''}</span>
                 </div>
                 <div style="display:flex; align-items:center; gap:8px;">
+                    <button class="btn-secondary btn-recheck" style="font-size:11px; padding:6px 10px;" title="Re-run the readiness check without a new approval">🔄 Recheck</button>
                     <button class="btn-advance" ${isReady ? '' : 'disabled'}>Mark Quiz Passed & Advance</button>
                     <button class="team-members-toggle" aria-label="Show team members">▼</button>
                 </div>
@@ -505,6 +565,11 @@ async function loadTeacherTeamProgress() {
         row.querySelector('.btn-advance').onclick = (e) => {
             e.stopPropagation();
             advanceTeamLevel(team.id, team.current_level);
+        };
+
+        row.querySelector('.btn-recheck').onclick = (e) => {
+            e.stopPropagation();
+            recheckTeamReadiness(team.id);
         };
 
         const toggleBtn = row.querySelector('.team-members-toggle');
@@ -836,6 +901,7 @@ window.teacherAssignStudentToPod = teacherAssignStudentToPod;
 window.toggleTeacherPanel = toggleTeacherPanel;
 window.jumpToTeacherPanel = jumpToTeacherPanel;
 window.loadTeacherClassroomOverview = loadTeacherClassroomOverview;
+window.recheckTeamReadiness = recheckTeamReadiness;
 
 // ---------------------------------------------------------------------------
 // Export progress CSV (teacher dashboard button)
