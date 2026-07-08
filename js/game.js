@@ -160,10 +160,12 @@ function selectBlockTokenTrackElement(element, index) {
         setTimeout(() => streakEl.classList.remove("streak-bump"), 300);
         selectedGameTokenId = null;
 
+        // Normal matches get no toast at all — the flash + resolved-pair
+        // animation on the cards is enough feedback and doesn't cover the
+        // next cards. Toasts are reserved for real milestones.
         if (currentStreakScore === 5)        showNotificationToast("🔥 5 in a row!");
         else if (currentStreakScore === 10)  showGobezToast("10 streak — halfway there!");
         else if (currentStreakScore === 15)  showGobezToast("15 streak — almost there!");
-        else                                 showNotificationToast("Match!");
 
         if (activeChallengeContext) {
             activeChallengeContext.onStreakUpdate?.(currentStreakScore);
