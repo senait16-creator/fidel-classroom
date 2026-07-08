@@ -869,7 +869,7 @@ function launchChallengeStreakGame(fidelObj, levelNumber) {
             setTimeout(() => {
                 document.getElementById('gameWorkspace').style.display = "none";
                 activeChallengeContext = null;
-                showPostStreakWritingPrompt(fidelObj, levelNumber);
+                showPostStreakWritingPrompt(fidelObj, levelNumber, 'challenge');
             }, 1800);
         }
     };
