@@ -152,6 +152,47 @@
         <button class="btn-primary" style="width:auto; padding:8px 16px; font-size:13px;" onclick="switchAdminPanelsFromDashboard('student')">Switch to Student View →</button>
     </div>
 
+    <!-- ============================================================
+         CLASSROOM OVERVIEW — answers "what needs my attention right
+         now" before the detailed panels below. All of it reads from
+         the same tables the panels below already use.
+         ============================================================ -->
+    <div class="teacher-health-grid" id="teacherHealthGrid">
+        <div class="teacher-health-tile" id="healthPendingReviews">
+            <div class="teacher-health-value">–</div>
+            <div class="teacher-health-label">Pending Reviews</div>
+        </div>
+        <div class="teacher-health-tile" id="healthTeamsReady">
+            <div class="teacher-health-value">–</div>
+            <div class="teacher-health-label">Teams Ready</div>
+        </div>
+        <div class="teacher-health-tile" id="healthActiveStudents">
+            <div class="teacher-health-value">–</div>
+            <div class="teacher-health-label">Active Students</div>
+        </div>
+        <div class="teacher-health-tile" id="healthCanDoReviews">
+            <div class="teacher-health-value">–</div>
+            <div class="teacher-health-label">Can-Do Reviews</div>
+        </div>
+    </div>
+
+    <div class="teacher-overview-card">
+        <div class="teacher-overview-title">✅ Today's Tasks</div>
+        <div id="teacherTodaysTasksMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
+    </div>
+
+    <div class="teacher-overview-card">
+        <div class="teacher-overview-title">🏆 Team Progress</div>
+        <div id="teacherLeaderboardMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
+    </div>
+
+    <div class="teacher-overview-card">
+        <div class="teacher-overview-title">👑 Captain Overview</div>
+        <div id="teacherCaptainOverviewMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
+    </div>
+
+    <div class="teacher-overview-divider">everything below continues to work exactly as it does now</div>
+
 <div class="teacher-panel" style="margin-bottom:20px;">
     <div class="teacher-panel-header" onclick="toggleTeacherPanel('rosterPanelBody', this)">
         <h2 style="font-size:18px; color:var(--neutral-dark);">Student Roster &amp; Progress</h2>
