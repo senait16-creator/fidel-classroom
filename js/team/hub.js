@@ -362,7 +362,7 @@ async function uploadTeamPracticePhoto(file, baseLetter) {
     showNotificationToast('Compressing and uploading...');
 
     const compressed = await compressImage(file);
-    const filename = `${currentUser.id}/practice_${Date.now()}.jpg`;
+    const filename = `practice_${currentUser.id}_${Date.now()}.jpg`;
 
     const { error: uploadError } = await _supabase.storage
         .from('team_practice_posts')
@@ -407,12 +407,27 @@ async function enterCaptainDashboard() {
         return;
     }
 
-    showScreen("captainDashboardScreen");
-
-    await loadCaptainWritingQueue();
-    await loadHelpFlags("captainHelpFlagsMount");
-    await loadCaptainTeamProgress();
+    // The old standalone captain screen is retired — leadership tools now
+    // live in the Captain Dashboard zone at the top of the Fidel Competition
+    // page, alongside all the normal challenge content.
+    if (typeof chooseModeChallenge === 'function') await chooseModeChallenge();
 }
+function updateCaptainPendingBadge(count) {
+    const pill = document.getElementById('captainPendingCount');
+    const btn  = document.getElementById('captainReviewToggleBtn');
+    if (pill) {
+        if (count > 0) {
+            pill.style.display = 'inline-block';
+            pill.innerText = `${count} waiting`;
+        } else {
+            pill.style.display = 'none';
+        }
+    }
+    if (btn) {
+        btn.innerText = count > 0 ? `📝 Review Writing` : `🎉 All caught up!`;
+    }
+}
+
 async function loadCaptainWritingQueue() {
     const mount = document.getElementById('captainWritingQueueMount');
     if (!mount) return;
@@ -426,6 +441,7 @@ async function loadCaptainWritingQueue() {
     const memberIds = (members || []).map(m => m.id).filter(id => id !== currentUser.id);
     if (memberIds.length === 0) {
         mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No teammates yet.</p>`;
+        updateCaptainPendingBadge(0);
         return;
     }
 
@@ -441,8 +457,11 @@ async function loadCaptainWritingQueue() {
 
     if (error) {
         mount.innerHTML = `<p style="color:#ef4444; font-size:13px;">Error: ${error.message}</p>`;
+        updateCaptainPendingBadge(0);
         return;
     }
+
+    updateCaptainPendingBadge(submissions?.length || 0);
 
     if (!submissions || submissions.length === 0) {
         mount.innerHTML = `
@@ -669,6 +688,53 @@ async function loadCaptainTeamProgress() {
 }
 
 // ---------------------------------------------------------------------------
+// Captain stats — small fun counters for the Captain Dashboard
+// ---------------------------------------------------------------------------
+
+async function loadCaptainStats() {
+    const mount = document.getElementById('captainStatsMount');
+    if (!mount) return;
+    if (!currentProfile?.team_id) return;
+
+    const [{ data: team }, { count: approvedCount }, { data: members }] = await Promise.all([
+        _supabase.from('teams').select('current_level').eq('id', currentProfile.team_id).maybeSingle(),
+        _supabase.from('writing_submissions')
+            .select('id', { count: 'exact', head: true })
+            .eq('reviewed_by', currentUser.id)
+            .eq('status', 'approved'),
+        _supabase.from('profiles').select('id').eq('team_id', currentProfile.team_id)
+    ]);
+
+    const memberIds = (members || []).map(m => m.id);
+    let studentsHelped = 0;
+    if (memberIds.length > 0) {
+        const { data: resolvedFlags } = await _supabase
+            .from('help_flags')
+            .select('student_id')
+            .in('student_id', memberIds)
+            .eq('is_resolved', true);
+        studentsHelped = new Set((resolvedFlags || []).map(f => f.student_id)).size;
+    }
+
+    const levelsDone = Math.max(0, (team?.current_level || 1) - 1);
+
+    mount.innerHTML = `
+        <div class="stat-tile">
+            <div class="stat-value">${approvedCount || 0}</div>
+            <div class="stat-label">SUBMISSIONS APPROVED</div>
+        </div>
+        <div class="stat-tile">
+            <div class="stat-value">${levelsDone}</div>
+            <div class="stat-label">TEAM LEVELS DONE</div>
+        </div>
+        <div class="stat-tile" style="grid-column: 1 / -1;">
+            <div class="stat-value">${studentsHelped}</div>
+            <div class="stat-label">STUDENTS HELPED</div>
+        </div>
+    `;
+}
+
+// ---------------------------------------------------------------------------
 // Captain inbox badge on hub load
 // ---------------------------------------------------------------------------
 
@@ -716,6 +782,7 @@ window.enterCaptainDashboard     = enterCaptainDashboard;
 window.exitCaptainDashboard      = exitCaptainDashboard;
 window.loadCaptainWritingQueue   = loadCaptainWritingQueue;
 window.loadCaptainTeamProgress   = loadCaptainTeamProgress;
+window.loadCaptainStats          = loadCaptainStats;
 window.captainApproveSubmission  = captainApproveSubmission;
 window.captainRejectSubmission   = captainRejectSubmission;
 window.checkCaptainInboxBadge    = checkCaptainInboxBadge;
