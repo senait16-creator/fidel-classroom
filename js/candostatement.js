@@ -34,6 +34,8 @@ const CAN_DO_STATEMENTS = [
     { key: 'daily_question',      category: 'Conversation',     text: 'I can answer the Question of the Day.',        verification: 'speaking' },
     { key: 'talk_about_yesterday',category: 'Past Tense',       text: 'I can talk about what I did yesterday.',        verification: 'speaking' },
     { key: 'describe_my_day',     category: 'Past Tense',       text: 'I can describe my day, start to finish.',       verification: 'speaking' },
+    { key: 'talk_about_plans',    category: 'Future Plans',     text: 'I can talk about my plans.',                    verification: 'speaking' },
+    { key: 'make_invitation',     category: 'Future Plans',     text: 'I can invite someone to do something.',         verification: 'speaking' },
     {
         // "auto" means the app can already tell this is probably true — it
         // pre-fills self_assessed automatically instead of making the
