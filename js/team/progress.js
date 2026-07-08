@@ -69,14 +69,17 @@ async function renderTeamRaceView(mountId) {
                     members.some(m => m.id === p.student_id)
                 );
                 const cleared = famProgress.filter(p => p.streak_passed && p.writing_passed);
-                const started = famProgress.filter(p => p.streak_passed || p.writing_passed);
+                // "Active" = has attempted this family (a progress row exists) but
+                // isn't cleared yet — tells a captain where the team's actual
+                // bottleneck is, not just who's touched it once.
+                const active = famProgress.filter(p => !(p.streak_passed && p.writing_passed));
 
-                if (cleared.length === memberCount && memberCount > 0) return 'done';
-                if (started.length > 0) return 'progress';
-                return 'empty';
+                if (cleared.length === memberCount && memberCount > 0) return { status: 'done', activeCount: 0 };
+                if (active.length > 0) return { status: 'progress', activeCount: active.length };
+                return { status: 'empty', activeCount: 0 };
             });
 
-            const clearedCount = familyStatus.filter(s => s === 'done').length;
+            const clearedCount = familyStatus.filter(s => s.status === 'done').length;
 
             return { ...team, clearedCount, familyStatus, memberCount };
         });
@@ -127,8 +130,11 @@ async function renderTeamRaceView(mountId) {
                 : `<div class="race-medal race-num">${idx + 1}</div>`;
 
             const familyChipsHtml = families.map((fam, fi) => {
-                const status = team.familyStatus[fi] || 'empty';
-                return `<div class="race-chip chip-${status}">${fam}</div>`;
+                const { status, activeCount } = team.familyStatus[fi] || { status: 'empty', activeCount: 0 };
+                const countDots = status === 'progress' && activeCount > 0
+                    ? `<div class="race-chip-count">${'●'.repeat(Math.min(activeCount, 4))}</div>`
+                    : '';
+                return `<div class="race-chip chip-${status}"><span>${fam}</span>${countDots}</div>`;
             }).join('');
 
             row.innerHTML = `
@@ -241,17 +247,32 @@ async function renderLevelCompletionBanner(mountId) {
     mount.style.display = "block";
 
     if (status.existingRequest?.status === 'approved') {
+        // Approval doesn't mean the whole team has advanced yet — point the
+        // student at encouraging teammates instead of implying they're done.
         mount.innerHTML = `
             <div style="background:#f0fdf4; border:2px solid #166534; border-radius:16px;
                         padding:20px; text-align:center; margin-bottom:16px;">
                 <div style="font-size:36px; margin-bottom:8px;">🎉</div>
                 <p style="font-size:16px; font-weight:800; color:#166534; margin-bottom:4px;">
-                    Level ${status.level} Complete!
+                    Your teacher approved your level!
                 </p>
-                <p style="font-size:13px; color:#15803d;">
-                    Your teacher approved your level completion. Keep going!
+                <p style="font-size:13px; color:#15803d; margin-bottom:16px;">
+                    Encourage your teammates so your team can begin Level ${status.level + 1} together.
                 </p>
+                <button id="levelApprovalEncourageBtn" class="btn-primary"
+                        style="max-width:280px; margin:0 auto; display:block;">
+                    📣 Encourage Your Team
+                </button>
             </div>`;
+
+        const encourageBtn = document.getElementById('levelApprovalEncourageBtn');
+        if (encourageBtn) {
+            encourageBtn.onclick = () => {
+                if (typeof shareTeamChallenge === 'function') {
+                    shareTeamChallenge(`🎉 I just got Level ${status.level} approved! Let's finish up so our team can move to Level ${status.level + 1} together 💪`);
+                }
+            };
+        }
     } else if (status.existingRequest?.status === 'pending') {
         mount.innerHTML = `
             <div style="background:#fffbeb; border:2px solid #ca8a04; border-radius:16px;
