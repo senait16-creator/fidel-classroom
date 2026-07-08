@@ -123,12 +123,23 @@ async function renderChallengeDashboard() {
             if (typeof loadCaptainWritingQueue === "function") await loadCaptainWritingQueue();
             if (typeof loadCaptainTeamProgress === "function") await loadCaptainTeamProgress();
             if (typeof loadHelpFlags === "function") await loadHelpFlags('helpFlagsMount');
+            if (typeof loadDailyTeamChallenge === "function") await loadDailyTeamChallenge();
+            if (typeof loadWeeklyMeeting === "function") await loadWeeklyMeeting();
             if (typeof renderStarPicker === "function") await renderStarPicker("starPickerMount");
             if (typeof loadCaptainStats === "function") await loadCaptainStats();
         } else {
             captainZone.style.display = "none";
         }
     }
+
+    // ── Captains lead, they don't need their own "Current Level" practice
+    //    card or "Coming Up" preview taking up the top of this page — the
+    //    Captain Dashboard above covers what they need here. Team Race and
+    //    Start Here stay visible for everyone. ──
+    const currentLevelCard = document.getElementById("challengeCurrentLevelCard");
+    const comingUpCard     = document.getElementById("challengeComingUpCard");
+    if (currentLevelCard) currentLevelCard.style.display = currentProfile?.is_captain ? "none" : "";
+    if (comingUpCard)     comingUpCard.style.display     = currentProfile?.is_captain ? "none" : "";
 
     // ── Level-completion approval banner (students only, relocated
     //    from team hub) — the function self-gates on is_captain/team_id ──
