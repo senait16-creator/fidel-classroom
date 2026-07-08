@@ -4545,6 +4545,102 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     margin-top: 2px;
 }
 
+/* Daily Team Challenge */
+
+.daily-challenge-card {
+    background: linear-gradient(135deg, #f0fdf4, #fffdf5);
+    border: 1px solid #bbf7d0;
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+}
+
+.daily-challenge-title {
+    font-size: 14px;
+    font-weight: 900;
+    color: #14532d;
+    margin-bottom: 6px;
+}
+
+.daily-challenge-body {
+    font-size: 13px;
+    color: #334155;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.daily-challenge-fidel {
+    font-family: 'Abyssinica SIL', serif;
+    font-size: 20px;
+    color: #14532d;
+    font-weight: 700;
+}
+
+.daily-challenge-share-btn {
+    width: 100%;
+    border: none;
+    border-radius: 14px;
+    padding: 12px;
+    background: linear-gradient(135deg, #b45309, #ca8a04);
+    color: white;
+    font-size: 13.5px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 6px 14px rgba(180, 83, 9, 0.22);
+}
+
+/* Weekly Team Meeting */
+
+.team-meeting-display {
+    text-align: center;
+    padding: 6px 0 2px;
+}
+
+.team-meeting-label {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #94a3b8;
+    margin-bottom: 4px;
+}
+
+.team-meeting-value {
+    font-size: 18px;
+    font-weight: 900;
+    color: #14532d;
+    font-family: 'Lora', Georgia, serif;
+    margin-bottom: 10px;
+}
+
+.team-meeting-edit-btn {
+    background: #fff7ed;
+    color: #b45309;
+    border: 1px solid #fed7aa;
+    border-radius: 999px;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.team-meeting-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.team-meeting-edit-form select,
+.team-meeting-edit-form input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 13px;
+    color: #1e293b;
+    font-family: 'Inter', sans-serif;
+}
+
 .intro-mascot-screen {
     position: fixed;
     inset: 0;
