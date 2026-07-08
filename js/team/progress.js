@@ -531,6 +531,7 @@ async function approveTeacherLevelCompletion(requestId, studentId, levelNumber, 
 
     showGobezToast("Level completion approved! 🌟");
     await loadTeacherLevelCompletionQueue(mountId);
+    if (typeof loadTeacherClassroomOverview === "function") await loadTeacherClassroomOverview();
 }
 
 async function rejectTeacherLevelCompletion(requestId, mountId) {
