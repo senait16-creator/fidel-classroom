@@ -86,16 +86,18 @@ function generateNewGameRoundData() {
             const rIdx = Math.floor(Math.random() * 7);
             const sub = standardVowelSubscripts[rIdx];
             const phonetic = (item.prefix === "h" || item.prefix === "ḥ") ? vowelFrameworkLabels[rIdx] : `${item.prefix}${sub}`;
-            list.push({ char: item.family[rIdx], matchKey: item.family[rIdx], displayTxt: item.family[rIdx], kind: "fidel" });
-            list.push({ char: item.family[rIdx], matchKey: item.family[rIdx], displayTxt: phonetic, kind: "phonetic" });
+            const matchKey = getFidelSoundKey(item.family[rIdx]);
+            list.push({ char: item.family[rIdx], matchKey, displayTxt: item.family[rIdx], kind: "fidel" });
+            list.push({ char: item.family[rIdx], matchKey, displayTxt: phonetic, kind: "phonetic" });
         });
     } else {
         const indices = [0,1,2,3,4,5,6].sort(() => Math.random() - 0.5).slice(0, 4);
         indices.forEach(idx => {
             const sub = standardVowelSubscripts[idx];
             const phonetic = (gameModeScope.prefix === "h" || gameModeScope.prefix === "ḥ") ? vowelFrameworkLabels[idx] : `${gameModeScope.prefix}${sub}`;
-            list.push({ char: gameModeScope.family[idx], matchKey: gameModeScope.family[idx], displayTxt: gameModeScope.family[idx], kind: "fidel" });
-            list.push({ char: gameModeScope.family[idx], matchKey: gameModeScope.family[idx], displayTxt: phonetic, kind: "phonetic" });
+            const matchKey = getFidelSoundKey(gameModeScope.family[idx]);
+            list.push({ char: gameModeScope.family[idx], matchKey, displayTxt: gameModeScope.family[idx], kind: "fidel" });
+            list.push({ char: gameModeScope.family[idx], matchKey, displayTxt: phonetic, kind: "phonetic" });
         });
     }
 
