@@ -183,6 +183,77 @@ async function selfAssessCanDo(statementKey, targetId, categoryFilter) {
 }
 
 // ---------------------------------------------------------------------------
+// Teacher verification queue — a student can never set their own row to
+// 'verified' (enforced by RLS, not just this UI); this is the only place
+// that transition happens.
+// ---------------------------------------------------------------------------
+
+async function loadCanDoVerificationQueue(mountId) {
+    const mount = document.getElementById(mountId);
+    if (!mount) return;
+    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
+
+    const { data: rows, error } = await _supabase
+        .from('can_do_progress')
+        .select('student_id, statement_key, self_assessed_at')
+        .eq('status', 'self_assessed')
+        .order('self_assessed_at', { ascending: true });
+
+    if (error) {
+        mount.innerHTML = `<p style="color:#ef4444; font-size:13px;">Error: ${error.message}</p>`;
+        return;
+    }
+
+    if (!rows || rows.length === 0) {
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No Can-Do statements waiting for verification.</p>`;
+        return;
+    }
+
+    // Separate query instead of a foreign-table join, so this doesn't
+    // depend on guessing the exact FK constraint name Supabase generated.
+    const studentIds = [...new Set(rows.map(r => r.student_id))];
+    const { data: students } = await _supabase
+        .from('profiles')
+        .select('id, nickname, avatar')
+        .in('id', studentIds);
+
+    mount.innerHTML = '';
+    rows.forEach(row => {
+        const student = (students || []).find(s => s.id === row.student_id);
+        const statement = CAN_DO_STATEMENTS.find(s => s.key === row.statement_key);
+
+        const card = document.createElement('div');
+        card.className = 'teacher-submission-card';
+        card.style.cssText = 'flex-direction:column; align-items:flex-start; gap:8px;';
+        card.innerHTML = `
+            <div>
+                <strong style="font-size:14px;">${student?.avatar || '🦁'} ${student?.nickname || 'Student'}</strong>
+                <p style="font-size:13px; color:#334155; margin:4px 0 0;">${statement?.text || row.statement_key}</p>
+                <span style="font-size:11px; color:#94a3b8;">${statement?.category || ''}</span>
+            </div>
+            <button class="btn-approve">✓ Verify</button>
+        `;
+        card.querySelector('.btn-approve').onclick = () =>
+            verifyCanDoStatement(row.student_id, row.statement_key, mountId);
+        mount.appendChild(card);
+    });
+}
+
+async function verifyCanDoStatement(studentId, statementKey, mountId) {
+    const { error } = await _supabase
+        .from('can_do_progress')
+        .update({ status: 'verified' })
+        .eq('student_id', studentId)
+        .eq('statement_key', statementKey);
+
+    if (error) return showNotificationToast("Couldn't verify: " + error.message);
+
+    showGobezToast('Statement verified! 🌟');
+    await loadCanDoVerificationQueue(mountId);
+    if (typeof loadTeacherClassroomOverview === 'function') await loadTeacherClassroomOverview();
+}
+
+// ---------------------------------------------------------------------------
 // Entry / exit
 // ---------------------------------------------------------------------------
 
@@ -207,3 +278,5 @@ window.renderCanDoRows    = renderCanDoRows;
 window.selfAssessCanDo    = selfAssessCanDo;
 window.chooseModeCanDo    = chooseModeCanDo;
 window.exitCanDo          = exitCanDo;
+window.loadCanDoVerificationQueue = loadCanDoVerificationQueue;
+window.verifyCanDoStatement       = verifyCanDoStatement;
