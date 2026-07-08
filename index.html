@@ -560,6 +560,24 @@
 
         <section class="captain-card">
             <div class="captain-card-title">
+                <span class="captain-card-title-left">📣 Daily Team Challenge</span>
+            </div>
+            <div id="dailyChallengeMount">
+                <p style="color:#94a3b8; font-size:13px;">Loading...</p>
+            </div>
+        </section>
+
+        <section class="captain-card">
+            <div class="captain-card-title">
+                <span class="captain-card-title-left">📅 Weekly Team Meeting</span>
+            </div>
+            <div id="teamMeetingMount">
+                <p style="color:#94a3b8; font-size:13px;">Loading...</p>
+            </div>
+        </section>
+
+        <section class="captain-card">
+            <div class="captain-card-title">
                 <span class="captain-card-title-left">⭐ Star of the Week</span>
             </div>
             <div id="starPickerMount">
@@ -579,7 +597,7 @@
 
     <div class="challenge-dash-grid">
 
-        <section class="challenge-dash-card challenge-map-card">
+        <section class="challenge-dash-card challenge-map-card" id="challengeCurrentLevelCard">
             <div class="challenge-card-title">🔥 Current Level</div>
             <div id="challengeDashMapMount">
                 <p style="color:#94a3b8;font-size:13px;">Loading current level...</p>
@@ -637,7 +655,7 @@
 
         <div id="levelCompletionMount" style="display:none;"></div>
 
-        <section class="challenge-dash-card">
+        <section class="challenge-dash-card" id="challengeComingUpCard">
             <div class="challenge-card-title">Coming Up</div>
             <div id="challengeComingUpMount">
                 <p style="color:#94a3b8;font-size:13px;">Loading next rows...</p>
