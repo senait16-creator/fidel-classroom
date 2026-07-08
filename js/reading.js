@@ -195,9 +195,9 @@ async function renderReadingLevelsList() {
             openChapterGoals(level, 'view');
         };
         card.querySelector('.chapter-start-btn').onclick = (e) => {
-            e.stopPropagation();
-            openChapterGoals(level, 'start');
-        };
+    e.stopPropagation();
+    enterChapter(level.level_number);
+};
 
         container.appendChild(card);
     });
