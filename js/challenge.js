@@ -32,13 +32,6 @@ function enterModeSelect() {
 
     if (typeof applyModeLockStyling === 'function') applyModeLockStyling();
 
-    // Captains already see their team/leadership info on the Captain
-    // Dashboard inside Fidel Competition — this card would just repeat it.
-    const teamLeadersCard = document.getElementById("teamLeadersCupCard");
-    if (teamLeadersCard) {
-        teamLeadersCard.style.display = currentProfile?.is_captain ? "none" : "";
-    }
-
     localStorage.setItem('fidel_has_visited', '1');
 }
 
