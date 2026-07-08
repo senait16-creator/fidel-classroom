@@ -191,13 +191,13 @@ async function renderReadingLevelsList() {
         `;
 
         card.querySelector('.chapter-start-btn').onclick = (e) => {
-    e.stopPropagation();
-    enterChapter(level.level_number);
-};
+            e.stopPropagation();
+            enterChapter(level.level_number);
+        };
         card.querySelector('.chapter-goals-btn').onclick = (e) => {
-    e.stopPropagation();
-    openChapterGoals(level, 'view');
-};
+            e.stopPropagation();
+            openChapterGoals(level, 'view');
+        };
 
         container.appendChild(card);
     });
@@ -1369,3 +1369,5 @@ window.renderCheckpointSection = renderCheckpointSection;
 window.closeChapterGoals = closeChapterGoals;
 window.goToPrevLesson = goToPrevLesson;
 window.restartCurrentChapter = restartCurrentChapter;
+window.fetchAllLessons = fetchAllLessons;
+window.fetchMyLessonProgressAll = fetchMyLessonProgressAll;
