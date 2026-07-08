@@ -463,8 +463,10 @@
             <div class="cup-card-desc">Vocabulary, grammar, and real sentences — one chapter at a time</div>
         </div>
 
-        <!-- Team status → lives on the Competition page now -->
-        <div class="cup-card wide" onclick="chooseModeChallenge()">
+        <!-- Team status → lives on the Competition page now.
+             Hidden for captains — they already see this on their
+             Captain Dashboard inside the Fidel Competition page. -->
+        <div class="cup-card wide" id="teamLeadersCupCard" onclick="chooseModeChallenge()">
             <svg width="48" height="54" viewBox="0 0 48 54" fill="none" style="flex-shrink:0;">
                 <path d="M10 18L16 28L24 16L32 28L38 18L36 36H12L10 18Z"
                       fill="#fbbf24" stroke="#b45309" stroke-width="1.5"/>
@@ -513,6 +515,66 @@
         </div>
 
         <button class="challenge-back-home" onclick="enterModeSelect()">← Home</button>
+    </div>
+
+    <!-- ============================================================
+         CAPTAIN DASHBOARD — captains only. Leadership tools live here,
+         above the normal challenge content, which continues unchanged
+         below for everyone (captains are still learners too).
+         ============================================================ -->
+    <div id="captainZone" class="captain-zone" style="display:none;">
+        <div class="captain-zone-header">
+            <div class="captain-zone-badge">🛡️</div>
+            <div>
+                <div class="captain-zone-title">Captain Dashboard</div>
+                <div class="captain-zone-sub" id="captainZoneSub">Your leadership tools</div>
+            </div>
+        </div>
+
+        <section class="captain-card">
+            <div class="captain-card-title">
+                <span class="captain-card-title-left">✍️ Pending Writing Reviews</span>
+                <span class="count-pill" id="captainPendingCount" style="display:none;"></span>
+            </div>
+            <button class="pending-review-cta" id="captainReviewToggleBtn">📝 Review Writing</button>
+            <div id="captainWritingQueueMount" style="display:none; margin-top:12px;">
+                <p style="color:#94a3b8; font-size:13px;">Loading submissions...</p>
+            </div>
+        </section>
+
+        <section class="captain-card">
+            <div class="captain-card-title">
+                <span class="captain-card-title-left">🏁 Team Progress</span>
+            </div>
+            <div id="captainTeamProgressMount">
+                <p style="color:#94a3b8; font-size:13px;">Loading...</p>
+            </div>
+        </section>
+
+        <section class="captain-card">
+            <div class="captain-card-title">
+                <span class="captain-card-title-left">❤️ Students Who Need Help</span>
+            </div>
+            <div id="helpFlagsMount"></div>
+        </section>
+
+        <section class="captain-card">
+            <div class="captain-card-title">
+                <span class="captain-card-title-left">⭐ Star of the Week</span>
+            </div>
+            <div id="starPickerMount">
+                <p style="color:#94a3b8; font-size:13px;">Loading...</p>
+            </div>
+        </section>
+
+        <section class="captain-card">
+            <div class="captain-card-title">
+                <span class="captain-card-title-left">📊 Captain Stats</span>
+            </div>
+            <div id="captainStatsMount" class="stats-grid">
+                <p style="color:#94a3b8; font-size:13px;">Loading...</p>
+            </div>
+        </section>
     </div>
 
     <div class="challenge-dash-grid">
@@ -571,24 +633,6 @@
                     <small>Helpful Amharic tools</small>
                 </div>
             </button>
-        </section>
-
-        <section class="challenge-dash-card" id="captainReviewDashCard" style="display:none;">
-            <div class="challenge-card-title">👑 Pending Submissions</div>
-            <div id="captainWritingQueueMount">
-                <p style="color:#94a3b8; font-size:13px;">Loading submissions...</p>
-            </div>
-        </section>
-         <section class="challenge-dash-card" id="starOfWeekCard" style="display:none;">
-            <div class="challenge-card-title">⭐ Star of the Week</div>
-            <div id="starPickerMount">
-                <p style="color:#94a3b8; font-size:13px;">Loading...</p>
-            </div>
-        </section>
-
-        <section class="challenge-dash-card" id="challengeHelpFlagsCard" style="display:none;">
-            <div class="challenge-card-title">🙋 Help Requests</div>
-            <div id="helpFlagsMount"></div>
         </section>
 
         <div id="levelCompletionMount" style="display:none;"></div>
@@ -1159,7 +1203,7 @@
 <script src="js/guide.js?v=10" defer></script>
 <script src="js/utils/compress.js?v=9" defer></script>
 <script src="js/game.js?v=9" defer></script>
-<script src="js/submissions.js?v=12" defer></script>
+<script src="js/submissions.js?v=11" defer></script>
 <script src="js/teacher.js?v=10" defer></script>
 <script src="js/reading.js?v=19" defer></script>
     <script src="js/letterboard.js?v=10" defer></script>
