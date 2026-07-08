@@ -735,6 +735,152 @@ async function loadCaptainStats() {
 }
 
 // ---------------------------------------------------------------------------
+// Daily Team Challenge — alternates Lesson day / Pronunciation day, pulled
+// straight from the Guided Course / current Fidel Challenge level so it
+// always reinforces what the team is actually learning right now.
+// ---------------------------------------------------------------------------
+
+async function loadDailyTeamChallenge() {
+    const mount = document.getElementById('dailyChallengeMount');
+    if (!mount) return;
+    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
+    if (!currentProfile?.team_id) return;
+
+    // Alternates every calendar day — even day-index = Lesson, odd = Pronunciation.
+    const dayIndex = Math.floor(Date.now() / 86400000);
+    const isPronunciationDay = dayIndex % 2 === 1;
+
+    let title, bodyHtml, shareText;
+
+    if (isPronunciationDay) {
+        const { data: team } = await _supabase
+            .from('teams').select('current_level').eq('id', currentProfile.team_id).maybeSingle();
+        const currentLevel = team?.current_level || 1;
+        const { data: level } = await _supabase
+            .from('challenge_levels').select('letter_families')
+            .eq('level_number', currentLevel).maybeSingle();
+        const families = (level?.letter_families || []).join('  ');
+
+        title = "🗣️ Pronunciation Challenge";
+        bodyHtml = families
+            ? `Read the <span class="daily-challenge-fidel">${families}</span> family aloud together, then record a short voice memo for the team chat.`
+            : `Read today's Fidel family aloud together, then record a short voice memo for the team chat.`;
+        shareText = families
+            ? `🗣️ Pronunciation Challenge: Read the ${families} family aloud, then record a short voice memo for the team chat!`
+            : `🗣️ Pronunciation Challenge: Read today's Fidel family aloud, then record a short voice memo for the team chat!`;
+    } else {
+        const lessons  = typeof fetchAllLessons === 'function' ? await fetchAllLessons() : [];
+        const progress = typeof fetchMyLessonProgressAll === 'function' ? await fetchMyLessonProgressAll() : [];
+        const completedIds = new Set((progress || []).filter(r => r.completed_at).map(r => r.lesson_id));
+        let current = lessons.find(l => !completedIds.has(l.id));
+        if (!current && lessons.length > 0) current = lessons[lessons.length - 1];
+
+        title = "📖 Lesson Challenge";
+        bodyHtml = current
+            ? `Practice today's lesson together: <strong>${current.title}</strong>. Read it aloud, review the vocabulary, and try today's conversation prompt.`
+            : `Review your most recent lesson together — read it aloud and practice the vocabulary as a team.`;
+        shareText = current
+            ? `📖 Lesson Challenge: Practice "${current.title}" together — read it aloud, review the vocabulary, and try today's conversation prompt!`
+            : `📖 Lesson Challenge: Review your most recent lesson together — read it aloud and practice the vocabulary as a team!`;
+    }
+
+    mount.innerHTML = `
+        <div class="daily-challenge-card">
+            <div class="daily-challenge-title">${title}</div>
+            <p class="daily-challenge-body">${bodyHtml}</p>
+        </div>
+        <button class="daily-challenge-share-btn" id="dailyChallengeShareBtn">📤 Share with Team</button>
+    `;
+
+    const shareBtn = document.getElementById('dailyChallengeShareBtn');
+    if (shareBtn) shareBtn.onclick = () => shareTeamChallenge(shareText);
+}
+
+async function shareTeamChallenge(text) {
+    if (navigator.share) {
+        try {
+            await navigator.share({ text });
+            return;
+        } catch (e) {
+            // User cancelled the native share sheet — fall through to clipboard.
+        }
+    }
+    try {
+        await navigator.clipboard.writeText(text);
+        showNotificationToast("Copied! Paste it into your team chat 📋");
+    } catch (e) {
+        showNotificationToast("Couldn't copy automatically — select and copy the challenge text.");
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Weekly Team Meeting — simple day/time the captain sets, shown on the
+// Captain Dashboard. table: team_meetings (team_id primary key).
+// ---------------------------------------------------------------------------
+
+const TEAM_MEETING_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+async function loadWeeklyMeeting() {
+    const mount = document.getElementById('teamMeetingMount');
+    if (!mount) return;
+    if (!currentProfile?.team_id) return;
+
+    const { data: meeting } = await _supabase
+        .from('team_meetings')
+        .select('day_of_week, meeting_time')
+        .eq('team_id', currentProfile.team_id)
+        .maybeSingle();
+
+    const day  = meeting?.day_of_week || 'Monday';
+    const time = meeting?.meeting_time || '7:00 PM';
+
+    mount.innerHTML = `
+        <div class="team-meeting-display" id="teamMeetingDisplay">
+            <div class="team-meeting-label">Next Team Meeting</div>
+            <div class="team-meeting-value">${day} • ${time}</div>
+            <button class="team-meeting-edit-btn" id="teamMeetingEditBtn">Edit</button>
+        </div>
+        <div class="team-meeting-edit-form" id="teamMeetingEditForm" style="display:none;">
+            <select id="teamMeetingDaySelect">
+                ${TEAM_MEETING_DAYS.map(d => `<option value="${d}" ${d === day ? 'selected' : ''}>${d}</option>`).join('')}
+            </select>
+            <input type="text" id="teamMeetingTimeInput" value="${time}" placeholder="7:00 PM">
+            <button class="btn-primary" id="teamMeetingSaveBtn" style="margin-top:8px; width:100%;">Save</button>
+        </div>
+    `;
+
+    const editBtn = document.getElementById('teamMeetingEditBtn');
+    if (editBtn) {
+        editBtn.onclick = () => {
+            document.getElementById('teamMeetingDisplay').style.display = 'none';
+            document.getElementById('teamMeetingEditForm').style.display = 'block';
+        };
+    }
+    const saveBtn = document.getElementById('teamMeetingSaveBtn');
+    if (saveBtn) saveBtn.onclick = saveWeeklyMeeting;
+}
+
+async function saveWeeklyMeeting() {
+    const day  = document.getElementById('teamMeetingDaySelect')?.value || 'Monday';
+    const time = document.getElementById('teamMeetingTimeInput')?.value.trim() || '7:00 PM';
+
+    const { error } = await _supabase
+        .from('team_meetings')
+        .upsert({
+            team_id: currentProfile.team_id,
+            day_of_week: day,
+            meeting_time: time,
+            updated_at: new Date().toISOString(),
+            updated_by: currentUser.id
+        }, { onConflict: 'team_id' });
+
+    if (error) return showNotificationToast("Couldn't save: " + error.message);
+
+    showNotificationToast("Meeting time updated ✓");
+    await loadWeeklyMeeting();
+}
+
+// ---------------------------------------------------------------------------
 // Captain inbox badge on hub load
 // ---------------------------------------------------------------------------
 
@@ -780,6 +926,10 @@ window.uploadTeamPracticePhoto   = uploadTeamPracticePhoto;
 window.openTeamHubFinalSubmit    = openTeamHubFinalSubmit;
 window.enterCaptainDashboard     = enterCaptainDashboard;
 window.exitCaptainDashboard      = exitCaptainDashboard;
+window.loadDailyTeamChallenge    = loadDailyTeamChallenge;
+window.shareTeamChallenge        = shareTeamChallenge;
+window.loadWeeklyMeeting         = loadWeeklyMeeting;
+window.saveWeeklyMeeting         = saveWeeklyMeeting;
 window.loadCaptainWritingQueue   = loadCaptainWritingQueue;
 window.loadCaptainTeamProgress   = loadCaptainTeamProgress;
 window.loadCaptainStats          = loadCaptainStats;
