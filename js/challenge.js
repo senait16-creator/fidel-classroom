@@ -32,6 +32,13 @@ function enterModeSelect() {
 
     if (typeof applyModeLockStyling === 'function') applyModeLockStyling();
 
+    // Captains already see their team/leadership info on the Captain
+    // Dashboard inside Fidel Competition — this card would just repeat it.
+    const teamLeadersCard = document.getElementById("teamLeadersCupCard");
+    if (teamLeadersCard) {
+        teamLeadersCard.style.display = currentProfile?.is_captain ? "none" : "";
+    }
+
     localStorage.setItem('fidel_has_visited', '1');
 }
 
@@ -68,59 +75,58 @@ async function renderChallengeDashboard() {
     }
 
     // ── "View team status" button — toggles the inline panel.
-    //    Team is information on this page, not a separate destination. ──
+    //    Team is information on this page, not a separate destination.
+    //    Captains get the richer Captain Dashboard's Team Progress card
+    //    instead, so this whole card is hidden for them to avoid showing
+    //    the same information twice. ──
+    const teamStatusSection = document.getElementById("challengeTeamStatusMount");
     const teamBtn = document.getElementById("challengeYourTeamBtn");
     const statusContent = document.getElementById("challengeTeamStatusContent");
-    if (teamBtn) {
-        teamBtn.style.background = `linear-gradient(135deg, ${teamHex}, ${teamHex}cc)`;
-        teamBtn.innerText = `View ${team.name} status ↓`;
-        teamBtn.onclick = () => {
-            if (!statusContent) return;
-            const isOpen = statusContent.style.display === "block";
-            statusContent.style.display = isOpen ? "none" : "block";
-            teamBtn.innerText = isOpen
-                ? `View ${team.name} status ↓`
-                : `Hide ${team.name} status ↑`;
-        };
-    }
-    if (statusContent) statusContent.style.display = "none";
-
-    // ── Captain review queue (captains only, relocated from team hub) ──
-    const captainCard = document.getElementById("captainReviewDashCard");
-    if (captainCard) {
-        if (currentProfile?.is_captain) {
-            captainCard.style.display = "block";
-            if (typeof loadCaptainWritingQueue === "function") {
-                await loadCaptainWritingQueue();
-            }
-        } else {
-            captainCard.style.display = "none";
+    if (currentProfile?.is_captain) {
+        if (teamStatusSection) teamStatusSection.style.display = "none";
+    } else {
+        if (teamStatusSection) teamStatusSection.style.display = "";
+        if (teamBtn) {
+            teamBtn.style.background = `linear-gradient(135deg, ${teamHex}, ${teamHex}cc)`;
+            teamBtn.innerText = `View ${team.name} status ↓`;
+            teamBtn.onclick = () => {
+                if (!statusContent) return;
+                const isOpen = statusContent.style.display === "block";
+                statusContent.style.display = isOpen ? "none" : "block";
+                teamBtn.innerText = isOpen
+                    ? `View ${team.name} status ↓`
+                    : `Hide ${team.name} status ↑`;
+            };
         }
+        if (statusContent) statusContent.style.display = "none";
     }
 
-    // ── Star of the Week picker (captains only) ─────────────────
-    const starCard = document.getElementById("starOfWeekCard");
-    if (starCard) {
+    // ── Captain Dashboard — one consolidated leadership zone ─────
+    const captainZone = document.getElementById("captainZone");
+    if (captainZone) {
         if (currentProfile?.is_captain) {
-            starCard.style.display = "block";
-            if (typeof renderStarPicker === "function") {
-                await renderStarPicker("starPickerMount");
-            }
-        } else {
-            starCard.style.display = "none";
-        }
-    }
+            captainZone.style.display = "block";
+            const zoneSub = document.getElementById("captainZoneSub");
+            if (zoneSub) zoneSub.innerText = `Your leadership tools for ${team.name}`;
 
-    // ── Help requests (captains only, relocated from team hub) ──────
-    const helpCard = document.getElementById("challengeHelpFlagsCard");
-    if (helpCard) {
-        if (currentProfile?.is_captain) {
-            helpCard.style.display = "block";
-            if (typeof loadHelpFlags === "function") {
-                await loadHelpFlags('helpFlagsMount');
+            // Pending Writing Reviews — collapsed behind the CTA button,
+            // loadCaptainWritingQueue() also fills in the count pill.
+            const reviewMount = document.getElementById("captainWritingQueueMount");
+            const reviewToggleBtn = document.getElementById("captainReviewToggleBtn");
+            if (reviewToggleBtn && reviewMount) {
+                reviewToggleBtn.onclick = () => {
+                    const isOpen = reviewMount.style.display === "block";
+                    reviewMount.style.display = isOpen ? "none" : "block";
+                    reviewToggleBtn.innerText = isOpen ? "📝 Review Writing" : "📝 Hide Review Queue";
+                };
             }
+            if (typeof loadCaptainWritingQueue === "function") await loadCaptainWritingQueue();
+            if (typeof loadCaptainTeamProgress === "function") await loadCaptainTeamProgress();
+            if (typeof loadHelpFlags === "function") await loadHelpFlags('helpFlagsMount');
+            if (typeof renderStarPicker === "function") await renderStarPicker("starPickerMount");
+            if (typeof loadCaptainStats === "function") await loadCaptainStats();
         } else {
-            helpCard.style.display = "none";
+            captainZone.style.display = "none";
         }
     }
 
