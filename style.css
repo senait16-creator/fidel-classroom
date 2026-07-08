@@ -40,9 +40,9 @@
    Clean consolidated version. No duplicate blocks, no unclosed rules.
    ============================================================================= */
 
-/*  Variables */
+/* Variables */
 
-/*  Reset */
+/* Reset */
 
 * {
     box-sizing: border-box;
@@ -51,7 +51,7 @@
     -webkit-tap-highlight-color: transparent;
 }
 
-/*  Typography  */
+/* Typography */
 
 .main-title {
     font-family: 'Lora', 'Playfair Display', serif;
@@ -71,7 +71,7 @@
     font-weight: 400;
 }
 
-/* App card (auth screens)  */
+/* App card (auth screens) */
 
 .app-card {
     max-width: 420px;
@@ -87,7 +87,7 @@
     z-index: 2;
 }
 
-/*  Auth screen */
+/* Auth screen */
 
 .auth-decorative-bg {
     position: fixed;
@@ -188,7 +188,7 @@
     }
 }
 
-/*  Team dot accent  */
+/* Team dot accent */
 
 .team-dot-accent {
     display: flex;
@@ -227,7 +227,7 @@
     font-weight: 400;
 }
 
-/*  Inputs  */
+/* Inputs */
 
 input, select {
     width: 100%;
@@ -246,7 +246,7 @@ input:focus, select:focus {
     border-color: var(--brand-primary);
 }
 
-/*  Auth buttons  */
+/* Auth buttons */
 
 .choice-container {
     display: flex;
@@ -337,7 +337,7 @@ input:focus, select:focus {
     text-decoration: underline;
 }
 
-/*  Global buttons  */
+/* Global buttons */
 
 .btn-primary {
     background: var(--brand-primary);
@@ -368,7 +368,7 @@ input:focus, select:focus {
     font-family: 'Inter', sans-serif;
 }
 
-/*  Dashboards  */
+/* Dashboards */
 
 .dashboard-split-layout {
     display: grid;
@@ -429,7 +429,7 @@ header {
     transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/*  Pod card  */
+/* Pod card */
 
 .pod-card {
     background: white;
@@ -509,9 +509,9 @@ header {
     color: #475569;
 }
 
-/*  Admin gate (kept for JS compatibility, never shown)  */
+/* Admin gate (kept for JS compatibility, never shown) */
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Teacher panels Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Teacher panels */
 
 .teacher-panel {
     background: white;
@@ -623,7 +623,7 @@ header {
     }
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Collapsible dropdowns Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Collapsible dropdowns */
 
 .collapsible-dropdown-container {
     background: white;
@@ -661,7 +661,7 @@ header {
     display: flex;
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Leaderboard Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Leaderboard */
 
 .leaderboard-row {
     display: flex;
@@ -723,7 +723,7 @@ header {
     text-align: center;
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Workspace Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Workspace */
 
 .workspace-title {
     font-size: 22px;
@@ -792,7 +792,7 @@ header {
     }
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Fidel grid Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Fidel grid */
 
 .fidel-grid-3col {
     display: grid;
@@ -832,7 +832,7 @@ header {
     color: #10b981;
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Classroom row Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Classroom row */
 
 #isolatedFamilyClassroom {
     display: none;
@@ -889,7 +889,7 @@ header {
     font-weight: 500;
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Game workspace Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Game workspace */
 
 #gameWorkspace {
     display: none;
@@ -988,7 +988,7 @@ header {
     pointer-events: none;
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Sketchpad Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Sketchpad */
 
 .embedded-classroom-sketchpad {
     background: #f8fafc;
@@ -1016,7 +1016,7 @@ header {
     margin-top: 10px;
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Feed / gallery Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Feed / gallery */
 
 .feed-grid {
     display: grid;
@@ -1052,7 +1052,7 @@ header {
     gap: 4px;
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Avatars Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Avatars */
 
 .avatar-grid {
     display: grid;
@@ -1075,7 +1075,7 @@ header {
     background: #f0fdfa;
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Toast / confetti Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Toast / confetti */
 
 #toastContainer {
     position: fixed;
@@ -1122,7 +1122,7 @@ header {
     z-index: 99999;
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Bottom banner (teacher only) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Bottom banner (teacher only) */
 
 .bottom-banner {
     position: fixed;
@@ -1156,7 +1156,7 @@ header {
     display: none !important;
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Challenge board header Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Challenge board header */
 
 .challenge-board-header {
     background: white;
@@ -1240,7 +1240,7 @@ header {
     transition: width 0.5s ease;
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Challenge level cards Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Challenge level cards */
 
 .challenge-levels-grid {
     display: grid;
@@ -1282,7 +1282,7 @@ header {
 }
 
 .challenge-level-card.completed::after {
-    content: "Ã¢Å“â€œ";
+    content: "✓";
     position: absolute;
     top: 8px;
     right: 10px;
@@ -1359,7 +1359,7 @@ header {
     border-radius: 8px;
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Challenge family picker Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Challenge family picker */
 
 .challenge-family-grid {
     display: grid;
@@ -1477,7 +1477,7 @@ header {
     background: #d1fae5;
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Challenge family detail Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Challenge family detail */
 
 .challenge-streak-rule-banner {
     background: #fff7ed;
@@ -1658,7 +1658,7 @@ header {
     opacity: 0.6;
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Teacher submission cards Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Teacher submission cards */
 
 .teacher-submission-card {
     display: flex;
@@ -1798,7 +1798,7 @@ header {
     font-weight: 600;
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Captain member cards Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Captain member cards */
 
 .captain-member-card {
     border: 1px solid var(--border-color);
@@ -1895,7 +1895,7 @@ header {
     color: #92400e;
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Reading path Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Reading path */
 
 .reading-passage-card {
     background: white;
@@ -1958,63 +1958,9 @@ header {
    two side-by-side buttons, which never fit the tight multi-column
    grid built for the plain number-badge Fidel Challenge tiles. */
 
-.chapter-list-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    margin-top: 20px;
-}
-
-.chapter-list-card {
-    position: relative;
-    background: white;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-standard);
-    box-shadow: var(--shadow-premium);
-    padding: 18px 20px;
-    text-align: left;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.chapter-list-card.completed {
-    border-color: #bbf7d0;
-}
-
-.chapter-list-card .challenge-level-number-badge {
-    margin: 0;
-    flex-shrink: 0;
-}
-
 .chapter-list-card-body {
     flex: 1;
     min-width: 0;
-}
-
-.chapter-list-card-title {
-    font-size: 16px;
-    font-weight: 800;
-    color: var(--neutral-dark);
-}
-
-.chapter-list-card-meta {
-    font-size: 11px;
-    color: #94a3b8;
-    margin-top: 4px;
-}
-
-.chapter-card-actions {
-    display: flex;
-    gap: 8px;
-    margin-top: 12px;
-}
-
-.chapter-card-actions button {
-    flex: 1;
-    font-size: 12px;
-    padding: 9px 8px;
-    white-space: nowrap;
 }
 
 @media (max-width: 480px) {
@@ -2027,13 +1973,6 @@ header {
 
 /* ── My Amharic Path — step progress indicator ──────────────── */
 
-.lesson-step-header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-}
-
 .lesson-prev-lesson-link {
     font-size: 11px;
     font-weight: 700;
@@ -2041,16 +1980,6 @@ header {
     text-decoration: none;
     text-transform: uppercase;
     letter-spacing: 0.4px;
-}
-
-.lesson-step-progress {
-    font-size: 11px;
-    font-weight: 700;
-    color: #94a3b8;
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    flex: 1;
 }
 
 /* ── My Amharic Path — Chapter Goals card ("what will I learn") ── */
@@ -2078,22 +2007,6 @@ header {
 
 /* ── My Amharic Path — Today's Goal step ─────────────────────── */
 
-.lesson-goal-card {
-    background: #eef2ff;
-    border: 1px solid #c7d2fe;
-    border-radius: 14px;
-    padding: 20px 18px;
-    text-align: center;
-}
-
-.lesson-goal-text {
-    font-size: 16px;
-    font-weight: 700;
-    color: #3730a3;
-    line-height: 1.5;
-    margin-top: 6px;
-}
-
 .lesson-goal-time {
     font-size: 12px;
     color: #6366f1;
@@ -2101,19 +2014,6 @@ header {
 }
 
 /* ── My Amharic Path — per-step Continue/Back nav ───────────── */
-
-.lesson-step-nav {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    margin-top: 20px;
-    padding-top: 16px;
-    border-top: 1px solid var(--border-color);
-}
-
-.lesson-step-nav button {
-    flex: 1;
-}
 
 /* ── My Amharic Path — Conversation tab ─────────────────────── */
 
@@ -2265,10 +2165,6 @@ header {
 }
 
 /* ── My Amharic Path — lesson step panel ─────────────────────── */
-
-.chapter-tab-panel {
-    text-align: left;
-}
 
 /* ── Vocabulary tab ──────────────────────────────────────────── */
 
@@ -2435,7 +2331,7 @@ header {
     border: 1px solid #fecaca;
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Student team rows Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Student team rows */
 
 .student-team-row {
     display: flex;
@@ -2466,7 +2362,7 @@ header {
     font-weight: 700;
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Flashcard screen Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Flashcard screen */
 
 #flashcardScreen {
     display: none;
@@ -2530,7 +2426,7 @@ header {
     transform: rotateY(-180deg);
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Writing submit screen Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Writing submit screen */
 
 #writingSubmitScreen {
     position: fixed;
@@ -2545,13 +2441,13 @@ header {
     flex-direction: column;
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Family practice sheet Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Family practice sheet */
 
 #familyPracticeSheet {
     padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Team hub Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Team hub */
 
 .team-hub-header-pattern {
     position: absolute;
@@ -2846,7 +2742,7 @@ header {
     animation: gentlePulse 2s ease-in-out 1;
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Challenge map overlay Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Challenge map overlay */
 
 #challengeMapOverlay {
     display: none;
@@ -2874,7 +2770,7 @@ header {
     flex: 1;
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Hamburger button Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Hamburger button */
 
 #hamburgerBtn:hover {
     box-shadow: 0 4px 16px rgba(22, 101, 52, 0.2);
@@ -2899,7 +2795,7 @@ header {
     animation: screenFadeIn 0.22s ease forwards;
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Skeleton loader Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Skeleton loader */
 
 @keyframes shimmer {
     0% {
@@ -2911,7 +2807,7 @@ header {
     }
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Streak value display Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Streak value display */
 
 .streak-value-display {
     display: inline-block;
@@ -3026,7 +2922,7 @@ header {
     gap: 10px;
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Wordle overlay Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Wordle overlay */
 
 #wordleOverlay {
     position: fixed;
@@ -3286,13 +3182,13 @@ header {
     font-family: 'Inter', sans-serif;
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Letter picker in team hub Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Letter picker in team hub */
 
 #teamHubLetterPickerWrap {
     animation: screenFadeIn 0.2s ease forwards;
 }
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Animations Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Animations */
 
 @keyframes screenFadeIn {
     from {
@@ -3411,13 +3307,13 @@ header {
 }
 
 /* =============================================================
-   PHASE 2 VISUAL ADDITIONS Ã¢â‚¬â€ paste at bottom of style.css
+   PHASE 2 VISUAL ADDITIONS — paste at bottom of style.css
    Covers: mode select gradient, team hub Option B overlap,
    team race redesign, icon action buttons, letter board,
    reading/vocab path headers.
    ============================================================= */
 
-/* Ã¢â€â‚¬Ã¢â€â‚¬ Mode select: gradient background Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+/* Mode select: gradient background */
 
 .mode-jump-btn {
     flex: 1;
@@ -3441,9 +3337,9 @@ header {
     color: white !important;
 }
 
-/*  Team hub: Option B overlap  */
+/* Team hub: Option B overlap */
 
-/*  Team race redesign  */
+/* Team race redesign */
 
 .race-standings {
     display: flex;
@@ -3580,7 +3476,7 @@ header {
     color: #94a3b8;
 }
 
-/*  Icon action buttons  */
+/* Icon action buttons */
 
 .share-hint-text {
     font-size: 12px;
@@ -3632,7 +3528,7 @@ header {
     font-family: 'Inter', sans-serif;
 }
 
-/* Full letter board  */
+/* Full letter board */
 
 #letterBoardScreen {
     display: none;
@@ -3852,13 +3748,13 @@ header {
     background: #e2e8f0;
 }
 
-/* Reading path gradient header  */
+/* Reading path gradient header */
 
-/*  Vocab path gradient header */
+/* Vocab path gradient header */
 
-/*  Path header shared styles  */
+/* Path header shared styles */
 
-/*  Level card shared (reading + vocab)  */
+/* Level card shared (reading + vocab) */
 
 /* Word chips for vocab levels */
 
@@ -3875,7 +3771,7 @@ header {
 /* Fidel map amber header */
 
 /* =============================================================================
-   v9 FINAL DESIGN LAYER Ã¢â‚¬â€ cohesive Ethiopian coffee UI
+   v9 FINAL DESIGN LAYER — cohesive Ethiopian coffee UI
    Paste-safe overrides. Keep this at the bottom of style.css.
    ============================================================================= */
 
@@ -3964,7 +3860,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     background: linear-gradient(135deg, #14532d, #166534);
 }
 
-/* Mode select Ã¢â‚¬â€ make preview design the real home screen */
+/* Mode select — make preview design the real home screen */
 
 #modeSelectScreen {
     animation: modeSelectEnter 0.35s cubic-bezier(0.32, 0.72, 0, 1) forwards;
@@ -3991,7 +3887,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 
 #modeSelectScreen::after {
-    content: "Ã¡Ë†Ëœ";
+    content: "";
     font-size: 180px;
     bottom: -44px;
     right: 6px;
@@ -4719,70 +4615,6 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 
 .challenge-level-resource-panel {
     grid-column: 1 / -1;
-    background: linear-gradient(135deg, #fff7ed, #ecfdf5);
-    border: 1px solid rgba(22, 101, 52, 0.16);
-    border-radius: 24px;
-    padding: 22px;
-    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
-    margin-bottom: 8px;
-}
-
-.challenge-resource-eyebrow {
-    font-size: 12px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #a16207;
-    margin-bottom: 6px;
-}
-
-.challenge-resource-title {
-    margin: 0;
-    font-size: 24px;
-    font-weight: 900;
-    color: #166534;
-}
-
-.challenge-resource-copy {
-    margin: 8px 0 16px;
-    color: #475569;
-    font-size: 14px;
-    line-height: 1.5;
-}
-
-.challenge-resource-links {
-    display: grid;
-    gap: 10px;
-}
-
-.challenge-resource-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    border-radius: 16px;
-    padding: 13px 14px;
-    background: white;
-    color: #166534;
-    font-weight: 900;
-    border: 1px solid rgba(22, 101, 52, 0.14);
-}
-
-.challenge-resource-link.primary {
-    background: #166534;
-    color: white;
-}
-
-.challenge-family-section-title {
-    grid-column: 1 / -1;
-    font-weight: 900;
-    color: #334155;
-    margin: 12px 0 2px;
-    text-align: center;
-}
-
-.challenge-level-resource-panel {
-    grid-column: 1 / -1;
     background: linear-gradient(135deg, #fff7ed 0%, #ecfdf5 55%, #fef3c7 100%);
     border: 2px solid rgba(22, 101, 52, 0.18);
     border-radius: 28px;
@@ -4886,34 +4718,6 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 
 .challenge-lesson-briefing {
-    text-align: center;
-    background: linear-gradient(135deg, #432818, #166534);
-    color: white;
-    border-radius: 30px;
-    padding: 28px 22px;
-    box-shadow: 0 20px 45px rgba(15, 23, 42, 0.18);
-}
-
-.challenge-lesson-icon {
-    font-size: 34px;
-    margin-bottom: 8px;
-}
-
-.challenge-lesson-level {
-    font-size: 13px;
-    font-weight: 900;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    opacity: 0.85;
-}
-
-.challenge-lesson-families {
-    font-size: 42px;
-    font-weight: 900;
-    margin: 8px 0;
-}
-
-.challenge-lesson-briefing {
     grid-column: 1 / -1;
     position: relative;
     overflow: hidden;
@@ -4933,30 +4737,6 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 
     box-shadow:
         0 10px 30px rgba(15,23,42,.06);
-}
-.challenge-lesson-briefing::before{
-    content:"ሀ ለ ሐ መ ሠ";
-
-    position:absolute;
-
-    top:50%;
-    left:50%;
-
-    transform:translate(-50%,-50%);
-
-    font-size:90px;
-
-    font-weight:900;
-
-    letter-spacing:24px;
-
-    color:rgba(22,101,52,.035);
-
-    pointer-events:none;
-
-    user-select:none;
-
-    white-space:nowrap;
 }
 
 .challenge-lesson-briefing::before{
@@ -6023,13 +5803,6 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
 }
 
-.lesson-section-card h3 {
-    font-size: 20px;
-    font-weight: 800;
-    color: #166534;
-    margin: 6px 0 10px;
-}
-
 .lesson-section-card p {
     font-size: 14px;
     line-height: 1.6;
@@ -6044,34 +5817,11 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     line-height: 1.7;
 }
 
-.lesson-resource-link {
-    display: block;
-    margin-top: 14px;
-    padding: 12px 14px;
-    border-radius: 12px;
-    background: #eef2ff;
-    color: #4338ca;
-    font-size: 13px;
-    font-weight: 800;
-    text-decoration: none;
-}
-
 .lesson-example-list {
     display: flex;
     flex-direction: column;
     gap: 10px;
     margin-top: 12px;
-}
-
-.lesson-example-row {
-    display: grid;
-    grid-template-columns: 90px 1fr;
-    gap: 10px;
-    align-items: start;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 12px;
 }
 
 .lesson-example-label {
@@ -6081,47 +5831,16 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     text-transform: uppercase;
 }
 
-.lesson-example-amharic {
-    font-family: 'Abyssinica SIL', serif;
-    font-size: 19px;
-    color: #0f172a;
-}
-
 .lesson-example-translit {
     font-size: 12px;
     color: #64748b;
     margin-top: 2px;
 }
 
-.lesson-example-english {
-    font-size: 13px;
-    color: #334155;
-    margin-top: 4px;
-}
-
-.lesson-notice {
-    margin-top: 14px;
-    background: #fefce8;
-    border: 1px solid #fde68a;
-    color: #854d0e;
-    padding: 12px;
-    border-radius: 12px;
-    font-size: 13px;
-    line-height: 1.5;
-}
-
 .lesson-quiz-list {
     display: flex;
     flex-direction: column;
     gap: 10px;
-}
-
-.lesson-quiz-card {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    padding: 14px;
-    cursor: pointer;
 }
 
 .lesson-quiz-question {
@@ -6138,11 +5857,6 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     font-weight: 700;
 }
 
-.lesson-quiz-card.revealed {
-    background: #f0fdf4;
-    border-color: #bbf7d0;
-}
-
 .lesson-quiz-card.revealed .lesson-quiz-answer {
     display: block;
 }
@@ -6156,59 +5870,6 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     margin-top: 24px;
 }
 
-.chapter-list-card {
-    position: relative;
-    overflow: hidden;
-    border-radius: 24px;
-    padding: 22px 20px;
-    background:
-        radial-gradient(circle at top left, rgba(22, 101, 52, 0.10), transparent 35%),
-        linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    border: 1px solid rgba(22, 101, 52, 0.12);
-    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.10);
-}
-
-.chapter-list-card::before {
-    content: "ፊደል";
-    position: absolute;
-    right: 18px;
-    top: 10px;
-    font-family: 'Abyssinica SIL', serif;
-    font-size: 42px;
-    color: rgba(22, 101, 52, 0.07);
-    font-weight: 900;
-}
-
-.chapter-list-card.completed {
-    background:
-        radial-gradient(circle at top left, rgba(34, 197, 94, 0.18), transparent 38%),
-        linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
-    border-color: #86efac;
-}
-
-.chapter-list-card .challenge-level-number-badge {
-    width: 52px;
-    height: 52px;
-    border-radius: 18px;
-    background: linear-gradient(135deg, #166534, #22c55e);
-    color: white;
-    box-shadow: 0 10px 22px rgba(22, 101, 52, 0.25);
-}
-
-.chapter-list-card-title {
-    font-size: 19px;
-    font-weight: 900;
-    color: #0f172a;
-    letter-spacing: -0.3px;
-}
-
-.chapter-list-card-meta {
-    margin-top: 6px;
-    font-size: 12px;
-    font-weight: 800;
-    color: #64748b;
-}
-
 .chapter-card-actions {
     margin-top: 16px;
 }
@@ -6218,18 +5879,6 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     padding: 11px 10px;
     font-size: 12px;
     font-weight: 900;
-}
-
-.chapter-card-actions .chapter-goals-btn {
-    background: #f8fafc;
-    border: 1px solid #dbeafe;
-    color: #1e3a8a;
-}
-
-.chapter-card-actions .chapter-start-btn {
-    background: linear-gradient(135deg, #166534, #16a34a);
-    color: white;
-    box-shadow: 0 10px 22px rgba(22, 101, 52, 0.22);
 }
 
 /* Lesson step header/progress */
@@ -6248,20 +5897,8 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 
 /* Main lesson panel */
-.chapter-tab-panel {
-    background:
-        linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-    border-radius: 24px;
-}
 
 /* Lesson cards inside chapters */
-.lesson-section-card,
-.lesson-goal-card {
-    border-radius: 24px;
-    padding: 22px 18px;
-    border: 1px solid rgba(22, 101, 52, 0.12);
-    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
-}
 
 .lesson-section-card h3 {
     font-size: 22px;
@@ -6273,13 +5910,6 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 .lesson-section-card li {
     font-size: 15px;
     line-height: 1.75;
-}
-
-.lesson-goal-card {
-    background:
-        radial-gradient(circle at top, rgba(22, 101, 52, 0.12), transparent 40%),
-        linear-gradient(135deg, #ecfdf5, #ffffff);
-    border-color: #bbf7d0;
 }
 
 .lesson-goal-text {
@@ -6322,16 +5952,6 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 
 /* Notices/resources */
-.lesson-notice {
-    border-radius: 18px;
-    background: #fffbeb;
-    border-color: #fde68a;
-}
-
-.lesson-resource-link {
-    border-radius: 18px;
-    background: #eef2ff;
-}
 
 /* Nav buttons */
 .lesson-step-nav {
