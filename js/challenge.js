@@ -140,8 +140,110 @@ async function renderChallengeDashboard() {
 
     // ── Render all dashboard sections ────────────────────────
     await renderChallengeDashboardMap(levels, team);
+    await renderTeamUrgencyCard(team);
     await renderChallengeTeamStatus(team);
     await renderChallengeDashboardRace();
+    wireCurrentLevelResources(levels, team);
+}
+
+// The resource videos/links themselves are the same regardless of level
+// (general Fidel alphabet resources), so this just labels the card with
+// the student's actual current level and points Practice at it.
+function wireCurrentLevelResources(levels, team) {
+    const currentLevel = levels.find(l => l.level_number === (team.current_level || 1)) || levels[0];
+
+    const title = document.getElementById("currentLevelResourcesTitle");
+    if (title && currentLevel) title.innerText = `📚 Level ${currentLevel.level_number} Resources`;
+
+    const practiceBtn = document.getElementById("currentLevelPracticeBtn");
+    if (practiceBtn && currentLevel) {
+        practiceBtn.onclick = () => openChallengeFamilyPicker(currentLevel);
+    }
+}
+
+// Makes the team part of the challenge feel real: instead of a flat
+// percentage, tell the student whether their team is waiting on them,
+// or whether they're waiting on their team. Captains skip this — they
+// get the richer per-member Team Progress card in the Captain Dashboard.
+async function renderTeamUrgencyCard(team) {
+    const card = document.getElementById("challengeTeamUrgencyCard");
+    const mount = document.getElementById("teamUrgencyMount");
+    if (!card || !mount) return;
+
+    if (currentProfile?.is_captain || !currentProfile?.team_id) {
+        card.style.display = "none";
+        return;
+    }
+
+    const currentLevel = team.current_level || 1;
+
+    const { data: members } = await _supabase
+        .from('profiles')
+        .select('id, nickname, is_captain')
+        .eq('team_id', currentProfile.team_id);
+
+    const teammates = (members || []).filter(m => !m.is_captain && m.id !== currentUser.id);
+    if (teammates.length === 0) {
+        card.style.display = "none";
+        return;
+    }
+
+    const { data: level } = await _supabase
+        .from('challenge_levels')
+        .select('letter_families')
+        .eq('level_number', currentLevel)
+        .maybeSingle();
+
+    const families = level?.letter_families || [];
+    if (families.length === 0) {
+        card.style.display = "none";
+        return;
+    }
+
+    const memberIds = [currentUser.id, ...teammates.map(m => m.id)];
+    const { data: progressRows } = await _supabase
+        .from('student_family_progress')
+        .select('student_id, base_letter, streak_passed, writing_passed')
+        .in('student_id', memberIds)
+        .eq('level_number', currentLevel);
+
+    const isDone = (studentId) => families.every(fam => {
+        const row = (progressRows || []).find(r => r.student_id === studentId && r.base_letter === fam);
+        return row?.streak_passed && row?.writing_passed;
+    });
+
+    const iAmDone = isDone(currentUser.id);
+    const doneTeammates = teammates.filter(m => isDone(m.id));
+    const waitingTeammates = teammates.filter(m => !isDone(m.id));
+
+    card.style.display = "block";
+
+    if (iAmDone && waitingTeammates.length === 0) {
+        // Whole team cleared — the top-of-page banner already covers this.
+        card.style.display = "none";
+        return;
+    }
+
+    let html;
+    if (!iAmDone && doneTeammates.length > 0) {
+        html = `
+            <div class="team-urgency-title">🏁 ${team.name}</div>
+            <p class="team-urgency-body">${doneTeammates.length} teammate${doneTeammates.length > 1 ? 's are' : ' is'} waiting on you.</p>
+            <p class="team-urgency-sub">Finish today and your team can advance.</p>`;
+    } else if (iAmDone && waitingTeammates.length > 0) {
+        const names = waitingTeammates.map(m => m.nickname || 'a teammate').join(', ');
+        html = `
+            <div class="team-urgency-title">🏁 ${team.name}</div>
+            <p class="team-urgency-body">You're done! Waiting on: ${names}.</p>
+            <p class="team-urgency-sub">Encourage them so your team can move on together.</p>`;
+    } else {
+        html = `
+            <div class="team-urgency-title">🏁 ${team.name}</div>
+            <p class="team-urgency-body">Everyone's working on Level ${currentLevel} together.</p>
+            <p class="team-urgency-sub">Keep practicing — every family you clear helps the team.</p>`;
+    }
+
+    mount.innerHTML = html;
 }
 
 async function renderChallengeTeamStatus(team) {
@@ -174,21 +276,34 @@ async function renderChallengeTeamStatus(team) {
     const families = level?.letter_families || [];
 
     let progressRows = [];
+    let pendingSubs = [];
     if (memberIds.length > 0 && families.length > 0) {
-        const { data } = await _supabase
-            .from('student_family_progress')
-            .select('student_id, base_letter, streak_passed, writing_passed, best_streak')
-            .in('student_id', memberIds)
-            .eq('level_number', currentLevel);
-        progressRows = data || [];
+        const [{ data: progress }, { data: subs }] = await Promise.all([
+            _supabase
+                .from('student_family_progress')
+                .select('student_id, base_letter, streak_passed, writing_passed, best_streak')
+                .in('student_id', memberIds)
+                .eq('level_number', currentLevel),
+            _supabase
+                .from('writing_submissions')
+                .select('student_id, base_letter, status')
+                .in('student_id', memberIds)
+                .eq('status', 'pending')
+        ]);
+        progressRows = progress || [];
+        pendingSubs = subs || [];
     }
 
     const rows = (members || []).map(member => {
         if (member.is_captain) {
             return `
-                <div class="challenge-team-member-row captain">
-                    <span>${member.avatar || '👑'} ${member.nickname || 'Captain'}</span>
-                    <strong>Captain</strong>
+                <div class="teammate-card">
+                    <div class="teammate-avatar">${member.avatar || '👑'}</div>
+                    <div>
+                        <div class="teammate-name">${member.nickname || 'Captain'}</div>
+                        <div class="teammate-meta">Level ${currentLevel}</div>
+                    </div>
+                    <div class="teammate-status captain">Captain</div>
                 </div>`;
         }
 
@@ -202,10 +317,29 @@ async function renderChallengeTeamStatus(team) {
             return !(row?.streak_passed && row?.writing_passed);
         });
 
+        const hasPending = pendingSubs.some(s => s.student_id === member.id);
+
+        let statusHtml;
+        if (!nextNeeded) {
+            statusHtml = `<div class="teammate-status approved">Approved ✓</div>`;
+        } else if (hasPending) {
+            statusHtml = `<div class="teammate-status pending">Pending review</div>`;
+        } else {
+            statusHtml = '';
+        }
+
+        const meta = nextNeeded
+            ? `Level ${currentLevel} • ${nextNeeded} family`
+            : `Level ${currentLevel} • all ${families.length || 3} families`;
+
         return `
-            <div class="challenge-team-member-row">
-                <span>${member.avatar || '🦁'} ${member.nickname || 'Student'}</span>
-                <strong>${cleared}/${families.length || 3} done${nextNeeded ? ` · next ${nextNeeded}` : ' ✓'}</strong>
+            <div class="teammate-card">
+                <div class="teammate-avatar">${member.avatar || '🦁'}</div>
+                <div>
+                    <div class="teammate-name">${member.nickname || 'Student'}</div>
+                    <div class="teammate-meta">${meta}</div>
+                </div>
+                ${statusHtml}
             </div>`;
     }).join('');
 
@@ -245,18 +379,44 @@ async function renderChallengeDashboardMap(levels, team) {
         (!nextLevel || level.level_number !== nextLevel.level_number)
     );
 
+    // "Today's Goal" — the student's specific next-incomplete family in the
+    // current level, with their live streak, instead of a flat level label.
+    // Hidden once every family is cleared — the "cleared all 3" banner at
+    // the very top of the page already covers that state.
+    let goalHtml = '';
+    let targetFamily = null;
+    const families = currentLevel.letter_families || [];
+    if (!currentProfile?.is_captain && families.length > 0) {
+        const { data: progressRows } = await _supabase
+            .from('student_family_progress')
+            .select('base_letter, streak_passed, writing_passed, best_streak')
+            .eq('student_id', currentUser.id)
+            .eq('level_number', currentLevel.level_number);
+
+        targetFamily = families.find(fam => {
+            const row = (progressRows || []).find(r => r.base_letter === fam);
+            return !(row?.streak_passed && row?.writing_passed);
+        });
+
+        if (targetFamily) {
+            const row = (progressRows || []).find(r => r.base_letter === targetFamily);
+            const streak = row?.best_streak || 0;
+            const percent = Math.min(100, Math.round((streak / STREAK_THRESHOLD) * 100));
+            goalHtml = `
+                <div class="challenge-goal-card">
+                    <div class="challenge-goal-eyebrow">🎯 Today's Goal</div>
+                    <div class="challenge-goal-title">Complete the ${targetFamily} family</div>
+                    <div class="challenge-goal-streak-row">
+                        <span>Current streak</span><span>${streak} / ${STREAK_THRESHOLD}</span>
+                    </div>
+                    <div class="challenge-goal-track"><div class="challenge-goal-fill" style="width:${percent}%;"></div></div>
+                    <button class="challenge-goal-btn" id="challengeGoalBtn">Continue Practicing →</button>
+                </div>`;
+        }
+    }
+
     mount.innerHTML = `
-        <div class="challenge-level-focus-card">
-            <div class="challenge-focus-label">Current Level</div>
-            <div class="challenge-focus-title">Level ${currentLevel.level_number}</div>
-            <div class="challenge-focus-families">${(currentLevel.letter_families || []).join(" ")}</div>
-            <p class="challenge-focus-copy">
-                Complete your streak and writing submission to help your team move forward.
-            </p>
-            <button class="challenge-focus-btn" id="challengeContinueLevelBtn">
-                Continue Level ${currentLevel.level_number}
-            </button>
-        </div>
+        ${goalHtml}
 
         ${
             nextLevel
@@ -305,9 +465,16 @@ async function renderChallengeDashboardMap(levels, team) {
         </div>
     `;
 
-    const continueBtn = document.getElementById("challengeContinueLevelBtn");
-    if (continueBtn) {
-        continueBtn.onclick = () => openChallengeFamilyPicker(currentLevel);
+    const goalBtn = document.getElementById("challengeGoalBtn");
+    if (goalBtn) {
+        goalBtn.onclick = async () => {
+            const fidelObj = targetFamily ? alphabetData.find(f => f.base === targetFamily) : null;
+            // Go through the picker first so its navigation state (activeChallengeLevel,
+            // the rendered family grid) is set up correctly for the "back" button,
+            // then immediately layer the detail screen on top for a one-tap jump.
+            await openChallengeFamilyPicker(currentLevel);
+            if (fidelObj) openChallengeFamilyDetail(fidelObj, currentLevel.level_number);
+        };
     }
 }
 
