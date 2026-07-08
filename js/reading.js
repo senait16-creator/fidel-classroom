@@ -1,6 +1,6 @@
 // =============================================================================
 // MY AMHARIC PATH — reading.js
-// The flagship guided course. reading.js is the ENGINE ONLY — navigation,
+// The flagship guided course. reading.js is the ENGINE ONLY — navigation, 
 // rendering, progress, quizzes, lesson flow. The CURRICULUM lives entirely
 // in Supabase: the app asks "what does Lesson 3 contain?" and renders
 // whatever comes back. Adding Chapters 2-12 is a content/SQL job, not a
