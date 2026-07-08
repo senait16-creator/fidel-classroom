@@ -121,28 +121,55 @@ async function fetchMyChapterProgressAll() {
     return data || [];
 }
 
+// Powers the progress bar on each chapter card — every lesson (including
+// the Chapter Challenge itself) gets a row here once completed, so
+// completedCount/totalCount naturally reaches 100% exactly when
+// reading_chapter_progress.checkpoint_passed does too.
+async function fetchMyLessonProgressAll() {
+    const { data, error } = await _supabase
+        .from('chapter_lesson_progress')
+        .select('lesson_id, completed_at')
+        .eq('student_id', currentUser.id);
+
+    if (error) {
+        console.error("Failed to load lesson progress:", error);
+        return [];
+    }
+    return data || [];
+}
+
 // A chapter is considered "complete" once its Chapter Challenge checkpoint
 // is passed — that single existing rollup is simpler and more meaningful
 // than trying to combine six different per-lesson progress tables into one
-// completion percentage just for a list card.
+// completion flag. The progress BAR underneath, though, tracks real
+// per-lesson completion so the card shows meaningful movement before the
+// chapter is finished, not just an all-or-nothing state.
 async function renderReadingLevelsList() {
     const container = document.getElementById("readingLevelsGrid");
     container.innerHTML = `<p style="color:#94a3b8;">Loading...</p>`;
 
-    const [levels, lessons, chapterProgress] = await Promise.all([
+    const [levels, lessons, chapterProgress, lessonProgress] = await Promise.all([
         fetchReadingLevels(),
         fetchAllLessons(),
-        fetchMyChapterProgressAll()
+        fetchMyChapterProgressAll(),
+        fetchMyLessonProgressAll()
     ]);
 
     const passedByLevel = {};
     chapterProgress.forEach(row => { passedByLevel[row.level_number] = row.checkpoint_passed; });
+
+    const completedLessonIds = new Set(
+        lessonProgress.filter(row => row.completed_at).map(row => row.lesson_id)
+    );
 
     container.innerHTML = "";
 
     levels.forEach(level => {
         const lessonsForLevel = lessons.filter(l => l.level_number === level.level_number);
         const isComplete = !!passedByLevel[level.level_number];
+        const totalCount = lessonsForLevel.length;
+        const completedCount = lessonsForLevel.filter(l => completedLessonIds.has(l.id)).length;
+        const percent = totalCount ? Math.round((completedCount / totalCount) * 100) : 0;
 
         const card = document.createElement('div');
         card.className = `chapter-list-card ${isComplete ? 'completed' : ''}`;
@@ -151,7 +178,10 @@ async function renderReadingLevelsList() {
             <div class="chapter-list-card-body">
                 <div class="chapter-list-card-title">${level.title}</div>
                 <div class="chapter-list-card-meta">
-                    ${lessonsForLevel.length || 0} lesson${lessonsForLevel.length === 1 ? '' : 's'}${isComplete ? ' • Chapter complete ✓' : ''}
+                    ${completedCount} of ${totalCount} lesson${totalCount === 1 ? '' : 's'}${isComplete ? ' • Chapter complete ✓' : ''}
+                </div>
+                <div class="chapter-progress-track">
+                    <div class="chapter-progress-fill" style="width:${percent}%;"></div>
                 </div>
                 <div class="chapter-card-actions">
                     <button type="button" class="btn-secondary chapter-goals-btn">🎯 Chapter Goals</button>
