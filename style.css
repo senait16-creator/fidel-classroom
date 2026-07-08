@@ -1516,47 +1516,56 @@ header {
     color: #991b1b;
 }
 
-.challenge-level-focus-card {
-    background: linear-gradient(180deg, #f0fdf4, #ffffff);
-    border: 1px solid #bbf7d0;
+.challenge-goal-card {
+    background: linear-gradient(135deg, #f0fdf4, #fffdf5);
+    border: 1.5px solid #86efac;
     border-radius: 18px;
     padding: 18px;
     box-shadow: var(--shadow-premium);
-    text-align: center;
     margin-bottom: 12px;
 }
 
-.challenge-focus-label, .challenge-next-label {
-    font-size: 10px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    color: #166534;
-    margin-bottom: 5px;
-}
-
-.challenge-focus-title {
-    font-size: 24px;
-    font-weight: 800;
-    color: #14532d;
-}
-
-.challenge-focus-families {
-    font-family: 'Abyssinica SIL', serif;
-    font-size: 34px;
-    color: #166534;
-    letter-spacing: 6px;
-    margin: 8px 0;
-}
-
-.challenge-focus-copy, .challenge-next-copy {
+.challenge-goal-eyebrow {
     font-size: 12px;
-    color: #64748b;
-    line-height: 1.5;
+    font-weight: 900;
+    color: #166534;
+    margin-bottom: 6px;
+}
+
+.challenge-goal-title {
+    font-size: 20px;
+    font-weight: 900;
+    color: #14532d;
+    font-family: 'Lora', Georgia, serif;
     margin-bottom: 12px;
 }
 
-.challenge-focus-btn {
+.challenge-goal-streak-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #475569;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.challenge-goal-track {
+    width: 100%;
+    height: 10px;
+    background: #f1f5e9;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 14px;
+}
+
+.challenge-goal-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #166534, #ca8a04);
+    border-radius: 999px;
+    transition: width 0.4s ease;
+}
+
+.challenge-goal-btn {
     width: 100%;
     border: none;
     border-radius: 14px;
@@ -1566,6 +1575,22 @@ header {
     font-size: 14px;
     font-weight: 800;
     cursor: pointer;
+}
+
+.challenge-next-label {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #166534;
+    margin-bottom: 5px;
+}
+
+.challenge-next-copy {
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.5;
+    margin-bottom: 12px;
 }
 
 .challenge-next-card {
@@ -3447,14 +3472,28 @@ header {
 }
 
 .race-chip {
-    width: 22px;
+    min-width: 22px;
     height: 22px;
     border-radius: 6px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     font-family: 'Abyssinica SIL', serif;
     font-size: 12px;
+    padding: 0 3px;
+}
+
+.race-chip.chip-progress {
+    height: 30px;
+}
+
+.race-chip-count {
+    font-family: 'Inter', sans-serif;
+    font-size: 7px;
+    letter-spacing: 1px;
+    line-height: 1;
+    margin-top: 1px;
 }
 
 .race-chip.chip-done {
@@ -4314,6 +4353,30 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     grid-row: span 3;
 }
 
+#challengeTeamUrgencyCard {
+    background: linear-gradient(135deg, #eff6ff, #fffdf5);
+    border: 1.5px solid #93c5fd;
+}
+
+.team-urgency-title {
+    font-size: 16px;
+    font-weight: 900;
+    color: #1e3a8a;
+    margin-bottom: 6px;
+}
+
+.team-urgency-body {
+    font-size: 13px;
+    color: #334155;
+    margin: 0 0 4px;
+}
+
+.team-urgency-sub {
+    font-size: 12px;
+    color: #64748b;
+    margin: 0;
+}
+
 .challenge-card-title {
     font-size: 15px;
     font-weight: 900;
@@ -4830,6 +4893,95 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     margin-top: 12px;
     padding-top: 12px;
     border-top: 1px solid #f1f5f9;
+}
+
+.challenge-team-summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.challenge-team-summary strong {
+    display: block;
+    font-size: 14px;
+    color: #1e293b;
+}
+
+.challenge-team-summary small {
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+.challenge-team-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.challenge-team-member-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.teammate-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: #fafaf9;
+}
+
+.teammate-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #f0fdf4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.teammate-name {
+    font-size: 13px;
+    font-weight: 900;
+    color: #1e293b;
+}
+
+.teammate-meta {
+    font-size: 11.5px;
+    color: #64748b;
+    margin-top: 1px;
+}
+
+.teammate-status {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.teammate-status.pending {
+    background: #fffbeb;
+    color: #92400e;
+}
+
+.teammate-status.approved {
+    background: #f0fdf4;
+    color: #166534;
+}
+
+.teammate-status.captain {
+    background: #fff7ed;
+    color: #b45309;
 }
 
 .challenge-level-resource-panel {
