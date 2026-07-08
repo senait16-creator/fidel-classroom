@@ -25,27 +25,27 @@
 // Loads AFTER: app.js.
 // =============================================================================
 
-let canDoStatementsCache = null;
-
-async function fetchCanDoStatements() {
-    if (canDoStatementsCache) return canDoStatementsCache;
-
-    const { data, error } = await _supabase
-        .from('can_do_statements')
-        .select('key, level_number, lesson_order, category, text, verification, order_index, icon, xp_reward')
-        .eq('is_active', true)
-        .order('level_number', { ascending: true })
-        .order('order_index', { ascending: true });
-
-    if (error) {
-        console.error("Failed to load Can-Do statements:", error);
-        showNotificationToast("Couldn't load Can-Do statements.");
-        return [];
-    }
-
-    canDoStatementsCache = data || [];
-    return canDoStatementsCache;
-}
+const CAN_DO_STATEMENTS = [
+    { key: 'intro_self',          category: 'Introductions',    text: 'I can introduce myself.',                       verification: 'speaking' },
+    { key: 'ask_name',            category: 'Introductions',    text: "I can ask someone's name.",                     verification: 'speaking' },
+    { key: 'describe_family',     category: 'Family & Daily Life', text: 'I can describe my family.',                  verification: 'speaking' },
+    { key: 'order_coffee',        category: 'Family & Daily Life', text: 'I can order coffee.',                        verification: 'speaking' },
+    { key: 'short_conversation',  category: 'Conversation',     text: 'I can hold a short conversation.',              verification: 'speaking' },
+    { key: 'daily_question',      category: 'Conversation',     text: 'I can answer the Question of the Day.',        verification: 'speaking' },
+    { key: 'talk_about_yesterday',category: 'Past Tense',       text: 'I can talk about what I did yesterday.',        verification: 'speaking' },
+    { key: 'describe_my_day',     category: 'Past Tense',       text: 'I can describe my day, start to finish.',       verification: 'speaking' },
+    {
+        // "auto" means the app can already tell this is probably true — it
+        // pre-fills self_assessed automatically instead of making the
+        // student tap "I think I can" themselves. It still goes through
+        // the teacher queue for the final ✓, same as every other
+        // statement — the database enforces that no status ever reaches
+        // 'verified' without a teacher, no exceptions for this either.
+        key: 'read_fidel', category: 'Alphabet', text: 'I can read all Fidel.', verification: 'auto',
+        autoCheck: (ctx) => ctx.masteredLettersCount >= 34
+    },
+    { key: 'write_fidel',         category: 'Alphabet',         text: 'I can write basic Fidel letters.',              verification: 'speaking' }
+];
 
 // ---------------------------------------------------------------------------
 // Progress loading
@@ -108,15 +108,14 @@ async function loadCanDoProgressMapWithAutoCheck() {
 // the per-chapter "Chapter Goals" card (My Amharic Path), which passes a
 // categoryFilter so only that chapter's related statements show up.
 async function renderCanDoRows(targetId, categoryFilter) {
-
     const mount = document.getElementById(targetId);
     if (!mount) return;
+    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
 
-    const allStatements = await fetchCanDoStatements();
-
+    const progressMap = await loadCanDoProgressMapWithAutoCheck();
     const statements = categoryFilter
-        ? allStatements.filter(s => s.category === categoryFilter)
-        : allStatements;
+        ? CAN_DO_STATEMENTS.filter(s => s.category === categoryFilter)
+        : CAN_DO_STATEMENTS;
     const categories = [...new Set(statements.map(s => s.category))];
 
     mount.innerHTML = categories.map(category => {
