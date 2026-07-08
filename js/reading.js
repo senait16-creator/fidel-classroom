@@ -190,13 +190,13 @@ async function renderReadingLevelsList() {
             </div>
         `;
 
-        card.querySelector('.chapter-goals-btn').onclick = (e) => {
-            e.stopPropagation();
-            openChapterGoals(level, 'view');
-        };
         card.querySelector('.chapter-start-btn').onclick = (e) => {
     e.stopPropagation();
     enterChapter(level.level_number);
+};
+        card.querySelector('.chapter-goals-btn').onclick = (e) => {
+    e.stopPropagation();
+    openChapterGoals(level, 'view');
 };
 
         container.appendChild(card);
