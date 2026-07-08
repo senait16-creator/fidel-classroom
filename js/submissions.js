@@ -389,16 +389,25 @@ async function submitWritingSketch() {
 // ---------------------------------------------------------------------------
 
 async function finalizeWritingSubmission(imageUrl) {
-    const { error } = await _supabase.from('writing_submissions').insert({
+    // level_number is only included when we actually have one — omitting it
+    // when null avoids a 400 if the column doesn't accept/have a null default
+    // (most writing submissions come from the Letter Board / Practice Sheet,
+    // which never carry a chapter level_number at all).
+    const payload = {
         student_id:   currentUser.id,
         base_letter:  writingSubmitContext.baseLetter,
-        level_number: writingSubmitContext.levelNumber || null,
         image_url:    imageUrl,
         status:       'pending',
         submitted_at: new Date().toISOString()
-    });
+    };
+    if (writingSubmitContext.levelNumber) payload.level_number = writingSubmitContext.levelNumber;
 
-    if (error) return showNotificationToast("Couldn't submit: " + error.message);
+    const { error } = await _supabase.from('writing_submissions').insert(payload);
+
+    if (error) {
+        console.error("Writing submission insert failed:", error);
+        return showNotificationToast("Couldn't submit: " + (error.message || "unknown error"));
+    }
 
     showNotificationToast("Submitted! Your captain will review it soon. 🎉");
     closeWritingSubmitScreen();
