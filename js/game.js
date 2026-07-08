@@ -10,6 +10,23 @@
 //   showNotificationToast, showGobezToast, executeVictoryConfettiCelebration
 // =============================================================================
 
+function getFidelSoundKey(char) {
+    const soundGroups = {
+        ha: ["ሀ", "ሃ", "ሐ", "ሓ", "ኀ", "ኃ"],
+        hu: ["ሁ", "ሑ", "ኁ"],
+        hi: ["ሂ", "ሒ", "ኂ"],
+        he: ["ሄ", "ሔ", "ኄ"],
+        hih: ["ህ", "ሕ", "ኅ"],
+        ho: ["ሆ", "ሖ", "ኆ"]
+    };
+
+    for (const [key, chars] of Object.entries(soundGroups)) {
+        if (chars.includes(char)) return key;
+    }
+
+    return char;
+}
+
 function openMatchingGameWorkspaceMode(scope) {
     gameModeScope = scope;
     document.getElementById("viewFidelGrid").style.display = "none";
