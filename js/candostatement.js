@@ -42,6 +42,20 @@ const CAN_DO_STATEMENTS = [
     { key: 'make_appointment',    category: 'Time & Schedule',  text: 'I can tell time and make an appointment.',      verification: 'speaking' },
     { key: 'go_shopping',         category: 'Shopping',         text: 'I can go shopping and ask for what I want.',    verification: 'speaking' },
     { key: 'colors_sizes',        category: 'Shopping',         text: 'I can talk about colors and sizes.',            verification: 'speaking' },
+    { key: 'give_instructions',   category: 'Commands & Requests', text: 'I can give simple instructions.',            verification: 'speaking' },
+    { key: 'polite_request',      category: 'Commands & Requests', text: 'I can make a polite request.',               verification: 'speaking' },
+    { key: 'order_meal',          category: 'Food & Dining',    text: 'I can order a meal.',                            verification: 'speaking' },
+    { key: 'likes_dislikes',      category: 'Food & Dining',    text: "I can say what I like and don't like.",          verification: 'speaking' },
+    { key: 'say_feelings',        category: 'Health & Feelings', text: "I can say how I'm feeling.",                    verification: 'speaking' },
+    { key: 'describe_health_problem', category: 'Health & Feelings', text: 'I can describe a simple health problem.',   verification: 'speaking' },
+    { key: 'tell_my_story',       category: 'Fluency Milestones', text: 'I can tell my story in Amharic — introductions, family, and daily life.', verification: 'speaking' },
+    { key: 'extended_conversation', category: 'Fluency Milestones', text: 'I can have an extended conversation covering the past, present, and future.', verification: 'speaking' },
+    { key: 'talk_weather',        category: 'Weather & Seasons', text: 'I can talk about the weather.',                  verification: 'speaking' },
+    { key: 'talk_seasons',        category: 'Weather & Seasons', text: 'I can talk about the seasons.',                  verification: 'speaking' },
+    { key: 'talk_job_studies',    category: 'Work & School',    text: 'I can talk about my job or studies.',            verification: 'speaking' },
+    { key: 'describe_work_routine', category: 'Work & School',  text: 'I can describe my daily work or school routine.', verification: 'speaking' },
+    { key: 'travel_transport',    category: 'Travel',           text: 'I can travel by bus, taxi, or train.',           verification: 'speaking' },
+    { key: 'checkin_hotel',       category: 'Travel',           text: 'I can buy a ticket and check into a hotel.',     verification: 'speaking' },
     {
         // "auto" means the app can already tell this is probably true — it
         // pre-fills self_assessed automatically instead of making the
