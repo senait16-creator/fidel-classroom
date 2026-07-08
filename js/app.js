@@ -55,7 +55,7 @@ let canvas, ctx, isDrawing = false;
 // Alphabet data
 // ---------------------------------------------------------------------------
 
-const vowelFrameworkLabels = ["ha", "hu", "hee", "ha", "hay", "hih", "ho"];
+const vowelFrameworkLabels = ["hä", "hu", "hee", "ha", "hay", "hih", "ho"];
 const standardVowelSubscripts = ["-ä", "-u", "-ee", "-a", "-ay", "-ih", "-o"];
 
 const alphabetData = [
@@ -505,7 +505,7 @@ function toggleDropdownElement(elementId) {
 // ---------------------------------------------------------------------------
 
 const LOCKED_MODES = {
-    practice:    false,
+    practice:    true,
     community:   false,
     amharicPath: false
 };
