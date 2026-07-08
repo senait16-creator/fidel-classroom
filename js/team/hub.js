@@ -362,7 +362,7 @@ async function uploadTeamPracticePhoto(file, baseLetter) {
     showNotificationToast('Compressing and uploading...');
 
     const compressed = await compressImage(file);
-    const filename = `practice_${currentUser.id}_${Date.now()}.jpg`;
+    const filename = `${currentUser.id}/practice_${Date.now()}.jpg`;
 
     const { error: uploadError } = await _supabase.storage
         .from('team_practice_posts')
