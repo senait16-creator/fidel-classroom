@@ -505,7 +505,7 @@ function toggleDropdownElement(elementId) {
 // ---------------------------------------------------------------------------
 
 const LOCKED_MODES = {
-    practice:    true,
+    practice:    false,
     community:   false,
     amharicPath: false
 };
