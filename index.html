@@ -517,6 +517,12 @@
         <button class="challenge-back-home" onclick="enterModeSelect()">← Home</button>
     </div>
 
+    <!-- All 3 families cleared → this becomes the primary call-to-action,
+         above everything else including the Captain Dashboard. Hidden by
+         renderLevelCompletionBanner() until the student actually clears
+         their level. -->
+    <div id="levelCompletionMount" style="display:none;"></div>
+
     <!-- ============================================================
          CAPTAIN DASHBOARD — captains only. Leadership tools live here,
          above the normal challenge content, which continues unchanged
@@ -651,15 +657,6 @@
                     <small>Helpful Amharic tools</small>
                 </div>
             </button>
-        </section>
-
-        <div id="levelCompletionMount" style="display:none;"></div>
-
-        <section class="challenge-dash-card" id="challengeComingUpCard">
-            <div class="challenge-card-title">Coming Up</div>
-            <div id="challengeComingUpMount">
-                <p style="color:#94a3b8;font-size:13px;">Loading next rows...</p>
-            </div>
         </section>
 
     </div>
