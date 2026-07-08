@@ -51,16 +51,18 @@ async function loadTeacherRosterData() {
         // safe action (sets team_id to null) — NOT account deletion, which
         // can't be done securely from browser JS (requires Supabase's
         // service-role key, which must never be exposed client-side).
-        const actionButton = teamName
+        const removeBtn = teamName
             ? `<button class="btn-secondary" style="font-size:11px; padding:6px 10px; color:#ef4444; border:1px solid #fecaca;" onclick="removeStudentFromTeam('${s.id}', '${s.nickname.replace(/'/g, "\\'")}')">Remove from Team</button>`
-            : '<span style="font-size:11px; color:#cbd5e1;">—</span>';
+            : '';
+        const resetLevelBtn = `<button class="btn-secondary" style="font-size:11px; padding:6px 10px; color:#b45309; border:1px solid #fed7aa;" onclick="teacherResetStudentLevel('${s.id}', '${s.nickname.replace(/'/g, "\\'")}')">🔄 Reset a Level</button>`;
+        const actionButtons = `<div style="display:flex; flex-direction:column; gap:6px; align-items:flex-start;">${removeBtn}${resetLevelBtn}</div>`;
 
         tbody.innerHTML += `
             <tr>
                 <td data-label="Student" style="font-weight:500;">${s.avatar || '🦁'} ${s.nickname}<br><span style="font-size:11px; color:#94a3b8; font-weight:400;">${s.email || ''}</span></td>
                 <td data-label="Team">${teamDisplay}</td>
                 <td data-label="Progress"><strong>${masteredCount} / 34 rows</strong> complete</td>
-                <td data-label="Action">${actionButton}</td>
+                <td data-label="Action">${actionButtons}</td>
             </tr>
         `;
     });
@@ -90,6 +92,57 @@ async function removeStudentFromTeam(studentId, nickname) {
     showNotificationToast(`${nickname} is now Practicing Solo.`);
     await loadTeacherRosterData();
     await teacherRefreshConfigurationDropdowns();
+}
+
+// Resets ONE student's progress on ONE Fidel Challenge level — e.g. they
+// passed Level 1 but the teacher wants them to redo the whole thing. Only
+// that student and only that level are touched: their streaks, writing
+// submissions, and any level-completion request for that level number are
+// cleared, and — if their team had already been marked "ready for live
+// quiz" for that level based on their old progress — that flag is reset
+// too, since it's no longer accurate. Nothing else (other levels, other
+// students, the team's current_level) is affected.
+async function teacherResetStudentLevel(studentId, nickname) {
+    const levelInput = prompt(`Reset which level for ${nickname}? Enter a level number (e.g. 1).`);
+    if (!levelInput) return;
+
+    const levelNumber = parseInt(levelInput, 10);
+    if (!Number.isInteger(levelNumber) || levelNumber < 1) {
+        return showNotificationToast("Enter a valid level number.");
+    }
+
+    if (!confirm(`Reset ${nickname}'s Level ${levelNumber}? They'll need to redo every family's streak and writing submission for that level. This only affects ${nickname} — not their team or any other level.`)) return;
+
+    showNotificationToast(`Resetting Level ${levelNumber} for ${nickname}...`);
+
+    const [{ error: progressError }, { error: subError }, { error: reqError }] = await Promise.all([
+        _supabase.from('student_family_progress').delete()
+            .eq('student_id', studentId).eq('level_number', levelNumber),
+        _supabase.from('writing_submissions').delete()
+            .eq('student_id', studentId).eq('level_number', levelNumber),
+        _supabase.from('level_completion_requests').delete()
+            .eq('student_id', studentId).eq('level_number', levelNumber)
+    ]);
+
+    if (progressError || subError || reqError) {
+        console.error("Failed to reset student level:", progressError, subError, reqError);
+        return showNotificationToast("Reset had errors — check the console.");
+    }
+
+    // If this reset means the team is no longer fully cleared for this
+    // level, un-flag it so the teacher doesn't see a stale "ready" state.
+    const { data: student } = await _supabase.from('profiles').select('team_id').eq('id', studentId).maybeSingle();
+    if (student?.team_id) {
+        await _supabase.from('team_level_status')
+            .update({ all_members_cleared: false, all_members_cleared_at: null })
+            .eq('team_id', student.team_id)
+            .eq('level_number', levelNumber);
+    }
+
+    showGobezToast(`${nickname}'s Level ${levelNumber} was reset.`);
+    await loadTeacherRosterData();
+    if (typeof loadTeacherTeamProgress === "function") await loadTeacherTeamProgress();
+    if (typeof loadTeacherClassroomOverview === "function") await loadTeacherClassroomOverview();
 }
 
 async function teacherRefreshConfigurationDropdowns() {
@@ -338,6 +391,7 @@ async function approveWritingSubmission(submissionId, studentId, baseLetter) {
     showNotificationToast("Submission approved! ✓");
     await loadTeacherWritingQueue();
     await checkAndUpdateTeamLevelCompletion(studentId);
+    if (typeof loadTeacherClassroomOverview === 'function') await loadTeacherClassroomOverview();
 }
 
 async function rejectWritingSubmission(submissionId, note) {
@@ -360,6 +414,7 @@ async function rejectWritingSubmission(submissionId, note) {
 
     showNotificationToast("Submission rejected — student can resubmit.");
     await loadTeacherWritingQueue();
+    if (typeof loadTeacherClassroomOverview === 'function') await loadTeacherClassroomOverview();
 }
 
 // ---------------------------------------------------------------------------
@@ -561,6 +616,191 @@ async function advanceTeamLevel(teamId, currentLevel) {
 
     showNotificationToast("Team advanced to the next level! 🎉");
     await loadTeacherTeamProgress();
+    if (typeof loadTeacherClassroomOverview === 'function') await loadTeacherClassroomOverview();
+}
+
+// ---------------------------------------------------------------------------
+// Classroom Overview — the "what needs my attention right now" summary
+// shown above all the detailed panels. Reads from the same tables those
+// panels already use; nothing here needs new schema.
+// ---------------------------------------------------------------------------
+
+async function loadTeacherClassroomOverview() {
+    await Promise.all([
+        renderTeacherHealthAndTasks(),
+        loadTeacherLeaderboard(),
+        loadTeacherCaptainOverview()
+    ]);
+}
+
+function setHealthTile(tileId, value, flagAttention = true) {
+    const tile = document.getElementById(tileId);
+    if (!tile) return;
+    const valueEl = tile.querySelector('.teacher-health-value');
+    if (valueEl) valueEl.innerText = value;
+    if (flagAttention) tile.classList.toggle('attention', value > 0);
+}
+
+async function renderTeacherHealthAndTasks() {
+    const [
+        { data: pendingSubs },
+        { data: teams },
+        { data: statusRows },
+        { data: allProfiles },
+        { count: canDoReviewCount }
+    ] = await Promise.all([
+        _supabase.from('writing_submissions').select('id, student_id').eq('status', 'pending'),
+        _supabase.from('teams').select('id, name, current_level'),
+        _supabase.from('team_level_status').select('team_id, level_number, all_members_cleared, live_quiz_passed'),
+        _supabase.from('profiles').select('id, is_admin'),
+        _supabase.from('can_do_progress').select('student_id', { count: 'exact', head: true }).eq('status', 'self_assessed')
+    ]);
+
+    const pendingWritingCount = (pendingSubs || []).length;
+    const pendingWritingStudents = new Set((pendingSubs || []).map(s => s.student_id)).size;
+
+    // Same "ready" definition as the Team Level Progress panel below.
+    const readyTeams = (teams || []).filter(team => {
+        const status = (statusRows || []).find(s => s.team_id === team.id && s.level_number === team.current_level);
+        return status?.all_members_cleared && !status?.live_quiz_passed;
+    });
+
+    const activeStudentsCount = (allProfiles || []).filter(p => !p.is_admin).length;
+
+    setHealthTile('healthPendingReviews', pendingWritingCount);
+    setHealthTile('healthTeamsReady', readyTeams.length);
+    setHealthTile('healthActiveStudents', activeStudentsCount, false);
+    setHealthTile('healthCanDoReviews', canDoReviewCount || 0);
+
+    const tasksMount = document.getElementById('teacherTodaysTasksMount');
+    if (!tasksMount) return;
+
+    tasksMount.innerHTML = `
+        <div class="teacher-task-row">
+            <div class="teacher-task-icon">✍️</div>
+            <div>
+                <div class="teacher-task-label">Writing submissions waiting</div>
+                <div class="teacher-task-sub">${pendingWritingStudents > 0 ? `From ${pendingWritingStudents} student${pendingWritingStudents > 1 ? 's' : ''}` : 'All caught up'}</div>
+            </div>
+            ${pendingWritingCount > 0 ? `<span class="teacher-task-count">${pendingWritingCount}</span>` : ''}
+            <button class="teacher-task-go" onclick="jumpToTeacherPanel('writingQueuePanelBody')">Review →</button>
+        </div>
+        <div class="teacher-task-row">
+            <div class="teacher-task-icon">🏁</div>
+            <div>
+                <div class="teacher-task-label">Teams ready for a live quiz</div>
+                <div class="teacher-task-sub">${readyTeams.length > 0 ? readyTeams.map(t => t.name).join(', ') : 'None right now'}</div>
+            </div>
+            ${readyTeams.length > 0 ? `<span class="teacher-task-count">${readyTeams.length}</span>` : ''}
+            <button class="teacher-task-go" onclick="jumpToTeacherPanel('teamProgressPanelBody')">View →</button>
+        </div>
+        <div class="teacher-task-row">
+            <div class="teacher-task-icon">📋</div>
+            <div>
+                <div class="teacher-task-label">Can-Do statements to verify</div>
+                <div class="teacher-task-sub">Self-assessed, waiting on you</div>
+            </div>
+            ${(canDoReviewCount || 0) > 0 ? `<span class="teacher-task-count">${canDoReviewCount}</span>` : ''}
+            <button class="teacher-task-go" onclick="jumpToTeacherPanel('canDoVerificationPanelBody')">Review →</button>
+        </div>
+    `;
+}
+
+// Read-only glance view, sorted by level — the actual "Mark Quiz Passed &
+// Advance" action stays only in the Team Level Progress panel below, so
+// there's one place that does it, not two.
+async function loadTeacherLeaderboard() {
+    const mount = document.getElementById('teacherLeaderboardMount');
+    if (!mount) return;
+    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
+
+    const [{ data: teams }, { data: statusRows }, { data: topLevel }] = await Promise.all([
+        _supabase.from('teams').select('id, name, current_level').order('current_level', { ascending: false }),
+        _supabase.from('team_level_status').select('team_id, level_number, all_members_cleared, live_quiz_passed'),
+        _supabase.from('challenge_levels').select('level_number').order('level_number', { ascending: false }).limit(1)
+    ]);
+
+    if (!teams || teams.length === 0) {
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No teams yet.</p>`;
+        return;
+    }
+
+    const totalLevels = topLevel?.[0]?.level_number || 12;
+    const medals = ['🥇', '🥈', '🥉'];
+    const teamColorMap = { Red: '#ef4444', Blue: '#1d4ed8', Green: '#166534', Yellow: '#a16207', Purple: '#7c3aed', Black: '#111827', White: '#64748b' };
+    const getColor = (name) => {
+        for (const [key, hex] of Object.entries(teamColorMap)) if (name?.includes(key)) return hex;
+        return '#64748b';
+    };
+
+    mount.innerHTML = teams.map((team, idx) => {
+        const status = (statusRows || []).find(s => s.team_id === team.id && s.level_number === team.current_level);
+        const isReady = status?.all_members_cleared && !status?.live_quiz_passed;
+        const percent = Math.min(100, Math.max(0, Math.round(((team.current_level - 1) / totalLevels) * 100)));
+        const medal = idx < 3 ? medals[idx] : (idx + 1);
+        const color = getColor(team.name);
+
+        return `
+            <div class="teacher-lb-row">
+                <div class="teacher-lb-medal">${medal}</div>
+                <div class="teacher-lb-dot" style="background:${color};"></div>
+                <div class="teacher-lb-name">${team.name}</div>
+                <div class="teacher-lb-track"><div class="teacher-lb-fill" style="width:${percent}%; background:${color};"></div></div>
+                <div class="teacher-lb-status ${isReady ? 'ready' : 'ok'}">${isReady ? 'Ready for quiz' : `Level ${team.current_level}`}</div>
+            </div>`;
+    }).join('');
+}
+
+async function loadTeacherCaptainOverview() {
+    const mount = document.getElementById('teacherCaptainOverviewMount');
+    if (!mount) return;
+    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
+
+    const { data: captains } = await _supabase
+        .from('profiles')
+        .select('id, nickname, avatar, team_id, teams!profiles_team_id_fkey(name)')
+        .eq('is_captain', true)
+        .order('nickname');
+
+    if (!captains || captains.length === 0) {
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No captains assigned yet.</p>`;
+        return;
+    }
+
+    const teamIds = [...new Set(captains.map(c => c.team_id).filter(Boolean))];
+    const pendingByTeam = {};
+
+    if (teamIds.length > 0) {
+        const { data: teamMembers } = await _supabase
+            .from('profiles')
+            .select('id, team_id')
+            .in('team_id', teamIds);
+
+        const memberIds = (teamMembers || []).map(m => m.id);
+        const { data: pendingSubs } = memberIds.length > 0
+            ? await _supabase.from('writing_submissions').select('student_id').in('student_id', memberIds).eq('status', 'pending')
+            : { data: [] };
+
+        (pendingSubs || []).forEach(sub => {
+            const member = (teamMembers || []).find(m => m.id === sub.student_id);
+            if (!member) return;
+            pendingByTeam[member.team_id] = (pendingByTeam[member.team_id] || 0) + 1;
+        });
+    }
+
+    mount.innerHTML = captains.map(cap => {
+        const pending = pendingByTeam[cap.team_id] || 0;
+        const health = pending === 0 ? 'Team health: on track' : `Team health: ${pending} review${pending > 1 ? 's' : ''} backed up`;
+        return `
+            <div class="teacher-captain-row">
+                <div class="teacher-captain-avatar">${cap.avatar || '👑'}</div>
+                <div>
+                    <div class="teacher-captain-name">${cap.nickname || 'Captain'} — ${cap.teams?.name || 'No team'}</div>
+                    <div class="teacher-captain-meta">${health}</div>
+                </div>
+                <div class="teacher-captain-pending">${pending} pending review${pending === 1 ? '' : 's'}</div>
+            </div>`;
+    }).join('');
 }
 
 // ---------------------------------------------------------------------------
@@ -575,13 +815,27 @@ function toggleTeacherPanel(bodyId, headerEl) {
     headerEl.querySelector('.teacher-panel-toggle')?.classList.toggle('collapsed');
 }
 
+// Used by the Today's Tasks buttons to force a panel open and scroll to it,
+// even if the teacher had previously collapsed it.
+function jumpToTeacherPanel(bodyId) {
+    const body = document.getElementById(bodyId);
+    if (!body) return;
+    body.classList.remove('collapsed');
+    const header = body.previousElementSibling;
+    header?.querySelector('.teacher-panel-toggle')?.classList.remove('collapsed');
+    body.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 // ---------------------------------------------------------------------------
 // Expose functions used via inline onclick="" handlers in index.html
 // ---------------------------------------------------------------------------
 
 window.removeStudentFromTeam = removeStudentFromTeam;
+window.teacherResetStudentLevel = teacherResetStudentLevel;
 window.teacherAssignStudentToPod = teacherAssignStudentToPod;
 window.toggleTeacherPanel = toggleTeacherPanel;
+window.jumpToTeacherPanel = jumpToTeacherPanel;
+window.loadTeacherClassroomOverview = loadTeacherClassroomOverview;
 
 // ---------------------------------------------------------------------------
 // Export progress CSV (teacher dashboard button)
