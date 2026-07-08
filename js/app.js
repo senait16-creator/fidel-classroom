@@ -429,6 +429,7 @@ if (viewMode === "teacher") {
     if (typeof loadCanDoVerificationQueue === 'function') loadCanDoVerificationQueue('canDoVerificationQueueMount');
     populateCaptainTeamDropdown();
     loadCurrentCaptains();
+    if (typeof loadTeacherClassroomOverview === 'function') loadTeacherClassroomOverview();
     } else {
         showScreen("studentDashboard");
         fetchUserProgress();
