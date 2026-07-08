@@ -38,6 +38,10 @@ const CAN_DO_STATEMENTS = [
     { key: 'make_invitation',     category: 'Future Plans',     text: 'I can invite someone to do something.',         verification: 'speaking' },
     { key: 'ask_location',        category: 'Places & Directions', text: 'I can ask where something is.',              verification: 'speaking' },
     { key: 'describe_location',   category: 'Places & Directions', text: 'I can describe where something is located.', verification: 'speaking' },
+    { key: 'days_of_week',        category: 'Time & Schedule',  text: 'I can say the days of the week.',               verification: 'speaking' },
+    { key: 'make_appointment',    category: 'Time & Schedule',  text: 'I can tell time and make an appointment.',      verification: 'speaking' },
+    { key: 'go_shopping',         category: 'Shopping',         text: 'I can go shopping and ask for what I want.',    verification: 'speaking' },
+    { key: 'colors_sizes',        category: 'Shopping',         text: 'I can talk about colors and sizes.',            verification: 'speaking' },
     {
         // "auto" means the app can already tell this is probably true — it
         // pre-fills self_assessed automatically instead of making the
