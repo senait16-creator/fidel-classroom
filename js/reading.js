@@ -435,8 +435,16 @@ async function renderCurrentStep() {
     const step = activeStepList[activeStepIndex];
     const mount = document.getElementById('lessonStepMount');
 
-    document.getElementById('lessonStepProgress').innerText =
-        `Step ${activeStepIndex + 1} of ${activeStepList.length}`;
+    const percent = Math.round(((activeStepIndex + 1) / activeStepList.length) * 100);
+
+document.getElementById('lessonStepProgress').innerHTML = `
+    <div class="lesson-progress-mini">
+        <div class="lesson-progress-mini-fill" style="width:${percent}%"></div>
+    </div>
+    <div class="lesson-progress-mini-label">
+        Step ${activeStepIndex + 1} of ${activeStepList.length} · ${percent}%
+    </div>
+`;
 
     const lesson = activeLessons[activeLessonIndex];
     const levelNumber = activeReadingLevel.level_number;
@@ -577,15 +585,28 @@ function renderQuizStep(mount, quiz) {
 }
 
 function renderLessonCompleteStep(mount) {
+    const lesson = activeLessons[activeLessonIndex];
+
     mount.innerHTML = `
-        <div style="text-align:center; padding:24px 0;">
-            <p style="font-size:48px;">✅</p>
-            <p class="subtitle" style="font-size:16px; font-weight:700; color:#10b981;">Lesson Complete!</p>
+        <div class="lesson-complete-card">
+            <div class="lesson-complete-badge">ጎበዝ!</div>
+            <p class="lesson-complete-icon">🎉</p>
+            <h3>Lesson Complete</h3>
+            <p>You finished <strong>${lesson?.title || 'this lesson'}</strong>.</p>
+            <p class="lesson-complete-sub">You’re building real Amharic step by step.</p>
         </div>
         <button class="btn-primary lesson-complete-next-btn" style="width:100%;">Next Lesson →</button>
     `;
+
     mount.querySelector('.lesson-complete-next-btn').onclick = goToNextLesson;
-    executeVictoryConfettiCelebration();
+
+    if (typeof showGobezToast === "function") {
+        showGobezToast("ጎበዝ! Lesson complete!");
+    }
+
+    if (typeof executeVictoryConfettiCelebration === "function") {
+        executeVictoryConfettiCelebration();
+    }
 }
 
 // -----------------------------------------------------------------------------
