@@ -6193,3 +6193,225 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     font-size: 11px;
     opacity: 0.85;
 }
+
+/* =========================================================
+   MY AMHARIC PATH — CHAPTER AESTHETIC CLEANUP
+   Paste at very bottom of style.css
+========================================================= */
+
+#readingLevelsScreen,
+#readingLevelDetailScreen {
+    background: #fffdf5;
+    border-radius: 28px;
+    padding: 22px 16px 32px !important;
+}
+
+#readingLevelsScreen .workspace-title,
+#readingLevelDetailScreen .workspace-title {
+    background: #ffffff;
+    border: 1px solid #e7e5d8;
+    border-radius: 22px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+}
+
+#readingLevelsScreen .workspace-title span,
+#readingLevelDetailTitle {
+    color: #14532d;
+}
+
+#readingLevelsScreen .subtitle {
+    color: #64748b;
+    margin: 6px 4px 22px !important;
+    font-size: 14px;
+}
+
+/* Chapter cards */
+.chapter-list-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.chapter-list-card {
+    background: #ffffff;
+    border: 1px solid #e7e5d8;
+    border-radius: 24px;
+    padding: 20px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    position: relative;
+    overflow: hidden;
+}
+
+.chapter-list-card::before {
+    color: rgba(22, 101, 52, 0.035);
+}
+
+.chapter-list-card::after {
+    background: linear-gradient(180deg, #166534, #ca8a04);
+    top: 20px;
+    bottom: 20px;
+}
+
+.chapter-list-card-title {
+    color: #14532d;
+    font-size: 20px;
+    line-height: 1.2;
+    margin-bottom: 6px;
+}
+
+.chapter-list-card-meta {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.chapter-list-card .challenge-level-number-badge {
+    background: #14532d;
+    color: #fffdf5;
+}
+
+/* Progress */
+.chapter-progress-track {
+    height: 8px;
+    background: #f1f5e9;
+    margin: 12px 0 4px;
+}
+
+.chapter-progress-fill {
+    background: linear-gradient(90deg, #166534, #ca8a04);
+}
+
+/* Buttons */
+.chapter-card-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.chapter-card-actions button {
+    min-height: 44px;
+}
+
+.chapter-card-actions .chapter-start-btn {
+    background: #166534;
+    color: white;
+}
+
+.chapter-card-actions .chapter-goals-btn {
+    background: #fffdf5;
+    color: #14532d;
+    border: 1px solid #d6d3c4;
+}
+
+/* Lesson detail spacing */
+.lesson-step-header-row {
+    margin-bottom: 14px;
+    background: #ffffff;
+    border: 1px solid #e7e5d8;
+    border-radius: 20px;
+    padding: 14px 16px;
+}
+
+.lesson-step-progress {
+    color: #14532d;
+}
+
+.chapter-tab-panel {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+}
+
+/* Lesson cards */
+.lesson-section-card,
+.lesson-goal-card {
+    background: #ffffff;
+    border: 1px solid #e7e5d8;
+    border-radius: 24px;
+    padding: 22px 18px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
+.lesson-goal-card {
+    background: linear-gradient(135deg, #f8fff9, #fffdf5);
+    border-color: #bbf7d0;
+}
+
+.lesson-section-card h3 {
+    color: #14532d;
+    font-size: 22px;
+    line-height: 1.2;
+    margin-bottom: 12px;
+}
+
+.lesson-section-card p,
+.lesson-section-card li {
+    color: #334155;
+}
+
+.lesson-example-row {
+    background: #fffdf5;
+    border: 1px solid #e7e5d8;
+    border-radius: 18px;
+    padding: 14px;
+}
+
+.lesson-example-amharic {
+    color: #14532d;
+}
+
+.lesson-notice {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    color: #78350f;
+    border-radius: 16px;
+    padding: 12px 14px;
+    margin-top: 14px;
+}
+
+.lesson-resource-link {
+    display: block;
+    margin-top: 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #14532d;
+    border-radius: 16px;
+    padding: 12px 14px;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+/* Navigation */
+.lesson-step-nav {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.lesson-step-nav button {
+    min-height: 46px;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+    #readingLevelsScreen,
+    #readingLevelDetailScreen {
+        margin: 16px auto !important;
+        padding: 16px 12px 28px !important;
+    }
+
+    .chapter-list-card {
+        padding: 22px 18px;
+    }
+
+    .chapter-card-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .lesson-step-nav {
+        grid-template-columns: 1fr;
+    }
+}
