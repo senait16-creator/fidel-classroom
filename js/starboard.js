@@ -49,8 +49,7 @@ async function renderStarBoard(mountId) {
 
     if (!stars || stars.length === 0) {
         mount.innerHTML = `
-            <div class="star-board-header">⭐ Star Board</div>
-            <div class="star-board-empty">
+            <div class="card star-board-empty">
                 No stars yet this week — captains, pick a teammate to celebrate!
             </div>`;
         return;
@@ -80,7 +79,6 @@ async function renderStarBoard(mountId) {
     }).join('');
 
     mount.innerHTML = `
-        <div class="star-board-header">⭐ Star Board</div>
         <div class="star-board-sub">This week's stars, chosen by team captains</div>
         <div class="star-board-grid">${cards}</div>`;
 }
