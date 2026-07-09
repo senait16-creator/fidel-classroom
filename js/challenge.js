@@ -23,6 +23,17 @@ function getTeamHex(teamName) {
     return '#166534';
 }
 
+// Program Week 1 runs Sunday July 5, 2026 → Saturday July 11, 2026; each
+// following Sun–Sat span increments by one. Confirmed with the teacher.
+const PROGRAM_WEEK_ONE_START = new Date(2026, 6, 5); // month is 0-indexed: 6 = July
+
+function getProgramWeekNumber() {
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const diffDays = Math.floor((startOfToday - PROGRAM_WEEK_ONE_START) / (1000 * 60 * 60 * 24));
+    return Math.max(1, Math.floor(diffDays / 7) + 1);
+}
+
 // -----------------------------------------------------------------------------
 // Mode select — home screen after login, shown every time
 // -----------------------------------------------------------------------------
@@ -67,6 +78,21 @@ async function renderChallengeDashboard() {
         sub.innerText = `${team.name} • Level ${team.current_level} • 🔥 ${team.streak_count || 0} streak`;
     }
 
+    // ── Progress to ፐ — shared hero, so this renders once and shows
+    //    up automatically on both the student and captain dashboard. ──
+    const totalLevels = levels.length > 0 ? Math.max(...levels.map(l => l.level_number)) : 12;
+    const currentLevelNum = team.current_level || 1;
+    const pePercent = Math.min(100, Math.max(0, Math.round(((currentLevelNum - 1) / totalLevels) * 100)));
+    const peLabel = document.getElementById("peProgressLabel");
+    const peFill = document.getElementById("peProgressFill");
+    if (peLabel) peLabel.innerText = `Level ${currentLevelNum} of ${totalLevels}`;
+    if (peFill) peFill.style.width = `${pePercent}%`;
+
+    const peWeekLabel = document.getElementById("peWeekLabel");
+    if (peWeekLabel && typeof getProgramWeekNumber === "function") {
+        peWeekLabel.innerText = `📅 Week ${getProgramWeekNumber()}`;
+    }
+
     // ── "View team status" button — toggles the inline panel.
     //    Team is information on this page, not a separate destination.
     //    Captains get the richer Captain Dashboard's Team Progress card
@@ -92,6 +118,15 @@ async function renderChallengeDashboard() {
             };
         }
         if (statusContent) statusContent.style.display = "none";
+    }
+
+    // ── Weekly Team Meeting, read-only for students — captains already
+    //    have the editable version in the Captain Dashboard above. ──
+    const studentMeetingCard = document.getElementById("studentMeetingCard");
+    if (currentProfile?.is_captain) {
+        if (studentMeetingCard) studentMeetingCard.style.display = "none";
+    } else if (typeof loadStudentMeetingDisplay === "function") {
+        await loadStudentMeetingDisplay();
     }
 
     // ── Captain Dashboard — one consolidated leadership zone ─────
