@@ -5211,6 +5211,222 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     transform: none;
 }
 
+/* Family detail: sound/resource links above the vowel row */
+
+.row-resource-links {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.row-resource-link {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 10px;
+    padding: 9px 11px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #166534;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.row-resource-link.alt {
+    background: #fffbeb;
+    border-color: #fde68a;
+    color: #92400e;
+}
+
+.row-resource-link .rl-icon {
+    font-size: 14px;
+}
+
+.row-resource-link .rl-arrow {
+    margin-left: auto;
+    opacity: 0.6;
+}
+
+/* Family detail: inline section labels (Flashcards / Practice Pad / etc) */
+
+.challenge-inline-section-label {
+    font-size: 11.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #94a3b8;
+    margin: 0 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.challenge-inline-section-count {
+    margin-left: auto;
+    font-weight: 700;
+    color: #b45309;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+/* Family detail: inline swipeable flashcard — no navigation away from the page */
+
+.inline-flashcard-wrap {
+    margin-bottom: 22px;
+}
+
+.inline-flashcard {
+    width: 100%;
+    height: 180px;
+    border-radius: 18px;
+    background: white;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-premium);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Abyssinica SIL', serif;
+    font-size: 76px;
+    color: var(--neutral-dark);
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+}
+
+.inline-flashcard #challengeFlashChar.flash-face-sound {
+    font-family: 'Inter', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--brand-primary);
+}
+
+.flashcard-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.9);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: #475569;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    cursor: pointer;
+}
+
+.flashcard-arrow.left { left: 10px; }
+.flashcard-arrow.right { right: 10px; }
+
+.flashcard-hint {
+    text-align: center;
+    font-size: 11.5px;
+    color: #94a3b8;
+    margin-top: 8px;
+}
+
+.flashcard-dots {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+.flashcard-dots span {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #e2e8f0;
+}
+
+.flashcard-dots span.active {
+    background: var(--brand-primary);
+    width: 14px;
+    border-radius: 4px;
+}
+
+/* Family detail: practice pad (finger-drawing, warm-up only — never submitted) */
+
+.practice-pad-card {
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 14px;
+    padding: 15px;
+    margin-bottom: 18px;
+}
+
+.practice-pad-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: #64748b;
+    background: #e2e8f0;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-bottom: 8px;
+}
+
+.practice-pad-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--neutral-dark);
+    margin-bottom: 2px;
+}
+
+.practice-pad-sub {
+    font-size: 11.5px;
+    color: #64748b;
+    margin-bottom: 10px;
+}
+
+.challenge-photo-only-note {
+    background: #fffbeb;
+    border: 1px dashed #fde68a;
+    border-radius: 12px;
+    padding: 11px 13px;
+    font-size: 11.5px;
+    color: #92400e;
+    line-height: 1.5;
+    margin-bottom: 18px;
+}
+
+/* Family detail: locked writing submission card */
+
+.submit-card-locked {
+    background: #f1f5f9;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    color: #94a3b8;
+    margin-bottom: 16px;
+}
+
+.submit-card-locked .lock-icon {
+    font-size: 26px;
+    margin-bottom: 6px;
+}
+
+.submit-card-locked .lock-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #64748b;
+    margin-bottom: 4px;
+}
+
+.submit-card-locked .lock-sub {
+    font-size: 12px;
+}
+
 /* Team status content â€” hidden until toggled on Competition page */
 
 .challenge-team-status-content {
