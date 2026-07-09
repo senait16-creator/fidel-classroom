@@ -19,7 +19,7 @@ let writingSubmitContext = null;
 // Open / close writing submit screen
 // ---------------------------------------------------------------------------
 
-function openWritingSubmitScreen(baseLetter, returnToOrOnClose, levelNumber) {
+function openWritingSubmitScreen(baseLetter, returnToOrOnClose, levelNumber, opts) {
     // Support legacy callers that passed a callback: openWritingSubmitScreen(letter, fn)
     // New callers pass a returnTo string: openWritingSubmitScreen(letter, 'teamHub', level)
     let returnTo = 'teamHub';
@@ -29,6 +29,8 @@ function openWritingSubmitScreen(baseLetter, returnToOrOnClose, levelNumber) {
     } else if (typeof returnToOrOnClose === 'string') {
         returnTo = returnToOrOnClose;
     }
+
+    const photoOnly = !!(opts && opts.photoOnly);
 
     writingSubmitContext = { baseLetter, levelNumber: levelNumber || null, returnTo, legacyOnClose };
 
@@ -51,6 +53,18 @@ function openWritingSubmitScreen(baseLetter, returnToOrOnClose, levelNumber) {
     const sketchCard = document.getElementById("writingChoiceSketchCard");
     if (uploadCard) uploadCard.style.border = "2px solid #e2e8f0";
     if (sketchCard) sketchCard.style.border = "2px solid #e2e8f0";
+
+    // Fidel Competition submissions must be real pen-and-paper handwriting —
+    // finger-drawing on glass doesn't prove the same thing, so the digital
+    // sketch option is hidden entirely for that context (photoOnly = true).
+    // The Letter Board's practice-sheet flow still allows either method.
+    if (sketchCard) sketchCard.style.display = photoOnly ? "none" : "flex";
+    const submitPrompt = document.getElementById("writingSubmitPrompt");
+    if (submitPrompt) {
+        submitPrompt.innerText = photoOnly
+            ? "Write it on paper, then upload a photo"
+            : "How would you like to submit?";
+    }
 
     // Clear undo history for a fresh session
     _writingHistory = [];
@@ -282,6 +296,25 @@ function clearSketchpadCanvas() {
 }
 
 // ---------------------------------------------------------------------------
+// Fidel Competition practice pad — warm-up drawing only, never submitted.
+// The real writing submission for a Competition family is photo-only (see
+// openWritingSubmitScreen's photoOnly option), so this canvas has no
+// "submit" action at all, just Clear.
+// ---------------------------------------------------------------------------
+
+function initChallengePracticePad() {
+    if (typeof initSketchpadWithUndo === 'function') initSketchpadWithUndo('challengePracticeCanvas');
+    clearChallengePracticePad();
+}
+
+function clearChallengePracticePad() {
+    const canvas = document.getElementById('challengePracticeCanvas');
+    if (!canvas) return;
+    const ctx = canvas._ctx || canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+// ---------------------------------------------------------------------------
 // Photo upload — practice sketchpad shares to teamHubPracticeFeed ONLY
 // (replaces the old disappearingArtGalleryFeed path)
 // ---------------------------------------------------------------------------
@@ -300,7 +333,7 @@ async function uploadSketchpadDrawingCanvasData() {
     try {
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.8));
         const compressed = typeof compressImage === 'function' ? await compressImage(blob, 800) : blob;
-        const filename = `${currentUser.id}/practice_${Date.now()}.jpg`;
+        const filename = `practice_${currentUser.id}_${Date.now()}.jpg`;
 
         const { error: uploadErr } = await _supabase.storage
             .from('team_practice_posts')
@@ -343,7 +376,7 @@ async function submitWritingPhoto(file) {
     showNotificationToast("Compressing and uploading...");
     const compressed = typeof compressImage === 'function' ? await compressImage(file) : file;
     const letterIndex = alphabetData.findIndex(item => item.base === writingSubmitContext.baseLetter);
-    const storagePath = `${currentUser.id}/writing-fam${letterIndex}-${Date.now()}.jpg`;
+    const storagePath = `writing-${currentUser.id}-fam${letterIndex}-${Date.now()}.jpg`;
 
     const { error: uploadError } = await _supabase.storage
         .from('art_shares')
@@ -371,7 +404,7 @@ async function submitWritingSketch() {
     showNotificationToast("Submitting your drawing...");
     canvas.toBlob(async (blob) => {
         const letterIndex = alphabetData.findIndex(item => item.base === writingSubmitContext.baseLetter);
-        const storagePath = `${currentUser.id}/writing-fam${letterIndex}-${Date.now()}.jpg`;
+        const storagePath = `writing-${currentUser.id}-fam${letterIndex}-${Date.now()}.jpg`;
 
         const { error: uploadError } = await _supabase.storage
             .from('art_shares')
@@ -389,10 +422,10 @@ async function submitWritingSketch() {
 // ---------------------------------------------------------------------------
 
 async function finalizeWritingSubmission(imageUrl) {
-    // Keep this payload aligned with the current Supabase table columns:
-    // id, student_id, base_letter, image_url, status, reviewed_by,
-    // reviewer_note, submitted_at, reviewed_at, rejected_at.
-    // Do NOT send level_number unless that column is added back to Supabase.
+    // level_number is only included when we actually have one — omitting it
+    // when null avoids a 400 if the column doesn't accept/have a null default
+    // (most writing submissions come from the Letter Board / Practice Sheet,
+    // which never carry a chapter level_number at all).
     const payload = {
         student_id:   currentUser.id,
         base_letter:  writingSubmitContext.baseLetter,
@@ -400,12 +433,13 @@ async function finalizeWritingSubmission(imageUrl) {
         status:       'pending',
         submitted_at: new Date().toISOString()
     };
+    if (writingSubmitContext.levelNumber) payload.level_number = writingSubmitContext.levelNumber;
 
     const { error } = await _supabase.from('writing_submissions').insert(payload);
 
     if (error) {
-        console.error('Writing submission insert failed:', error);
-        return showNotificationToast("Couldn't submit: " + error.message);
+        console.error("Writing submission insert failed:", error);
+        return showNotificationToast("Couldn't submit: " + (error.message || "unknown error"));
     }
 
     showNotificationToast("Submitted! Your captain will review it soon. 🎉");
@@ -551,3 +585,5 @@ window.renderWritingStatusForFamily   = renderWritingStatusForFamily;
 window.shareApprovedWritingToClass    = shareApprovedWritingToClass;
 window.updateModeSelectCaptainButton  = updateModeSelectCaptainButton;
 window.bindSketchpadButtons           = bindSketchpadButtons;
+window.initChallengePracticePad       = initChallengePracticePad;
+window.clearChallengePracticePad      = clearChallengePracticePad;
