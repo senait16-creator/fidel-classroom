@@ -515,7 +515,7 @@ header {
 
 .teacher-health-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 10px;
     margin-top: 20px;
     margin-bottom: 16px;
@@ -2378,14 +2378,28 @@ header {
 
 .candoo-row {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     gap: 10px;
     background: white;
     border: 1px solid var(--border-color);
     border-radius: 10px;
-    padding: 10px 12px;
+    padding: 12px;
     margin-bottom: 8px;
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s;
+}
+
+.candoo-row.done {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+}
+
+.candoo-checkbox {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    accent-color: var(--brand-primary);
+    cursor: pointer;
 }
 
 .candoo-text {
@@ -2393,46 +2407,248 @@ header {
     color: var(--neutral-dark);
 }
 
-.candoo-row-right {
+.candoo-row.done .candoo-text {
+    color: #166534;
+    font-weight: 600;
+}
+
+/* ── My Growth ─────────────────────────────────────────────────── */
+
+.growth-entry-card {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 14px;
+    background: linear-gradient(135deg, #eef2ff, #ffffff);
+    border: 1px solid #c7d2fe;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+
+.growth-entry-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    background: white;
+    border: 1px solid #e0e7ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
     flex-shrink: 0;
 }
 
-.candoo-status-pill {
-    font-size: 10px;
+.growth-entry-title {
+    font-size: 14.5px;
+    font-weight: 800;
+    color: #3730a3;
+    margin-bottom: 2px;
+}
+
+.growth-entry-sub {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.growth-entry-arrow {
+    margin-left: auto;
+    color: #a5b4fc;
+    font-size: 16px;
+}
+
+.growth-section-label {
+    font-size: 11.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #94a3b8;
+    margin: 22px 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.growth-section-label:first-of-type {
+    margin-top: 0;
+}
+
+.growth-section-count {
+    margin-left: auto;
     font-weight: 700;
-    padding: 3px 8px;
-    border-radius: 999px;
-    white-space: nowrap;
+    color: #4338ca;
+    text-transform: none;
+    letter-spacing: 0;
 }
 
-.candoo-status-pill.verified {
-    background: #dcfce7;
-    color: #166534;
+.growth-today-strip {
+    background: linear-gradient(135deg, #4338ca, #6366f1);
+    border-radius: 16px;
+    padding: 16px;
+    color: white;
 }
 
-.candoo-status-pill.self-assessed {
-    background: #fef3c7;
-    color: #92400e;
+.growth-today-date {
+    font-size: 13px;
+    font-weight: 800;
+    opacity: 0.85;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
 }
 
-.candoo-status-pill.not-started {
-    background: #f1f5f9;
+.growth-today-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    font-size: 13.5px;
+}
+
+.growth-today-row + .growth-today-row {
+    border-top: 1px solid rgba(255,255,255,0.15);
+}
+
+.growth-today-icon {
+    font-size: 16px;
+    width: 22px;
+    text-align: center;
+}
+
+.growth-today-empty {
+    font-size: 13px;
+    opacity: 0.85;
+    padding: 4px 0;
+}
+
+.growth-vocab-chapter {
+    margin-bottom: 18px;
+}
+
+.growth-vocab-chapter-title {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #4338ca;
+    margin-bottom: 8px;
+}
+
+.vocab-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.vocab-chip {
+    background: white;
+    border: 1px solid #e0e7ff;
+    border-radius: 12px;
+    padding: 10px 6px;
+    text-align: center;
+}
+
+.vocab-chip-word {
+    font-family: 'Abyssinica SIL', serif;
+    font-size: 18px;
+    color: var(--neutral-dark);
+    margin-bottom: 2px;
+}
+
+.vocab-chip-meaning {
+    font-size: 9.5px;
+    color: #64748b;
+    line-height: 1.3;
+}
+
+.vocab-review-btn {
+    width: 100%;
+    margin-top: 10px;
+    background: #eef2ff;
+    color: #4338ca;
+    border: 1px solid #c7d2fe;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.grammar-card {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+}
+
+.grammar-pattern {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #4338ca;
+    margin-bottom: 3px;
+}
+
+.grammar-note {
+    font-size: 12px;
+    color: #475569;
+    line-height: 1.5;
+}
+
+.grammar-lesson-tag {
+    font-size: 10px;
+    color: #94a3b8;
+    margin-top: 4px;
+}
+
+.candoo-summary-card {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 16px;
+}
+
+.candoo-summary-top {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.candoo-summary-count {
+    font-size: 26px;
+    font-weight: 800;
+    color: #4338ca;
+}
+
+.candoo-summary-of {
+    font-size: 13px;
     color: #94a3b8;
 }
 
-.candoo-assess-btn {
-    background: #4338ca;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 6px 10px;
-    font-size: 11px;
+.candoo-summary-track {
+    height: 8px;
+    background: #f1f5f9;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.candoo-summary-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4338ca, #6366f1);
+    border-radius: 20px;
+}
+
+.candoo-cat-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #475569;
+    padding: 4px 0;
+}
+
+.candoo-cat-count {
     font-weight: 700;
-    cursor: pointer;
-    white-space: nowrap;
+    color: var(--neutral-dark);
 }
 
 /* ── My Amharic Path — lesson step panel ─────────────────────── */
