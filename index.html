@@ -170,10 +170,6 @@
             <div class="teacher-health-value">–</div>
             <div class="teacher-health-label">Active Students</div>
         </div>
-        <div class="teacher-health-tile" id="healthCanDoReviews">
-            <div class="teacher-health-value">–</div>
-            <div class="teacher-health-label">Can-Do Reviews</div>
-        </div>
     </div>
 
     <div class="teacher-overview-card">
@@ -220,17 +216,6 @@
     <div class="teacher-panel-body" id="levelCompletionPanelBody">
         <p style="font-size:13px; color:#64748b; margin-bottom:12px;">Students who cleared all 3 families and are requesting level advancement.</p>
         <div id="levelCompletionQueueMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
-    </div>
-</div>
-
-<div class="teacher-panel" style="margin-bottom:20px;">
-    <div class="teacher-panel-header" onclick="toggleTeacherPanel('canDoVerificationPanelBody', this)">
-        <h2 style="font-size:18px; color:var(--neutral-dark);">📋 Can-Do Statement Reviews</h2>
-        <button class="teacher-panel-toggle">▼</button>
-    </div>
-    <div class="teacher-panel-body" id="canDoVerificationPanelBody">
-        <p style="font-size:13px; color:#64748b; margin-bottom:12px;">Students who self-assessed a Can-Do statement and are waiting on your confirmation.</p>
-        <div id="canDoVerificationQueueMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
     </div>
 </div>
 
@@ -1026,7 +1011,28 @@
         <button class="btn-secondary" onclick="exitAmharicPath()">← Back</button>
     </div>
     <p class="subtitle" style="text-align:left; margin-bottom:16px;">From Fidel to Fluent </p>
+    <div id="growthEntryMount"></div>
     <div id="readingLevelsGrid" class="chapter-list-grid"></div>
+</div>
+
+<div id="myGrowthScreen" style="display:none; max-width:600px; margin:40px auto; padding:0 16px;">
+    <div class="workspace-title">
+        <span>🌱 My Growth</span>
+        <button class="btn-secondary" onclick="exitMyGrowth()">← Back</button>
+    </div>
+    <p class="subtitle" style="text-align:left; margin-bottom:16px;">Everything you've picked up so far on My Amharic Path</p>
+
+    <div class="growth-section-label">📅 Today</div>
+    <div id="growthTodayMount"></div>
+
+    <div class="growth-section-label">🔤 Vocabulary <span id="growthVocabCount" class="growth-section-count"></span></div>
+    <div id="growthVocabMount"></div>
+
+    <div class="growth-section-label">📐 Grammar Points <span id="growthGrammarCount" class="growth-section-count"></span></div>
+    <div id="growthGrammarMount"></div>
+
+    <div class="growth-section-label">✅ Can-Do Skills</div>
+    <div id="growthCanDoMount"></div>
 </div>
 
 <!-- Chapter intro card — shared by "🎯 Chapter Goals" and "▶️ Start Chapter".
@@ -1405,22 +1411,22 @@
             <button class="btn-secondary" onclick="exitCanDo()">← Home</button>
         </div>
         <p style="font-size:13px; color:#64748b; margin-bottom:20px;">
-            Mark what you think you can do — your teacher confirms it, and some skills confirm themselves automatically.
+            Check off what you can already do — some skills check themselves automatically once you've earned them.
         </p>
         <div id="canDoStatementsMount"></div>
     </div>
 </div>
 <!-- END CAN-DO STATEMENTS -->
 
-<script src="js/navigation.js?v=2" defer></script>
-<script src="js/app.js?v=14" defer></script>
+<script src="js/navigation.js?v=3" defer></script>
+<script src="js/app.js?v=15" defer></script>
 <script src="js/auth.js?v=10" defer></script>
 <script src="js/guide.js?v=10" defer></script>
 <script src="js/utils/compress.js?v=9" defer></script>
 <script src="js/game.js?v=9" defer></script>
 <script src="js/submissions.js?v=12" defer></script>
-<script src="js/teacher.js?v=10" defer></script>
-<script src="js/reading.js?v=19" defer></script>
+<script src="js/teacher.js?v=11" defer></script>
+<script src="js/reading.js?v=20" defer></script>
     <script src="js/letterboard.js?v=10" defer></script>
 <script src="js/team/progress.js?v=9" defer></script>
 <script src="js/team/levels.js?v=10" defer></script>
@@ -1429,7 +1435,7 @@
     <script src="js/community.js?v=6" defer></script>
     <script src="js/dailyfeed.js?v=1" defer></script>
     <script src="js/songweek.js?v=1" defer></script>
-    <script src="js/candostatement.js?v=3" defer></script>
+    <script src="js/candostatement.js?v=4" defer></script>
         <script src="js/starboard.js?v=1" defer></script>
 <script src="js/wordle.js?v=9" defer></script>
 <script src="intro.js?v=1" defer></script>
