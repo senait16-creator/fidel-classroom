@@ -517,6 +517,60 @@ async function loadCaptainWritingQueue() {
     });
 }
 
+// Shows recently approved submissions for the team, including ones a
+// teacher approved directly (bypassing the captain) — otherwise those
+// just silently vanish from the pending queue with no record the captain
+// ever sees, and they wouldn't know the teacher stepped in.
+async function loadCaptainRecentlyApproved() {
+    const mount = document.getElementById('captainRecentlyApprovedMount');
+    if (!mount) return;
+    if (!currentProfile?.team_id) return;
+
+    const { data: members } = await _supabase
+        .from('profiles').select('id').eq('team_id', currentProfile.team_id);
+    const memberIds = (members || []).map(m => m.id).filter(id => id !== currentUser.id);
+    if (memberIds.length === 0) { mount.innerHTML = ''; return; }
+
+    const { data: approved } = await _supabase
+        .from('writing_submissions')
+        .select(`
+            id, base_letter, reviewed_at, reviewed_by, student_id,
+            profiles!writing_submissions_student_id_fkey(nickname, avatar)
+        `)
+        .in('student_id', memberIds)
+        .eq('status', 'approved')
+        .order('reviewed_at', { ascending: false })
+        .limit(5);
+
+    if (!approved || approved.length === 0) { mount.innerHTML = ''; return; }
+
+    const reviewerIds = [...new Set(approved.map(a => a.reviewed_by).filter(Boolean))];
+    const { data: reviewers } = reviewerIds.length > 0
+        ? await _supabase.from('profiles').select('id, nickname, is_admin').in('id', reviewerIds)
+        : { data: [] };
+
+    const rows = approved.map(sub => {
+        const reviewer = (reviewers || []).find(r => r.id === sub.reviewed_by);
+        let reviewerLabel = 'a captain';
+        if (sub.reviewed_by === currentUser.id) reviewerLabel = 'you';
+        else if (reviewer?.is_admin) reviewerLabel = `${reviewer?.nickname || 'your teacher'} (teacher)`;
+        else if (reviewer?.nickname) reviewerLabel = reviewer.nickname;
+
+        return `
+            <div class="captain-approved-row">
+                <span>${sub.profiles?.avatar || '🦁'} <strong>${sub.profiles?.nickname || 'Student'}</strong> —
+                    <span class="captain-approved-letter">${sub.base_letter}</span>
+                </span>
+                <span class="captain-approved-by">✓ by ${reviewerLabel}</span>
+            </div>`;
+    }).join('');
+
+    mount.innerHTML = `
+        <div class="captain-approved-title">Recently Approved</div>
+        ${rows}
+    `;
+}
+
 async function captainApproveSubmission(submissionId, studentId, baseLetter) {
     showNotificationToast('Approving...');
 
@@ -566,6 +620,7 @@ async function captainApproveSubmission(submissionId, studentId, baseLetter) {
     showGobezToast('Submission approved! ✓');
     await loadCaptainWritingQueue();
     await loadCaptainTeamProgress();
+    if (typeof loadCaptainRecentlyApproved === 'function') await loadCaptainRecentlyApproved();
 
     // Refresh the Competition page team status if it's the visible screen
     const dash = document.getElementById('challengeDashboardScreen');
@@ -965,6 +1020,7 @@ window.loadWeeklyMeeting         = loadWeeklyMeeting;
 window.loadStudentMeetingDisplay = loadStudentMeetingDisplay;
 window.saveWeeklyMeeting         = saveWeeklyMeeting;
 window.loadCaptainWritingQueue   = loadCaptainWritingQueue;
+window.loadCaptainRecentlyApproved = loadCaptainRecentlyApproved;
 window.loadCaptainTeamProgress   = loadCaptainTeamProgress;
 window.loadCaptainStats          = loadCaptainStats;
 window.captainApproveSubmission  = captainApproveSubmission;
