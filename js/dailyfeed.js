@@ -11,7 +11,7 @@
 // Verse of the Day: content here is a best-effort Amharic rendering —
 // worth a native-speaker pass before relying on it for a class.
 //
-// Loads AFTER: app.js, team/progress.js (buildLiveTestSchedulingLink).
+// Loads AFTER: app.js.
 // =============================================================================
 
 // breakdown/grammarNote are a best-effort word-level gloss for teaching
@@ -236,18 +236,15 @@ function renderWordleStatusMini(targetId = 'wordleStatusMount') {
 }
 
 // ---------------------------------------------------------------------------
-// Today banners — live test slots (static, reuses the Calendly link already
-// wired into the level-completion flow) + real classmates-leveled-up-today
-// count from level_completion_requests.
+// Today banners — real classmates-leveled-up-today count from
+// level_completion_requests. (The live-test booking banner used to live
+// here too, but it duplicated the properly-gated one already on the Fidel
+// Challenge dashboard, so it was dropped from Community.)
 // ---------------------------------------------------------------------------
 
 async function renderTodayBanners(targetId = 'todayBannersMount') {
     const mount = document.getElementById(targetId);
     if (!mount) return;
-
-    const schedulingLink = typeof buildLiveTestSchedulingLink === 'function'
-        ? buildLiveTestSchedulingLink()
-        : 'https://calendly.com/senaitrichmond16/fidel-test';
 
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
@@ -266,11 +263,6 @@ async function renderTodayBanners(targetId = 'todayBannersMount') {
             : `${names.slice(0, 2).join(', ')} and ${names.length - 2} more cleared a level today.`;
 
     mount.innerHTML = `
-        <a class="banner-card" href="${schedulingLink}" target="_blank" rel="noopener">
-            <div class="banner-icon">🎤</div>
-            <p class="banner-title">Book Your Live Test</p>
-            <p class="banner-sub">Cleared all 3 families? Schedule it here.</p>
-        </a>
         <div class="banner-card">
             <div class="banner-icon">🎉</div>
             <p class="banner-title">${names.length} Leveled Up Today</p>
