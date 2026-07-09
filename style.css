@@ -6325,13 +6325,31 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     margin-bottom:10px;
 }
 
-.verse-card{
-    background:linear-gradient(155deg,#166534,#22c55e);
-    border:none;
-    color:#eafff1;
+/* #communityScreen .card (higher specificity: 1 id + 1 class) was silently
+   overriding .verse-card (1 class) everywhere the verse card renders inside
+   Community, flattening it to the same white/cream look as every other
+   card — this is why it was blending into the background. Matching
+   specificity here so this rule actually wins. */
+#communityScreen .card.verse-card{
+    background: linear-gradient(160deg, #78350f 0%, #b45309 55%, #ca8a04 100%);
+    border: 2px solid #fbbf24;
+    box-shadow: 0 12px 28px rgba(120, 53, 15, 0.25);
+    color:#fef9e7;
+    position: relative;
+    overflow: hidden;
 }
 
-.verse-card .eyebrow{ color:rgba(234,255,241,0.75); }
+#communityScreen .card.verse-card::after{
+    content: '✝';
+    position: absolute;
+    top: 10px;
+    right: 16px;
+    font-size: 22px;
+    color: rgba(255,255,255,0.28);
+    line-height: 1;
+}
+
+.verse-card .eyebrow{ color:rgba(254,249,231,0.78); }
 
 .verse-amharic{
     font-family:"Abyssinica SIL", serif;
@@ -6342,14 +6360,14 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 
 .verse-translit{
     font-size:12px;
-    color:rgba(234,255,241,0.8);
+    color:rgba(254,249,231,0.82);
     font-style:italic;
     margin:0 0 6px;
 }
 
 .verse-en{
     font-size:13px;
-    color:rgba(234,255,241,0.92);
+    color:rgba(254,249,231,0.94);
     margin:0;
     line-height:1.5;
 }
