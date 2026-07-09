@@ -55,7 +55,8 @@ async function loadTeacherRosterData() {
             ? `<button class="btn-secondary" style="font-size:11px; padding:6px 10px; color:#ef4444; border:1px solid #fecaca;" onclick="removeStudentFromTeam('${s.id}', '${s.nickname.replace(/'/g, "\\'")}')">Remove from Team</button>`
             : '';
         const resetLevelBtn = `<button class="btn-secondary" style="font-size:11px; padding:6px 10px; color:#b45309; border:1px solid #fed7aa;" onclick="teacherResetStudentLevel('${s.id}', '${s.nickname.replace(/'/g, "\\'")}')">🔄 Reset a Level</button>`;
-        const actionButtons = `<div style="display:flex; flex-direction:column; gap:6px; align-items:flex-start;">${removeBtn}${resetLevelBtn}</div>`;
+        const forgetBtn = `<button class="btn-secondary" style="font-size:11px; padding:6px 10px; color:#991b1b; border:1px solid #fecaca; font-weight:800;" onclick="teacherForgetStudent('${s.id}', '${s.nickname.replace(/'/g, "\\'")}')">🗑️ Forget Student</button>`;
+        const actionButtons = `<div style="display:flex; flex-direction:column; gap:6px; align-items:flex-start;">${removeBtn}${resetLevelBtn}${forgetBtn}</div>`;
 
         tbody.innerHTML += `
             <tr>
@@ -143,6 +144,61 @@ async function teacherResetStudentLevel(studentId, nickname) {
     await loadTeacherRosterData();
     if (typeof loadTeacherTeamProgress === "function") await loadTeacherTeamProgress();
     if (typeof loadTeacherClassroomOverview === "function") await loadTeacherClassroomOverview();
+}
+
+// Erases a student's footprint from everything this app shows: their name,
+// email, progress, submissions, and team membership. This does NOT delete
+// their actual Supabase Auth login (email/password) — that requires a
+// service-role key, which can never be used safely from browser JS (it
+// would be exposed to anyone who opens dev tools). After this runs, the
+// login still technically exists but is fully disconnected from any
+// classroom data. To remove the login itself, delete it directly from the
+// Supabase dashboard's Authentication tab.
+async function teacherForgetStudent(studentId, nickname) {
+    const typed = prompt(
+        `This permanently erases ${nickname}'s name, email, progress, and submissions from this app, ` +
+        `and removes them from their team. It cannot be undone from here. Their login will still exist in ` +
+        `Supabase Auth but disconnected from all data — delete it there yourself if you want it fully gone.\n\n` +
+        'Type REMOVE to confirm:'
+    );
+    if (typed !== 'REMOVE') {
+        showNotificationToast('Cancelled — nothing was changed.');
+        return;
+    }
+
+    showNotificationToast(`Forgetting ${nickname}...`);
+
+    const deleteResults = await Promise.all([
+        _supabase.from('student_family_progress').delete().eq('student_id', studentId),
+        _supabase.from('writing_submissions').delete().eq('student_id', studentId),
+        _supabase.from('can_do_progress').delete().eq('student_id', studentId),
+        _supabase.from('help_flags').delete().eq('student_id', studentId),
+        _supabase.from('level_completion_requests').delete().eq('student_id', studentId),
+        _supabase.from('team_practice_posts').delete().eq('uploader_id', studentId)
+    ]);
+    const deleteError = deleteResults.find(r => r.error)?.error;
+    if (deleteError) {
+        console.error('Failed to forget student (data wipe):', deleteError);
+        return showNotificationToast('Failed: ' + deleteError.message);
+    }
+
+    const { error: profileError } = await _supabase.from('profiles').update({
+        nickname: 'Removed Student',
+        email: `forgotten-${studentId}@deleted.local`,
+        avatar: null,
+        team_id: null,
+        is_captain: false
+    }).eq('id', studentId);
+
+    if (profileError) {
+        console.error('Failed to forget student (profile scrub):', profileError);
+        return showNotificationToast('Failed: ' + profileError.message);
+    }
+
+    showGobezToast(`${nickname} has been removed and forgotten.`);
+    await loadTeacherRosterData();
+    await teacherRefreshConfigurationDropdowns();
+    if (typeof loadTeacherClassroomOverview === 'function') await loadTeacherClassroomOverview();
 }
 
 async function teacherRefreshConfigurationDropdowns() {
@@ -528,6 +584,36 @@ async function recheckTeamReadiness(teamId) {
     if (typeof loadTeacherClassroomOverview === 'function') await loadTeacherClassroomOverview();
 }
 
+// Teachers can set/edit any team's meeting time too, not just captains —
+// same team_meetings table, needs the matching RLS policy for is_admin.
+async function teacherEditTeamMeeting(teamId, teamName) {
+    const { data: existing } = await _supabase
+        .from('team_meetings')
+        .select('day_of_week, meeting_time')
+        .eq('team_id', teamId)
+        .maybeSingle();
+
+    const currentDay = existing?.day_of_week || 'Monday';
+    const currentTime = existing?.meeting_time || '7:00 PM';
+
+    const day = prompt(`Meeting day for ${teamName}? (e.g. Monday, Tuesday...)`, currentDay);
+    if (day === null) return;
+    const time = prompt(`Meeting time for ${teamName}? (e.g. 7:00 PM)`, currentTime);
+    if (time === null) return;
+
+    const { error } = await _supabase.from('team_meetings').upsert({
+        team_id: teamId,
+        day_of_week: day.trim() || currentDay,
+        meeting_time: time.trim() || currentTime,
+        updated_at: new Date().toISOString(),
+        updated_by: currentUser.id
+    }, { onConflict: 'team_id' });
+
+    if (error) return showNotificationToast("Couldn't save: " + error.message);
+
+    showNotificationToast(`Meeting updated for ${teamName} ✓`);
+}
+
 async function loadTeacherTeamProgress() {
     const mount = document.getElementById("teacherTeamProgressMount");
     mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
@@ -553,7 +639,8 @@ async function loadTeacherTeamProgress() {
                     <strong>${team.name}</strong>
                     <span>Level ${team.current_level} • Streak: ${team.streak_count || 0}${isReady ? ' • Ready for live quiz! 🎉' : ''}</span>
                 </div>
-                <div style="display:flex; align-items:center; gap:8px;">
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+                    <button class="btn-secondary btn-edit-meeting" style="font-size:11px; padding:6px 10px;" title="Edit this team's meeting day/time">📅 Meeting</button>
                     <button class="btn-secondary btn-recheck" style="font-size:11px; padding:6px 10px;" title="Re-run the readiness check without a new approval">🔄 Recheck</button>
                     <button class="btn-advance" ${isReady ? '' : 'disabled'}>Mark Quiz Passed & Advance</button>
                     <button class="team-members-toggle" aria-label="Show team members">▼</button>
@@ -570,6 +657,11 @@ async function loadTeacherTeamProgress() {
         row.querySelector('.btn-recheck').onclick = (e) => {
             e.stopPropagation();
             recheckTeamReadiness(team.id);
+        };
+
+        row.querySelector('.btn-edit-meeting').onclick = (e) => {
+            e.stopPropagation();
+            teacherEditTeamMeeting(team.id, team.name);
         };
 
         const toggleBtn = row.querySelector('.team-members-toggle');
@@ -897,6 +989,8 @@ function jumpToTeacherPanel(bodyId) {
 
 window.removeStudentFromTeam = removeStudentFromTeam;
 window.teacherResetStudentLevel = teacherResetStudentLevel;
+window.teacherForgetStudent = teacherForgetStudent;
+window.teacherEditTeamMeeting = teacherEditTeamMeeting;
 window.teacherAssignStudentToPod = teacherAssignStudentToPod;
 window.toggleTeacherPanel = toggleTeacherPanel;
 window.jumpToTeacherPanel = jumpToTeacherPanel;
