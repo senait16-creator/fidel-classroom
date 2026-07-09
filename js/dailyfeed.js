@@ -14,36 +14,78 @@
 // Loads AFTER: app.js, team/progress.js (buildLiveTestSchedulingLink).
 // =============================================================================
 
+// breakdown/grammarNote are a best-effort word-level gloss for teaching
+// purposes, same caveat as the verse text itself above: worth a
+// native-speaker review before treating as fully authoritative.
 const VERSE_LIBRARY = [
     {
         amharic: "በመጀመሪያ እግዚአብሔር ሰማይንና ምድርን ፈጠረ።",
         translit: "Bemejemeria Igziabiher semayinna midirin fetere.",
         english: "In the beginning God created the heavens and the earth.",
-        reference: "Genesis 1:1"
+        reference: "Genesis 1:1",
+        breakdown: [
+            { amharic: "በመጀመሪያ", translit: "bemejemeria", meaning: "in the beginning (በ- \"in\" + መጀመሪያ \"beginning\")" },
+            { amharic: "እግዚአብሔር", translit: "Igziabiher", meaning: "God / the LORD" },
+            { amharic: "ሰማይንና", translit: "semayinna", meaning: "heaven(s), and (ሰማይ \"sky\" + -ን object marker + -ና \"and\")" },
+            { amharic: "ምድርን", translit: "midirin", meaning: "the earth (object) (ምድር \"earth\" + -ን object marker)" },
+            { amharic: "ፈጠረ", translit: "fetere", meaning: "created (he) — past tense verb" }
+        ],
+        grammarNote: "Amharic is verb-final: the verb ፈጠረ (\"created\") comes at the very end, after both objects. Notice -ን attached to ሰማይ and ምድር — that suffix marks the direct object of the sentence."
     },
     {
         amharic: "እግዚአብሔር እረኛዬ ነው፤ የሚያሳጣኝ የለም።",
         translit: "Igziabiher irenyaye now; yemiyasat'agn yelem.",
         english: "The LORD is my shepherd; I shall not want.",
-        reference: "Psalm 23:1"
+        reference: "Psalm 23:1",
+        breakdown: [
+            { amharic: "እግዚአብሔር", translit: "Igziabiher", meaning: "the LORD" },
+            { amharic: "እረኛዬ", translit: "irenyaye", meaning: "my shepherd (እረኛ \"shepherd\" + -ዬ \"my\")" },
+            { amharic: "ነው", translit: "now", meaning: "is — the verb \"to be\"" },
+            { amharic: "የለም", translit: "yelem", meaning: "there is not / does not exist" }
+        ],
+        grammarNote: "-ዬ is a common possessive ending meaning \"my\" — attach it straight onto a noun, like እረኛ (\"shepherd\") → እረኛዬ (\"my shepherd\")."
     },
     {
         amharic: "ይህ እግዚአብሔር የሠራው ቀን ነው፤ በእርሱ ደስ ይበለን ሐሴትም እናድርግ።",
         translit: "Yih Igziabiher yeserawi k'en now; be'irsu des yibelen haset'imi inadirig.",
         english: "This is the day the LORD has made; let us rejoice and be glad in it.",
-        reference: "Psalm 118:24"
+        reference: "Psalm 118:24",
+        breakdown: [
+            { amharic: "ይህ", translit: "yih", meaning: "this" },
+            { amharic: "የሠራው", translit: "yeserawi", meaning: "that (he) made — relative clause (የ- \"that/which\" + ሠራ \"made\")" },
+            { amharic: "ቀን", translit: "k'en", meaning: "day" },
+            { amharic: "በእርሱ", translit: "be'irsu", meaning: "in it (በ- \"in\" + እርሱ \"it/he\")" },
+            { amharic: "እናድርግ", translit: "inadirig", meaning: "let us do / let us make — \"we\" command form" }
+        ],
+        grammarNote: "የ- at the front of a verb turns it into a relative clause (\"that/which...\"): ሠራ (\"made\") → የሠራው (\"that he made\"). This is one of the most useful patterns in Amharic."
     },
     {
         amharic: "በፍጹም ልብህ በእግዚአብሔር ታመን በራስህም ማስተዋል አትደገፍ።",
         translit: "Befitsum libih be'igziabiher tamen berasihimi mastewal atidegef.",
         english: "Trust in the LORD with all your heart, and lean not on your own understanding.",
-        reference: "Proverbs 3:5"
+        reference: "Proverbs 3:5",
+        breakdown: [
+            { amharic: "ልብህ", translit: "libih", meaning: "your heart (ልብ \"heart\" + -ህ \"your,\" masculine)" },
+            { amharic: "ታመን", translit: "tamen", meaning: "trust! — command form" },
+            { amharic: "ራስህ", translit: "rasih", meaning: "yourself (ራስ \"self\" + -ህ \"your\")" },
+            { amharic: "ማስተዋል", translit: "mastewal", meaning: "understanding" },
+            { amharic: "አትደገፍ", translit: "atidegef", meaning: "do not lean/rely — negative command" }
+        ],
+        grammarNote: "-ህ is \"your\" for a masculine \"you.\" አት- at the front of a verb makes a negative command (\"don't...\"): ደገፈ (\"lean on\") → አትደገፍ (\"don't lean on\")."
     },
     {
         amharic: "ኃይልን በሚሰጠኝ በክርስቶስ ሁሉን እችላለሁ።",
         translit: "Hayilin bemiset'egn bekristos hulun ichilalehu.",
         english: "I can do all things through Christ who strengthens me.",
-        reference: "Philippians 4:13"
+        reference: "Philippians 4:13",
+        breakdown: [
+            { amharic: "ኃይልን", translit: "hayilin", meaning: "strength (object) (ኃይል \"strength\" + -ን object marker)" },
+            { amharic: "በሚሰጠኝ", translit: "bemiset'egn", meaning: "who gives me — relative clause + -ኝ \"me\"" },
+            { amharic: "ክርስቶስ", translit: "kristos", meaning: "Christ" },
+            { amharic: "ሁሉን", translit: "hulun", meaning: "all (of it) (ሁሉ \"all\" + -ን object marker)" },
+            { amharic: "እችላለሁ", translit: "ichilalehu", meaning: "I am able / I can — \"I\" present tense" }
+        ],
+        grammarNote: "-ኝ tacked onto a verb means \"me\": ይሰጠኝ (\"gives me\"). Compare with -ህ (\"your\") and -ዬ (\"my\") above — Amharic verbs and nouns both take these short person endings."
     }
 ];
 
@@ -83,11 +125,33 @@ function renderVerseOfDay(targetId = 'verseOfDayMount') {
     if (!mount) return;
 
     const verse = VERSE_LIBRARY[dailyFeedDayIndex(VERSE_LIBRARY.length)];
+    const panelId = `${targetId}-grammar`;
+
+    const breakdownHTML = (verse.breakdown || []).map(w => `
+        <div class="verse-word-row">
+            <span class="verse-word-amharic">${w.amharic}</span>
+            <span class="verse-word-translit">${w.translit}</span>
+            <span class="verse-word-meaning">${w.meaning}</span>
+        </div>`).join('');
+
     mount.innerHTML = `
         <div class="eyebrow">Verse of the Day</div>
         <p class="verse-amharic">${verse.amharic}</p>
         <p class="verse-translit">${verse.translit}</p>
-        <p class="verse-en">"${verse.english}" — ${verse.reference}</p>`;
+        <p class="verse-en">"${verse.english}" — ${verse.reference}</p>
+        <button type="button" class="verse-grammar-toggle" onclick="toggleVerseGrammar('${panelId}', this)">🔤 Grammar &amp; Vocab</button>
+        <div id="${panelId}" class="verse-grammar-panel" style="display:none;">
+            ${breakdownHTML}
+            ${verse.grammarNote ? `<div class="verse-grammar-note"><strong>Grammar note:</strong> ${verse.grammarNote}</div>` : ''}
+        </div>`;
+}
+
+function toggleVerseGrammar(panelId, btn) {
+    const panel = document.getElementById(panelId);
+    if (!panel) return;
+    const isOpen = panel.style.display !== 'none';
+    panel.style.display = isOpen ? 'none' : 'block';
+    if (btn) btn.textContent = isOpen ? '🔤 Grammar & Vocab' : '🔤 Hide Grammar & Vocab';
 }
 
 // ---------------------------------------------------------------------------
@@ -219,6 +283,7 @@ async function renderTodayBanners(targetId = 'todayBannersMount') {
 // ---------------------------------------------------------------------------
 
 window.renderVerseOfDay = renderVerseOfDay;
+window.toggleVerseGrammar = toggleVerseGrammar;
 window.renderQuestionOfDay = renderQuestionOfDay;
 window.submitQuestionOfDayAnswer = submitQuestionOfDayAnswer;
 window.editQuestionOfDayAnswer = editQuestionOfDayAnswer;
