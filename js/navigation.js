@@ -36,6 +36,7 @@ const ALL_SCREENS = [
     "challengeFamilyDetailScreen",
     "readingLevelsScreen",
     "readingLevelDetailScreen",
+    "myGrowthScreen",
     "letterBoardScreen",
     "writingSubmitScreen",
     "communityScreen",
