@@ -793,37 +793,35 @@ async function openChallengeFamilyDetail(fidelObj, levelNumber) {
     document.getElementById("challengeFamilyDetailTitle").innerText = `Family: "${fidelObj.base}"`;
     renderChallengeFamilyDetailGiantRow(fidelObj);
 
+    const body = document.getElementById("challengeFamilyPracticeBody");
+
     if (currentProfile?.is_captain) {
-        document.getElementById("challengeDetailPlayBtn").style.display = "none";
-        document.getElementById("challengeDetailFlashcardBtn").style.display = "none";
-        document.getElementById("challengeDetailWritingBtn").style.display = "none";
+        if (body) body.style.display = "none";
         const box = document.getElementById("challengeWritingStatusBox");
         box.style.display = "block";
         box.innerHTML = `<div class="challenge-writing-status approved">👑 As team captain, you're exempt — focus on reviewing your team's submissions!</div>`;
         return;
     }
 
-    document.getElementById("challengeDetailFlashcardBtn").style.display = "flex";
-    document.getElementById("challengeDetailPlayBtn").style.display = "flex";
-    document.getElementById("challengeDetailWritingBtn").style.display = "flex";
+    if (body) body.style.display = "block";
     renderWritingStatusForFamily(fidelObj.base);
+    renderChallengeInlineFlashcard(fidelObj);
+
+    const practiceTitle = document.getElementById("challengePracticeTitle");
+    if (practiceTitle) practiceTitle.innerText = `Try writing "${fidelObj.base}" with your finger`;
+    if (typeof initChallengePracticePad === 'function') initChallengePracticePad();
 
     document.getElementById("challengeDetailPlayBtn").onclick = () => launchChallengeStreakGame(fidelObj, levelNumber);
-    document.getElementById("challengeDetailFlashcardBtn").onclick = () => {
-        openFlashcardStudy(buildFlashcardDeckForFamily(fidelObj), `"${fidelObj.base}" Family`, () => {
-            document.getElementById("challengeFamilyDetailScreen").style.display = "block";
-        });
-        document.getElementById("challengeFamilyDetailScreen").style.display = "none";
-    };
 
     await refreshChallengeDetailWritingGate(fidelObj, levelNumber);
 }
 
 // Writing submission stays locked until the matching-game streak of
-// STREAK_THRESHOLD is passed, so the 1→2→3 lesson order is actually
-// enforced here (not just implied by the button numbering).
+// STREAK_THRESHOLD is passed, and once unlocked it's photo-only (real paper
+// handwriting) — see openWritingSubmitScreen's photoOnly option.
 async function refreshChallengeDetailWritingGate(fidelObj, levelNumber) {
     const writeBtn = document.getElementById("challengeDetailWritingBtn");
+    const lockCard = document.getElementById("challengeWritingLockCard");
     if (!writeBtn) return;
     const writeSub = document.getElementById("challengeDetailWritingSub");
 
@@ -836,17 +834,13 @@ async function refreshChallengeDetailWritingGate(fidelObj, levelNumber) {
         .maybeSingle();
 
     const streakDone = !!progress?.streak_passed;
-    writeBtn.classList.toggle('step-locked', !streakDone);
-    writeBtn.disabled = !streakDone;
-    if (writeSub) {
-        writeSub.innerText = streakDone
-            ? "Submit for captain review"
-            : `🔒 Unlocks after a streak of ${STREAK_THRESHOLD}`;
-    }
+    if (lockCard) lockCard.style.display = streakDone ? "none" : "block";
+    writeBtn.style.display = streakDone ? "flex" : "none";
+    if (writeSub) writeSub.innerText = "Submit for captain review";
 
     writeBtn.onclick = streakDone
         ? () => {
-            openWritingSubmitScreen(fidelObj.base, 'challengeDetail', levelNumber);
+            openWritingSubmitScreen(fidelObj.base, 'challengeDetail', levelNumber, { photoOnly: true });
             document.getElementById("challengeFamilyDetailScreen").style.display = "none";
         }
         : null;
@@ -855,6 +849,95 @@ async function refreshChallengeDetailWritingGate(fidelObj, levelNumber) {
 function exitChallengeFamilyDetail() {
     document.getElementById("challengeFamilyDetailScreen").style.display = "none";
     document.getElementById("challengeFamilyScreen").style.display = "block";
+}
+
+// ---------------------------------------------------------------------------
+// Inline flashcards — same deck data as the standalone Flashcard screen
+// (buildFlashcardDeckForFamily), but mounted directly on the family detail
+// page so there's no extra navigation between the letter row and practice.
+// ---------------------------------------------------------------------------
+
+let challengeFlashDeck = [];
+let challengeFlashIndex = 0;
+let challengeFlashFlipped = false;
+let _challengeFlashTouchX = 0;
+let _challengeFlashTouchY = 0;
+
+function renderChallengeInlineFlashcard(fidelObj) {
+    challengeFlashDeck = buildFlashcardDeckForFamily(fidelObj);
+    challengeFlashIndex = 0;
+    challengeFlashFlipped = false;
+    renderChallengeFlashFace();
+
+    const card = document.getElementById("challengeInlineFlashcard");
+    const prevBtn = document.getElementById("challengeFlashPrevBtn");
+    const nextBtn = document.getElementById("challengeFlashNextBtn");
+    if (!card) return;
+
+    if (prevBtn) prevBtn.onclick = (e) => { e.stopPropagation(); challengeFlashStep(-1); };
+    if (nextBtn) nextBtn.onclick = (e) => { e.stopPropagation(); challengeFlashStep(1); };
+
+    if (!card._wired) {
+        card._wired = true;
+        card.addEventListener("click", (e) => {
+            if (e.target.closest('.flashcard-arrow')) return;
+            challengeFlashFlipped = !challengeFlashFlipped;
+            renderChallengeFlashFace();
+        });
+        card.addEventListener("touchstart", e => {
+            _challengeFlashTouchX = e.changedTouches[0].screenX;
+            _challengeFlashTouchY = e.changedTouches[0].screenY;
+        }, { passive: true });
+        card.addEventListener("touchend", e => {
+            const dx = e.changedTouches[0].screenX - _challengeFlashTouchX;
+            const dy = e.changedTouches[0].screenY - _challengeFlashTouchY;
+            if (Math.abs(dx) < 40 || Math.abs(dy) > Math.abs(dx)) return;
+            challengeFlashStep(dx < 0 ? 1 : -1);
+        }, { passive: true });
+    }
+}
+
+function challengeFlashStep(dir) {
+    if (!challengeFlashDeck.length) return;
+    challengeFlashIndex = (challengeFlashIndex + dir + challengeFlashDeck.length) % challengeFlashDeck.length;
+    challengeFlashFlipped = false;
+    renderChallengeFlashFace();
+}
+
+function renderChallengeFlashFace() {
+    const entry = challengeFlashDeck[challengeFlashIndex];
+    if (!entry) return;
+
+    const charEl = document.getElementById("challengeFlashChar");
+    if (charEl) {
+        charEl.innerText = challengeFlashFlipped ? entry.sound : entry.char;
+        charEl.classList.toggle("flash-face-sound", challengeFlashFlipped);
+    }
+    const count = document.getElementById("challengeFlashCount");
+    if (count) count.innerText = `${challengeFlashIndex + 1} / ${challengeFlashDeck.length}`;
+
+    const dots = document.getElementById("challengeFlashDots");
+    if (dots) {
+        dots.innerHTML = challengeFlashDeck.map((_, i) =>
+            `<span class="${i === challengeFlashIndex ? 'active' : ''}"></span>`
+        ).join("");
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Level Resources overlay — same links as the "Current Level Resources"
+// dashboard card, surfaced as an overlay so they're reachable from inside a
+// family's detail screen too, without leaving the page.
+// ---------------------------------------------------------------------------
+
+function openLevelResourcesOverlay() {
+    const overlay = document.getElementById("levelResourcesOverlay");
+    if (overlay) overlay.style.display = "flex";
+}
+
+function closeLevelResourcesOverlay() {
+    const overlay = document.getElementById("levelResourcesOverlay");
+    if (overlay) overlay.style.display = "none";
 }
 
 function renderChallengeFamilyDetailGiantRow(fidelObj) {
@@ -952,6 +1035,10 @@ window.launchChallengeStreakGame = launchChallengeStreakGame;
 window.exitChallengeFamilyDetail = exitChallengeFamilyDetail;
 window.openChallengeFamilyDetail = openChallengeFamilyDetail;
 window.refreshChallengeDetailWritingGate = refreshChallengeDetailWritingGate;
+window.renderChallengeInlineFlashcard = renderChallengeInlineFlashcard;
+window.challengeFlashStep = challengeFlashStep;
+window.openLevelResourcesOverlay = openLevelResourcesOverlay;
+window.closeLevelResourcesOverlay = closeLevelResourcesOverlay;
 
 window.getTeamHex = getTeamHex;
 
