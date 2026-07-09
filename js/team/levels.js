@@ -439,7 +439,9 @@ function submitFromPostStreak(baseLetter, levelNumber, returnMode) {
     document.getElementById('postStreakPrompt')?.remove();
     const mode = returnMode || (embeddedActiveFamily ? 'embedded' : 'challenge');
     const returnTo = mode === 'embedded' ? 'practiceSheet' : 'challengeDetail';
-    openWritingSubmitScreen(baseLetter, returnTo, levelNumber);
+    // Competition submissions are photo-only (real paper handwriting) — the
+    // Letter Board's practice-sheet flow still allows the digital sketchpad.
+    openWritingSubmitScreen(baseLetter, returnTo, levelNumber, { photoOnly: mode !== 'embedded' });
 }
 
 // ---------------------------------------------------------------------------
