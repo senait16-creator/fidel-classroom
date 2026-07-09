@@ -888,6 +888,31 @@ async function saveWeeklyMeeting() {
     await loadWeeklyMeeting();
 }
 
+// Read-only version for the student-facing dashboard — same table, no
+// edit ability. Card stays hidden if the team hasn't set a meeting yet.
+async function loadStudentMeetingDisplay() {
+    const card = document.getElementById('studentMeetingCard');
+    const mount = document.getElementById('studentMeetingMount');
+    if (!card || !mount) return;
+    if (!currentProfile?.team_id) { card.style.display = 'none'; return; }
+
+    const { data: meeting } = await _supabase
+        .from('team_meetings')
+        .select('day_of_week, meeting_time')
+        .eq('team_id', currentProfile.team_id)
+        .maybeSingle();
+
+    if (!meeting) { card.style.display = 'none'; return; }
+
+    card.style.display = 'block';
+    mount.innerHTML = `
+        <div class="team-meeting-display">
+            <div class="team-meeting-label">Next Team Meeting</div>
+            <div class="team-meeting-value">${meeting.day_of_week} • ${meeting.meeting_time}</div>
+        </div>
+    `;
+}
+
 // ---------------------------------------------------------------------------
 // Captain inbox badge on hub load
 // ---------------------------------------------------------------------------
@@ -937,6 +962,7 @@ window.exitCaptainDashboard      = exitCaptainDashboard;
 window.loadDailyTeamChallenge    = loadDailyTeamChallenge;
 window.shareTeamChallenge        = shareTeamChallenge;
 window.loadWeeklyMeeting         = loadWeeklyMeeting;
+window.loadStudentMeetingDisplay = loadStudentMeetingDisplay;
 window.saveWeeklyMeeting         = saveWeeklyMeeting;
 window.loadCaptainWritingQueue   = loadCaptainWritingQueue;
 window.loadCaptainTeamProgress   = loadCaptainTeamProgress;
