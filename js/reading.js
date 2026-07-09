@@ -147,6 +147,7 @@ async function fetchMyLessonProgressAll() {
 async function renderReadingLevelsList() {
     const container = document.getElementById("readingLevelsGrid");
     container.innerHTML = `<p style="color:#94a3b8;">Loading...</p>`;
+    renderGrowthEntryCard();
 
     const [levels, lessons, chapterProgress, lessonProgress] = await Promise.all([
         fetchReadingLevels(),
@@ -1359,6 +1360,252 @@ async function submitCheckpoint(levelNumber) {
 }
 
 // -----------------------------------------------------------------------------
+// My Growth — a cumulative, cross-chapter view of what a student has
+// actually picked up so far: vocabulary marked known, grammar notes
+// reached, Can-Do skills checked off, and a "Today" strip of activity.
+// Every per-lesson screen above only ever shows ONE lesson's worth of
+// content; this is deliberately the only place that aggregates across all
+// of them, so progress reads as accumulating instead of resetting on every
+// lesson.
+// -----------------------------------------------------------------------------
+
+function startOfTodayISO() {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d.toISOString();
+}
+
+// Small counts for the entry card on the chapter list — cheap enough to
+// run every time that screen loads.
+async function renderGrowthEntryCard(targetId = 'growthEntryMount') {
+    const mount = document.getElementById(targetId);
+    if (!mount) return;
+
+    const [{ count: vocabCount }, { count: grammarCount }, { count: canDoCount }] = await Promise.all([
+        _supabase.from('reading_vocab_progress').select('vocab_id', { count: 'exact', head: true })
+            .eq('student_id', currentUser.id).eq('is_known', true),
+        _supabase.from('reading_item_progress').select('item_id', { count: 'exact', head: true })
+            .eq('student_id', currentUser.id).eq('has_understood_grammar', true),
+        _supabase.from('can_do_progress').select('statement_key', { count: 'exact', head: true })
+            .eq('student_id', currentUser.id)
+    ]);
+
+    mount.innerHTML = `
+        <div class="growth-entry-card" onclick="enterMyGrowth()">
+            <div class="growth-entry-icon">🌱</div>
+            <div>
+                <div class="growth-entry-title">My Growth</div>
+                <div class="growth-entry-sub">${vocabCount || 0} words · ${grammarCount || 0} grammar points · ${canDoCount || 0} Can-Dos</div>
+            </div>
+            <div class="growth-entry-arrow">→</div>
+        </div>`;
+}
+
+function enterMyGrowth() {
+    showScreen("myGrowthScreen");
+    loadMyGrowthScreen();
+}
+
+function exitMyGrowth() {
+    showScreen("readingLevelsScreen");
+    renderReadingLevelsList();
+}
+
+async function loadMyGrowthScreen() {
+    const levels = await fetchReadingLevels();
+    const chapterTitleByLevel = {};
+    levels.forEach(l => { chapterTitleByLevel[l.level_number] = l.title; });
+
+    await Promise.all([
+        renderGrowthToday(chapterTitleByLevel),
+        renderGrowthVocab(chapterTitleByLevel),
+        renderGrowthGrammar(chapterTitleByLevel),
+        renderGrowthCanDo()
+    ]);
+}
+
+async function renderGrowthToday(chapterTitleByLevel) {
+    const mount = document.getElementById('growthTodayMount');
+    if (!mount) return;
+    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
+
+    const todayISO = startOfTodayISO();
+
+    const [{ data: lessonRows }, { data: vocabRows }, { data: canDoRows }] = await Promise.all([
+        _supabase.from('chapter_lesson_progress').select('lesson_id, completed_at')
+            .eq('student_id', currentUser.id).gte('completed_at', todayISO),
+        _supabase.from('reading_vocab_progress').select('vocab_id, reviewed_at')
+            .eq('student_id', currentUser.id).eq('is_known', true).gte('reviewed_at', todayISO),
+        _supabase.from('can_do_progress').select('statement_key, self_assessed_at')
+            .eq('student_id', currentUser.id).gte('self_assessed_at', todayISO)
+    ]);
+
+    const rows = [];
+
+    if (lessonRows?.length) {
+        const allLessons = await fetchAllLessons();
+        lessonRows.forEach(row => {
+            const lesson = allLessons.find(l => l.id === row.lesson_id);
+            const chapterTitle = lesson ? chapterTitleByLevel[lesson.level_number] : null;
+            rows.push({
+                icon: '📖',
+                text: lesson
+                    ? `Completed ${lesson.is_challenge ? 'the Chapter Challenge' : lesson.title}${chapterTitle ? ` · ${chapterTitle}` : ''}`
+                    : 'Completed a lesson'
+            });
+        });
+    }
+
+    if (vocabRows?.length) {
+        rows.push({ icon: '🔤', text: `Learned ${vocabRows.length} new word${vocabRows.length === 1 ? '' : 's'}` });
+    }
+
+    if (canDoRows?.length) {
+        canDoRows.forEach(row => {
+            const statement = CAN_DO_STATEMENTS.find(s => s.key === row.statement_key);
+            rows.push({ icon: '✅', text: `Checked off "${statement?.text || row.statement_key}"` });
+        });
+    }
+
+    const dateLabel = new Date().toLocaleDateString(undefined, { month: 'long', day: 'numeric' });
+
+    mount.innerHTML = `
+        <div class="growth-today-strip">
+            <div class="growth-today-date">${dateLabel}</div>
+            ${rows.length
+                ? rows.map(r => `<div class="growth-today-row"><span class="growth-today-icon">${r.icon}</span> ${r.text}</div>`).join('')
+                : `<div class="growth-today-empty">Nothing yet today — pick a lesson to get started!</div>`}
+        </div>`;
+}
+
+async function renderGrowthVocab(chapterTitleByLevel) {
+    const mount = document.getElementById('growthVocabMount');
+    const countEl = document.getElementById('growthVocabCount');
+    if (!mount) return;
+    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
+
+    const { data: progressRows } = await _supabase
+        .from('reading_vocab_progress')
+        .select('vocab_id')
+        .eq('student_id', currentUser.id)
+        .eq('is_known', true);
+
+    const vocabIds = (progressRows || []).map(r => r.vocab_id);
+    if (countEl) countEl.innerText = `${vocabIds.length} word${vocabIds.length === 1 ? '' : 's'}`;
+
+    if (vocabIds.length === 0) {
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No words marked known yet — they'll show up here as you work through lessons.</p>`;
+        return;
+    }
+
+    const { data: words } = await _supabase
+        .from('reading_vocab')
+        .select('id, level_number, amharic_word, transliteration, english_meaning')
+        .in('id', vocabIds);
+
+    const byLevel = {};
+    (words || []).forEach(w => {
+        if (!byLevel[w.level_number]) byLevel[w.level_number] = [];
+        byLevel[w.level_number].push(w);
+    });
+
+    mount.innerHTML = Object.keys(byLevel).sort((a, b) => a - b).map(levelNumber => {
+        const chapterWords = byLevel[levelNumber];
+        const chapterTitle = chapterTitleByLevel[levelNumber] || `Chapter ${levelNumber}`;
+        return `
+            <div class="growth-vocab-chapter">
+                <div class="growth-vocab-chapter-title">${chapterTitle}</div>
+                <div class="vocab-grid">
+                    ${chapterWords.map(w => `
+                        <div class="vocab-chip">
+                            <div class="vocab-chip-word">${w.amharic_word}</div>
+                            <div class="vocab-chip-meaning">${w.english_meaning}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <button type="button" class="vocab-review-btn" onclick="reviewGrowthVocabDeck(${levelNumber})">🗂️ Review as Flashcards</button>
+            </div>`;
+    }).join('');
+
+    _growthVocabByLevel = byLevel;
+}
+
+let _growthVocabByLevel = {};
+
+function reviewGrowthVocabDeck(levelNumber) {
+    const words = _growthVocabByLevel[levelNumber] || [];
+    if (words.length === 0) return;
+    const deck = words.map(w => ({ char: w.amharic_word, sound: w.english_meaning }));
+    document.getElementById('myGrowthScreen').style.display = 'none';
+    openFlashcardStudy(deck, 'My Growth Vocabulary', () => {
+        document.getElementById('myGrowthScreen').style.display = 'block';
+    });
+}
+
+async function renderGrowthGrammar(chapterTitleByLevel) {
+    const mount = document.getElementById('growthGrammarMount');
+    const countEl = document.getElementById('growthGrammarCount');
+    if (!mount) return;
+    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
+
+    const { data: progressRows } = await _supabase
+        .from('reading_item_progress')
+        .select('item_id')
+        .eq('student_id', currentUser.id)
+        .eq('has_understood_grammar', true);
+
+    const itemIds = (progressRows || []).map(r => r.item_id);
+    if (countEl) countEl.innerText = itemIds.length;
+
+    if (itemIds.length === 0) {
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No grammar notes reached yet — they'll show up here as you read through lessons.</p>`;
+        return;
+    }
+
+    const { data: items } = await _supabase
+        .from('reading_items')
+        .select('id, level_number, lesson_order, label, grammar_note')
+        .in('id', itemIds)
+        .not('grammar_note', 'is', null);
+
+    mount.innerHTML = (items || []).map(item => `
+        <div class="grammar-card">
+            <div class="grammar-pattern">${item.label || 'Grammar note'}</div>
+            <div class="grammar-note">${item.grammar_note}</div>
+            <div class="grammar-lesson-tag">${chapterTitleByLevel[item.level_number] || `Chapter ${item.level_number}`} · Lesson ${item.lesson_order}</div>
+        </div>
+    `).join('');
+}
+
+async function renderGrowthCanDo() {
+    const mount = document.getElementById('growthCanDoMount');
+    if (!mount) return;
+    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
+
+    const progressMap = await loadCanDoProgressMapWithAutoCheck();
+    const doneKeys = Object.keys(progressMap).filter(key => candoIsDone(progressMap[key]));
+    const total = CAN_DO_STATEMENTS.length;
+    const percent = total ? Math.round((doneKeys.length / total) * 100) : 0;
+
+    const categories = [...new Set(CAN_DO_STATEMENTS.map(s => s.category))];
+    const catRows = categories.map(category => {
+        const inCategory = CAN_DO_STATEMENTS.filter(s => s.category === category);
+        const doneInCategory = inCategory.filter(s => candoIsDone(progressMap[s.key])).length;
+        return `<div class="candoo-cat-row"><span>${category}</span><span class="candoo-cat-count">${doneInCategory} / ${inCategory.length}</span></div>`;
+    }).join('');
+
+    mount.innerHTML = `
+        <div class="candoo-summary-card">
+            <div class="candoo-summary-top">
+                <span class="candoo-summary-count">${doneKeys.length}</span>
+                <span class="candoo-summary-of">of ${total} checked off</span>
+            </div>
+            <div class="candoo-summary-track"><div class="candoo-summary-fill" style="width:${percent}%;"></div></div>
+            ${catRows}
+        </div>`;
+}
+
+// -----------------------------------------------------------------------------
 // Expose functions used via inline onclick="" handlers in index.html
 // -----------------------------------------------------------------------------
 
@@ -1371,3 +1618,7 @@ window.goToPrevLesson = goToPrevLesson;
 window.restartCurrentChapter = restartCurrentChapter;
 window.fetchAllLessons = fetchAllLessons;
 window.fetchMyLessonProgressAll = fetchMyLessonProgressAll;
+window.renderGrowthEntryCard = renderGrowthEntryCard;
+window.enterMyGrowth = enterMyGrowth;
+window.exitMyGrowth = exitMyGrowth;
+window.reviewGrowthVocabDeck = reviewGrowthVocabDeck;
