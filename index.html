@@ -528,13 +528,22 @@
      style="display:none; min-height:100vh; padding:24px 16px 48px; background:#f5f5f0;">
 
     <div class="challenge-dash-hero">
-        <div>
-            <div class="challenge-dash-kicker">First Team to ፐ Wins</div>
-            <h1>Fidel Competition</h1>
-            <p id="challengeDashSub">Loading your team...</p>
+        <div class="challenge-dash-hero-top">
+            <div>
+                <div class="challenge-dash-kicker">First Team to ፐ Wins</div>
+                <h1>Fidel Competition</h1>
+                <p id="challengeDashSub">Loading your team...</p>
+            </div>
+
+            <button class="challenge-back-home" onclick="enterModeSelect()">← Home</button>
         </div>
 
-        <button class="challenge-back-home" onclick="enterModeSelect()">← Home</button>
+        <div class="pe-progress-row">
+            <span>🏁 Progress to ፐ</span>
+            <span id="peProgressLabel">Level – of –</span>
+        </div>
+        <div class="pe-progress-track"><div class="pe-progress-fill" id="peProgressFill" style="width:0%;"></div></div>
+        <div class="pe-progress-caption" id="peWeekLabel"></div>
     </div>
 
     <!-- All 3 families cleared → this becomes the primary call-to-action,
@@ -644,6 +653,11 @@
             <div id="challengeTeamStatusContent" class="challenge-team-status-content">
                 <p style="color:#94a3b8;font-size:13px;">Loading team status...</p>
             </div>
+        </section>
+
+        <section class="challenge-dash-card" id="studentMeetingCard" style="display:none;">
+            <div class="challenge-card-title">📅 Next Team Meeting</div>
+            <div id="studentMeetingMount"></div>
         </section>
 
         <section class="challenge-dash-card">
