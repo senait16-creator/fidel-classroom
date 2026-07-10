@@ -4227,6 +4227,9 @@ header {
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+.race-row-header.race-row-expandable {
     cursor: pointer;
 }
 
