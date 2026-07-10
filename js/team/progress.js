@@ -145,8 +145,11 @@ async function fetchTeamStudentDetail(teamId, level, families) {
         _supabase.from('student_family_progress')
             .select('student_id, base_letter, streak_passed, writing_passed, best_streak')
             .eq('level_number', level).in('student_id', memberIds),
+        // No level_number filter here — writing_submissions doesn't have
+        // that column, and base_letter alone is enough since each letter
+        // belongs to exactly one challenge level.
         _supabase.from('writing_submissions')
-            .select('student_id, base_letter').eq('status', 'pending').eq('level_number', level).in('student_id', memberIds),
+            .select('student_id, base_letter').eq('status', 'pending').in('student_id', memberIds),
         _supabase.from('help_flags')
             .select('student_id, base_letter').eq('is_resolved', false).in('student_id', memberIds)
     ]);
