@@ -4,23 +4,21 @@
 // Design: statement CONTENT lives here as a plain config array (same pattern
 // as alphabetData, WORDLE_PHRASES, VERSE_LIBRARY, EXPLORE_CATEGORIES) so
 // adding/reordering/editing statements never needs a migration. Only actual
-// STUDENT PROGRESS — which statements a student has self-assessed or been
-// verified on — lives in Supabase (can_do_progress table).
+// STUDENT PROGRESS lives in Supabase (can_do_progress table).
 //
-// Each statement has three possible states, tracked per (student, statement):
-//   not_started   — ⬜ default, nothing recorded yet
-//   self_assessed — 🟡 the student marked "I think I can" — or the app
-//                     pre-filled it for statements it can already tell are
-//                     probably true (verification:'auto', e.g. mastered
-//                     all 34 letters)
-//   verified      — 🟢 a teacher gave the final confirmation. Always. No
-//                     status ever reaches 'verified' without that,
-//                     including the 'auto' statements above.
+// Self-report only — a student checks a statement off themselves, no
+// teacher confirmation step. Two states per (student, statement):
+//   not_started   — ⬜ no row in can_do_progress yet
+//   self_assessed — ✅ the student checked it — or the app pre-filled it
+//                     for statements it can already tell are probably true
+//                     (verification:'auto', e.g. mastered all 34 letters)
 //
-// A student can never set their own row to 'verified' directly — that's
-// enforced at the database level (see the RLS policies delivered alongside
-// this file), not just in this UI, so the state can't be spoofed by editing
-// client-side code.
+// Unchecking deletes the row (see toggleCanDo), so a statement can be
+// un-marked just as easily as it was checked.
+//
+// 'verified' is still read as a synonym for "done" (candoIsDone,
+// toggleCanDo) so any rows written before teacher verification was
+// removed keep showing as checked instead of silently reverting.
 //
 // Loads AFTER: app.js.
 // =============================================================================
@@ -59,10 +57,7 @@ const CAN_DO_STATEMENTS = [
     {
         // "auto" means the app can already tell this is probably true — it
         // pre-fills self_assessed automatically instead of making the
-        // student tap "I think I can" themselves. It still goes through
-        // the teacher queue for the final ✓, same as every other
-        // statement — the database enforces that no status ever reaches
-        // 'verified' without a teacher, no exceptions for this either.
+        // student check it themselves.
         key: 'read_fidel', category: 'Alphabet', text: 'I can read all Fidel.', verification: 'auto',
         autoCheck: (ctx) => ctx.masteredLettersCount >= 34
     },
@@ -88,17 +83,13 @@ async function loadCanDoProgressMap() {
 // Render
 // ---------------------------------------------------------------------------
 
-function candoStatusPill(status) {
-    if (status === 'verified')      return `<span class="candoo-status-pill verified">🟢 Verified</span>`;
-    if (status === 'self_assessed') return `<span class="candoo-status-pill self-assessed">🟡 Self-Assessed</span>`;
-    return `<span class="candoo-status-pill not-started">⬜ Not Started</span>`;
+function candoIsDone(status) {
+    return status === 'self_assessed' || status === 'verified';
 }
 
 // Auto-assess path — statements the app can already tell are probably
-// true. Pre-fills self_assessed (never verified — the database won't
-// allow a student-owned write to set 'verified' regardless of what this
-// code sends) so it lands in the teacher's queue automatically instead
-// of waiting on the student to tap "I think I can" themselves.
+// true. Pre-fills self_assessed automatically instead of waiting on the
+// student to check it themselves.
 async function loadCanDoProgressMapWithAutoCheck() {
     const progressMap = await loadCanDoProgressMap();
 
@@ -142,18 +133,28 @@ async function renderCanDoRows(targetId, categoryFilter) {
 
     mount.innerHTML = categories.map(category => {
         const rows = statements.filter(s => s.category === category).map(statement => {
-            const status = progressMap[statement.key] || 'not_started';
-            const actionHTML = status === 'not_started'
-                ? `<button type="button" class="candoo-assess-btn" onclick="selfAssessCanDo('${statement.key}', '${targetId}', ${categoryFilter ? `'${categoryFilter}'` : 'null'})">I think I can</button>`
-                : '';
+            const done = candoIsDone(progressMap[statement.key]);
+            const filterArg = categoryFilter ? `'${categoryFilter}'` : 'null';
+
+            // Auto-derived statements (e.g. "I can read all Fidel" once 34
+            // letters are mastered) aren't a self-report once true — the app
+            // itself re-derives them on every render, so unchecking would
+            // just have them silently re-check themselves. Lock the box
+            // instead of offering an uncheck that can't actually stick.
+            if (statement.verification === 'auto' && done) {
+                return `
+                    <label class="candoo-row done candoo-row-auto">
+                        <input type="checkbox" class="candoo-checkbox" checked disabled>
+                        <span class="candoo-text">${statement.text} <span class="candoo-auto-tag">Automatically tracked</span></span>
+                    </label>`;
+            }
+
             return `
-                <div class="candoo-row">
+                <label class="candoo-row ${done ? 'done' : ''}">
+                    <input type="checkbox" class="candoo-checkbox" ${done ? 'checked' : ''}
+                        onchange="toggleCanDo('${statement.key}', '${targetId}', ${filterArg}, this.checked)">
                     <span class="candoo-text">${statement.text}</span>
-                    <div class="candoo-row-right">
-                        ${candoStatusPill(status)}
-                        ${actionHTML}
-                    </div>
-                </div>`;
+                </label>`;
         }).join('');
 
         return `
@@ -168,89 +169,28 @@ function renderCanDoScreen(targetId = 'canDoStatementsMount') {
     return renderCanDoRows(targetId, null);
 }
 
-async function selfAssessCanDo(statementKey, targetId, categoryFilter) {
-    const { error } = await _supabase.from('can_do_progress').upsert({
-        student_id: currentUser.id,
-        statement_key: statementKey,
-        status: 'self_assessed',
-        self_assessed_at: new Date().toISOString()
-    }, { onConflict: 'student_id,statement_key' });
-
-    if (error) return showNotificationToast("Couldn't save: " + error.message);
-
-    showGobezToast('Marked as self-assessed!');
-    renderCanDoRows(targetId, categoryFilter || null);
-}
-
-// ---------------------------------------------------------------------------
-// Teacher verification queue — a student can never set their own row to
-// 'verified' (enforced by RLS, not just this UI); this is the only place
-// that transition happens.
-// ---------------------------------------------------------------------------
-
-async function loadCanDoVerificationQueue(mountId) {
-    const mount = document.getElementById(mountId);
-    if (!mount) return;
-    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
-
-    const { data: rows, error } = await _supabase
-        .from('can_do_progress')
-        .select('student_id, statement_key, self_assessed_at')
-        .eq('status', 'self_assessed')
-        .order('self_assessed_at', { ascending: true });
+// Self-report toggle — checking a box marks it done, unchecking removes
+// the row entirely so it goes back to not_started. No teacher step.
+async function toggleCanDo(statementKey, targetId, categoryFilter, checked) {
+    const error = checked
+        ? (await _supabase.from('can_do_progress').upsert({
+            student_id: currentUser.id,
+            statement_key: statementKey,
+            status: 'self_assessed',
+            self_assessed_at: new Date().toISOString()
+        }, { onConflict: 'student_id,statement_key' })).error
+        : (await _supabase.from('can_do_progress')
+            .delete()
+            .eq('student_id', currentUser.id)
+            .eq('statement_key', statementKey)).error;
 
     if (error) {
-        mount.innerHTML = `<p style="color:#ef4444; font-size:13px;">Error: ${error.message}</p>`;
-        return;
+        showNotificationToast("Couldn't save: " + error.message);
+        return renderCanDoRows(targetId, categoryFilter || null);
     }
 
-    if (!rows || rows.length === 0) {
-        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No Can-Do statements waiting for verification.</p>`;
-        return;
-    }
-
-    // Separate query instead of a foreign-table join, so this doesn't
-    // depend on guessing the exact FK constraint name Supabase generated.
-    const studentIds = [...new Set(rows.map(r => r.student_id))];
-    const { data: students } = await _supabase
-        .from('profiles')
-        .select('id, nickname, avatar')
-        .in('id', studentIds);
-
-    mount.innerHTML = '';
-    rows.forEach(row => {
-        const student = (students || []).find(s => s.id === row.student_id);
-        const statement = CAN_DO_STATEMENTS.find(s => s.key === row.statement_key);
-
-        const card = document.createElement('div');
-        card.className = 'teacher-submission-card';
-        card.style.cssText = 'flex-direction:column; align-items:flex-start; gap:8px;';
-        card.innerHTML = `
-            <div>
-                <strong style="font-size:14px;">${student?.avatar || '🦁'} ${student?.nickname || 'Student'}</strong>
-                <p style="font-size:13px; color:#334155; margin:4px 0 0;">${statement?.text || row.statement_key}</p>
-                <span style="font-size:11px; color:#94a3b8;">${statement?.category || ''}</span>
-            </div>
-            <button class="btn-approve">✓ Verify</button>
-        `;
-        card.querySelector('.btn-approve').onclick = () =>
-            verifyCanDoStatement(row.student_id, row.statement_key, mountId);
-        mount.appendChild(card);
-    });
-}
-
-async function verifyCanDoStatement(studentId, statementKey, mountId) {
-    const { error } = await _supabase
-        .from('can_do_progress')
-        .update({ status: 'verified' })
-        .eq('student_id', studentId)
-        .eq('statement_key', statementKey);
-
-    if (error) return showNotificationToast("Couldn't verify: " + error.message);
-
-    showGobezToast('Statement verified! 🌟');
-    await loadCanDoVerificationQueue(mountId);
-    if (typeof loadTeacherClassroomOverview === 'function') await loadTeacherClassroomOverview();
+    if (checked) showGobezToast('Marked as achieved! 🎉');
+    renderCanDoRows(targetId, categoryFilter || null);
 }
 
 // ---------------------------------------------------------------------------
@@ -275,8 +215,6 @@ function exitCanDo() {
 
 window.renderCanDoScreen  = renderCanDoScreen;
 window.renderCanDoRows    = renderCanDoRows;
-window.selfAssessCanDo    = selfAssessCanDo;
+window.toggleCanDo        = toggleCanDo;
 window.chooseModeCanDo    = chooseModeCanDo;
 window.exitCanDo          = exitCanDo;
-window.loadCanDoVerificationQueue = loadCanDoVerificationQueue;
-window.verifyCanDoStatement       = verifyCanDoStatement;
