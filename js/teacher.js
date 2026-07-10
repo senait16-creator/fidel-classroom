@@ -15,58 +15,258 @@
 
 async function loadTeacherRosterData() {
     const tbody = document.getElementById("teacherRosterTableBody");
-    tbody.innerHTML = '<tr><td colspan="3" style="color:#94a3b8; text-align:center;">Loading class roster...</td></tr>';
+    if (!tbody) return;
+    tbody.innerHTML = '<p style="color:#94a3b8; text-align:center;">Loading class tracker...</p>';
 
-    const { data: students } = await _supabase
-        .from('profiles')
-        .select('id, nickname, avatar, email, team_id, is_admin, teams!profiles_team_id_fkey(name)')
-        .order('nickname', { ascending: true });
+    const [
+        { data: students, error: studentError },
+        { data: practiceProgress },
+        { data: familyProgress },
+        { data: pendingSubs },
+        { data: helpFlags },
+        { data: levels },
+        { data: teams }
+    ] = await Promise.all([
+        _supabase
+            .from('profiles')
+            .select('id, nickname, avatar, email, team_id, is_admin, is_captain, created_at, teams!profiles_team_id_fkey(id, name, current_level)')
+            .order('nickname', { ascending: true }),
+        _supabase.from('user_progress').select('user_id, mastered_letters'),
+        _supabase.from('student_family_progress').select('student_id, base_letter, level_number, best_streak, streak_passed, writing_passed, completed_at'),
+        _supabase.from('writing_submissions').select('student_id, base_letter, level_number, status, submitted_at').eq('status', 'pending'),
+        _supabase.from('help_flags').select('student_id, base_letter, level_number, created_at'),
+        _supabase.from('challenge_levels').select('level_number, letter_families').order('level_number', { ascending: true }),
+        _supabase.from('teams').select('id, name, current_level').order('name')
+    ]);
 
-    const { data: progress } = await _supabase
-        .from('user_progress')
-        .select('user_id, mastered_letters');
-
-    const progressMap = {};
-    progress?.forEach(rec => { progressMap[rec.user_id] = rec.mastered_letters || []; });
-
-    tbody.innerHTML = '';
-
-    // Don't list the admin account itself as a "student" in the roster.
-    const realStudents = (students || []).filter(s => !s.is_admin);
-
-    if (realStudents.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="color:#94a3b8; text-align:center;">No students registered yet.</td></tr>';
+    if (studentError) {
+        tbody.innerHTML = `<p style="color:#ef4444; font-size:13px;">Could not load roster: ${studentError.message}</p>`;
         return;
     }
 
-    realStudents.forEach(s => {
-        const masteredCount = (progressMap[s.id] || []).length;
-        const teamName = s.teams?.name;
-        const teamDisplay = teamName
-            ? `<span style="font-weight:700;">${teamName}</span>`
-            : '<span style="color:#0d9488; font-style:italic;">Practicing Solo</span>';
+    const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, ch => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[ch]));
+    const jsString = (value) => String(value ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    const formatDate = (iso) => iso ? new Date(iso).toLocaleDateString([], { month: 'short', day: 'numeric' }) : 'Unknown';
+    const familyListForLevel = (levelNumber) => (levels || []).find(l => l.level_number === levelNumber)?.letter_families || [];
 
-        // Only show the removal action for students currently ON a team —
-        // someone already solo has nothing to remove. This is a reversible,
-        // safe action (sets team_id to null) — NOT account deletion, which
-        // can't be done securely from browser JS (requires Supabase's
-        // service-role key, which must never be exposed client-side).
-        const removeBtn = teamName
-            ? `<button class="btn-secondary" style="font-size:11px; padding:6px 10px; color:#ef4444; border:1px solid #fecaca;" onclick="removeStudentFromTeam('${s.id}', '${s.nickname.replace(/'/g, "\\'")}')">Remove from Team</button>`
-            : '';
-        const resetLevelBtn = `<button class="btn-secondary" style="font-size:11px; padding:6px 10px; color:#b45309; border:1px solid #fed7aa;" onclick="teacherResetStudentLevel('${s.id}', '${s.nickname.replace(/'/g, "\\'")}')">🔄 Reset a Level</button>`;
-        const forgetBtn = `<button class="btn-secondary" style="font-size:11px; padding:6px 10px; color:#991b1b; border:1px solid #fecaca; font-weight:800;" onclick="teacherForgetStudent('${s.id}', '${s.nickname.replace(/'/g, "\\'")}')">🗑️ Forget Student</button>`;
-        const actionButtons = `<div style="display:flex; flex-direction:column; gap:6px; align-items:flex-start;">${removeBtn}${resetLevelBtn}${forgetBtn}</div>`;
+    const practiceMap = {};
+    (practiceProgress || []).forEach(rec => { practiceMap[rec.user_id] = rec.mastered_letters || []; });
 
-        tbody.innerHTML += `
-            <tr>
-                <td data-label="Student" style="font-weight:500;">${s.avatar || '🦁'} ${s.nickname}<br><span style="font-size:11px; color:#94a3b8; font-weight:400;">${s.email || ''}</span></td>
-                <td data-label="Team">${teamDisplay}</td>
-                <td data-label="Progress"><strong>${masteredCount} / 34 rows</strong> complete</td>
-                <td data-label="Action">${actionButtons}</td>
-            </tr>
-        `;
+    const progressByStudent = {};
+    (familyProgress || []).forEach(row => {
+        if (!progressByStudent[row.student_id]) progressByStudent[row.student_id] = [];
+        progressByStudent[row.student_id].push(row);
     });
+
+    const pendingByStudent = {};
+    (pendingSubs || []).forEach(sub => {
+        if (!pendingByStudent[sub.student_id]) pendingByStudent[sub.student_id] = [];
+        pendingByStudent[sub.student_id].push(sub);
+    });
+
+    const helpByStudent = {};
+    (helpFlags || []).forEach(flag => {
+        if (!helpByStudent[flag.student_id]) helpByStudent[flag.student_id] = [];
+        helpByStudent[flag.student_id].push(flag);
+    });
+
+    const realStudents = (students || []).filter(s => !s.is_admin);
+    const challengeStudents = realStudents.filter(s => !!s.team_id);
+    const soloStudents = realStudents.filter(s => !s.team_id);
+    const studentsTrying = realStudents.filter(s =>
+        (progressByStudent[s.id] || []).length > 0 ||
+        (pendingByStudent[s.id] || []).length > 0 ||
+        (helpByStudent[s.id] || []).length > 0
+    );
+
+    if (realStudents.length === 0) {
+        tbody.innerHTML = '<p style="color:#94a3b8; text-align:center;">No students registered yet.</p>';
+        return;
+    }
+
+    const getChallengeSnapshot = (student) => {
+        const levelNumber = student.teams?.current_level || 1;
+        const families = familyListForLevel(levelNumber);
+        const rows = (progressByStudent[student.id] || []).filter(row => row.level_number === levelNumber);
+        const pending = (pendingByStudent[student.id] || []).filter(row => !row.level_number || row.level_number === levelNumber);
+        const help = (helpByStudent[student.id] || []).filter(row => !row.level_number || row.level_number === levelNumber);
+        const cleared = families.filter(letter => rows.find(row => row.base_letter === letter && row.streak_passed && row.writing_passed));
+        const nextFamily = families.find(letter => {
+            const row = rows.find(r => r.base_letter === letter);
+            return !(row?.streak_passed && row?.writing_passed);
+        });
+        const nextRow = nextFamily ? rows.find(row => row.base_letter === nextFamily) : null;
+        const hasPending = pending.length > 0;
+        const hasHelp = help.length > 0;
+
+        let status = 'Not started';
+        if (student.is_captain) status = 'Captain';
+        else if (!nextFamily && families.length > 0) status = 'Level cleared';
+        else if (hasPending) status = 'Pending writing review';
+        else if (hasHelp) status = 'Asked for help';
+        else if (nextRow?.streak_passed) status = `Needs writing for ${nextFamily}`;
+        else if ((nextRow?.best_streak || 0) > 0) status = `${nextFamily} streak ${nextRow.best_streak}/${STREAK_THRESHOLD}`;
+        else if (nextFamily) status = `Ready for ${nextFamily}`;
+
+        return { levelNumber, families, rows, pending, help, cleared, nextFamily, nextRow, hasPending, hasHelp, status };
+    };
+
+    const renderFamilyChips = (student, snapshot) => {
+        if (student.is_captain) return `<span class="teacher-family-chip chip-captain">Captain</span>`;
+        if (snapshot.families.length === 0) return `<span class="teacher-family-chip chip-empty">No level map</span>`;
+
+        return snapshot.families.map(letter => {
+            const row = snapshot.rows.find(r => r.base_letter === letter);
+            const hasPending = snapshot.pending.some(p => p.base_letter === letter);
+            const hasHelp = snapshot.help.some(h => h.base_letter === letter);
+            let state = 'empty';
+            let label = letter;
+            if (row?.streak_passed && row?.writing_passed) state = 'done';
+            else if (hasPending) state = 'pending';
+            else if (hasHelp) state = 'help';
+            else if (row?.streak_passed) state = 'writing';
+            else if ((row?.best_streak || 0) > 0) {
+                state = 'trying';
+                label = `${letter} ${row.best_streak}/${STREAK_THRESHOLD}`;
+            }
+            return `<span class="teacher-family-chip chip-${state}">${escapeHtml(label)}</span>`;
+        }).join('');
+    };
+
+    const attentionItems = [];
+    realStudents.forEach(student => {
+        const snapshot = getChallengeSnapshot(student);
+        const name = escapeHtml(student.nickname || 'Student');
+        const avatar = escapeHtml(student.avatar || '🦁');
+        if (snapshot.hasPending) {
+            attentionItems.push({
+                type: 'review',
+                html: `<div class="teacher-attention-row review"><strong>${avatar} ${name}</strong><span>Writing waiting for review: ${snapshot.pending.map(p => escapeHtml(p.base_letter)).join(', ')}</span></div>`
+            });
+        }
+        if (snapshot.hasHelp) {
+            attentionItems.push({
+                type: 'help',
+                html: `<div class="teacher-attention-row help"><strong>${avatar} ${name}</strong><span>Asked for help with ${snapshot.help.map(h => escapeHtml(h.base_letter)).join(', ')}</span></div>`
+            });
+        }
+        if (student.team_id && !student.is_captain && snapshot.rows.length === 0 && snapshot.pending.length === 0) {
+            attentionItems.push({
+                type: 'start',
+                html: `<div class="teacher-attention-row start"><strong>${avatar} ${name}</strong><span>On ${escapeHtml(student.teams?.name || 'a team')} but has not started Level ${snapshot.levelNumber}</span></div>`
+            });
+        }
+    });
+
+    const summaryHtml = `
+        <div class="teacher-roster-summary-grid">
+            <div class="teacher-roster-summary-tile"><strong>${realStudents.length}</strong><span>Signed up</span></div>
+            <div class="teacher-roster-summary-tile"><strong>${challengeStudents.length}</strong><span>In challenge</span></div>
+            <div class="teacher-roster-summary-tile"><strong>${soloStudents.length}</strong><span>Practicing solo</span></div>
+            <div class="teacher-roster-summary-tile"><strong>${studentsTrying.length}</strong><span>Trying now</span></div>
+        </div>
+    `;
+
+    const attentionHtml = `
+        <section class="teacher-roster-section">
+            <div class="teacher-roster-section-head">
+                <h3>Needs Attention</h3>
+                <span>${attentionItems.length || 'Clear'}</span>
+            </div>
+            <div class="teacher-attention-list">
+                ${attentionItems.length ? attentionItems.map(item => item.html).join('') : '<div class="teacher-empty-state">No pending reviews, help flags, or challenge-start gaps right now.</div>'}
+            </div>
+        </section>
+    `;
+
+    const groupedByTeam = (teams || []).map(team => ({
+        ...team,
+        members: challengeStudents.filter(s => s.team_id === team.id)
+    })).filter(team => team.members.length > 0);
+
+    const teamGroupsHtml = groupedByTeam.length ? groupedByTeam.map(team => {
+        const membersHtml = team.members.map(student => {
+            const snapshot = getChallengeSnapshot(student);
+            const masteredCount = (practiceMap[student.id] || []).length;
+            const progressLabel = student.is_captain
+                ? 'Captain support role'
+                : `${snapshot.cleared.length}/${snapshot.families.length || 3} families approved`;
+
+            return `
+                <div class="teacher-student-progress-card">
+                    <div class="teacher-student-main">
+                        <div class="teacher-student-avatar">${escapeHtml(student.avatar || '🦁')}</div>
+                        <div>
+                            <div class="teacher-student-name">${escapeHtml(student.nickname || 'Student')}${student.is_captain ? ' <span class="teacher-mini-badge">Captain</span>' : ''}</div>
+                            <div class="teacher-student-meta">Level ${snapshot.levelNumber} • ${escapeHtml(progressLabel)} • ${masteredCount}/34 practice rows</div>
+                        </div>
+                    </div>
+                    <div class="teacher-student-status">${escapeHtml(snapshot.status)}</div>
+                    <div class="teacher-family-chip-row">${renderFamilyChips(student, snapshot)}</div>
+                </div>
+            `;
+        }).join('');
+
+        return `
+            <details class="teacher-team-progress-group" open>
+                <summary>
+                    <span>${escapeHtml(team.name)}</span>
+                    <small>Level ${team.current_level || 1} • ${team.members.length} student${team.members.length === 1 ? '' : 's'}</small>
+                </summary>
+                <div class="teacher-team-progress-list">${membersHtml}</div>
+            </details>
+        `;
+    }).join('') : '<div class="teacher-empty-state">No students are assigned to challenge teams yet.</div>';
+
+    const rosterHtml = realStudents.map(student => {
+        const masteredCount = (practiceMap[student.id] || []).length;
+        const teamName = student.teams?.name || 'Practicing Solo';
+        const removeBtn = student.team_id
+            ? `<button class="btn-secondary teacher-action-btn danger-light" onclick="removeStudentFromTeam('${student.id}', '${jsString(student.nickname || 'Student')}')">Remove from Team</button>`
+            : '';
+        return `
+            <div class="teacher-roster-person">
+                <div>
+                    <strong>${escapeHtml(student.avatar || '🦁')} ${escapeHtml(student.nickname || 'Student')}</strong>
+                    <span>${escapeHtml(student.email || '')}</span>
+                </div>
+                <div class="teacher-roster-person-meta">
+                    <span>${escapeHtml(teamName)}</span>
+                    <span>${masteredCount}/34 practice rows</span>
+                    <span>Joined ${formatDate(student.created_at)}</span>
+                </div>
+                <details class="teacher-action-menu">
+                    <summary>Actions</summary>
+                    <div>
+                        ${removeBtn}
+                        <button class="btn-secondary teacher-action-btn warn-light" onclick="teacherResetStudentLevel('${student.id}', '${jsString(student.nickname || 'Student')}')">Reset a Level</button>
+                        <button class="btn-secondary teacher-action-btn danger" onclick="teacherForgetStudent('${student.id}', '${jsString(student.nickname || 'Student')}')">Forget Student</button>
+                    </div>
+                </details>
+            </div>
+        `;
+    }).join('');
+
+    tbody.innerHTML = `
+        ${summaryHtml}
+        ${attentionHtml}
+        <section class="teacher-roster-section">
+            <div class="teacher-roster-section-head">
+                <h3>Challenge Progress By Team</h3>
+                <span>${challengeStudents.length} in challenge</span>
+            </div>
+            ${teamGroupsHtml}
+        </section>
+        <section class="teacher-roster-section">
+            <div class="teacher-roster-section-head">
+                <h3>All Signed-Up Students</h3>
+                <span>${realStudents.length} total</span>
+            </div>
+            <div class="teacher-roster-person-list">${rosterHtml}</div>
+        </section>
+    `;
 }
 
 // Removes a student from their current team, setting them to "Practicing
