@@ -22,7 +22,7 @@ function chooseModeCommunity() {
 
     if (typeof renderTodayBanners === 'function') renderTodayBanners('todayBannersMount');
     if (typeof renderStarBoard === 'function') renderStarBoard('starBoardMount');
-    if (typeof renderCommunityTeamLeaderboard === 'function') renderCommunityTeamLeaderboard('communityTeamRaceMount');
+    if (typeof renderTeamRaceView === 'function') renderTeamRaceView('communityTeamRaceMount', { mode: 'compact' });
 
     if (typeof renderVerseOfDay === 'function') renderVerseOfDay('verseOfDayMount');
     if (typeof renderWordleStatusMini === 'function') renderWordleStatusMini('wordleStatusMount');
