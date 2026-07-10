@@ -987,6 +987,7 @@ header {
 .roster-status-help { background: #fee2e2; color: #991b1b; }
 .roster-status-in-progress { background: #dbeafe; color: #1d4ed8; }
 .roster-status-not-started { background: #f1f5f9; color: #94a3b8; }
+.roster-status-captain { background: #fffbeb; color: #b45309; }
 
 .roster-student-menu-btn {
     background: #f1f5f9;
