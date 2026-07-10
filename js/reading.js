@@ -1555,9 +1555,9 @@ async function renderGrowthGrammar(chapterTitleByLevel) {
         .eq('has_understood_grammar', true);
 
     const itemIds = (progressRows || []).map(r => r.item_id);
-    if (countEl) countEl.innerText = itemIds.length;
 
     if (itemIds.length === 0) {
+        if (countEl) countEl.innerText = 0;
         mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No grammar notes reached yet — they'll show up here as you read through lessons.</p>`;
         return;
     }
@@ -1567,6 +1567,11 @@ async function renderGrowthGrammar(chapterTitleByLevel) {
         .select('id, level_number, lesson_order, label, grammar_note')
         .in('id', itemIds)
         .not('grammar_note', 'is', null);
+
+    // Count from the same filtered list being rendered, not the raw
+    // progress-row count — some completed items have no grammar_note yet,
+    // and the label should never claim more cards than actually show.
+    if (countEl) countEl.innerText = (items || []).length;
 
     mount.innerHTML = (items || []).map(item => `
         <div class="grammar-card">
