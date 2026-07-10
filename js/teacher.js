@@ -61,7 +61,7 @@ async function loadTeacherRosterData() {
         { data: helpFlags },
         { data: userProgress }
     ] = await Promise.all([
-        _supabase.from('profiles').select('id, nickname, avatar, email, team_id, is_captain, is_admin, created_at'),
+        _supabase.from('profiles').select('id, nickname, avatar, email, team_id, is_captain, is_admin'),
         _supabase.from('teams').select('id, name, current_level'),
         (typeof fetchChallengeLevels === 'function' ? fetchChallengeLevels() : Promise.resolve([])),
         _supabase.from('student_family_progress').select('student_id, base_letter, level_number, streak_passed, writing_passed, best_streak'),
@@ -189,10 +189,7 @@ async function loadTeacherRosterData() {
         } else {
             soloMount.innerHTML = `<div class="roster-solo-card">${soloStudents.map(s => {
                 const masteredCount = masteredByStudent[s.id] || 0;
-                const joinedDays = s.created_at ? Math.floor((Date.now() - new Date(s.created_at).getTime()) / 86400000) : null;
-                const sub = masteredCount > 0
-                    ? `${masteredCount} / 34 letters practiced`
-                    : (joinedDays === null ? '' : joinedDays <= 0 ? 'Joined today' : `Joined ${joinedDays} day${joinedDays === 1 ? '' : 's'} ago`);
+                const sub = masteredCount > 0 ? `${masteredCount} / 34 letters practiced` : 'Not started yet';
                 return `
                     <div class="roster-solo-row">
                         <span class="roster-solo-avatar">${s.avatar || '🦁'}</span>
