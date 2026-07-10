@@ -12,115 +12,179 @@
 // Team race view — all teams on a visual progress track, sorted by level
 // ---------------------------------------------------------------------------
 
+// Per-student, per-family status — the single source of truth both the
+// team-row summary counts and the student detail view are built from, so
+// the two views can never disagree about where someone actually stands.
+//   not_started -> practicing -> needs_writing -> pending -> approved
+// "help" is an overlay (a student mid-practice can still have flagged for
+// help), not a separate point tier, so it doesn't affect the progress math.
+const RACE_STATUS_POINTS = { not_started: 0, practicing: 1, needs_writing: 2, pending: 3, approved: 4 };
+
+function computeRaceFamilyStatus(row, hasPendingSubmission, hasHelpFlag) {
+    let key;
+    if (row?.streak_passed && row?.writing_passed) key = 'approved';
+    else if (hasPendingSubmission) key = 'pending';
+    else if (row?.streak_passed) key = 'needs_writing';
+    else if ((row?.best_streak || 0) > 0) key = 'practicing';
+    else key = 'not_started';
+
+    return { key, points: RACE_STATUS_POINTS[key], needsHelp: !!hasHelpFlag, streak: row?.best_streak || 0 };
+}
+
+const RACE_STATUS_LABEL = {
+    approved: 'approved',
+    pending: 'pending writing',
+    needs_writing: 'needs writing',
+    practicing: 'practicing',
+    not_started: 'not started'
+};
+
+const RACE_TEAM_COLOR_MAP = {
+    'Red':    '#ef4444',
+    'Blue':   '#1d4ed8',
+    'Green':  '#166534',
+    'Yellow': '#a16207',
+    'Purple': '#7c3aed',
+};
+
+function getRaceTeamColor(name) {
+    for (const [key, hex] of Object.entries(RACE_TEAM_COLOR_MAP)) {
+        if (name && name.includes(key)) return hex;
+    }
+    return '#64748b';
+}
+
+function getRaceTeamInitial(name) {
+    if (!name) return '?';
+    for (const key of Object.keys(RACE_TEAM_COLOR_MAP)) {
+        if (name.includes(key)) return key[0];
+    }
+    return name[0];
+}
+
+// Shared standings computation — both the detailed Challenge-dashboard race
+// and the lighter Community leaderboard are built from this same array, so
+// the two views can never disagree about a team's rank or percentage.
+async function computeTeamRaceStandings() {
+    const { data: teams } = await _supabase
+        .from('teams')
+        .select('id, name, current_level, last_advanced_at')
+        .eq('is_active', true)
+        .eq('is_test', false)
+        .order('name');
+
+    if (!teams || teams.length === 0) return [];
+
+    // Each team can be on its own level (the teacher advances teams
+    // independently), so families have to be looked up per-level, not
+    // just once for "my" team and reused for everyone.
+    const levelNumbers = [...new Set(teams.map(t => t.current_level || 1))];
+    const { data: levelRows } = await _supabase
+        .from('challenge_levels')
+        .select('level_number, letter_families')
+        .in('level_number', levelNumbers);
+    const familiesByLevel = {};
+    (levelRows || []).forEach(l => { familiesByLevel[l.level_number] = l.letter_families || []; });
+
+    const teamIds = teams.map(t => t.id);
+    const { data: allMembers } = await _supabase
+        .from('profiles')
+        .select('id, nickname, avatar, team_id, is_captain')
+        .in('team_id', teamIds);
+
+    const memberIds = (allMembers || []).map(m => m.id);
+    let allProgress = [], pendingSubs = [], helpFlags = [], statusRows = [];
+    if (memberIds.length > 0) {
+        const [{ data: prog }, { data: subs }, { data: flags }, { data: statuses }] = await Promise.all([
+            _supabase.from('student_family_progress')
+                .select('student_id, base_letter, level_number, streak_passed, writing_passed, best_streak')
+                .in('student_id', memberIds),
+            _supabase.from('writing_submissions')
+                .select('student_id, base_letter, level_number').eq('status', 'pending').in('student_id', memberIds),
+            _supabase.from('help_flags')
+                .select('student_id, base_letter').eq('is_resolved', false).in('student_id', memberIds),
+            _supabase.from('team_level_status')
+                .select('team_id, level_number, all_members_cleared, live_quiz_passed').in('team_id', teamIds)
+        ]);
+        allProgress = prog || [];
+        pendingSubs = subs || [];
+        helpFlags = flags || [];
+        statusRows = statuses || [];
+    }
+
+    const standings = teams.map(team => {
+        const level = team.current_level || 1;
+        const families = familiesByLevel[level] || [];
+        const members = (allMembers || []).filter(m => m.team_id === team.id);
+        const memberCount = members.length;
+
+        const readyForQuiz = statusRows.some(s =>
+            s.team_id === team.id && s.level_number === level && s.all_members_cleared && !s.live_quiz_passed
+        );
+
+        if (memberCount === 0 || families.length === 0) {
+            return { ...team, level, families, memberCount, overallPct: 0, familySummaries: [], memberStatuses: {}, readyForQuiz };
+        }
+
+        let earnedPoints = 0;
+        const maxPoints = memberCount * families.length * 4;
+        const memberStatuses = {}; // studentId -> [{family, status}]
+
+        const familySummaries = families.map(fam => {
+            let approved = 0, pending = 0, practicing = 0, notStarted = 0;
+            members.forEach(m => {
+                const row = allProgress.find(p => p.student_id === m.id && p.base_letter === fam && p.level_number === level);
+                const hasPending = pendingSubs.some(s => s.student_id === m.id && s.base_letter === fam && s.level_number === level);
+                const hasHelp = helpFlags.some(f => f.student_id === m.id && f.base_letter === fam);
+                const status = computeRaceFamilyStatus(row, hasPending, hasHelp);
+                earnedPoints += status.points;
+
+                if (status.key === 'approved') approved++;
+                else if (status.key === 'pending') pending++;
+                else if (status.key === 'needs_writing' || status.key === 'practicing') practicing++;
+                else notStarted++;
+
+                if (!memberStatuses[m.id]) memberStatuses[m.id] = [];
+                memberStatuses[m.id].push({ family: fam, status });
+            });
+            return { family: fam, approved, pending, practicing, notStarted, memberCount };
+        });
+
+        const overallPct = maxPoints > 0 ? Math.round((earnedPoints / maxPoints) * 100) : 0;
+
+        return { ...team, level, families, memberCount, overallPct, familySummaries, memberStatuses, members, readyForQuiz };
+    });
+
+    standings.sort((a, b) => b.overallPct - a.overallPct);
+    return standings;
+}
+
 async function renderTeamRaceView(mountId) {
     const mount = document.getElementById(mountId);
     if (!mount) return;
     mount.innerHTML = `<p style="color:#94a3b8;font-size:13px;padding:8px 0;">Loading race...</p>`;
 
     try {
-        const { data: teams } = await _supabase
-            .from('teams')
-            .select('id, name, current_level')
-            .eq('is_active', true)
-            .eq('is_test', false)
-            .order('name');
+        const standings = await computeTeamRaceStandings();
 
-        if (!teams || teams.length === 0) {
+        if (standings.length === 0) {
             mount.innerHTML = `<p style="color:#94a3b8;font-size:13px;">No teams yet.</p>`;
             return;
         }
 
-        const myTeam = teams.find(t => t.id === currentProfile?.team_id);
-        const currentLevel = myTeam?.current_level || 1;
-
-        const { data: levelData } = await _supabase
-            .from('challenge_levels')
-            .select('letter_families')
-            .eq('level_number', currentLevel)
-            .maybeSingle();
-
-        const families = levelData?.letter_families || [];
-
-        const teamIds = teams.map(t => t.id);
-        const { data: allMembers } = await _supabase
-            .from('profiles')
-            .select('id, team_id')
-            .in('team_id', teamIds);
-
-        const memberIds = (allMembers || []).map(m => m.id);
-        let allProgress = [];
-        if (memberIds.length > 0) {
-            const { data: prog } = await _supabase
-                .from('student_family_progress')
-                .select('student_id, base_letter, streak_passed, writing_passed')
-                .in('student_id', memberIds)
-                .eq('level_number', currentLevel);
-            allProgress = prog || [];
-        }
-
-        const standings = teams.map(team => {
-            const members = (allMembers || []).filter(m => m.team_id === team.id);
-            const memberCount = members.length;
-            if (memberCount === 0) return { ...team, clearedCount: 0, familyStatus: families.map(() => 'empty'), memberCount: 0 };
-
-            const familyStatus = families.map(fam => {
-                const famProgress = allProgress.filter(p =>
-                    p.base_letter === fam &&
-                    members.some(m => m.id === p.student_id)
-                );
-                const cleared = famProgress.filter(p => p.streak_passed && p.writing_passed);
-                // "Active" = has attempted this family (a progress row exists) but
-                // isn't cleared yet — tells a captain where the team's actual
-                // bottleneck is, not just who's touched it once.
-                const active = famProgress.filter(p => !(p.streak_passed && p.writing_passed));
-
-                if (cleared.length === memberCount && memberCount > 0) return { status: 'done', activeCount: 0 };
-                if (active.length > 0) return { status: 'progress', activeCount: active.length };
-                return { status: 'empty', activeCount: 0 };
-            });
-
-            const clearedCount = familyStatus.filter(s => s.status === 'done').length;
-
-            return { ...team, clearedCount, familyStatus, memberCount };
-        });
-
-        standings.sort((a, b) => b.clearedCount - a.clearedCount);
-
-        const teamColorMap = {
-            'Red':    '#ef4444',
-            'Blue':   '#1d4ed8',
-            'Green':  '#166534',
-            'Yellow': '#a16207',
-            'Purple': '#7c3aed',
-        };
-
-        function getTeamColor(name) {
-            for (const [key, hex] of Object.entries(teamColorMap)) {
-                if (name && name.includes(key)) return hex;
-            }
-            return '#64748b';
-        }
-
-        function getTeamInitial(name) {
-            if (!name) return '?';
-            for (const key of Object.keys(teamColorMap)) {
-                if (name.includes(key)) return key[0];
-            }
-            return name[0];
-        }
-
+        const getTeamColor = getRaceTeamColor;
+        const getTeamInitial = getRaceTeamInitial;
         const medals = ['🥇', '🥈', '🥉'];
 
         mount.innerHTML = '';
         const standings_div = document.createElement('div');
         standings_div.className = 'race-standings';
+        _raceStandingsCache[mountId] = standings;
 
         standings.forEach((team, idx) => {
             const isYou = team.id === currentProfile?.team_id;
             const color = getTeamColor(team.name);
-            const pct = families.length > 0
-                ? Math.round((team.clearedCount / families.length) * 100)
-                : 0;
+            const rowId = `raceRow-${mountId}-${team.id}`;
 
             const row = document.createElement('div');
             row.className = `race-row${isYou ? ' race-you' : ''}`;
@@ -129,32 +193,41 @@ async function renderTeamRaceView(mountId) {
                 ? `<div class="race-medal">${medals[idx]}</div>`
                 : `<div class="race-medal race-num">${idx + 1}</div>`;
 
-            const familyChipsHtml = families.map((fam, fi) => {
-                const { status, activeCount } = team.familyStatus[fi] || { status: 'empty', activeCount: 0 };
-                const countDots = status === 'progress' && activeCount > 0
-                    ? `<div class="race-chip-count">${'●'.repeat(Math.min(activeCount, 4))}</div>`
-                    : '';
-                return `<div class="race-chip chip-${status}"><span>${fam}</span>${countDots}</div>`;
+            const familyLinesHtml = team.familySummaries.map(fs => {
+                const parts = [`${fs.approved}/${fs.memberCount} approved`];
+                if (fs.pending > 0) parts.push(`${fs.pending} pending`);
+                if (fs.practicing > 0) parts.push(`${fs.practicing} practicing`);
+                const fullyDone = fs.approved === fs.memberCount;
+                return `
+                    <div class="race-family-line ${fullyDone ? 'race-family-line-done' : ''}">
+                        <span class="race-family-letter">${fs.family}</span>
+                        <span class="race-family-detail">${parts.join(' · ')}</span>
+                    </div>`;
             }).join('');
 
             row.innerHTML = `
-                ${medalHtml}
-                <div class="race-team-dot" style="background:${color};">
-                    ${getTeamInitial(team.name)}
-                </div>
-                <div class="race-team-info">
-                    <div class="race-team-name-row">
-                        <div class="race-team-name-text">
-                            ${team.name}
-                            ${isYou ? '<span class="race-you-tag">You</span>' : ''}
+                <div class="race-row-header" onclick="toggleRaceTeamDetail('${mountId}', '${team.id}', '${rowId}')">
+                    ${medalHtml}
+                    <div class="race-team-dot" style="background:${color};">
+                        ${getTeamInitial(team.name)}
+                    </div>
+                    <div class="race-team-info">
+                        <div class="race-team-name-row">
+                            <div class="race-team-name-text">
+                                ${team.name}
+                                ${isYou ? '<span class="race-you-tag">You</span>' : ''}
+                            </div>
+                            <div class="race-team-count">${team.overallPct}%</div>
                         </div>
-                        <div class="race-team-count">${team.clearedCount}/${families.length} cleared</div>
+                        <div class="race-bar-track">
+                            <div class="race-bar-fill" style="width:${team.overallPct}%;background:${color};"></div>
+                        </div>
+                        <div class="race-team-sub">Level ${team.level} · ${team.memberCount} active student${team.memberCount === 1 ? '' : 's'}${team.readyForQuiz ? ' · 🎤 ready for live quiz' : ''}</div>
                     </div>
-                    <div class="race-bar-track">
-                        <div class="race-bar-fill" style="width:${pct}%;background:${color};"></div>
-                    </div>
-                    <div class="race-family-chips">${familyChipsHtml}</div>
+                    <div class="race-expand-arrow">▾</div>
                 </div>
+                <div class="race-family-lines">${familyLinesHtml}</div>
+                <div class="race-team-detail" id="${rowId}" style="display:none;"></div>
             `;
 
             standings_div.appendChild(row);
@@ -166,6 +239,117 @@ async function renderTeamRaceView(mountId) {
         console.error('Race render error:', e);
         mount.innerHTML = `<p style="color:#94a3b8;font-size:13px;">Couldn't load race standings.</p>`;
     }
+}
+
+// ---------------------------------------------------------------------------
+// Community's lighter version — same standings data, but Community is a
+// celebration feed, not a work dashboard, so this deliberately drops the
+// per-family breakdown and tap-to-expand student detail (that stays on the
+// Challenge dashboard, via renderTeamRaceView). Just rank, level, a simple
+// bar, and a couple of recent team-level-up "wins" for a bit of buzz.
+// ---------------------------------------------------------------------------
+
+async function renderCommunityTeamLeaderboard(mountId) {
+    const mount = document.getElementById(mountId);
+    if (!mount) return;
+    mount.innerHTML = `<p style="color:#94a3b8;font-size:13px;padding:8px 0;">Loading...</p>`;
+
+    try {
+        const standings = await computeTeamRaceStandings();
+
+        if (standings.length === 0) {
+            mount.innerHTML = `<p style="color:#94a3b8;font-size:13px;">No teams yet.</p>`;
+            return;
+        }
+
+        const medals = ['🥇', '🥈', '🥉'];
+
+        const rowsHtml = standings.map((team, idx) => {
+            const isYou = team.id === currentProfile?.team_id;
+            const color = getRaceTeamColor(team.name);
+            const rankHtml = idx < 3
+                ? `<div class="community-race-medal">${medals[idx]}</div>`
+                : `<div class="community-race-medal community-race-num">${idx + 1}</div>`;
+
+            return `
+                <div class="community-race-row${isYou ? ' community-race-you' : ''}">
+                    ${rankHtml}
+                    <div class="community-race-dot" style="background:${color};">${getRaceTeamInitial(team.name)}</div>
+                    <div class="community-race-info">
+                        <div class="community-race-name-row">
+                            <span class="community-race-name">${team.name}${isYou ? ' <span class="race-you-tag">You</span>' : ''}</span>
+                            <span class="community-race-pct">${team.overallPct}%</span>
+                        </div>
+                        <div class="race-bar-track"><div class="race-bar-fill" style="width:${team.overallPct}%;background:${color};"></div></div>
+                        <div class="community-race-sub">Level ${team.level}${team.readyForQuiz ? ' <span class="community-race-ready-tag">🎤 ready for quiz</span>' : ''}</div>
+                    </div>
+                </div>`;
+        }).join('');
+
+        // Recent wins — last few teams to advance a level, most recent first.
+        const recentWins = standings
+            .filter(t => t.last_advanced_at)
+            .sort((a, b) => new Date(b.last_advanced_at) - new Date(a.last_advanced_at))
+            .slice(0, 3);
+
+        const winsHtml = recentWins.length > 0
+            ? `<div class="community-race-wins">${recentWins.map(t => `
+                <div class="community-race-win-row">
+                    🎉 <strong>${t.name}</strong> advanced to Level ${t.level}
+                    <span class="community-race-win-time">${typeof formatTimeAgo === 'function' ? formatTimeAgo(t.last_advanced_at) : ''}</span>
+                </div>`).join('')}</div>`
+            : '';
+
+        mount.innerHTML = `<div class="community-race-standings">${rowsHtml}</div>${winsHtml}`;
+
+    } catch (e) {
+        console.error('Community race render error:', e);
+        mount.innerHTML = `<p style="color:#94a3b8;font-size:13px;">Couldn't load team standings.</p>`;
+    }
+}
+
+// Cache keyed by mountId so a tap-to-expand on one instance (e.g. the
+// Community page) can find its own render's data without re-fetching.
+const _raceStandingsCache = {};
+
+function toggleRaceTeamDetail(mountId, teamId, rowId) {
+    const el = document.getElementById(rowId);
+    if (!el) return;
+
+    if (el.style.display !== 'none') {
+        el.style.display = 'none';
+        return;
+    }
+
+    const standings = _raceStandingsCache[mountId] || [];
+    const team = standings.find(t => t.id === teamId);
+
+    if (!team || !team.members) {
+        el.innerHTML = `<p style="color:#94a3b8; font-size:12px; padding:6px 0;">No student detail available.</p>`;
+        el.style.display = 'block';
+        return;
+    }
+
+    const sortedMembers = [...team.members].sort((a, b) => (b.is_captain ? 1 : 0) - (a.is_captain ? 1 : 0));
+
+    el.innerHTML = sortedMembers.map(m => {
+        const statuses = team.memberStatuses[m.id] || [];
+        const line = statuses.map(s => {
+            const label = RACE_STATUS_LABEL[s.status.key];
+            const streakSuffix = s.status.key === 'practicing' && s.status.streak > 0 ? ` ${s.status.streak}/${STREAK_THRESHOLD}` : '';
+            const helpPrefix = s.status.needsHelp ? '🆘 ' : '';
+            return `<span class="race-student-family race-student-${s.status.needsHelp ? 'help' : s.status.key}">${s.family} ${helpPrefix}${label}${streakSuffix}</span>`;
+        }).join(' ');
+
+        return `
+            <div class="race-student-row">
+                <span class="race-student-avatar">${m.avatar || '🦁'}</span>
+                <span class="race-student-name">${m.nickname}${m.is_captain ? ' 👑' : ''}</span>
+                <span class="race-student-line">${line}</span>
+            </div>`;
+    }).join('');
+
+    el.style.display = 'block';
 }
 
 // ---------------------------------------------------------------------------
@@ -554,6 +738,8 @@ async function rejectTeacherLevelCompletion(requestId, mountId) {
 // ---------------------------------------------------------------------------
 
 window.renderTeamRaceView = renderTeamRaceView;
+window.renderCommunityTeamLeaderboard = renderCommunityTeamLeaderboard;
+window.toggleRaceTeamDetail = toggleRaceTeamDetail;
 window.renderLevelCompletionBanner = renderLevelCompletionBanner;
 window.submitLevelCompletion = submitLevelCompletion;
 window.flagNeedHelp = flagNeedHelp;
