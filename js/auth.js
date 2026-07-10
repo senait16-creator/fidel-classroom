@@ -96,6 +96,37 @@ async function handleAuth() {
 // Post-auth routing
 // ---------------------------------------------------------------------------
 
+// Self-heals profiles.is_captain against teams.captain_id. The two are
+// meant to move together — setTeamCaptain() in teacher.js updates both —
+// but a captain changed directly in the Supabase table editor (bypassing
+// that flow) leaves is_captain stale, which silently shows/hides the
+// captain dashboard for the wrong person. Runs on every profile load so
+// it corrects itself here rather than needing a patched check in every
+// one of the many files that read currentProfile.is_captain.
+async function resolveCaptainStatus(profile) {
+    if (!profile?.team_id) return profile;
+
+    const { data: team } = await _supabase
+        .from('teams')
+        .select('captain_id')
+        .eq('id', profile.team_id)
+        .maybeSingle();
+
+    const actuallyCaptain = !!team && team.captain_id === profile.id;
+    if (actuallyCaptain === !!profile.is_captain) return profile;
+
+    const { error } = await _supabase
+        .from('profiles')
+        .update({ is_captain: actuallyCaptain })
+        .eq('id', profile.id);
+
+    if (error) console.error("Couldn't self-heal is_captain flag:", error);
+
+    // Reflect the correct value for this session either way, so the UI is
+    // right even if the write above was blocked (e.g. by RLS).
+    return { ...profile, is_captain: actuallyCaptain };
+}
+
 async function proceedFlowMap(user) {
     currentUser = user;
 
@@ -110,7 +141,7 @@ async function proceedFlowMap(user) {
         showNotificationToast("Couldn't load your profile: " + profileError.message);
     }
 
-    currentProfile = profile || null;
+    currentProfile = await resolveCaptainStatus(profile || null);
 
     // Suspended account check
     if (currentProfile?.is_suspended) {
@@ -313,7 +344,7 @@ async function saveProfileData(event) {
         .select('id, email, nickname, avatar, team_id, is_admin, is_captain, is_suspended')
         .eq('id', user.id)
         .maybeSingle();
-    currentProfile = refreshedProfile || currentProfile;
+    currentProfile = await resolveCaptainStatus(refreshedProfile || currentProfile);
 
     if (currentProfile) await applyProfileToHeader(currentProfile);
 
