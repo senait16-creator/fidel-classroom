@@ -194,17 +194,23 @@
         <h2 style="font-size:18px; color:var(--neutral-dark);">Student Roster &amp; Progress</h2>
         <button class="teacher-panel-toggle">▼</button>
     </div>
+
     <div class="teacher-panel-body" id="rosterPanelBody">
-        <p style="font-size:13px; color:#64748b; margin-bottom:12px;">See how everyone is moving through the alphabet rows.</p>
+        <p style="font-size:13px; color:#64748b; margin-bottom:12px;">
+            See who has signed up, who is actively in the challenge, and who needs encouragement.
+        </p>
+
         <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
-            <button class="btn-primary" style="width:auto; padding:8px 18px; font-size:13px;" onclick="exportProgressCSV()">⬇️ Export Progress CSV</button>
+            <button class="btn-primary"
+                    style="width:auto; padding:8px 18px; font-size:13px;"
+                    onclick="exportProgressCSV()">
+                ⬇️ Export Progress CSV
+            </button>
         </div>
-        <table class="teacher-roster-table">
-            <thead><tr><th>Student</th><th>Team</th><th>Progress</th><th>Action</th></tr></thead>
-            <tbody id="teacherRosterTableBody">
-                <tr><td colspan="4" style="color:#94a3b8; text-align:center;">Loading roster...</td></tr>
-            </tbody>
-        </table>
+
+        <div id="teacherRosterTableBody">
+            <p style="color:#94a3b8; text-align:center;">Loading roster...</p>
+        </div>
     </div>
 </div>
 
