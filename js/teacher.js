@@ -573,25 +573,7 @@ async function approveWritingSubmission(submissionId, studentId, baseLetter) {
         return showNotificationToast("Approval failed: " + subError.message);
     }
 
-    // Flip writing_passed on the student's family progress row, and mark
-    // completed_at if the streak gate is also already passed.
-    const { data: progressRow } = await _supabase
-        .from('student_family_progress')
-        .select('streak_passed')
-        .eq('student_id', studentId)
-        .eq('base_letter', baseLetter)
-        .maybeSingle();
-
-    const updatePayload = { writing_passed: true };
-    if (progressRow?.streak_passed) updatePayload.completed_at = new Date().toISOString();
-
-    const { error: progressError } = await _supabase
-        .from('student_family_progress')
-        .update(updatePayload)
-        .eq('student_id', studentId)
-        .eq('base_letter', baseLetter);
-
-    if (progressError) console.error("Failed to update family progress:", progressError);
+    await creditApprovedWritingToProgress(studentId, baseLetter);
 
     showNotificationToast("Submission approved! ✓");
     await loadTeacherWritingQueue();
