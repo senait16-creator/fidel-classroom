@@ -540,7 +540,7 @@ async function renderChallengeDashboardRace() {
     if (!mount) return;
 
     if (typeof renderTeamRaceView === "function") {
-        await renderTeamRaceView("challengeDashRaceMount");
+        await renderTeamRaceView("challengeDashRaceMount", { mode: "challenge" });
     } else {
         mount.innerHTML = `<p style="font-size:13px; color:#94a3b8;">Team race loading soon.</p>`;
     }
