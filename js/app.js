@@ -426,7 +426,6 @@ if (viewMode === "teacher") {
     loadTeacherWritingQueue();
     loadTeacherTeamProgress();
     loadTeacherLevelCompletionQueue('levelCompletionQueueMount');
-    if (typeof loadCanDoVerificationQueue === 'function') loadCanDoVerificationQueue('canDoVerificationQueueMount');
     populateCaptainTeamDropdown();
     loadCurrentCaptains();
     if (typeof loadTeacherClassroomOverview === 'function') loadTeacherClassroomOverview();
