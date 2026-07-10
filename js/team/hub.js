@@ -585,21 +585,7 @@ async function captainApproveSubmission(submissionId, studentId, baseLetter) {
 
     if (subError) return showNotificationToast('Approval failed: ' + subError.message);
 
-    const { data: progressRow } = await _supabase
-        .from('student_family_progress')
-        .select('streak_passed')
-        .eq('student_id', studentId)
-        .eq('base_letter', baseLetter)
-        .maybeSingle();
-
-    const updatePayload = { writing_passed: true };
-    if (progressRow?.streak_passed) updatePayload.completed_at = new Date().toISOString();
-
-    await _supabase
-        .from('student_family_progress')
-        .update(updatePayload)
-        .eq('student_id', studentId)
-        .eq('base_letter', baseLetter);
+    await creditApprovedWritingToProgress(studentId, baseLetter);
 
     // Write a notification so the student sees it on next hub load
     await _supabase.from('team_notifications').insert({
