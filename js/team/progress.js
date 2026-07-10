@@ -128,6 +128,76 @@ function canExpandRaceTeam(teamId) {
     return !!currentProfile?.is_admin || teamId === currentProfile?.team_id;
 }
 
+// Persists streak progress for one family, defending against out-of-order
+// concurrent writes to the same row: the periodic in-game autosave and
+// the "streak passed" save are two independent async calls with no
+// ordering guarantee, so if the autosave's write lands second, it can
+// silently downgrade an already-passed streak back to not-passed even
+// though best_streak stayed at/above the threshold. Reading the existing
+// row first and taking the max/OR of old vs new makes every write
+// monotonic — streak_passed can only ever go false -> true, and
+// best_streak can only ever go up, regardless of arrival order. Shared by
+// both the Fidel Challenge and embedded practice-sheet streak games so
+// they can't drift apart.
+async function saveStreakProgress(baseLetter, levelNumber, bestStreak, passed) {
+    const { data: existing } = await _supabase
+        .from('student_family_progress')
+        .select('best_streak, streak_passed')
+        .eq('student_id', currentUser.id)
+        .eq('base_letter', baseLetter)
+        .maybeSingle();
+
+    const finalBestStreak = Math.max(bestStreak, existing?.best_streak || 0);
+    const finalPassed = !!passed || !!existing?.streak_passed || finalBestStreak >= STREAK_THRESHOLD;
+
+    const { error } = await _supabase.from('student_family_progress').upsert({
+        student_id: currentUser.id, base_letter: baseLetter,
+        level_number: levelNumber, best_streak: finalBestStreak, streak_passed: finalPassed
+    }, { onConflict: 'student_id,base_letter' });
+    if (error) console.error("Failed to save streak progress:", error);
+}
+
+// Credits an approved writing submission onto student_family_progress —
+// shared by the teacher's and captain's approve-submission flows so they
+// can't drift apart. Upserts rather than updates: the free-form "pick any
+// letter" submit path in the Team Hub (openTeamHubFinalSubmit) has no
+// gate requiring the streak game be played first, unlike the Practice
+// Sheet flow, so a matching row may not exist yet. A plain UPDATE would
+// then silently match zero rows and the approval would never register
+// anywhere else in the app (roster, Team Race, the student's own view).
+async function creditApprovedWritingToProgress(studentId, baseLetter) {
+    const { data: progressRow } = await _supabase
+        .from('student_family_progress')
+        .select('streak_passed')
+        .eq('student_id', studentId)
+        .eq('base_letter', baseLetter)
+        .maybeSingle();
+
+    const payload = {
+        student_id: studentId,
+        base_letter: baseLetter,
+        writing_passed: true
+    };
+    if (progressRow?.streak_passed) payload.completed_at = new Date().toISOString();
+
+    if (!progressRow) {
+        // Brand new row — resolve which level this letter belongs to so
+        // level-scoped queries (roster, Team Race) can still find it.
+        const { data: levelRow } = await _supabase
+            .from('challenge_levels')
+            .select('level_number')
+            .contains('letter_families', [baseLetter])
+            .maybeSingle();
+        if (levelRow?.level_number) payload.level_number = levelRow.level_number;
+    }
+
+    const { error } = await _supabase
+        .from('student_family_progress')
+        .upsert(payload, { onConflict: 'student_id,base_letter' });
+
+    if (error) console.error("Failed to credit approved writing to progress:", error);
+}
+
 // Lazy, per-team fetch of the protected, student-identifying tables —
 // only ever called for a team the viewer is allowed to see (see
 // canExpandRaceTeam), and only once per team per page load (cached by
@@ -772,6 +842,8 @@ async function rejectTeacherLevelCompletion(requestId, mountId) {
 // Expose
 // ---------------------------------------------------------------------------
 
+window.saveStreakProgress = saveStreakProgress;
+window.creditApprovedWritingToProgress = creditApprovedWritingToProgress;
 window.renderTeamRaceView = renderTeamRaceView;
 // Back-compat alias in case any other code still calls the old name directly.
 window.renderCommunityTeamLeaderboard = (mountId) => renderTeamRaceView(mountId, { mode: 'compact' });
