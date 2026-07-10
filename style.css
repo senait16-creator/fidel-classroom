@@ -1,7 +1,7 @@
 /* =============================================================================
-   FIDEL CLASSROOM Ã¢â‚¬â€ style.css  (cleaned Jul 2026)
+   FIDEL CLASSROOM â€” style.css  (cleaned Jul 2026)
    =============================================================================
-   TABLE OF CONTENTS (order preserved from original Ã¢â‚¬â€ do not re-sort;
+   TABLE OF CONTENTS (order preserved from original â€” do not re-sort;
    later rules intentionally override earlier ones)
 
      1. Variables & reset            (:root, *, body)
@@ -18,12 +18,12 @@
     12. Menus, toasts, overlays
     13. Wordle / reading
     14. Coffee theme vars & mode-select redesign
-    15. Lesson step buttons          (flashcards Ã¢â€ â€™ game Ã¢â€ â€™ writing)
+    15. Lesson step buttons          (flashcards â†’ game â†’ writing)
     16. Community & team status toggles
 
    CLEANUP NOTES:
    - 116 dead classes removed (old daily-decode, reading-path, vocab-path,
-     fidel-map, plc-* level cards Ã¢â‚¬â€ features redesigned or never shipped)
+     fidel-map, plc-* level cards â€” features redesigned or never shipped)
    - 44 duplicate selectors merged property-by-property, last value wins
      (identical computed styles verified before/after)
    ============================================================================= */
@@ -826,391 +826,229 @@ header {
     color: #475569;
 }
 
-.teacher-roster-summary-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin: 14px 0 18px;
-}
+/* ── Classroom Roster (redesign) ─────────────────────────────────── */
 
-.teacher-roster-summary-tile {
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 14px;
-    background: #f8fafc;
-}
-
-.teacher-roster-summary-tile strong {
-    display: block;
-    font-size: 24px;
-    color: #14532d;
-    line-height: 1;
-}
-
-.teacher-roster-summary-tile span {
-    display: block;
-    margin-top: 6px;
-    color: #64748b;
-    font-size: 11px;
+.roster-section-title {
+    font-size: 14px;
     font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
+    color: var(--neutral-dark);
+    margin: 20px 0 10px;
 }
 
-.teacher-roster-section {
-    border-top: 1px solid #e2e8f0;
-    padding-top: 18px;
-    margin-top: 18px;
+.roster-section-title:first-of-type {
+    margin-top: 0;
 }
 
-.teacher-roster-section-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 12px;
+.roster-attention-card {
+    background: linear-gradient(135deg, #fef2f2, #ffffff);
+    border: 1px solid #fecaca;
+    border-radius: 16px;
+    padding: 6px 14px;
 }
 
-.teacher-roster-section-head h3 {
-    font-family: 'Inter', sans-serif;
-    font-size: 15px;
-    color: #1e293b;
-    margin: 0;
-}
-
-.teacher-roster-section-head span {
-    border-radius: 999px;
-    background: #ecfdf5;
-    color: #166534;
-    font-size: 11px;
-    font-weight: 900;
-    padding: 5px 10px;
-    white-space: nowrap;
-}
-
-.teacher-attention-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.teacher-attention-row {
-    display: grid;
-    grid-template-columns: minmax(140px, 0.8fr) 1fr;
-    gap: 12px;
-    align-items: center;
-    border: 1px solid #e2e8f0;
-    border-left-width: 5px;
-    border-radius: 12px;
-    padding: 11px 12px;
-    background: white;
-}
-
-.teacher-attention-row strong {
-    color: #1e293b;
-    font-size: 13px;
-}
-
-.teacher-attention-row span {
-    color: #64748b;
-    font-size: 12px;
-    font-weight: 700;
-}
-
-.teacher-attention-row.review {
-    border-left-color: #b45309;
-    background: #fffbeb;
-}
-
-.teacher-attention-row.help {
-    border-left-color: #dc2626;
-    background: #fef2f2;
-}
-
-.teacher-attention-row.start {
-    border-left-color: #0d9488;
-    background: #f0fdfa;
-}
-
-.teacher-empty-state {
-    border: 1px dashed #cbd5e1;
-    border-radius: 12px;
-    color: #94a3b8;
-    font-size: 13px;
-    padding: 16px;
-    text-align: center;
-    background: #f8fafc;
-}
-
-.teacher-team-progress-group {
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    margin-bottom: 10px;
-    overflow: hidden;
-    background: white;
-}
-
-.teacher-team-progress-group summary {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 13px 14px;
-    cursor: pointer;
-    background: #f8fafc;
-    font-weight: 900;
-    color: #1e293b;
-}
-
-.teacher-team-progress-group summary small {
-    color: #64748b;
-    font-size: 12px;
-    font-weight: 800;
-}
-
-.teacher-team-progress-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 12px;
-}
-
-.teacher-student-progress-card {
-    display: grid;
-    grid-template-columns: minmax(220px, 1fr) auto;
-    gap: 10px 14px;
-    align-items: center;
-    border: 1px solid #f1f5f9;
-    border-radius: 12px;
-    padding: 12px;
-}
-
-.teacher-student-main {
+.roster-attention-row {
     display: flex;
     align-items: center;
     gap: 10px;
-    min-width: 0;
+    padding: 9px 0;
 }
 
-.teacher-student-avatar {
-    width: 38px;
-    height: 38px;
+.roster-attention-row + .roster-attention-row {
+    border-top: 1px solid #fee2e2;
+}
+
+.roster-attention-avatar {
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
+    background: white;
+    border: 1px solid #fecaca;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f0fdf4;
+    font-size: 15px;
     flex-shrink: 0;
 }
 
-.teacher-student-name {
+.roster-attention-name {
     font-size: 13px;
-    font-weight: 900;
-    color: #1e293b;
+    font-weight: 700;
+    color: var(--neutral-dark);
 }
 
-.teacher-student-meta {
+.roster-attention-reason {
     font-size: 11.5px;
-    color: #64748b;
-    margin-top: 2px;
-}
-
-.teacher-mini-badge {
-    display: inline-block;
-    border-radius: 999px;
-    background: #fff7ed;
-    color: #b45309;
-    font-size: 10px;
-    font-weight: 900;
-    padding: 2px 7px;
-    margin-left: 5px;
-}
-
-.teacher-student-status {
-    justify-self: end;
-    border-radius: 999px;
-    background: #f1f5f9;
-    color: #475569;
-    font-size: 11px;
-    font-weight: 900;
-    padding: 6px 10px;
-    white-space: nowrap;
-}
-
-.teacher-family-chip-row {
-    grid-column: 1 / -1;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-}
-
-.teacher-family-chip {
-    border-radius: 999px;
-    border: 1px solid #e2e8f0;
-    background: #f8fafc;
-    color: #64748b;
-    padding: 5px 9px;
-    font-size: 12px;
-    font-weight: 900;
-}
-
-.teacher-family-chip.chip-done {
-    background: #dcfce7;
-    border-color: #bbf7d0;
-    color: #166534;
-}
-
-.teacher-family-chip.chip-pending {
-    background: #fef3c7;
-    border-color: #fde68a;
-    color: #92400e;
-}
-
-.teacher-family-chip.chip-help {
-    background: #fee2e2;
-    border-color: #fecaca;
     color: #b91c1c;
 }
 
-.teacher-family-chip.chip-writing,
-.teacher-family-chip.chip-trying {
-    background: #eff6ff;
-    border-color: #bfdbfe;
-    color: #1d4ed8;
+.roster-attention-go {
+    margin-left: auto;
+    background: #991b1b;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
 }
 
-.teacher-family-chip.chip-captain {
-    background: #fff7ed;
-    border-color: #fed7aa;
-    color: #b45309;
+.roster-attention-empty {
+    font-size: 12.5px;
+    color: #16a34a;
+    font-weight: 600;
+    padding: 10px 2px;
 }
 
-.teacher-roster-person-list {
+.roster-team-group {
+    margin-bottom: 18px;
+}
+
+.roster-team-header {
     display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.teacher-roster-person {
-    display: grid;
-    grid-template-columns: minmax(180px, 1fr) minmax(220px, 1.2fr) auto;
-    gap: 12px;
     align-items: center;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 12px;
-}
-
-.teacher-roster-person strong {
-    display: block;
-    color: #1e293b;
+    gap: 8px;
     font-size: 13px;
+    font-weight: 800;
+    color: var(--neutral-dark);
+    margin-bottom: 8px;
 }
 
-.teacher-roster-person span {
-    display: block;
+.roster-team-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.roster-team-meta {
+    margin-left: auto;
+    font-size: 11px;
     color: #94a3b8;
-    font-size: 11.5px;
-    margin-top: 2px;
+    font-weight: 500;
 }
 
-.teacher-roster-person-meta {
+.roster-student-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 6px;
+}
+
+.roster-student-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+.roster-student-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--neutral-dark);
+}
+
+.roster-captain-badge {
+    font-size: 10px;
+    color: #b45309;
+    font-weight: 700;
+}
+
+.roster-student-meta {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 1px;
+}
+
+.roster-status-pill {
+    margin-left: auto;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 4px 9px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.roster-status-cleared { background: #dcfce7; color: #166534; }
+.roster-status-pending { background: #fef3c7; color: #92400e; }
+.roster-status-needs-writing { background: #ede9fe; color: #5b21b6; }
+.roster-status-help { background: #fee2e2; color: #991b1b; }
+.roster-status-in-progress { background: #dbeafe; color: #1d4ed8; }
+.roster-status-not-started { background: #f1f5f9; color: #94a3b8; }
+
+.roster-student-menu-btn {
+    background: #f1f5f9;
+    border: none;
+    border-radius: 8px;
+    width: 26px;
+    height: 26px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #64748b;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.roster-student-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
+    padding: 0 0 10px 42px;
+    margin-top: -4px;
 }
 
-.teacher-roster-person-meta span {
+.roster-solo-card {
     background: #f8fafc;
-    border-radius: 999px;
-    color: #475569;
-    font-weight: 800;
-    padding: 5px 9px;
-    margin: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 4px 12px;
 }
 
-.teacher-action-menu {
-    justify-self: end;
-    position: relative;
-}
-
-.teacher-action-menu summary {
-    cursor: pointer;
-    border-radius: 10px;
-    border: 1px solid #cbd5e1;
-    padding: 7px 10px;
-    font-size: 12px;
-    font-weight: 900;
-    color: #475569;
-    list-style: none;
-}
-
-.teacher-action-menu summary::-webkit-details-marker {
-    display: none;
-}
-
-.teacher-action-menu > div {
-    position: absolute;
-    right: 0;
-    top: calc(100% + 6px);
-    z-index: 10;
-    min-width: 170px;
+.roster-solo-row {
     display: flex;
-    flex-direction: column;
-    gap: 6px;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    background: white;
-    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.14);
-    padding: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 0;
+    font-size: 12.5px;
+    color: #475569;
 }
 
-.teacher-action-btn {
-    width: 100%;
+.roster-solo-row + .roster-solo-row {
+    border-top: 1px solid var(--border-color);
+}
+
+.roster-solo-name {
+    font-weight: 700;
+    color: var(--neutral-dark);
+}
+
+.roster-solo-sub {
+    margin-left: auto;
     font-size: 11px;
-    padding: 7px 10px;
-    text-align: left;
+    color: #94a3b8;
 }
 
-.teacher-action-btn.warn-light {
-    color: #b45309;
-    border-color: #fed7aa;
-}
-
-.teacher-action-btn.danger-light,
-.teacher-action-btn.danger {
-    color: #991b1b;
-    border-color: #fecaca;
-}
-
-.teacher-action-btn.danger {
-    font-weight: 900;
+.roster-solo-actions {
+    flex-basis: 100%;
+    padding-left: 0;
 }
 
 @media (max-width: 640px) {
     .teacher-panel {
         padding: 16px;
-    }
-
-    .teacher-roster-summary-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .teacher-attention-row,
-    .teacher-student-progress-card,
-    .teacher-roster-person {
-        grid-template-columns: 1fr;
-    }
-
-    .teacher-student-status,
-    .teacher-action-menu {
-        justify-self: start;
-    }
-
-    .teacher-action-menu > div {
-        position: static;
-        margin-top: 8px;
-        box-shadow: none;
     }
 
     .teacher-roster-table thead {
@@ -1244,6 +1082,11 @@ header {
         text-transform: uppercase;
         letter-spacing: 0.4px;
         margin-bottom: 2px;
+    }
+
+    .roster-status-pill {
+        white-space: normal !important;
+        text-align: center;
     }
 
     .teacher-control-group {
@@ -1916,7 +1759,7 @@ header {
 }
 
 .challenge-level-card.completed::after {
-    content: "âœ“";
+    content: "✓";
     position: absolute;
     top: 8px;
     right: 10px;
@@ -2612,8 +2455,8 @@ header {
     letter-spacing: 0.4px;
 }
 
-/* â”€â”€ My Amharic Path â€” chapter list cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-/* Stacked, one per row â€” these cards carry a title, lesson count, and
+/* ── My Amharic Path — chapter list cards ───────────────────── */
+/* Stacked, one per row — these cards carry a title, lesson count, and
    two side-by-side buttons, which never fit the tight multi-column
    grid built for the plain number-badge Fidel Challenge tiles. */
 
@@ -2630,7 +2473,7 @@ header {
     }
 }
 
-/* â”€â”€ My Amharic Path â€” step progress indicator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── My Amharic Path — step progress indicator ──────────────── */
 
 .lesson-prev-lesson-link {
     font-size: 11px;
@@ -2641,7 +2484,7 @@ header {
     letter-spacing: 0.4px;
 }
 
-/* â”€â”€ My Amharic Path â€” Chapter Goals card ("what will I learn") â”€â”€ */
+/* ── My Amharic Path — Chapter Goals card ("what will I learn") ── */
 
 .chapter-goals-intro {
     font-size: 14px;
@@ -2664,7 +2507,7 @@ header {
     font-weight: 700;
 }
 
-/* â”€â”€ My Amharic Path â€” Today's Goal step â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── My Amharic Path — Today's Goal step ─────────────────────── */
 
 .lesson-goal-time {
     font-size: 12px;
@@ -2672,9 +2515,9 @@ header {
     margin-top: 10px;
 }
 
-/* â”€â”€ My Amharic Path â€” per-step Continue/Back nav â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── My Amharic Path — per-step Continue/Back nav ───────────── */
 
-/* â”€â”€ My Amharic Path â€” Conversation tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── My Amharic Path — Conversation tab ─────────────────────── */
 
 .conversation-lines {
     display: flex;
@@ -2718,7 +2561,7 @@ header {
     margin-top: 4px;
 }
 
-/* â”€â”€ My Amharic Path â€” Speaking tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── My Amharic Path — Speaking tab ──────────────────────────── */
 
 .speaking-prompt-card {
     background: white;
@@ -2741,9 +2584,9 @@ header {
     margin-bottom: 10px;
 }
 
-/* â”€â”€ My Amharic Path â€” Practice tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── My Amharic Path — Practice tab ──────────────────────────── */
 
-/* â”€â”€ Can-Do Statements â€” full screen + Chapter Goals card â”€â”€â”€â”€â”€ */
+/* ── Can-Do Statements — full screen + Chapter Goals card ───── */
 
 .candoo-category {
     margin-bottom: 18px;
@@ -2794,7 +2637,25 @@ header {
     font-weight: 600;
 }
 
-/* â”€â”€ My Growth â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.candoo-row-auto {
+    cursor: default;
+}
+
+.candoo-auto-tag {
+    display: inline-block;
+    font-size: 9.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: #64748b;
+    background: #f1f5f9;
+    padding: 2px 7px;
+    border-radius: 20px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+/* ── My Growth ─────────────────────────────────────────────────── */
 
 .growth-entry-card {
     display: flex;
@@ -3033,9 +2894,9 @@ header {
     color: var(--neutral-dark);
 }
 
-/* â”€â”€ My Amharic Path â€” lesson step panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── My Amharic Path — lesson step panel ─────────────────────── */
 
-/* â”€â”€ Vocabulary tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Vocabulary tab ──────────────────────────────────────────── */
 
 .vocab-item {
     background: linear-gradient(135deg, #ffffff, #fffdf5);
@@ -3092,7 +2953,7 @@ header {
     font-style: italic;
 }
 
-/* â”€â”€ Verb Forms (conjugation) tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Verb Forms (conjugation) tab ───────────────────────────── */
 
 .conjugation-card {
     background: white;
@@ -3143,7 +3004,7 @@ header {
     text-align: right;
 }
 
-/* â”€â”€ Checkpoint tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Checkpoint tab ──────────────────────────────────────────── */
 
 .checkpoint-question {
     background: white;
@@ -3708,7 +3569,7 @@ header {
     transition: width 0.3s ease, background-color 0.3s ease;
 }
 
-/* MODE SELECT Ã¢â‚¬â€ coffee cup home screen */
+/* MODE SELECT â€” coffee cup home screen */
 
 /* Remove old dark/stuck pseudo-symbols */
 
@@ -4178,7 +4039,7 @@ header {
 }
 
 /* =============================================================
-   PHASE 2 VISUAL ADDITIONS â€” paste at bottom of style.css
+   PHASE 2 VISUAL ADDITIONS — paste at bottom of style.css
    Covers: mode select gradient, team hub Option B overlap,
    team race redesign, icon action buttons, letter board,
    reading/vocab path headers.
@@ -4220,8 +4081,7 @@ header {
 
 .race-row {
     display: flex;
-    align-items: center;
-    gap: 10px;
+    flex-direction: column;
     padding: 10px 4px;
     border-bottom: 1px solid #f1f5f9;
     border-radius: 0;
@@ -4358,6 +4218,219 @@ header {
 
 .race-chip.chip-empty {
     background: #f1f5f9;
+    color: #94a3b8;
+}
+
+/* ── Team Race (redesign) — per-family breakdown + tap-to-expand ─── */
+
+.race-row-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.race-expand-arrow {
+    font-size: 11px;
+    color: #94a3b8;
+    flex-shrink: 0;
+    align-self: flex-start;
+    margin-top: 4px;
+}
+
+.race-team-sub {
+    font-size: 10px;
+    color: #94a3b8;
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+.race-family-lines {
+    margin: 8px 0 4px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.race-family-line {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 11px;
+    color: #475569;
+}
+
+.race-family-line-done {
+    color: #166534;
+}
+
+.race-family-letter {
+    font-family: 'Abyssinica SIL', serif;
+    font-size: 14px;
+    color: var(--neutral-dark);
+    flex-shrink: 0;
+    width: 18px;
+}
+
+.race-family-detail {
+    color: inherit;
+}
+
+.race-team-detail {
+    margin: 6px 0 4px 40px;
+    padding-top: 6px;
+    border-top: 1px dashed #e2e8f0;
+}
+
+.race-student-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 6px;
+    padding: 5px 0;
+    font-size: 11.5px;
+    max-width: 100%;
+}
+
+.race-student-avatar {
+    font-size: 13px;
+}
+
+.race-student-name {
+    font-weight: 700;
+    color: var(--neutral-dark);
+    flex-shrink: 0;
+}
+
+.race-student-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    flex-basis: 100%;
+    min-width: 0;
+}
+
+.race-student-family {
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+.race-student-approved { background: #dcfce7; color: #166534; }
+.race-student-pending { background: #fef3c7; color: #92400e; }
+.race-student-needs_writing { background: #ede9fe; color: #5b21b6; }
+.race-student-practicing { background: #dbeafe; color: #1d4ed8; }
+.race-student-not_started { background: #f1f5f9; color: #94a3b8; }
+.race-student-help { background: #fee2e2; color: #991b1b; }
+
+/* ── Community team leaderboard (lighter version of Team Race) ───── */
+
+.community-race-standings {
+    display: flex;
+    flex-direction: column;
+}
+
+.community-race-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 4px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.community-race-row:last-child {
+    border-bottom: none;
+}
+
+.community-race-row.community-race-you {
+    background: #f0fdf4;
+    border-radius: 10px;
+    border-bottom: none;
+    margin: 2px 0;
+    padding: 10px 8px;
+}
+
+.community-race-medal {
+    font-size: 16px;
+    width: 22px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.community-race-medal.community-race-num {
+    font-size: 12px;
+    color: #94a3b8;
+    font-weight: 700;
+}
+
+.community-race-dot {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    color: white;
+    flex-shrink: 0;
+}
+
+.community-race-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.community-race-name-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.community-race-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.community-race-pct {
+    font-size: 11px;
+    font-weight: 700;
+    color: #94a3b8;
+}
+
+.community-race-sub {
+    font-size: 10px;
+    color: #94a3b8;
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+.community-race-ready-tag {
+    color: #b45309;
+    font-weight: 700;
+}
+
+.community-race-wins {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.community-race-win-row {
+    font-size: 11.5px;
+    color: #475569;
+}
+
+.community-race-win-time {
+    margin-left: 6px;
+    font-size: 10px;
     color: #94a3b8;
 }
 
@@ -4658,7 +4731,7 @@ header {
 /* Fidel map amber header */
 
 /* =============================================================================
-   v9 FINAL DESIGN LAYER â€” cohesive Ethiopian coffee UI
+   v9 FINAL DESIGN LAYER — cohesive Ethiopian coffee UI
    Paste-safe overrides. Keep this at the bottom of style.css.
    ============================================================================= */
 
@@ -4747,7 +4820,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     background: linear-gradient(135deg, #14532d, #166534);
 }
 
-/* Mode select â€” make preview design the real home screen */
+/* Mode select — make preview design the real home screen */
 
 #modeSelectScreen {
     animation: modeSelectEnter 0.35s cubic-bezier(0.32, 0.72, 0, 1) forwards;
@@ -5342,7 +5415,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     }
 }
 
-/* â”€â”€ Captain Dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Captain Dashboard ────────────────────────────────────────── */
 
 .captain-zone {
     background: linear-gradient(135deg, #fffbeb, #fff7ed);
@@ -5714,12 +5787,12 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 
 /* =============================================================================
-   LESSON STEP BUTTONS Ã¢â‚¬â€ flashcards Ã¢â€ â€™ matching game Ã¢â€ â€™ writing submission
+   LESSON STEP BUTTONS â€” flashcards â†’ matching game â†’ writing submission
    Used on both challengeFamilyDetailScreen and familyPracticeSheet.
    Each step gets an icon in a circle and its own color identity:
-     Step 1 Flashcards  Ã¢â‚¬â€ gold  (study / warm-up)
-     Step 2 Matching    Ã¢â‚¬â€ forest green (the brand "play" moment)
-     Step 3 Writing     Ã¢â‚¬â€ deep purple (final proof)
+     Step 1 Flashcards  â€” gold  (study / warm-up)
+     Step 2 Matching    â€” forest green (the brand "play" moment)
+     Step 3 Writing     â€” deep purple (final proof)
    ============================================================================= */
 
 .challenge-step-btn {
@@ -5870,7 +5943,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     letter-spacing: 0;
 }
 
-/* Family detail: inline swipeable flashcard â€” no navigation away from the page */
+/* Family detail: inline swipeable flashcard — no navigation away from the page */
 
 .inline-flashcard-wrap {
     margin-bottom: 22px;
@@ -5950,7 +6023,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     border-radius: 4px;
 }
 
-/* Family detail: practice pad (finger-drawing, warm-up only â€” never submitted) */
+/* Family detail: practice pad (finger-drawing, warm-up only — never submitted) */
 
 .practice-pad-card {
     background: #f8fafc;
@@ -6025,7 +6098,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     font-size: 12px;
 }
 
-/* Team status content Ã¢â‚¬â€ hidden until toggled on Competition page */
+/* Team status content â€” hidden until toggled on Competition page */
 
 .challenge-team-status-content {
     display: none;
@@ -6250,7 +6323,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 
 .challenge-lesson-briefing::before{
-    content:"áˆ€ áˆˆ áˆ áˆ˜ áˆ ";
+    content:"ሀ ለ ሐ መ ሠ";
 
     position:absolute;
 
@@ -6305,7 +6378,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 
 /* ==========================================================================
    DASHBOARD FEATURE CARDS
-   Competition â€¢ Vocabulary â€¢ Reading
+   Competition • Vocabulary • Reading
    ========================================================================== */
 
 .dashboard-feature-card{
@@ -6360,7 +6433,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 
 .dashboard-feature-card.competition::after{
 
-    content:"ðŸ†";
+    content:"🏆";
 
     position:absolute;
 
@@ -6473,7 +6546,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 
 .dashboard-feature-card.locked::before{
 
-    content:"ðŸ”’";
+    content:"🔒";
 
     position:absolute;
 
@@ -6627,10 +6700,10 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 
 /* =============================================================================
-   STAR OF THE WEEK â€” star board (Community) + captain picker (Competition)
+   STAR OF THE WEEK — star board (Community) + captain picker (Competition)
    ============================================================================= */
 
-/* â”€â”€ Star Board (Community page) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Star Board (Community page) ─────────────────────────────── */
 
 .star-board-header {
     font-size: 18px;
@@ -6734,7 +6807,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     display: block;
 }
 
-/* â”€â”€ Captain picker (Competition page) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Captain picker (Competition page) ───────────────────────── */
 
 .star-current-banner {
     background: #fef3c7;
@@ -6838,10 +6911,10 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 
 /* =============================================================================
-   Mode-select locks â€” greys out a cup-card and shows a "Coming Soon"
+   Mode-select locks — greys out a cup-card and shows a "Coming Soon"
    overlay when its mode isn't ready yet (see LOCKED_MODES in js/app.js),
    plus a highlighted look for the featured Competition card. Re-added:
-   this block keeps getting dropped when style.css is edited elsewhere â€”
+   this block keeps getting dropped when style.css is edited elsewhere —
    if it disappears again, it's this exact block that needs re-adding.
    ============================================================================= */
 
@@ -6900,7 +6973,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 
 /* ==========================================================================
-   COMMUNITY PAGE LAYOUT â€” sidebar leaderboard (reuses .leaderboard-row from
+   COMMUNITY PAGE LAYOUT — sidebar leaderboard (reuses .leaderboard-row from
    the Practice-mode leaderboard) + main column for the sharing feed.
    Side-by-side on wider screens; stacks on phones, where the sidebar would
    otherwise be too narrow to read.
@@ -7084,7 +7157,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 
 /* ==========================================================================
-   EXPLORE â€” content library. Reuses .challenge-resource-link for individual
+   EXPLORE — content library. Reuses .challenge-resource-link for individual
    rows; only adds the category wrapper/title and the locked-row look.
    ========================================================================== */
 
@@ -7118,7 +7191,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 
 /* ==========================================================================
-   COMMUNITY DAILY FEED â€” Verse of the Day, Daily Wordle status, Question
+   COMMUNITY DAILY FEED — Verse of the Day, Daily Wordle status, Question
    of the Day, and the today-banners row at the bottom of Community.
    ========================================================================== */
 
@@ -7142,7 +7215,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 /* #communityScreen .card (higher specificity: 1 id + 1 class) was silently
    overriding .verse-card (1 class) everywhere the verse card renders inside
    Community, flattening it to the same white/cream look as every other
-   card â€” this is why it was blending into the background. Matching
+   card — this is why it was blending into the background. Matching
    specificity here so this rule actually wins. */
 #communityScreen .card.verse-card{
     background: linear-gradient(160deg, #78350f 0%, #b45309 55%, #ca8a04 100%);
@@ -7154,7 +7227,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 
 #communityScreen .card.verse-card::after{
-    content: 'âœ';
+    content: '✝';
     position: absolute;
     top: 10px;
     right: 16px;
@@ -7494,7 +7567,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 
 .challenge-start-here summary::after {
-    content: "âŒ„";
+    content: "⌄";
     font-size: 22px;
     font-weight: 900;
     transition: transform .2s ease;
@@ -7581,7 +7654,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     display: block;
 }
 /* =========================================================
-   MY AMHARIC PATH â€” UI/UX POLISH UPGRADE
+   MY AMHARIC PATH — UI/UX POLISH UPGRADE
    Paste at very bottom of style.css
 ========================================================= */
 
@@ -7643,7 +7716,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 
 /* =========================================================
-   MY AMHARIC PATH â€” CLEAN VISUAL RESET
+   MY AMHARIC PATH — CLEAN VISUAL RESET
    Less gradient, more polished course feel
 ========================================================= */
 
@@ -7771,7 +7844,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 
 /* =========================================================
-   MY AMHARIC PATH â€” CHAPTER AESTHETIC CLEANUP
+   MY AMHARIC PATH — CHAPTER AESTHETIC CLEANUP
    Paste at very bottom of style.css
 ========================================================= */
 
