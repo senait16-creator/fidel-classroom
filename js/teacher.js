@@ -101,6 +101,13 @@ async function loadTeacherRosterData() {
 
     const statusByStudent = {};
     challengeStudents.forEach(s => {
+        // Captains review teammates' work instead of grinding the
+        // challenge themselves — they're exempt, not "not started". Same
+        // exemption already shown in the Team Level Progress member list.
+        if (s.is_captain) {
+            statusByStudent[s.id] = { key: 'captain', label: 'Captain', family: null };
+            return;
+        }
         const team = teamsById[s.team_id];
         const level = levelsByNumber[team.current_level || 1];
         const families = level?.letter_families || [];
