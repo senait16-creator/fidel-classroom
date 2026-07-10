@@ -342,17 +342,7 @@ function launchEmbeddedStreakGame(fidelObj, levelNumber) {
 }
 
 async function recordEmbeddedStreakProgress(baseLetter, levelNumber, bestStreak, passed) {
-    const { error } = await _supabase
-        .from('student_family_progress')
-        .upsert({
-            student_id: currentUser.id,
-            base_letter: baseLetter,
-            level_number: levelNumber,
-            best_streak: bestStreak,
-            streak_passed: passed
-        }, { onConflict: 'student_id,base_letter' });
-
-    if (error) console.error("Failed to save streak progress:", error);
+    await saveStreakProgress(baseLetter, levelNumber, bestStreak, passed);
 }
 
 // ---------------------------------------------------------------------------
