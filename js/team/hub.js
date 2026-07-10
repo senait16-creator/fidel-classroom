@@ -119,7 +119,7 @@ async function renderTeamHub() {
 
     // ── Team race ────────────────────────────────────────────
     if (typeof renderTeamRaceView === 'function') {
-        await renderTeamRaceView('teamRaceMount');
+        await renderTeamRaceView('teamRaceMount', { mode: 'challenge' });
     }
 
     // ── Practice feed ────────────────────────────────────────
