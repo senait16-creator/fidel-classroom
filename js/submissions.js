@@ -422,10 +422,10 @@ async function submitWritingSketch() {
 // ---------------------------------------------------------------------------
 
 async function finalizeWritingSubmission(imageUrl) {
-    // level_number is only included when we actually have one — omitting it
-    // when null avoids a 400 if the column doesn't accept/have a null default
-    // (most writing submissions come from the Letter Board / Practice Sheet,
-    // which never carry a chapter level_number at all).
+    // writing_submissions has no level_number column — student_id +
+    // base_letter + status is enough to match a submission back to its
+    // level everywhere else in the app, since each letter belongs to
+    // exactly one challenge level by design (see team/progress.js).
     const payload = {
         student_id:   currentUser.id,
         base_letter:  writingSubmitContext.baseLetter,
@@ -433,7 +433,6 @@ async function finalizeWritingSubmission(imageUrl) {
         status:       'pending',
         submitted_at: new Date().toISOString()
     };
-    if (writingSubmitContext.levelNumber) payload.level_number = writingSubmitContext.levelNumber;
 
     const { error } = await _supabase.from('writing_submissions').insert(payload);
 
