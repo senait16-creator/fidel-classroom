@@ -191,26 +191,23 @@
 
 <div class="teacher-panel" style="margin-bottom:20px;">
     <div class="teacher-panel-header" onclick="toggleTeacherPanel('rosterPanelBody', this)">
-        <h2 style="font-size:18px; color:var(--neutral-dark);">Student Roster &amp; Progress</h2>
+        <h2 style="font-size:18px; color:var(--neutral-dark);">Classroom Roster</h2>
         <button class="teacher-panel-toggle">▼</button>
     </div>
-
     <div class="teacher-panel-body" id="rosterPanelBody">
-        <p style="font-size:13px; color:#64748b; margin-bottom:12px;">
-            See who has signed up, who is actively in the challenge, and who needs encouragement.
-        </p>
-
-        <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
-            <button class="btn-primary"
-                    style="width:auto; padding:8px 18px; font-size:13px;"
-                    onclick="exportProgressCSV()">
-                ⬇️ Export Progress CSV
-            </button>
+        <p style="font-size:13px; color:#64748b; margin-bottom:12px;">Where every student and team stands in the Fidel Challenge.</p>
+        <div style="display:flex; justify-content:flex-end; margin-bottom:16px;">
+            <button class="btn-primary" style="width:auto; padding:8px 18px; font-size:13px;" onclick="exportProgressCSV()">⬇️ Export Progress CSV</button>
         </div>
 
-        <div id="teacherRosterTableBody">
-            <p style="color:#94a3b8; text-align:center;">Loading roster...</p>
-        </div>
+        <div class="roster-section-title">🚨 Needs Attention</div>
+        <div id="rosterAttentionMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
+
+        <div class="roster-section-title">🏆 In the Fidel Challenge</div>
+        <div id="rosterChallengeMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
+
+        <div class="roster-section-title">📝 Signed Up, Not Yet Competing</div>
+        <div id="rosterSoloMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
     </div>
 </div>
 
@@ -859,9 +856,11 @@
                 <small id="challengeDetailWritingSub">Submit for captain review</small>
             </span>
         </button>
-
-        <div id="challengeWritingStatusBox" style="display:none;"></div>
     </div>
+
+    <!-- Sibling of challengeFamilyPracticeBody (not nested inside it) — the
+         captain-exempt message must still render when that body is hidden. -->
+    <div id="challengeWritingStatusBox" style="display:none;"></div>
 </div>
 
 <div id="levelResourcesOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9983; align-items:center; justify-content:center; padding:24px;">
@@ -1431,14 +1430,14 @@
 <script src="js/utils/compress.js?v=9" defer></script>
 <script src="js/game.js?v=9" defer></script>
 <script src="js/submissions.js?v=12" defer></script>
-<script src="js/teacher.js?v=11" defer></script>
+<script src="js/teacher.js?v=12" defer></script>
 <script src="js/reading.js?v=20" defer></script>
     <script src="js/letterboard.js?v=10" defer></script>
-<script src="js/team/progress.js?v=9" defer></script>
+<script src="js/team/progress.js?v=11" defer></script>
 <script src="js/team/levels.js?v=10" defer></script>
 <script src="js/team/map.js?v=9" defer></script>
 <script src="js/team/hub.js?v=13" defer></script>
-    <script src="js/community.js?v=6" defer></script>
+    <script src="js/community.js?v=7" defer></script>
     <script src="js/dailyfeed.js?v=1" defer></script>
     <script src="js/songweek.js?v=1" defer></script>
     <script src="js/candostatement.js?v=4" defer></script>
