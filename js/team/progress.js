@@ -132,11 +132,16 @@ function canExpandRaceTeam(teamId) {
 // only ever called for a team the viewer is allowed to see (see
 // canExpandRaceTeam), and only once per team per page load (cached by
 // toggleRaceTeamDetail).
+//
+// Captains are excluded entirely — they don't grind the matching/writing
+// game themselves (they review teammates' work instead), so they're not
+// part of the race and shouldn't appear in the per-student breakdown.
 async function fetchTeamStudentDetail(teamId, level, families) {
     const { data: members } = await _supabase
         .from('profiles')
-        .select('id, nickname, avatar, is_captain')
-        .eq('team_id', teamId);
+        .select('id, nickname, avatar')
+        .eq('team_id', teamId)
+        .eq('is_captain', false);
 
     const memberIds = (members || []).map(m => m.id);
     if (memberIds.length === 0) return [];
@@ -154,9 +159,7 @@ async function fetchTeamStudentDetail(teamId, level, families) {
             .select('student_id, base_letter').eq('is_resolved', false).in('student_id', memberIds)
     ]);
 
-    const sortedMembers = [...(members || [])].sort((a, b) => (b.is_captain ? 1 : 0) - (a.is_captain ? 1 : 0));
-
-    return sortedMembers.map(m => {
+    return (members || []).map(m => {
         const statuses = families.map(fam => {
             const row = (prog || []).find(p => p.student_id === m.id && p.base_letter === fam);
             const hasPending = (subs || []).some(s => s.student_id === m.id && s.base_letter === fam);
@@ -167,105 +170,16 @@ async function fetchTeamStudentDetail(teamId, level, families) {
     });
 }
 
-async function renderTeamRaceView(mountId) {
-    const mount = document.getElementById(mountId);
-    if (!mount) return;
-    mount.innerHTML = `<p style="color:#94a3b8;font-size:13px;padding:8px 0;">Loading race...</p>`;
-
-    try {
-        const standings = await computeTeamRaceStandings();
-
-        if (standings.length === 0) {
-            mount.innerHTML = `<p style="color:#94a3b8;font-size:13px;">No teams yet.</p>`;
-            return;
-        }
-
-        const getTeamColor = getRaceTeamColor;
-        const getTeamInitial = getRaceTeamInitial;
-        const medals = ['🥇', '🥈', '🥉'];
-
-        mount.innerHTML = '';
-        const standings_div = document.createElement('div');
-        standings_div.className = 'race-standings';
-        _raceStandingsCache[mountId] = standings;
-
-        standings.forEach((team, idx) => {
-            const isYou = team.id === currentProfile?.team_id;
-            const color = getTeamColor(team.name);
-            const rowId = `raceRow-${mountId}-${team.id}`;
-
-            const row = document.createElement('div');
-            row.className = `race-row${isYou ? ' race-you' : ''}`;
-
-            const medalHtml = idx < 3
-                ? `<div class="race-medal">${medals[idx]}</div>`
-                : `<div class="race-medal race-num">${idx + 1}</div>`;
-
-            const familyLinesHtml = team.familySummaries.map(fs => {
-                const parts = [`${fs.approved}/${fs.memberCount} approved`];
-                if (fs.pending > 0) parts.push(`${fs.pending} pending`);
-                if (fs.practicing > 0) parts.push(`${fs.practicing} practicing`);
-                const fullyDone = fs.approved === fs.memberCount;
-                return `
-                    <div class="race-family-line ${fullyDone ? 'race-family-line-done' : ''}">
-                        <span class="race-family-letter">${fs.family}</span>
-                        <span class="race-family-detail">${parts.join(' · ')}</span>
-                    </div>`;
-            }).join('');
-
-            // Only your own team (or a teacher/admin) can drill into
-            // individual students — everyone else stops at the aggregate
-            // family lines above. See canExpandRaceTeam.
-            const expandable = canExpandRaceTeam(team.id);
-            const headerAttrs = expandable
-                ? `class="race-row-header race-row-expandable" onclick="toggleRaceTeamDetail('${mountId}', '${team.id}', '${rowId}')"`
-                : `class="race-row-header"`;
-
-            row.innerHTML = `
-                <div ${headerAttrs}>
-                    ${medalHtml}
-                    <div class="race-team-dot" style="background:${color};">
-                        ${getTeamInitial(team.name)}
-                    </div>
-                    <div class="race-team-info">
-                        <div class="race-team-name-row">
-                            <div class="race-team-name-text">
-                                ${team.name}
-                                ${isYou ? '<span class="race-you-tag">You</span>' : ''}
-                            </div>
-                            <div class="race-team-count">${team.overallPct}%</div>
-                        </div>
-                        <div class="race-bar-track">
-                            <div class="race-bar-fill" style="width:${team.overallPct}%;background:${color};"></div>
-                        </div>
-                        <div class="race-team-sub">Level ${team.level} · ${team.memberCount} active student${team.memberCount === 1 ? '' : 's'}${team.readyForQuiz ? ' · 🎤 ready for live quiz' : ''}</div>
-                    </div>
-                    ${expandable ? '<div class="race-expand-arrow">▾</div>' : ''}
-                </div>
-                <div class="race-family-lines">${familyLinesHtml}</div>
-                ${expandable ? `<div class="race-team-detail" id="${rowId}" style="display:none;"></div>` : ''}
-            `;
-
-            standings_div.appendChild(row);
-        });
-
-        mount.appendChild(standings_div);
-
-    } catch(e) {
-        console.error('Race render error:', e);
-        mount.innerHTML = `<p style="color:#94a3b8;font-size:13px;">Couldn't load race standings.</p>`;
-    }
-}
-
-// ---------------------------------------------------------------------------
-// Community's lighter version — same standings data, but Community is a
-// celebration feed, not a work dashboard, so this deliberately drops the
-// per-family breakdown and tap-to-expand student detail (that stays on the
-// Challenge dashboard, via renderTeamRaceView). Just rank, level, a simple
-// bar, and a couple of recent team-level-up "wins" for a bit of buzz.
-// ---------------------------------------------------------------------------
-
-async function renderCommunityTeamLeaderboard(mountId) {
+// Single entry point for both places Team Race is shown. `options.mode`
+// picks the depth of detail:
+//   'challenge' (default) — full family breakdown + tap-to-expand
+//     student detail, for the Fidel Challenge dashboard / team hub.
+//   'compact' — rank/name/level/% + a couple of recent wins, for the
+//     Community page so it doesn't overwhelm a celebration feed.
+// Both modes are built from the same computeTeamRaceStandings() call, so
+// they can never disagree about a team's rank or percentage.
+async function renderTeamRaceView(mountId, options = {}) {
+    const mode = options.mode === 'compact' ? 'compact' : 'challenge';
     const mount = document.getElementById(mountId);
     if (!mount) return;
     mount.innerHTML = `<p style="color:#94a3b8;font-size:13px;padding:8px 0;">Loading...</p>`;
@@ -278,50 +192,139 @@ async function renderCommunityTeamLeaderboard(mountId) {
             return;
         }
 
-        const medals = ['🥇', '🥈', '🥉'];
+        _raceStandingsCache[mountId] = standings;
 
-        const rowsHtml = standings.map((team, idx) => {
-            const isYou = team.id === currentProfile?.team_id;
-            const color = getRaceTeamColor(team.name);
-            const rankHtml = idx < 3
-                ? `<div class="community-race-medal">${medals[idx]}</div>`
-                : `<div class="community-race-medal community-race-num">${idx + 1}</div>`;
+        if (mode === 'compact') {
+            renderCompactRaceStandings(mount, standings);
+        } else {
+            renderDetailedRaceStandings(mount, mountId, standings);
+        }
+    } catch (e) {
+        console.error('Race render error:', e);
+        mount.innerHTML = `<p style="color:#94a3b8;font-size:13px;">Couldn't load team standings.</p>`;
+    }
+}
 
+function renderDetailedRaceStandings(mount, mountId, standings) {
+    const getTeamColor = getRaceTeamColor;
+    const getTeamInitial = getRaceTeamInitial;
+    const medals = ['🥇', '🥈', '🥉'];
+
+    mount.innerHTML = '';
+    const standings_div = document.createElement('div');
+    standings_div.className = 'race-standings';
+
+    standings.forEach((team, idx) => {
+        const isYou = team.id === currentProfile?.team_id;
+        const color = getTeamColor(team.name);
+        const rowId = `raceRow-${mountId}-${team.id}`;
+
+        const row = document.createElement('div');
+        row.className = `race-row${isYou ? ' race-you' : ''}`;
+
+        const medalHtml = idx < 3
+            ? `<div class="race-medal">${medals[idx]}</div>`
+            : `<div class="race-medal race-num">${idx + 1}</div>`;
+
+        const familyLinesHtml = team.familySummaries.map(fs => {
+            const parts = [`${fs.approved}/${fs.memberCount} approved`];
+            if (fs.pending > 0) parts.push(`${fs.pending} pending`);
+            if (fs.practicing > 0) parts.push(`${fs.practicing} practicing`);
+            const fullyDone = fs.approved === fs.memberCount;
             return `
-                <div class="community-race-row${isYou ? ' community-race-you' : ''}">
-                    ${rankHtml}
-                    <div class="community-race-dot" style="background:${color};">${getRaceTeamInitial(team.name)}</div>
-                    <div class="community-race-info">
-                        <div class="community-race-name-row">
-                            <span class="community-race-name">${team.name}${isYou ? ' <span class="race-you-tag">You</span>' : ''}</span>
-                            <span class="community-race-pct">${team.overallPct}%</span>
-                        </div>
-                        <div class="race-bar-track"><div class="race-bar-fill" style="width:${team.overallPct}%;background:${color};"></div></div>
-                        <div class="community-race-sub">Level ${team.level}${team.readyForQuiz ? ' <span class="community-race-ready-tag">🎤 ready for quiz</span>' : ''}</div>
-                    </div>
+                <div class="race-family-line ${fullyDone ? 'race-family-line-done' : ''}">
+                    <span class="race-family-letter">${fs.family}</span>
+                    <span class="race-family-detail">${parts.join(' · ')}</span>
                 </div>`;
         }).join('');
 
-        // Recent wins — last few teams to advance a level, most recent first.
-        const recentWins = standings
-            .filter(t => t.last_advanced_at)
-            .sort((a, b) => new Date(b.last_advanced_at) - new Date(a.last_advanced_at))
-            .slice(0, 3);
+        // Only your own team (or a teacher/admin) can drill into
+        // individual students — everyone else stops at the aggregate
+        // family lines above. See canExpandRaceTeam.
+        const expandable = canExpandRaceTeam(team.id);
+        const headerAttrs = expandable
+            ? `class="race-row-header race-row-expandable" onclick="toggleRaceTeamDetail('${mountId}', '${team.id}', '${rowId}')"`
+            : `class="race-row-header"`;
 
-        const winsHtml = recentWins.length > 0
-            ? `<div class="community-race-wins">${recentWins.map(t => `
-                <div class="community-race-win-row">
-                    🎉 <strong>${t.name}</strong> advanced to Level ${t.level}
-                    <span class="community-race-win-time">${typeof formatTimeAgo === 'function' ? formatTimeAgo(t.last_advanced_at) : ''}</span>
-                </div>`).join('')}</div>`
-            : '';
+        row.innerHTML = `
+            <div ${headerAttrs}>
+                ${medalHtml}
+                <div class="race-team-dot" style="background:${color};">
+                    ${getTeamInitial(team.name)}
+                </div>
+                <div class="race-team-info">
+                    <div class="race-team-name-row">
+                        <div class="race-team-name-text">
+                            ${team.name}
+                            ${isYou ? '<span class="race-you-tag">You</span>' : ''}
+                        </div>
+                        <div class="race-team-count">${team.overallPct}%</div>
+                    </div>
+                    <div class="race-bar-track">
+                        <div class="race-bar-fill" style="width:${team.overallPct}%;background:${color};"></div>
+                    </div>
+                    <div class="race-team-sub">Level ${team.level} · ${team.memberCount} active student${team.memberCount === 1 ? '' : 's'}${team.readyForQuiz ? ' · 🎤 ready for live quiz' : ''}</div>
+                </div>
+                ${expandable ? '<div class="race-expand-arrow">▾</div>' : ''}
+            </div>
+            <div class="race-family-lines">${familyLinesHtml}</div>
+            ${expandable ? `<div class="race-team-detail" id="${rowId}" style="display:none;"></div>` : ''}
+        `;
 
-        mount.innerHTML = `<div class="community-race-standings">${rowsHtml}</div>${winsHtml}`;
+        standings_div.appendChild(row);
+    });
 
-    } catch (e) {
-        console.error('Community race render error:', e);
-        mount.innerHTML = `<p style="color:#94a3b8;font-size:13px;">Couldn't load team standings.</p>`;
-    }
+    mount.appendChild(standings_div);
+}
+
+// ---------------------------------------------------------------------------
+// Community's lighter version — same standings data, but Community is a
+// celebration feed, not a work dashboard, so this deliberately drops the
+// per-family breakdown and tap-to-expand student detail (that stays on the
+// Challenge dashboard / team hub, via mode:'challenge'). Just rank, level,
+// a simple bar, and a couple of recent team-level-up "wins" for buzz.
+// ---------------------------------------------------------------------------
+
+function renderCompactRaceStandings(mount, standings) {
+    const medals = ['🥇', '🥈', '🥉'];
+
+    const rowsHtml = standings.map((team, idx) => {
+        const isYou = team.id === currentProfile?.team_id;
+        const color = getRaceTeamColor(team.name);
+        const rankHtml = idx < 3
+            ? `<div class="community-race-medal">${medals[idx]}</div>`
+            : `<div class="community-race-medal community-race-num">${idx + 1}</div>`;
+
+        return `
+            <div class="community-race-row${isYou ? ' community-race-you' : ''}">
+                ${rankHtml}
+                <div class="community-race-dot" style="background:${color};">${getRaceTeamInitial(team.name)}</div>
+                <div class="community-race-info">
+                    <div class="community-race-name-row">
+                        <span class="community-race-name">${team.name}${isYou ? ' <span class="race-you-tag">You</span>' : ''}</span>
+                        <span class="community-race-pct">${team.overallPct}%</span>
+                    </div>
+                    <div class="race-bar-track"><div class="race-bar-fill" style="width:${team.overallPct}%;background:${color};"></div></div>
+                    <div class="community-race-sub">Level ${team.level}${team.readyForQuiz ? ' <span class="community-race-ready-tag">🎤 ready for quiz</span>' : ''}</div>
+                </div>
+            </div>`;
+    }).join('');
+
+    // Recent wins — last few teams to advance a level, most recent first.
+    const recentWins = standings
+        .filter(t => t.last_advanced_at)
+        .sort((a, b) => new Date(b.last_advanced_at) - new Date(a.last_advanced_at))
+        .slice(0, 3);
+
+    const winsHtml = recentWins.length > 0
+        ? `<div class="community-race-wins">${recentWins.map(t => `
+            <div class="community-race-win-row">
+                🎉 <strong>${t.name}</strong> advanced to Level ${t.level}
+                <span class="community-race-win-time">${typeof formatTimeAgo === 'function' ? formatTimeAgo(t.last_advanced_at) : ''}</span>
+            </div>`).join('')}</div>`
+        : '';
+
+    mount.innerHTML = `<div class="community-race-standings">${rowsHtml}</div>${winsHtml}`;
 }
 
 // Cache keyed by mountId so a tap-to-expand on one instance (e.g. the
@@ -372,7 +375,7 @@ async function toggleRaceTeamDetail(mountId, teamId, rowId) {
         return `
             <div class="race-student-row">
                 <span class="race-student-avatar">${m.avatar || '🦁'}</span>
-                <span class="race-student-name">${m.nickname}${m.is_captain ? ' 👑' : ''}</span>
+                <span class="race-student-name">${m.nickname}</span>
                 <span class="race-student-line">${line}</span>
             </div>`;
     }).join('');
@@ -770,7 +773,8 @@ async function rejectTeacherLevelCompletion(requestId, mountId) {
 // ---------------------------------------------------------------------------
 
 window.renderTeamRaceView = renderTeamRaceView;
-window.renderCommunityTeamLeaderboard = renderCommunityTeamLeaderboard;
+// Back-compat alias in case any other code still calls the old name directly.
+window.renderCommunityTeamLeaderboard = (mountId) => renderTeamRaceView(mountId, { mode: 'compact' });
 window.toggleRaceTeamDetail = toggleRaceTeamDetail;
 window.renderLevelCompletionBanner = renderLevelCompletionBanner;
 window.submitLevelCompletion = submitLevelCompletion;
