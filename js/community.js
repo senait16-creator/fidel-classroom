@@ -304,7 +304,7 @@ async function renderRecentAchievements(mountId) {
     const sinceIso = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     const events = [];
 
-    const [chapters, streaks, teamsAdvanced, approvals, newStudents] = await Promise.all([
+    const [chapters, streaks, teamsAdvanced, approvals] = await Promise.all([
         _supabase.from('reading_chapter_progress')
             .select('student_id, level_number, completed_at, profiles!reading_chapter_progress_student_id_fkey(nickname)')
             .eq('checkpoint_passed', true)
@@ -327,12 +327,6 @@ async function renderRecentAchievements(mountId) {
             .eq('status', 'approved')
             .gte('reviewed_at', sinceIso)
             .order('reviewed_at', { ascending: false })
-            .limit(10),
-        _supabase.from('profiles')
-            .select('nickname, is_admin, created_at')
-            .eq('is_admin', false)
-            .gte('created_at', sinceIso)
-            .order('created_at', { ascending: false })
             .limit(10)
     ]);
 
@@ -351,10 +345,6 @@ async function renderRecentAchievements(mountId) {
     (approvals.data || []).forEach(row => events.push({
         icon: '✓', time: row.reviewed_at,
         text: `${row.profiles?.nickname || 'A student'}'s writing was approved`
-    }));
-    (newStudents.data || []).forEach(row => events.push({
-        icon: '👋', time: row.created_at,
-        text: `Welcome our newest student, ${row.nickname || 'friend'}!`
     }));
 
     events.sort((a, b) => new Date(b.time) - new Date(a.time));
