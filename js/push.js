@@ -52,6 +52,11 @@ function getPushPermissionState() {
 async function enablePushNotifications() {
     const state = getPushPermissionState();
 
+    // TEMPORARY DEBUG BUILD — alert() at every step so failures are
+    // impossible to miss on a phone with no console attached. Remove once
+    // the real subscribe issue is found.
+    alert('DEBUG 1: permission state = ' + state);
+
     if (state === 'unsupported') {
         return showNotificationToast("Push notifications aren't supported on this browser.");
     }
@@ -64,17 +69,23 @@ async function enablePushNotifications() {
 
     try {
         const permission = await Notification.requestPermission();
+        alert('DEBUG 2: requestPermission result = ' + permission);
         if (permission !== 'granted') {
             return showNotificationToast('Notifications not enabled.');
         }
 
         const registration = await navigator.serviceWorker.ready;
+        alert('DEBUG 3: service worker ready, scope = ' + registration.scope);
+
         const subscription = await registration.pushManager.subscribe({
             userVisibleOnly: true,
             applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
         });
+        alert('DEBUG 4: subscribed, endpoint = ' + subscription.endpoint.slice(0, 60) + '...');
 
         const json = subscription.toJSON();
+        alert('DEBUG 5: currentUser.id = ' + (currentUser && currentUser.id));
+
         const { error } = await _supabase.from('push_subscriptions').upsert({
             student_id: currentUser.id,
             endpoint: json.endpoint,
@@ -83,13 +94,16 @@ async function enablePushNotifications() {
         }, { onConflict: 'endpoint' });
 
         if (error) {
+            alert('DEBUG 6 ERROR: upsert failed — ' + error.message);
             console.error('Failed to save push subscription:', error);
             return showNotificationToast("Couldn't save notification settings: " + error.message);
         }
 
+        alert('DEBUG 6: upsert succeeded!');
         showGobezToast('Notifications enabled! 🔔');
         updatePushMenuButton();
     } catch (err) {
+        alert('DEBUG CATCH: ' + (err && err.message) + '\n\n' + (err && err.stack));
         console.error('Push subscribe failed:', err);
         showNotificationToast("Couldn't enable notifications: " + err.message);
     }
