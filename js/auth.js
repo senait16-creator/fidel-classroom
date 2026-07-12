@@ -510,6 +510,22 @@ _supabase.auth.onAuthStateChange(async (event, session) => {
         document.getElementById("newPasswordScreen").style.display = "block";
         return;
     }
+    // Fires once automatically right after the page loads, with whatever
+    // session Supabase found already persisted (or null). This is what lets
+    // a returning student land straight on mode-select instead of having to
+    // sign in every visit — logout (hamburger menu) is how they switch
+    // accounts on a shared device.
+    if (event === 'INITIAL_SESSION') {
+        // Don't hijack a password-reset email link — that flow shows its
+        // own screen via the PASSWORD_RECOVERY event / app.js's hash check.
+        if (window.location.hash.includes('type=recovery')) return;
+        if (session?.user) {
+            await proceedFlowMap(session.user);
+        } else {
+            resetToGate();
+        }
+        return;
+    }
     if (event === 'SIGNED_IN' && session?.user) {
         const authScreen = document.getElementById("authScreen");
         if (authScreen && authScreen.style.display !== "none") {
