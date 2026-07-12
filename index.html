@@ -1172,6 +1172,10 @@
             <span style="font-size:22px; width:32px; text-align:center;">📱</span>
             <div><div>Add to Home Screen</div><div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">Install Fidel Classroom on your phone</div></div>
         </button>
+        <button id="pushNotifRow" onclick="togglePushNotifications()" style="display:none; width:100%; background:none; border:none; padding:16px 20px; align-items:center; gap:14px; cursor:pointer; font-size:15px; font-weight:600; color:#1e293b; text-align:left; transition:background 0.15s; border-bottom:1px solid #f1f5f9;">
+            <span style="font-size:22px; width:32px; text-align:center;">🔔</span>
+            <div><div id="pushNotifLabel">Enable Notifications</div><div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">Get pinged when your writing is approved or your team levels up</div></div>
+        </button>
         <a href="mailto:senaitrichmond16@gmail.com?subject=Fidel Classroom Question"
            style="display:flex; align-items:center; gap:14px; padding:16px 20px; text-decoration:none; color:#1e293b; font-size:15px; font-weight:600; border-bottom:1px solid #f1f5f9;">
             <span style="font-size:22px; width:32px; text-align:center;">✉️</span>
@@ -1430,10 +1434,10 @@
 <script src="js/utils/compress.js?v=9" defer></script>
 <script src="js/game.js?v=9" defer></script>
 <script src="js/submissions.js?v=13" defer></script>
-<script src="js/teacher.js?v=16" defer></script>
+<script src="js/teacher.js?v=17" defer></script>
 <script src="js/reading.js?v=20" defer></script>
     <script src="js/letterboard.js?v=10" defer></script>
-<script src="js/team/progress.js?v=14" defer></script>
+<script src="js/team/progress.js?v=15" defer></script>
 <script src="js/team/levels.js?v=11" defer></script>
 <script src="js/team/map.js?v=9" defer></script>
 <script src="js/team/hub.js?v=15" defer></script>
@@ -1445,7 +1449,8 @@
 <script src="js/wordle.js?v=9" defer></script>
 <script src="intro.js?v=1" defer></script>
 <script src="js/challenge.js?v=17" defer></script>
-<script src="js/menu.js?v=10" defer></script>
+<script src="js/menu.js?v=11" defer></script>
+<script src="js/push.js?v=1" defer></script>
 
 <script>
     if ('serviceWorker' in navigator) {
