@@ -12,6 +12,7 @@
 function openHamburgerMenu() {
     document.getElementById('hamburgerMenuOverlay').style.display = 'block';
     document.getElementById('hamburgerMenuPanel').style.transform = 'translateX(0)';
+    if (typeof updatePushMenuButton === 'function') updatePushMenuButton();
 }
 
 function closeHamburgerMenu() {
