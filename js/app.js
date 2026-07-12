@@ -143,9 +143,10 @@ window.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // Start fresh — clear any stale token from localStorage
-    await _supabase.auth.signOut();
-    resetToGate();
+    // Session restore (if any) happens via the INITIAL_SESSION handler in
+    // auth.js's onAuthStateChange — it lands a returning, already-logged-in
+    // user straight on mode-select, or shows the login gate if there's no
+    // session. Nothing to do here.
 });
 
 // ---------------------------------------------------------------------------
