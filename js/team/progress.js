@@ -626,6 +626,14 @@ async function submitLevelCompletion(levelNumber) {
 
     showGobezToast("Submitted! Your teacher will review your Level completion. 🌟");
     await renderLevelCompletionBanner('levelCompletionMount');
+
+    if (typeof sendPushNotification === 'function') {
+        sendPushNotification({
+            type: 'individual_test_ready',
+            student_id: currentUser.id,
+            level: levelNumber
+        });
+    }
 }
 
 // ---------------------------------------------------------------------------
