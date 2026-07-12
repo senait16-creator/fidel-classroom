@@ -651,6 +651,9 @@ async function checkAndUpdateTeamLevelCompletion(studentId) {
         if (advanced) {
             await loadTeacherTeamProgress();
             if (typeof loadTeacherClassroomOverview === 'function') await loadTeacherClassroomOverview();
+            if (typeof sendPushNotification === 'function') {
+                sendPushNotification({ type: 'team_advanced', team_id: student.team_id });
+            }
         }
     } catch (err) {
         console.error('[checkAndUpdateTeamLevelCompletion] THREW AN EXCEPTION:', err);
