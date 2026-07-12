@@ -47,3 +47,43 @@ self.addEventListener('fetch', (event) => {
             .catch(() => caches.match(req))
     );
 });
+
+// ---------------------------------------------------------------------------
+// Push notifications — the send-push Edge Function posts a JSON payload
+// ({ title, body, url }); this just displays it. Actual sending (looking up
+// subscriptions, calling the Web Push service) happens server-side — the
+// service worker's only job is to react to the push event once it arrives.
+// ---------------------------------------------------------------------------
+
+self.addEventListener('push', (event) => {
+    let payload = { title: 'Fidel Classroom', body: 'You have a new update.', url: '/' };
+    if (event.data) {
+        try { payload = { ...payload, ...event.data.json() }; } catch (e) { /* keep default */ }
+    }
+
+    event.waitUntil(
+        self.registration.showNotification(payload.title, {
+            body: payload.body,
+            icon: 'IMG_2514.png',
+            badge: 'IMG_2514.png',
+            data: { url: payload.url || '/' }
+        })
+    );
+});
+
+// Tapping the notification focuses an already-open tab if one exists,
+// otherwise opens a new one — either way landing on the app's start URL
+// (the notification's own url field, or '/' as a fallback).
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    const targetUrl = event.notification.data?.url || '/';
+
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+            for (const client of windowClients) {
+                if ('focus' in client) return client.focus();
+            }
+            if (clients.openWindow) return clients.openWindow(targetUrl);
+        })
+    );
+});
