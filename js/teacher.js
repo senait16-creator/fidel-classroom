@@ -265,11 +265,24 @@ async function teacherResetStudentLevel(studentId, nickname) {
 
     showNotificationToast(`Resetting Level ${levelNumber} for ${nickname}...`);
 
+    // writing_submissions has no level_number column — resolve this level's
+    // letters from challenge_levels and filter by base_letter instead, same
+    // approach used everywhere else in the app that needs to scope
+    // writing_submissions to a level.
+    const { data: levelRow } = await _supabase
+        .from('challenge_levels')
+        .select('letter_families')
+        .eq('level_number', levelNumber)
+        .maybeSingle();
+    const lettersForLevel = levelRow?.letter_families || [];
+
     const [{ error: progressError }, { error: subError }, { error: reqError }] = await Promise.all([
         _supabase.from('student_family_progress').delete()
             .eq('student_id', studentId).eq('level_number', levelNumber),
-        _supabase.from('writing_submissions').delete()
-            .eq('student_id', studentId).eq('level_number', levelNumber),
+        lettersForLevel.length > 0
+            ? _supabase.from('writing_submissions').delete()
+                .eq('student_id', studentId).in('base_letter', lettersForLevel)
+            : Promise.resolve({ error: null }),
         _supabase.from('level_completion_requests').delete()
             .eq('student_id', studentId).eq('level_number', levelNumber)
     ]);
