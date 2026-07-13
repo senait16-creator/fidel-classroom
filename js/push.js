@@ -126,18 +126,35 @@ async function togglePushNotifications() {
     }
 }
 
-// Keeps the hamburger menu's notification row in sync with actual
-// permission/subscription state — call after opening the menu and after
-// any enable/disable action.
+// Keeps the hamburger menu's notification row AND the mode-select shortcut
+// button in sync with actual permission/subscription state — call after
+// opening the menu, on boot, and after any enable/disable action.
 async function updatePushMenuButton() {
     const row = document.getElementById('pushNotifRow');
     const label = document.getElementById('pushNotifLabel');
+    const jumpBtn = document.getElementById('modeNotifBtn');
+
+    const state = getPushPermissionState();
+
+    // The mode-select button mirrors modeInstallBtn's behavior: prominent
+    // until the student's enabled notifications, then it disappears. It
+    // only shows once push is actually usable — needs-install is already
+    // covered by the "Add to Home Screen" button right next to it.
+    if (jumpBtn) {
+        if (state === 'unsupported' || state === 'needs-install') {
+            jumpBtn.style.display = 'none';
+        } else {
+            const registration = await navigator.serviceWorker.getRegistration();
+            const subscription = registration ? await registration.pushManager.getSubscription() : null;
+            jumpBtn.style.display = subscription ? 'none' : '';
+        }
+    }
+
     if (!row || !label) return;
 
     if (!isPushSupported()) { row.style.display = 'none'; return; }
     row.style.display = 'flex';
 
-    const state = getPushPermissionState();
     if (state === 'needs-install') {
         label.innerText = '🔔 Add to Home Screen to enable';
         return;
