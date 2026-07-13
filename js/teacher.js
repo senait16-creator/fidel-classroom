@@ -592,6 +592,10 @@ async function approveWritingSubmission(submissionId, studentId, baseLetter) {
     await loadTeacherWritingQueue();
     await checkAndUpdateTeamLevelCompletion(studentId);
     if (typeof loadTeacherClassroomOverview === 'function') await loadTeacherClassroomOverview();
+
+    if (typeof sendPushNotification === 'function') {
+        sendPushNotification({ type: 'writing_approved', student_id: studentId, base_letter: baseLetter });
+    }
 }
 
 async function rejectWritingSubmission(submissionId, note) {
