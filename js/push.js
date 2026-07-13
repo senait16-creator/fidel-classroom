@@ -111,8 +111,8 @@ async function enablePushNotifications() {
 
 async function disablePushNotifications() {
     try {
-        const registration = await navigator.serviceWorker.ready;
-        const subscription = await registration.pushManager.getSubscription();
+        const registration = await navigator.serviceWorker.getRegistration();
+        const subscription = registration ? await registration.pushManager.getSubscription() : null;
         if (subscription) {
             await _supabase.from('push_subscriptions').delete().eq('endpoint', subscription.endpoint);
             await subscription.unsubscribe();
@@ -126,7 +126,10 @@ async function disablePushNotifications() {
 }
 
 async function togglePushNotifications() {
-    const registration = await navigator.serviceWorker.ready.catch(() => null);
+    // getRegistration() (not .ready) — .ready never resolves at all if no
+    // service worker has ever successfully registered, hanging this
+    // function forever before it could reach enablePushNotifications().
+    const registration = await navigator.serviceWorker.getRegistration();
     const existing = registration ? await registration.pushManager.getSubscription() : null;
     if (existing) {
         await disablePushNotifications();
@@ -156,7 +159,7 @@ async function updatePushMenuButton() {
         return;
     }
 
-    const registration = await navigator.serviceWorker.ready.catch(() => null);
+    const registration = await navigator.serviceWorker.getRegistration();
     const subscription = registration ? await registration.pushManager.getSubscription() : null;
     label.innerText = subscription ? '🔕 Turn Off Notifications' : '🔔 Enable Notifications';
 }
