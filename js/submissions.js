@@ -443,6 +443,14 @@ async function finalizeWritingSubmission(imageUrl) {
 
     showNotificationToast("Submitted! Your captain will review it soon. 🎉");
     closeWritingSubmitScreen();
+
+    if (typeof sendPushNotification === 'function' && currentProfile?.team_id) {
+        sendPushNotification({
+            type: 'writing_submitted',
+            team_id: currentProfile.team_id,
+            base_letter: writingSubmitContext.baseLetter
+        });
+    }
 }
 
 // ---------------------------------------------------------------------------
