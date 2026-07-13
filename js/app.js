@@ -133,6 +133,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('setCaptainBtn')?.addEventListener('click', setTeamCaptain);
 
     syncInstallPromptVisibility();
+    if (typeof updatePushMenuButton === 'function') updatePushMenuButton();
 
     // Supabase redirects back with type=recovery after the user clicks a
     // password reset link — skip sign-out and show the new-password screen.
