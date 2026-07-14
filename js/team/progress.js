@@ -80,14 +80,14 @@ async function computeTeamRaceStandings() {
     if (!rows || rows.length === 0) return [];
 
     const teamIds = [...new Set(rows.map(r => r.team_id))];
-    const { data: statusRows } = await _supabase
-        .from('team_level_status')
-        .select('team_id, level_number, all_members_cleared, live_quiz_passed')
-        .in('team_id', teamIds);
+    const currentLevelByTeam = {};
+    rows.forEach(r => { currentLevelByTeam[r.team_id] = r.current_level; });
+    const advanceProgress = await fetchTeamAdvanceProgress(teamIds, currentLevelByTeam);
 
     const byTeam = {};
     rows.forEach(r => {
         if (!byTeam[r.team_id]) {
+            const progress = advanceProgress[r.team_id] || { approved: 0, required: 0 };
             byTeam[r.team_id] = {
                 id: r.team_id,
                 name: r.team_name,
@@ -97,10 +97,8 @@ async function computeTeamRaceStandings() {
                 overallPct: Math.round(r.team_percent || 0),
                 families: [],
                 familySummaries: [],
-                readyForQuiz: (statusRows || []).some(s =>
-                    s.team_id === r.team_id && s.level_number === r.current_level &&
-                    s.all_members_cleared && !s.live_quiz_passed
-                )
+                advanceApproved: progress.approved,
+                advanceRequired: progress.required
             };
         }
         byTeam[r.team_id].families.push(r.base_letter);
@@ -155,6 +153,41 @@ async function saveStreakProgress(baseLetter, levelNumber, bestStreak, passed) {
         level_number: levelNumber, best_streak: finalBestStreak, streak_passed: finalPassed
     }, { onConflict: 'student_id,base_letter' });
     if (error) console.error("Failed to save streak progress:", error);
+}
+
+// How close each team is to auto-advancing — the real "ready" signal in
+// the individual-live-test flow (see advance_team_level_if_ready). Teams
+// never sit in a "ready but not yet advanced" limbo state anymore, since
+// advancement is automatic the instant the last required member's test is
+// approved — so this reports a live progress fraction (e.g. 3/5 approved)
+// rather than a boolean. Replaces the old team_level_status.live_quiz_passed
+// signal, which nothing has written to since that redesign and which would
+// therefore always read as "not ready" no matter a team's real state.
+// Batched across all requested teams — safe to call with many team ids
+// at once instead of querying per team.
+async function fetchTeamAdvanceProgress(teamIds, currentLevelByTeam) {
+    if (!teamIds || teamIds.length === 0) return {};
+
+    const [{ data: members }, { data: approvals }] = await Promise.all([
+        _supabase.from('profiles').select('id, team_id').in('team_id', teamIds).eq('is_captain', false),
+        _supabase.from('level_completion_requests').select('team_id, level_number').in('team_id', teamIds).eq('status', 'approved')
+    ]);
+
+    const requiredByTeam = {};
+    (members || []).forEach(m => { requiredByTeam[m.team_id] = (requiredByTeam[m.team_id] || 0) + 1; });
+
+    const approvedByTeam = {};
+    (approvals || []).forEach(a => {
+        if (a.level_number === currentLevelByTeam[a.team_id]) {
+            approvedByTeam[a.team_id] = (approvedByTeam[a.team_id] || 0) + 1;
+        }
+    });
+
+    const result = {};
+    teamIds.forEach(id => {
+        result[id] = { approved: approvedByTeam[id] || 0, required: requiredByTeam[id] || 0 };
+    });
+    return result;
 }
 
 // Credits an approved writing submission onto student_family_progress —
@@ -333,7 +366,7 @@ function renderDetailedRaceStandings(mount, mountId, standings) {
                     <div class="race-bar-track">
                         <div class="race-bar-fill" style="width:${team.overallPct}%;background:${color};"></div>
                     </div>
-                    <div class="race-team-sub">Level ${team.level} · ${team.memberCount} active student${team.memberCount === 1 ? '' : 's'}${team.readyForQuiz ? ' · 🎤 ready for live quiz' : ''}</div>
+                    <div class="race-team-sub">Level ${team.level} · ${team.memberCount} active student${team.memberCount === 1 ? '' : 's'}${team.advanceApproved > 0 && team.advanceApproved < team.advanceRequired ? ` · 🎤 ${team.advanceApproved}/${team.advanceRequired} live tests approved` : ''}</div>
                 </div>
                 ${expandable ? '<div class="race-expand-arrow">▾</div>' : ''}
             </div>
@@ -375,7 +408,7 @@ function renderCompactRaceStandings(mount, standings) {
                         <span class="community-race-pct">${team.overallPct}%</span>
                     </div>
                     <div class="race-bar-track"><div class="race-bar-fill" style="width:${team.overallPct}%;background:${color};"></div></div>
-                    <div class="community-race-sub">Level ${team.level}${team.readyForQuiz ? ' <span class="community-race-ready-tag">🎤 ready for quiz</span>' : ''}</div>
+                    <div class="community-race-sub">Level ${team.level}${team.advanceApproved > 0 && team.advanceApproved < team.advanceRequired ? ` <span class="community-race-ready-tag">🎤 ${team.advanceApproved}/${team.advanceRequired} live tests approved</span>` : ''}</div>
                 </div>
             </div>`;
     }).join('');
@@ -864,6 +897,7 @@ async function rejectTeacherLevelCompletion(requestId, mountId) {
 // ---------------------------------------------------------------------------
 
 window.saveStreakProgress = saveStreakProgress;
+window.fetchTeamAdvanceProgress = fetchTeamAdvanceProgress;
 window.creditApprovedWritingToProgress = creditApprovedWritingToProgress;
 window.renderTeamRaceView = renderTeamRaceView;
 // Back-compat alias in case any other code still calls the old name directly.
