@@ -5651,6 +5651,12 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     margin-bottom: 4px;
 }
 
+.team-meeting-sub {
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 8px;
+}
+
 .team-meeting-value {
     font-size: 18px;
     font-weight: 900;
