@@ -5665,34 +5665,6 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     margin-bottom: 10px;
 }
 
-.team-meeting-edit-btn {
-    background: #fff7ed;
-    color: #b45309;
-    border: 1px solid #fed7aa;
-    border-radius: 999px;
-    padding: 6px 16px;
-    font-size: 12px;
-    font-weight: 800;
-    cursor: pointer;
-}
-
-.team-meeting-edit-form {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.team-meeting-edit-form select,
-.team-meeting-edit-form input {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    font-size: 13px;
-    color: #1e293b;
-    font-family: 'Inter', sans-serif;
-}
-
 .intro-mascot-screen {
     position: fixed;
     inset: 0;
