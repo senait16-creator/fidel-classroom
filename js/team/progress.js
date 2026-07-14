@@ -633,6 +633,11 @@ async function submitLevelCompletion(levelNumber) {
             student_id: currentUser.id,
             level: levelNumber
         });
+        sendPushNotification({
+            type: 'level_request_submitted',
+            student_id: currentUser.id,
+            level: levelNumber
+        });
     }
 }
 
@@ -664,6 +669,14 @@ async function flagNeedHelp(baseLetter, levelNumber) {
     }
 
     showNotificationToast(`Help request sent to your captain for "${baseLetter}" 🙋`);
+
+    if (typeof sendPushNotification === 'function') {
+        sendPushNotification({
+            type: 'help_requested',
+            team_id: currentProfile.team_id,
+            base_letter: baseLetter
+        });
+    }
 }
 
 async function loadHelpFlags(mountId) {
