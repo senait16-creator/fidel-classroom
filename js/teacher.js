@@ -684,41 +684,77 @@ async function recheckTeamReadiness(teamId) {
     if (typeof loadTeacherClassroomOverview === 'function') await loadTeacherClassroomOverview();
 }
 
-// Teachers can set/edit any team's meeting time too, not just captains —
-// same team_meetings table, needs the matching RLS policy for is_admin.
+// Team Lesson Schedule is teacher-owned — captains/students only see it,
+// they can't edit it (see lesson_schedule_setup.sql for the RLS change).
+// Uses a real day-select + time-picker overlay (teacherLessonTimeOverlay
+// in index.html) instead of prompt(), since lesson_time now needs to be a
+// structured value the scheduled reminder Edge Function can compare
+// against, not free text a teacher could type any which way.
+let _teacherLessonTimeContext = null;
+
+function formatLessonTimeDisplay(hhmm) {
+    // "19:00" -> "7:00 PM CT"
+    const [hStr, mStr] = hhmm.split(':');
+    let h = parseInt(hStr, 10);
+    const suffix = h >= 12 ? 'PM' : 'AM';
+    h = h % 12;
+    if (h === 0) h = 12;
+    return `${h}:${mStr} ${suffix} CT`;
+}
+
 async function teacherEditTeamMeeting(teamId, teamName) {
     const { data: existing } = await _supabase
         .from('team_meetings')
-        .select('day_of_week, meeting_time')
+        .select('day_of_week, lesson_time')
         .eq('team_id', teamId)
         .maybeSingle();
 
-    const currentDay = existing?.day_of_week || 'Monday';
-    const currentTime = existing?.meeting_time || '7:00 PM';
+    _teacherLessonTimeContext = { teamId, teamName };
 
-    const day = prompt(`Lesson meeting day for ${teamName}? (e.g. Monday, Tuesday...)`, currentDay);
-    if (day === null) return;
-    const time = prompt(`Lesson meeting time for ${teamName}? (e.g. 7:00 PM)`, currentTime);
-    if (time === null) return;
+    document.getElementById('teacherLessonTimeTeamName').innerText = teamName;
+    document.getElementById('teacherLessonDaySelect').value = existing?.day_of_week || 'Monday';
+    document.getElementById('teacherLessonTimeInput').value = existing?.lesson_time
+        ? existing.lesson_time.slice(0, 5)
+        : '19:00';
+
+    document.getElementById('teacherLessonTimeOverlay').style.display = 'flex';
+}
+
+function closeTeacherLessonTimeOverlay() {
+    document.getElementById('teacherLessonTimeOverlay').style.display = 'none';
+    _teacherLessonTimeContext = null;
+}
+
+async function saveTeacherLessonTime() {
+    if (!_teacherLessonTimeContext) return;
+    const { teamId, teamName } = _teacherLessonTimeContext;
+
+    const day = document.getElementById('teacherLessonDaySelect').value;
+    const hhmm = document.getElementById('teacherLessonTimeInput').value;
+    if (!hhmm) return showNotificationToast('Pick a lesson time first.');
+
+    const displayTime = formatLessonTimeDisplay(hhmm);
 
     const { error } = await _supabase.from('team_meetings').upsert({
         team_id: teamId,
-        day_of_week: day.trim() || currentDay,
-        meeting_time: time.trim() || currentTime,
+        day_of_week: day,
+        lesson_time: hhmm + ':00',
+        meeting_time: displayTime,
         updated_at: new Date().toISOString(),
         updated_by: currentUser.id
     }, { onConflict: 'team_id' });
 
     if (error) return showNotificationToast("Couldn't save: " + error.message);
 
-    showNotificationToast(`Meeting updated for ${teamName} ✓`);
+    closeTeacherLessonTimeOverlay();
+    showNotificationToast(`Lesson schedule updated for ${teamName} ✓`);
 
     if (typeof sendPushNotification === 'function') {
         sendPushNotification({
             type: 'meeting_updated',
             team_id: teamId,
-            day_of_week: day.trim() || currentDay,
-            meeting_time: time.trim() || currentTime
+            day_of_week: day,
+            meeting_time: displayTime
         });
     }
 }
@@ -748,7 +784,7 @@ async function loadTeacherTeamProgress() {
                     <span>Level ${team.current_level} • Streak: ${team.streak_count || 0}</span>
                 </div>
                 <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
-                    <button class="btn-secondary btn-edit-meeting" style="font-size:11px; padding:6px 10px;" title="Edit this team's meeting day/time">📅 Meeting</button>
+                    <button class="btn-secondary btn-edit-meeting" style="font-size:11px; padding:6px 10px;" title="Edit this team's lesson day/time">📅 Lesson Schedule</button>
                     <button class="btn-secondary btn-recheck" style="font-size:11px; padding:6px 10px;" title="Recalculate this team's advancement status — safe to run any time, only advances a team that's actually ready">🔄 Recalculate</button>
                     <button class="team-members-toggle" aria-label="Show team members">▼</button>
                 </div>
@@ -1043,6 +1079,8 @@ window.toggleRosterActions = toggleRosterActions;
 window.teacherResetStudentLevel = teacherResetStudentLevel;
 window.teacherForgetStudent = teacherForgetStudent;
 window.teacherEditTeamMeeting = teacherEditTeamMeeting;
+window.closeTeacherLessonTimeOverlay = closeTeacherLessonTimeOverlay;
+window.saveTeacherLessonTime = saveTeacherLessonTime;
 window.teacherAssignStudentToPod = teacherAssignStudentToPod;
 window.toggleTeacherPanel = toggleTeacherPanel;
 window.jumpToTeacherPanel = jumpToTeacherPanel;
