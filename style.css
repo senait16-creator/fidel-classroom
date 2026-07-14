@@ -515,7 +515,7 @@ header {
 
 .teacher-health-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 10px;
     margin-top: 20px;
     margin-bottom: 16px;
@@ -736,8 +736,119 @@ header {
     margin-left: auto;
     font-size: 11px;
     font-weight: 800;
-    color: #b91c1c;
+    color: #b45309;
     white-space: nowrap;
+}
+
+.teacher-captain-pending.caught-up {
+    color: #166534;
+}
+
+.teacher-captain-row.needs-nudge {
+    background: #fffbeb;
+    border-radius: 10px;
+    padding-left: 8px;
+    padding-right: 8px;
+    margin: 0 -8px 2px;
+}
+
+/* Team Snapshot cards */
+
+.teacher-snapshot-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+}
+
+.snapshot-card {
+    background: #fafaf9;
+    border: 1px solid #f1f5f9;
+    border-radius: 14px;
+    padding: 14px 15px;
+}
+
+.snapshot-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.snapshot-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.snapshot-name {
+    font-size: 13.5px;
+    font-weight: 900;
+    color: #1e293b;
+}
+
+.snapshot-level {
+    margin-left: auto;
+    font-size: 11.5px;
+    color: #64748b;
+    font-variant-numeric: tabular-nums;
+}
+
+.snapshot-track {
+    height: 6px;
+    background: #f1f5e9;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.snapshot-fill {
+    height: 100%;
+    border-radius: 999px;
+}
+
+.snapshot-lesson {
+    font-size: 12px;
+    font-weight: 700;
+    color: #3949ab;
+    margin-bottom: 10px;
+}
+
+.snapshot-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.snapshot-stat-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+}
+
+.snapshot-stat-row .k {
+    color: #64748b;
+}
+
+.snapshot-stat-row .v {
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: #1e293b;
+}
+
+.snapshot-stat-row .v.zero {
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+.snapshot-foot {
+    padding-top: 10px;
+    border-top: 1px solid #e7e0d0;
+    font-size: 11.5px;
+    color: #64748b;
+    font-weight: 700;
 }
 
 .teacher-overview-divider {
