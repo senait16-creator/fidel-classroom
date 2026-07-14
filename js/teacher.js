@@ -1004,6 +1004,18 @@ async function loadTeacherLeaderboard() {
     const meetingByTeam = {};
     (meetings || []).forEach(m => { meetingByTeam[m.team_id] = m; });
 
+    // Ordered like a weekly schedule — earliest day+time first, teams with
+    // no lesson set yet fall to the end instead of scattering alphabetically.
+    const WEEKDAY_ORDER = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const scheduleSortKey = (teamId) => {
+        const meeting = meetingByTeam[teamId];
+        if (!meeting?.lesson_time) return Infinity;
+        const dayIndex = WEEKDAY_ORDER.indexOf(meeting.day_of_week);
+        const [h, m] = meeting.lesson_time.split(':').map(Number);
+        return (dayIndex === -1 ? WEEKDAY_ORDER.length : dayIndex) * 1440 + h * 60 + m;
+    };
+    teams.sort((a, b) => scheduleSortKey(a.id) - scheduleSortKey(b.id));
+
     const teamIdByStudent = {};
     const captainByTeam = {};
     (members || []).forEach(m => {
