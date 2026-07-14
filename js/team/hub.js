@@ -867,8 +867,9 @@ async function shareTeamChallenge(text) {
 }
 
 // ---------------------------------------------------------------------------
-// Weekly Team Meeting — simple day/time the captain sets, shown on the
-// Captain Dashboard. table: team_meetings (team_id primary key).
+// Weekly Lesson Meeting — the day/time the team gets together to go over
+// that week's lesson, set by the captain and shown on the Captain
+// Dashboard. table: team_meetings (team_id primary key).
 // ---------------------------------------------------------------------------
 
 const TEAM_MEETING_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -889,7 +890,8 @@ async function loadWeeklyMeeting() {
 
     mount.innerHTML = `
         <div class="team-meeting-display" id="teamMeetingDisplay">
-            <div class="team-meeting-label">Next Team Meeting</div>
+            <div class="team-meeting-label">Next Lesson Meeting</div>
+            <div class="team-meeting-sub">The day your team gets together to go over the week's lesson</div>
             <div class="team-meeting-value">${day} • ${time}</div>
             <button class="team-meeting-edit-btn" id="teamMeetingEditBtn">Edit</button>
         </div>
@@ -952,7 +954,8 @@ async function loadStudentMeetingDisplay() {
     card.style.display = 'block';
     mount.innerHTML = `
         <div class="team-meeting-display">
-            <div class="team-meeting-label">Next Team Meeting</div>
+            <div class="team-meeting-label">Next Lesson Meeting</div>
+            <div class="team-meeting-sub">The day your team gets together to go over the week's lesson</div>
             <div class="team-meeting-value">${meeting.day_of_week} • ${meeting.meeting_time}</div>
         </div>
     `;
