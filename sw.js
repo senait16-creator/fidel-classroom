@@ -56,7 +56,7 @@ self.addEventListener('fetch', (event) => {
 // ---------------------------------------------------------------------------
 
 self.addEventListener('push', (event) => {
-    let payload = { title: 'Fidel Classroom', body: 'You have a new update.', url: '/' };
+    let payload = { title: 'Fidel Classroom', body: 'You have a new update.', url: '/fidel-classroom/' };
     if (event.data) {
         try { payload = { ...payload, ...event.data.json() }; } catch (e) { /* keep default */ }
     }
@@ -66,17 +66,18 @@ self.addEventListener('push', (event) => {
             body: payload.body,
             icon: 'IMG_2514.png',
             badge: 'IMG_2514.png',
-            data: { url: payload.url || '/' }
+            data: { url: payload.url || '/fidel-classroom/' }
         })
     );
 });
 
 // Tapping the notification focuses an already-open tab if one exists,
 // otherwise opens a new one — either way landing on the app's start URL
-// (the notification's own url field, or '/' as a fallback).
+// (the notification's own url field, or '/fidel-classroom/' as a fallback,
+// since the app is served from a GitHub Pages subpath, not domain root).
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
-    const targetUrl = event.notification.data?.url || '/';
+    const targetUrl = event.notification.data?.url || '/fidel-classroom/';
 
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
