@@ -692,9 +692,9 @@ async function teacherEditTeamMeeting(teamId, teamName) {
     const currentDay = existing?.day_of_week || 'Monday';
     const currentTime = existing?.meeting_time || '7:00 PM';
 
-    const day = prompt(`Meeting day for ${teamName}? (e.g. Monday, Tuesday...)`, currentDay);
+    const day = prompt(`Lesson meeting day for ${teamName}? (e.g. Monday, Tuesday...)`, currentDay);
     if (day === null) return;
-    const time = prompt(`Meeting time for ${teamName}? (e.g. 7:00 PM)`, currentTime);
+    const time = prompt(`Lesson meeting time for ${teamName}? (e.g. 7:00 PM)`, currentTime);
     if (time === null) return;
 
     const { error } = await _supabase.from('team_meetings').upsert({
