@@ -509,7 +509,7 @@ async function loadCaptainWritingQueue() {
                 noteInput.style.display = 'block';
                 rejectBtn.innerText = 'Confirm Reject';
             } else {
-                captainRejectSubmission(sub.id, noteInput.value.trim());
+                captainRejectSubmission(sub.id, noteInput.value.trim(), sub.student_id, sub.base_letter);
             }
         };
 
@@ -623,7 +623,7 @@ async function captainApproveSubmission(submissionId, studentId, baseLetter) {
     }
 }
 
-async function captainRejectSubmission(submissionId, note) {
+async function captainRejectSubmission(submissionId, note, studentId, baseLetter) {
     const { error } = await _supabase
         .from('writing_submissions')
         .update({
@@ -637,6 +637,10 @@ async function captainRejectSubmission(submissionId, note) {
     if (error) return showNotificationToast('Reject failed: ' + error.message);
     showNotificationToast('Rejected — student can resubmit.');
     await loadCaptainWritingQueue();
+
+    if (typeof sendPushNotification === 'function' && studentId && baseLetter) {
+        sendPushNotification({ type: 'writing_rejected', student_id: studentId, base_letter: baseLetter });
+    }
 }
 
 async function loadCaptainTeamProgress() {
@@ -933,6 +937,15 @@ async function saveWeeklyMeeting() {
 
     showNotificationToast("Meeting time updated ✓");
     await loadWeeklyMeeting();
+
+    if (typeof sendPushNotification === 'function') {
+        sendPushNotification({
+            type: 'meeting_updated',
+            team_id: currentProfile.team_id,
+            day_of_week: day,
+            meeting_time: time
+        });
+    }
 }
 
 // Read-only version for the student-facing dashboard — same table, no
