@@ -465,27 +465,26 @@ async function renderStudentTeamProgress() {
         return;
     }
 
-    const { data: statusRows } = await _supabase
-        .from('team_level_status')
-        .select('team_id, level_number, all_members_cleared, live_quiz_passed');
+    const currentLevelByTeam = {};
+    teams.forEach(t => { currentLevelByTeam[t.id] = t.current_level; });
+    const advanceProgress = typeof fetchTeamAdvanceProgress === 'function'
+        ? await fetchTeamAdvanceProgress(teams.map(t => t.id), currentLevelByTeam)
+        : {};
 
     mount.innerHTML = "";
     teams.forEach(team => {
-        const status = (statusRows || []).find(
-            s => s.team_id === team.id && s.level_number === team.current_level
-        );
-        const isReady = status?.all_members_cleared && !status?.live_quiz_passed;
+        const progress = advanceProgress[team.id] || { approved: 0, required: 0 };
         const isOwnTeam = currentProfile?.team_id === team.id;
 
         const row = document.createElement('div');
-        row.className = `student-team-row ${isReady ? 'ready' : ''}`;
+        row.className = 'student-team-row';
         row.innerHTML = `
             <span class="student-team-row-name">
                 ${team.name}${isOwnTeam ? ' (You)' : ''}
             </span>
             <span class="student-team-row-level">
                 Level ${team.current_level} • 🔥${team.streak_count || 0}
-                ${isReady ? ' • Ready! 🎉' : ''}
+                ${progress.approved > 0 && progress.approved < progress.required ? ` • ${progress.approved}/${progress.required} live tests approved 🎤` : ''}
             </span>
         `;
         mount.appendChild(row);
