@@ -898,32 +898,35 @@ function setHealthTile(tileId, value, flagAttention = true) {
 }
 
 async function renderTeacherHealthAndTasks() {
+    // "Today" is judged in the same timezone the lesson reminders use, so
+    // this tile and the actual reminders never disagree about what's
+    // happening today.
+    const todayWeekday = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', weekday: 'long' }).format(new Date());
+
     const [
         { data: pendingSubs },
-        { data: teams },
-        { data: statusRows },
+        { data: levelRequests },
+        { data: helpFlags },
+        { data: lessonsToday },
         { data: allProfiles }
     ] = await Promise.all([
         _supabase.from('writing_submissions').select('id, student_id').eq('status', 'pending'),
-        _supabase.from('teams').select('id, name, current_level'),
-        _supabase.from('team_level_status').select('team_id, level_number, all_members_cleared, live_quiz_passed'),
+        _supabase.from('level_completion_requests').select('id').eq('status', 'pending'),
+        _supabase.from('help_flags').select('id').eq('is_resolved', false),
+        _supabase.from('team_meetings').select('team_id').eq('day_of_week', todayWeekday).not('lesson_time', 'is', null),
         _supabase.from('profiles').select('id, is_admin')
     ]);
 
     const pendingWritingCount = (pendingSubs || []).length;
     const pendingWritingStudents = new Set((pendingSubs || []).map(s => s.student_id)).size;
+    const levelRequestCount = (levelRequests || []).length;
+    const helpFlagCount = (helpFlags || []).length;
+    const lessonsTodayCount = (lessonsToday || []).length;
 
-    // Same "ready" definition as the Team Level Progress panel below.
-    const readyTeams = (teams || []).filter(team => {
-        const status = (statusRows || []).find(s => s.team_id === team.id && s.level_number === team.current_level);
-        return status?.all_members_cleared && !status?.live_quiz_passed;
-    });
-
-    const activeStudentsCount = (allProfiles || []).filter(p => !p.is_admin).length;
-
+    setHealthTile('healthLessonsToday', lessonsTodayCount, false);
     setHealthTile('healthPendingReviews', pendingWritingCount);
-    setHealthTile('healthTeamsReady', readyTeams.length);
-    setHealthTile('healthActiveStudents', activeStudentsCount, false);
+    setHealthTile('healthLiveTestRequests', levelRequestCount);
+    setHealthTile('healthHelpFlags', helpFlagCount);
 
     const tasksMount = document.getElementById('teacherTodaysTasksMount');
     if (!tasksMount) return;
@@ -933,64 +936,124 @@ async function renderTeacherHealthAndTasks() {
             <div class="teacher-task-icon">✍️</div>
             <div>
                 <div class="teacher-task-label">Writing submissions waiting</div>
-                <div class="teacher-task-sub">${pendingWritingStudents > 0 ? `From ${pendingWritingStudents} student${pendingWritingStudents > 1 ? 's' : ''}` : 'All caught up'}</div>
+                <div class="teacher-task-sub">${pendingWritingStudents > 0 ? `From ${pendingWritingStudents} student${pendingWritingStudents > 1 ? 's' : ''}` : 'All writing reviewed'}</div>
             </div>
             ${pendingWritingCount > 0 ? `<span class="teacher-task-count">${pendingWritingCount}</span>` : ''}
             <button class="teacher-task-go" onclick="jumpToTeacherPanel('writingQueuePanelBody')">Review →</button>
         </div>
         <div class="teacher-task-row">
-            <div class="teacher-task-icon">🏁</div>
+            <div class="teacher-task-icon">🎤</div>
             <div>
-                <div class="teacher-task-label">Teams ready for a live quiz</div>
-                <div class="teacher-task-sub">${readyTeams.length > 0 ? readyTeams.map(t => t.name).join(', ') : 'None right now'}</div>
+                <div class="teacher-task-label">Live test requests waiting</div>
+                <div class="teacher-task-sub">${levelRequestCount > 0 ? 'Students who cleared all 3 families' : 'None right now'}</div>
             </div>
-            ${readyTeams.length > 0 ? `<span class="teacher-task-count">${readyTeams.length}</span>` : ''}
-            <button class="teacher-task-go" onclick="jumpToTeacherPanel('teamProgressPanelBody')">View →</button>
+            ${levelRequestCount > 0 ? `<span class="teacher-task-count">${levelRequestCount}</span>` : ''}
+            <button class="teacher-task-go" onclick="jumpToTeacherPanel('levelCompletionPanelBody')">View →</button>
+        </div>
+        <div class="teacher-task-row">
+            <div class="teacher-task-icon">🙋</div>
+            <div>
+                <div class="teacher-task-label">Help flags open</div>
+                <div class="teacher-task-sub">${helpFlagCount > 0 ? 'Students waiting on their captain' : 'No help flags right now'}</div>
+            </div>
+            ${helpFlagCount > 0 ? `<span class="teacher-task-count">${helpFlagCount}</span>` : ''}
+            <button class="teacher-task-go" onclick="jumpToTeacherPanel('rosterPanelBody')">View →</button>
         </div>
     `;
 }
 
-// Read-only glance view, sorted by level — the actual "Mark Quiz Passed &
-// Advance" action stays only in the Team Level Progress panel below, so
-// there's one place that does it, not two.
+// Team Snapshot — one card per team combining level %, lesson schedule,
+// and blockers (pending reviews / help requests / how close to auto-
+// advancing), so a teacher can compare teams in a few seconds instead of
+// opening several panels. Everything here reads tables the panels below
+// already use — this is an aggregating view, not a new source of truth.
 async function loadTeacherLeaderboard() {
     const mount = document.getElementById('teacherLeaderboardMount');
     if (!mount) return;
     mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
 
-    const [{ data: teams }, { data: statusRows }, { data: topLevel }] = await Promise.all([
-        _supabase.from('teams').select('id, name, current_level').order('current_level', { ascending: false }),
-        _supabase.from('team_level_status').select('team_id, level_number, all_members_cleared, live_quiz_passed'),
-        _supabase.from('challenge_levels').select('level_number').order('level_number', { ascending: false }).limit(1)
-    ]);
-
+    const { data: teams } = await _supabase.from('teams').select('id, name, current_level').order('name');
     if (!teams || teams.length === 0) {
         mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No teams yet.</p>`;
         return;
     }
 
-    const totalLevels = topLevel?.[0]?.level_number || 12;
-    const medals = ['🥇', '🥈', '🥉'];
+    const teamIds = teams.map(t => t.id);
+    const currentLevelByTeam = {};
+    teams.forEach(t => { currentLevelByTeam[t.id] = t.current_level; });
+
+    const [
+        { data: raceSummary },
+        { data: meetings },
+        { data: members },
+        { data: pendingSubs },
+        { data: helpFlags },
+        advanceProgress
+    ] = await Promise.all([
+        _supabase.from('public_team_race_summary').select('team_id, team_percent').in('team_id', teamIds),
+        _supabase.from('team_meetings').select('team_id, day_of_week, meeting_time, lesson_time').in('team_id', teamIds),
+        _supabase.from('profiles').select('id, team_id, is_captain, nickname').in('team_id', teamIds),
+        _supabase.from('writing_submissions').select('student_id, status').eq('status', 'pending'),
+        _supabase.from('help_flags').select('student_id').eq('is_resolved', false),
+        fetchTeamAdvanceProgress(teamIds, currentLevelByTeam)
+    ]);
+
+    const percentByTeam = {};
+    (raceSummary || []).forEach(r => { if (!(r.team_id in percentByTeam)) percentByTeam[r.team_id] = Math.round(r.team_percent || 0); });
+
+    const meetingByTeam = {};
+    (meetings || []).forEach(m => { meetingByTeam[m.team_id] = m; });
+
+    const teamIdByStudent = {};
+    const captainByTeam = {};
+    (members || []).forEach(m => {
+        teamIdByStudent[m.id] = m.team_id;
+        if (m.is_captain) captainByTeam[m.team_id] = m.nickname;
+    });
+
+    const pendingReviewsByTeam = {};
+    (pendingSubs || []).forEach(s => {
+        const tid = teamIdByStudent[s.student_id];
+        if (tid) pendingReviewsByTeam[tid] = (pendingReviewsByTeam[tid] || 0) + 1;
+    });
+
+    const helpByTeam = {};
+    (helpFlags || []).forEach(f => {
+        const tid = teamIdByStudent[f.student_id];
+        if (tid) helpByTeam[tid] = (helpByTeam[tid] || 0) + 1;
+    });
+
     const teamColorMap = { Red: '#ef4444', Blue: '#1d4ed8', Green: '#166534', Yellow: '#a16207', Purple: '#7c3aed', Black: '#111827', White: '#64748b' };
     const getColor = (name) => {
         for (const [key, hex] of Object.entries(teamColorMap)) if (name?.includes(key)) return hex;
         return '#64748b';
     };
 
-    mount.innerHTML = teams.map((team, idx) => {
-        const status = (statusRows || []).find(s => s.team_id === team.id && s.level_number === team.current_level);
-        const isReady = status?.all_members_cleared && !status?.live_quiz_passed;
-        const percent = Math.min(100, Math.max(0, Math.round(((team.current_level - 1) / totalLevels) * 100)));
-        const medal = idx < 3 ? medals[idx] : (idx + 1);
+    mount.innerHTML = teams.map(team => {
         const color = getColor(team.name);
+        const percent = percentByTeam[team.id] ?? 0;
+        const meeting = meetingByTeam[team.id];
+        const lessonText = meeting?.lesson_time ? `${meeting.day_of_week} · ${meeting.meeting_time}` : 'No lesson set';
+        const pending = pendingReviewsByTeam[team.id] || 0;
+        const help = helpByTeam[team.id] || 0;
+        const progress = advanceProgress[team.id] || { approved: 0, required: 0 };
+        const captainName = captainByTeam[team.id];
 
         return `
-            <div class="teacher-lb-row">
-                <div class="teacher-lb-medal">${medal}</div>
-                <div class="teacher-lb-dot" style="background:${color};"></div>
-                <div class="teacher-lb-name">${team.name}</div>
-                <div class="teacher-lb-track"><div class="teacher-lb-fill" style="width:${percent}%; background:${color};"></div></div>
-                <div class="teacher-lb-status ${isReady ? 'ready' : 'ok'}">${isReady ? 'Ready for quiz' : `Level ${team.current_level}`}</div>
+            <div class="snapshot-card">
+                <div class="snapshot-head">
+                    <span class="snapshot-dot" style="background:${color};"></span>
+                    <span class="snapshot-name">${team.name}</span>
+                    <span class="snapshot-level">Lvl ${team.current_level} · ${percent}%</span>
+                </div>
+                <div class="snapshot-track"><div class="snapshot-fill" style="width:${percent}%; background:${color};"></div></div>
+                <div class="snapshot-lesson">📅 ${lessonText}</div>
+                <div class="snapshot-stats">
+                    <div class="snapshot-stat-row"><span class="k">Pending reviews</span><span class="v ${pending === 0 ? 'zero' : ''}">${pending}</span></div>
+                    <div class="snapshot-stat-row"><span class="k">Help requests</span><span class="v ${help === 0 ? 'zero' : ''}">${help}</span></div>
+                    <div class="snapshot-stat-row"><span class="k">Ready to advance</span><span class="v ${progress.approved === 0 ? 'zero' : ''}">${progress.approved} / ${progress.required}</span></div>
+                </div>
+                <div class="snapshot-foot">${captainName ? `👑 Captain: ${captainName}` : 'No captain assigned'}</div>
             </div>`;
     }).join('');
 }
@@ -1013,6 +1076,7 @@ async function loadTeacherCaptainOverview() {
 
     const teamIds = [...new Set(captains.map(c => c.team_id).filter(Boolean))];
     const pendingByTeam = {};
+    const helpByTeam = {};
 
     if (teamIds.length > 0) {
         const { data: teamMembers } = await _supabase
@@ -1021,28 +1085,44 @@ async function loadTeacherCaptainOverview() {
             .in('team_id', teamIds);
 
         const memberIds = (teamMembers || []).map(m => m.id);
-        const { data: pendingSubs } = memberIds.length > 0
-            ? await _supabase.from('writing_submissions').select('student_id').in('student_id', memberIds).eq('status', 'pending')
-            : { data: [] };
+        const [{ data: pendingSubs }, { data: helpFlags }] = memberIds.length > 0
+            ? await Promise.all([
+                _supabase.from('writing_submissions').select('student_id').in('student_id', memberIds).eq('status', 'pending'),
+                _supabase.from('help_flags').select('student_id').in('student_id', memberIds).eq('is_resolved', false)
+            ])
+            : [{ data: [] }, { data: [] }];
 
         (pendingSubs || []).forEach(sub => {
             const member = (teamMembers || []).find(m => m.id === sub.student_id);
             if (!member) return;
             pendingByTeam[member.team_id] = (pendingByTeam[member.team_id] || 0) + 1;
         });
+
+        (helpFlags || []).forEach(flag => {
+            const member = (teamMembers || []).find(m => m.id === flag.student_id);
+            if (!member) return;
+            helpByTeam[member.team_id] = (helpByTeam[member.team_id] || 0) + 1;
+        });
     }
 
     mount.innerHTML = captains.map(cap => {
         const pending = pendingByTeam[cap.team_id] || 0;
-        const health = pending === 0 ? 'Team health: on track' : `Team health: ${pending} review${pending > 1 ? 's' : ''} backed up`;
+        const help = helpByTeam[cap.team_id] || 0;
+        const backlog = pending + help;
+        const health = backlog === 0
+            ? 'Team health: on track'
+            : `Team health: ${[
+                pending > 0 ? `${pending} review${pending > 1 ? 's' : ''}` : null,
+                help > 0 ? `${help} help flag${help > 1 ? 's' : ''}` : null
+            ].filter(Boolean).join(', ')} — consider a nudge`;
         return `
-            <div class="teacher-captain-row">
+            <div class="teacher-captain-row ${backlog > 0 ? 'needs-nudge' : ''}">
                 <div class="teacher-captain-avatar">${cap.avatar || '👑'}</div>
                 <div>
                     <div class="teacher-captain-name">${cap.nickname || 'Captain'} — ${cap.teams?.name || 'No team'}</div>
                     <div class="teacher-captain-meta">${health}</div>
                 </div>
-                <div class="teacher-captain-pending">${pending} pending review${pending === 1 ? '' : 's'}</div>
+                <div class="teacher-captain-pending ${backlog === 0 ? 'caught-up' : ''}">${backlog === 0 ? 'Caught up ✓' : `${backlog} waiting on them`}</div>
             </div>`;
     }).join('');
 }
