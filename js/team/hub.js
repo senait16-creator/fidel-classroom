@@ -871,13 +871,22 @@ async function shareTeamChallenge(text) {
 }
 
 // ---------------------------------------------------------------------------
-// Weekly Lesson Meeting — the day/time the team gets together to go over
-// that week's lesson, set by the captain and shown on the Captain
-// Dashboard. table: team_meetings (team_id primary key).
+// Team Lesson Schedule — the day/time the team gets together to go over
+// that week's lesson. Teacher-owned (see lesson_schedule_setup.sql — RLS
+// only allows admin writes now); captains and students see it read-only.
+// table: team_meetings (team_id primary key).
 // ---------------------------------------------------------------------------
 
-const TEAM_MEETING_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+// Older rows saved before the CT-labeling change may not have "CT" in the
+// stored text yet — append it defensively so students always see the
+// timezone regardless of when the row was last saved.
+function formatMeetingTimeForDisplay(rawTime) {
+    if (!rawTime) return '';
+    return /\bCT\b/.test(rawTime) ? rawTime : `${rawTime} CT`;
+}
 
+// Read-only — shown on the Captain Dashboard. Captains can no longer edit
+// this; only the teacher can, from the teacher dashboard.
 async function loadWeeklyMeeting() {
     const mount = document.getElementById('teamMeetingMount');
     if (!mount) return;
@@ -889,67 +898,23 @@ async function loadWeeklyMeeting() {
         .eq('team_id', currentProfile.team_id)
         .maybeSingle();
 
-    const day  = meeting?.day_of_week || 'Monday';
-    const time = meeting?.meeting_time || '7:00 PM';
+    if (!meeting) {
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Your teacher hasn't set a lesson schedule yet.</p>`;
+        return;
+    }
 
     mount.innerHTML = `
-        <div class="team-meeting-display" id="teamMeetingDisplay">
-            <div class="team-meeting-label">Next Lesson Meeting</div>
+        <div class="team-meeting-display">
+            <div class="team-meeting-label">Team Lesson Schedule</div>
             <div class="team-meeting-sub">The day your team gets together to go over the week's lesson</div>
-            <div class="team-meeting-value">${day} • ${time}</div>
-            <button class="team-meeting-edit-btn" id="teamMeetingEditBtn">Edit</button>
-        </div>
-        <div class="team-meeting-edit-form" id="teamMeetingEditForm" style="display:none;">
-            <select id="teamMeetingDaySelect">
-                ${TEAM_MEETING_DAYS.map(d => `<option value="${d}" ${d === day ? 'selected' : ''}>${d}</option>`).join('')}
-            </select>
-            <input type="text" id="teamMeetingTimeInput" value="${time}" placeholder="7:00 PM">
-            <button class="btn-primary" id="teamMeetingSaveBtn" style="margin-top:8px; width:100%;">Save</button>
+            <div class="team-meeting-value">${meeting.day_of_week} • ${formatMeetingTimeForDisplay(meeting.meeting_time)}</div>
         </div>
     `;
-
-    const editBtn = document.getElementById('teamMeetingEditBtn');
-    if (editBtn) {
-        editBtn.onclick = () => {
-            document.getElementById('teamMeetingDisplay').style.display = 'none';
-            document.getElementById('teamMeetingEditForm').style.display = 'block';
-        };
-    }
-    const saveBtn = document.getElementById('teamMeetingSaveBtn');
-    if (saveBtn) saveBtn.onclick = saveWeeklyMeeting;
 }
 
-async function saveWeeklyMeeting() {
-    const day  = document.getElementById('teamMeetingDaySelect')?.value || 'Monday';
-    const time = document.getElementById('teamMeetingTimeInput')?.value.trim() || '7:00 PM';
-
-    const { error } = await _supabase
-        .from('team_meetings')
-        .upsert({
-            team_id: currentProfile.team_id,
-            day_of_week: day,
-            meeting_time: time,
-            updated_at: new Date().toISOString(),
-            updated_by: currentUser.id
-        }, { onConflict: 'team_id' });
-
-    if (error) return showNotificationToast("Couldn't save: " + error.message);
-
-    showNotificationToast("Meeting time updated ✓");
-    await loadWeeklyMeeting();
-
-    if (typeof sendPushNotification === 'function') {
-        sendPushNotification({
-            type: 'meeting_updated',
-            team_id: currentProfile.team_id,
-            day_of_week: day,
-            meeting_time: time
-        });
-    }
-}
-
-// Read-only version for the student-facing dashboard — same table, no
-// edit ability. Card stays hidden if the team hasn't set a meeting yet.
+// Read-only version for the student-facing dashboard — same table, same
+// display, just a different mount. Card stays hidden if the team hasn't
+// had a lesson schedule set yet.
 async function loadStudentMeetingDisplay() {
     const card = document.getElementById('studentMeetingCard');
     const mount = document.getElementById('studentMeetingMount');
@@ -967,9 +932,9 @@ async function loadStudentMeetingDisplay() {
     card.style.display = 'block';
     mount.innerHTML = `
         <div class="team-meeting-display">
-            <div class="team-meeting-label">Next Lesson Meeting</div>
+            <div class="team-meeting-label">Team Lesson Schedule</div>
             <div class="team-meeting-sub">The day your team gets together to go over the week's lesson</div>
-            <div class="team-meeting-value">${meeting.day_of_week} • ${meeting.meeting_time}</div>
+            <div class="team-meeting-value">${meeting.day_of_week} • ${formatMeetingTimeForDisplay(meeting.meeting_time)}</div>
         </div>
     `;
 }
@@ -1024,7 +989,6 @@ window.loadDailyTeamChallenge    = loadDailyTeamChallenge;
 window.shareTeamChallenge        = shareTeamChallenge;
 window.loadWeeklyMeeting         = loadWeeklyMeeting;
 window.loadStudentMeetingDisplay = loadStudentMeetingDisplay;
-window.saveWeeklyMeeting         = saveWeeklyMeeting;
 window.loadCaptainWritingQueue   = loadCaptainWritingQueue;
 window.loadCaptainRecentlyApproved = loadCaptainRecentlyApproved;
 window.loadCaptainTeamProgress   = loadCaptainTeamProgress;
