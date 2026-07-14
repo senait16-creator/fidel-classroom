@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=17">
+    <link rel="stylesheet" href="style.css?v=18">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -158,17 +158,21 @@
          the same tables the panels below already use.
          ============================================================ -->
     <div class="teacher-health-grid" id="teacherHealthGrid">
+        <div class="teacher-health-tile" id="healthLessonsToday">
+            <div class="teacher-health-value">–</div>
+            <div class="teacher-health-label">Lessons Today</div>
+        </div>
         <div class="teacher-health-tile" id="healthPendingReviews">
             <div class="teacher-health-value">–</div>
             <div class="teacher-health-label">Pending Reviews</div>
         </div>
-        <div class="teacher-health-tile" id="healthTeamsReady">
+        <div class="teacher-health-tile" id="healthLiveTestRequests">
             <div class="teacher-health-value">–</div>
-            <div class="teacher-health-label">Teams Ready</div>
+            <div class="teacher-health-label">Live Test Requests</div>
         </div>
-        <div class="teacher-health-tile" id="healthActiveStudents">
+        <div class="teacher-health-tile" id="healthHelpFlags">
             <div class="teacher-health-value">–</div>
-            <div class="teacher-health-label">Active Students</div>
+            <div class="teacher-health-label">Help Flags Open</div>
         </div>
     </div>
 
@@ -178,8 +182,8 @@
     </div>
 
     <div class="teacher-overview-card">
-        <div class="teacher-overview-title">🏆 Team Progress</div>
-        <div id="teacherLeaderboardMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
+        <div class="teacher-overview-title">🏆 Team Snapshot</div>
+        <div id="teacherLeaderboardMount" class="teacher-snapshot-grid"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
     </div>
 
     <div class="teacher-overview-card">
@@ -1459,16 +1463,16 @@
 <!-- END CAN-DO STATEMENTS -->
 
 <script src="js/navigation.js?v=3" defer></script>
-<script src="js/app.js?v=17" defer></script>
+<script src="js/app.js?v=18" defer></script>
 <script src="js/auth.js?v=12" defer></script>
 <script src="js/guide.js?v=10" defer></script>
 <script src="js/utils/compress.js?v=9" defer></script>
 <script src="js/game.js?v=9" defer></script>
 <script src="js/submissions.js?v=14" defer></script>
-<script src="js/teacher.js?v=21" defer></script>
+<script src="js/teacher.js?v=22" defer></script>
 <script src="js/reading.js?v=20" defer></script>
     <script src="js/letterboard.js?v=10" defer></script>
-<script src="js/team/progress.js?v=16" defer></script>
+<script src="js/team/progress.js?v=17" defer></script>
 <script src="js/team/levels.js?v=11" defer></script>
 <script src="js/team/map.js?v=9" defer></script>
 <script src="js/team/hub.js?v=19" defer></script>
