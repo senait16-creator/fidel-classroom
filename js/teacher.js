@@ -565,7 +565,7 @@ async function loadTeacherWritingQueue() {
                 noteInput.style.display = "block";
                 rejectBtn.innerText = "Confirm Reject";
             } else {
-                rejectWritingSubmission(sub.id, noteInput.value.trim());
+                rejectWritingSubmission(sub.id, noteInput.value.trim(), sub.student_id, sub.base_letter);
             }
         };
 
@@ -598,7 +598,7 @@ async function approveWritingSubmission(submissionId, studentId, baseLetter) {
     }
 }
 
-async function rejectWritingSubmission(submissionId, note) {
+async function rejectWritingSubmission(submissionId, note, studentId, baseLetter) {
     showNotificationToast("Rejecting submission...");
 
     const { error } = await _supabase
@@ -619,6 +619,10 @@ async function rejectWritingSubmission(submissionId, note) {
     showNotificationToast("Submission rejected — student can resubmit.");
     await loadTeacherWritingQueue();
     if (typeof loadTeacherClassroomOverview === 'function') await loadTeacherClassroomOverview();
+
+    if (typeof sendPushNotification === 'function' && studentId && baseLetter) {
+        sendPushNotification({ type: 'writing_rejected', student_id: studentId, base_letter: baseLetter });
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -708,6 +712,15 @@ async function teacherEditTeamMeeting(teamId, teamName) {
     if (error) return showNotificationToast("Couldn't save: " + error.message);
 
     showNotificationToast(`Meeting updated for ${teamName} ✓`);
+
+    if (typeof sendPushNotification === 'function') {
+        sendPushNotification({
+            type: 'meeting_updated',
+            team_id: teamId,
+            day_of_week: day.trim() || currentDay,
+            meeting_time: time.trim() || currentTime
+        });
+    }
 }
 
 async function loadTeacherTeamProgress() {
