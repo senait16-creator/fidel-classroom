@@ -14,8 +14,11 @@
 // ---------------------------------------------------------------------------
 
 // Priority order when a student could match more than one status — most
-// actionable/blocking first. "Level cleared" wins outright (nothing left
-// to do), then the two attention-worthy states, then plain progress.
+// actionable/blocking first. All-3-families-done wins outright (nothing
+// left for the student to practice), then the two attention-worthy
+// states, then plain progress. Label deliberately says "Ready for live
+// test" rather than "Level cleared" — clearing practice isn't the same
+// as being done with the level, and "cleared" reads like it is.
 function computeStudentChallengeStatus(team, familiesForLevel, studentRows, hasPendingWriting, hasHelpFlag) {
     const rowFor = (base) => studentRows.find(r => r.base_letter === base);
 
@@ -23,7 +26,7 @@ function computeStudentChallengeStatus(team, familiesForLevel, studentRows, hasP
         const row = rowFor(f);
         return row?.streak_passed && row?.writing_passed;
     });
-    if (allCleared) return { key: 'cleared', label: 'Level cleared', family: null };
+    if (allCleared) return { key: 'cleared', label: 'Ready for live test', family: null };
 
     if (hasHelpFlag) return { key: 'help', label: 'Asked for help', family: null };
     if (hasPendingWriting) return { key: 'pending', label: 'Pending review', family: null };
