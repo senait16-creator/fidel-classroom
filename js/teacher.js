@@ -1050,6 +1050,9 @@ async function loadTeacherLeaderboard() {
         const help = helpByTeam[team.id] || 0;
         const progress = advanceProgress[team.id] || { approved: 0, required: 0 };
         const captainName = captainByTeam[team.id];
+        const pacing = typeof computeLevelPacing === 'function'
+            ? computeLevelPacing(meeting?.day_of_week, meeting?.lesson_time, progress.approved, progress.required)
+            : null;
 
         return `
             <div class="snapshot-card">
@@ -1060,6 +1063,7 @@ async function loadTeacherLeaderboard() {
                 </div>
                 <div class="snapshot-track"><div class="snapshot-fill" style="width:${percent}%; background:${color};"></div></div>
                 <div class="snapshot-lesson">📅 ${lessonText}</div>
+                ${pacing ? `<div class="snapshot-pacing pacing-${pacing.status}">${pacing.label}</div>` : ''}
                 <div class="snapshot-stats">
                     <div class="snapshot-stat-row"><span class="k">Pending reviews</span><span class="v ${pending === 0 ? 'zero' : ''}">${pending}</span></div>
                     <div class="snapshot-stat-row"><span class="k">Help requests</span><span class="v ${help === 0 ? 'zero' : ''}">${help}</span></div>
