@@ -190,6 +190,54 @@ async function fetchTeamAdvanceProgress(teamIds, currentLevelByTeam) {
     return result;
 }
 
+// Treats a team's weekly lesson time as a soft pacing deadline: the
+// current level should ideally be wrapped up before the next lesson,
+// since that's when the next level gets introduced. Non-blocking by
+// design — this only ever produces a countdown + urgency label for
+// display, it never gates anything. Shared by the teacher, captain, and
+// student dashboards so the three views can't disagree about how urgent
+// a team's situation is.
+const LEVEL_PACING_WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+function computeLevelPacing(dayOfWeek, lessonTime, approved, required) {
+    if (!dayOfWeek || !lessonTime) return null;
+    const targetWeekday = LEVEL_PACING_WEEKDAYS.indexOf(dayOfWeek);
+    if (targetWeekday === -1) return null;
+
+    // Wall-clock "now" in the same timezone the lesson time itself is
+    // entered in (Central), so the countdown lines up with the reminder
+    // system and doesn't drift with the viewer's own device timezone.
+    const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/Chicago', weekday: 'long', hour: '2-digit', minute: '2-digit', hour12: false
+    }).formatToParts(new Date());
+    const currentWeekday = LEVEL_PACING_WEEKDAYS.indexOf(parts.find(p => p.type === 'weekday').value);
+    const currentHour = parseInt(parts.find(p => p.type === 'hour').value, 10) % 24;
+    const currentMinute = parseInt(parts.find(p => p.type === 'minute').value, 10);
+    const currentMinutesOfDay = currentHour * 60 + currentMinute;
+
+    const [th, tm] = lessonTime.split(':').map(Number);
+    const targetMinutesOfDay = th * 60 + tm;
+
+    let dayDiff = (targetWeekday - currentWeekday + 7) % 7;
+    if (dayDiff === 0 && targetMinutesOfDay <= currentMinutesOfDay) dayDiff = 7; // today's slot already passed — next week's
+
+    const hoursUntil = (dayDiff * 1440 - currentMinutesOfDay + targetMinutesOfDay) / 60;
+    const isReady = required > 0 && approved >= required;
+
+    if (isReady) {
+        return { hoursUntil, status: 'ready', label: 'Ready for next lesson ✓' };
+    }
+    if (hoursUntil <= 24) {
+        return { hoursUntil, status: 'urgent', label: hoursUntil < 1 ? 'Lesson starting soon' : `Lesson in ${Math.round(hoursUntil)}h — not finished yet` };
+    }
+    if (hoursUntil <= 72) {
+        const days = Math.round(hoursUntil / 24);
+        return { hoursUntil, status: 'watch', label: `Lesson in ${days} day${days === 1 ? '' : 's'} — keep going` };
+    }
+    const days = Math.round(hoursUntil / 24);
+    return { hoursUntil, status: 'ok', label: `Lesson in ${days} day${days === 1 ? '' : 's'}` };
+}
+
 // Credits an approved writing submission onto student_family_progress —
 // shared by the teacher's and captain's approve-submission flows so they
 // can't drift apart. Upserts rather than updates: the free-form "pick any
@@ -898,6 +946,7 @@ async function rejectTeacherLevelCompletion(requestId, mountId) {
 
 window.saveStreakProgress = saveStreakProgress;
 window.fetchTeamAdvanceProgress = fetchTeamAdvanceProgress;
+window.computeLevelPacing = computeLevelPacing;
 window.creditApprovedWritingToProgress = creditApprovedWritingToProgress;
 window.renderTeamRaceView = renderTeamRaceView;
 // Back-compat alias in case any other code still calls the old name directly.
