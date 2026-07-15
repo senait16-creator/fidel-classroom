@@ -885,6 +885,35 @@ function formatMeetingTimeForDisplay(rawTime) {
     return /\bCT\b/.test(rawTime) ? rawTime : `${rawTime} CT`;
 }
 
+// Shared by the captain and student Lesson Schedule cards — resolves the
+// team's meeting, current level, and how close it is to auto-advancing,
+// then builds the same display markup (including the soft pacing
+// countdown) for either mount. Returns null if there's nothing to show.
+async function buildLessonScheduleMarkup(teamId) {
+    const [{ data: meeting }, { data: team }] = await Promise.all([
+        _supabase.from('team_meetings').select('day_of_week, meeting_time, lesson_time').eq('team_id', teamId).maybeSingle(),
+        _supabase.from('teams').select('current_level').eq('id', teamId).maybeSingle()
+    ]);
+
+    if (!meeting) return null;
+
+    let pacing = null;
+    if (team?.current_level && typeof fetchTeamAdvanceProgress === 'function' && typeof computeLevelPacing === 'function') {
+        const progressMap = await fetchTeamAdvanceProgress([teamId], { [teamId]: team.current_level });
+        const progress = progressMap[teamId] || { approved: 0, required: 0 };
+        pacing = computeLevelPacing(meeting.day_of_week, meeting.lesson_time, progress.approved, progress.required);
+    }
+
+    return `
+        <div class="team-meeting-display">
+            <div class="team-meeting-label">Team Lesson Schedule</div>
+            <div class="team-meeting-sub">The day your team gets together to go over the week's lesson</div>
+            <div class="team-meeting-value">${meeting.day_of_week} • ${formatMeetingTimeForDisplay(meeting.meeting_time)}</div>
+            ${pacing ? `<div class="team-meeting-pacing pacing-${pacing.status}">${pacing.label}</div>` : ''}
+        </div>
+    `;
+}
+
 // Read-only — shown on the Captain Dashboard. Captains can no longer edit
 // this; only the teacher can, from the teacher dashboard.
 async function loadWeeklyMeeting() {
@@ -892,51 +921,24 @@ async function loadWeeklyMeeting() {
     if (!mount) return;
     if (!currentProfile?.team_id) return;
 
-    const { data: meeting } = await _supabase
-        .from('team_meetings')
-        .select('day_of_week, meeting_time')
-        .eq('team_id', currentProfile.team_id)
-        .maybeSingle();
-
-    if (!meeting) {
-        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Your teacher hasn't set a lesson schedule yet.</p>`;
-        return;
-    }
-
-    mount.innerHTML = `
-        <div class="team-meeting-display">
-            <div class="team-meeting-label">Team Lesson Schedule</div>
-            <div class="team-meeting-sub">The day your team gets together to go over the week's lesson</div>
-            <div class="team-meeting-value">${meeting.day_of_week} • ${formatMeetingTimeForDisplay(meeting.meeting_time)}</div>
-        </div>
-    `;
+    const markup = await buildLessonScheduleMarkup(currentProfile.team_id);
+    mount.innerHTML = markup || `<p style="color:#94a3b8; font-size:13px;">Your teacher hasn't set a lesson schedule yet.</p>`;
 }
 
-// Read-only version for the student-facing dashboard — same table, same
-// display, just a different mount. Card stays hidden if the team hasn't
-// had a lesson schedule set yet.
+// Read-only version for the student-facing dashboard — same data, just a
+// different mount. Card stays hidden if the team hasn't had a lesson
+// schedule set yet.
 async function loadStudentMeetingDisplay() {
     const card = document.getElementById('studentMeetingCard');
     const mount = document.getElementById('studentMeetingMount');
     if (!card || !mount) return;
     if (!currentProfile?.team_id) { card.style.display = 'none'; return; }
 
-    const { data: meeting } = await _supabase
-        .from('team_meetings')
-        .select('day_of_week, meeting_time')
-        .eq('team_id', currentProfile.team_id)
-        .maybeSingle();
-
-    if (!meeting) { card.style.display = 'none'; return; }
+    const markup = await buildLessonScheduleMarkup(currentProfile.team_id);
+    if (!markup) { card.style.display = 'none'; return; }
 
     card.style.display = 'block';
-    mount.innerHTML = `
-        <div class="team-meeting-display">
-            <div class="team-meeting-label">Team Lesson Schedule</div>
-            <div class="team-meeting-sub">The day your team gets together to go over the week's lesson</div>
-            <div class="team-meeting-value">${meeting.day_of_week} • ${formatMeetingTimeForDisplay(meeting.meeting_time)}</div>
-        </div>
-    `;
+    mount.innerHTML = markup;
 }
 
 // ---------------------------------------------------------------------------
