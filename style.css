@@ -851,6 +851,45 @@ header {
     font-weight: 700;
 }
 
+/* Level pacing — soft deadline countdown tied to a team's next lesson.
+   Same 4 tiers used on the teacher (.snapshot-pacing), captain, and
+   student (.team-meeting-pacing) cards so the color language matches
+   everywhere it shows up. */
+
+.snapshot-pacing, .team-meeting-pacing {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11.5px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-bottom: 10px;
+}
+
+.team-meeting-pacing {
+    margin: 8px 0 0;
+}
+
+.pacing-ready {
+    background: #f0fdf4;
+    color: #166534;
+}
+
+.pacing-ok {
+    background: #eef2ff;
+    color: #3949ab;
+}
+
+.pacing-watch {
+    background: #fffbeb;
+    color: #b45309;
+}
+
+.pacing-urgent {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
 .teacher-overview-divider {
     text-align: center;
     font-size: 11px;
