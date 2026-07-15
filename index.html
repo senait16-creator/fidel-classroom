@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=19">
+    <link rel="stylesheet" href="style.css?v=20">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -1045,12 +1045,64 @@
      MY AMHARIC PATH (built on the original Reading Path tables/flow)
      ============================================================ -->
 
+<!-- My Amharic Path — self-reported fluency gate. Shown once (until answered
+     "yes"); "not yet" routes into Fidel Practice without saving anything, so
+     the question is simply asked again next visit. -->
+<div id="amharicPathGateScreen" style="display:none; max-width:520px; margin:60px auto; padding:0 16px;">
+    <div class="workspace-title">
+        <span>📘 My Amharic Path</span>
+        <button class="btn-secondary" onclick="exitAmharicPath()">← Back</button>
+    </div>
+    <div class="amharic-gate-card">
+        <div class="amharic-gate-icon">📗</div>
+        <h2 class="amharic-gate-title">Can you read the Fidel?</h2>
+        <p class="amharic-gate-sub">This just helps point you to the right starting place — you can always come back and change it.</p>
+        <div class="amharic-gate-options">
+            <button type="button" class="amharic-gate-btn yes" onclick="submitFidelGateAnswer(true)">
+                <span class="amharic-gate-btn-icon">✅</span>
+                <span>
+                    <span class="amharic-gate-btn-title">Yes, I can read Fidel</span>
+                    <span class="amharic-gate-btn-desc">Jump into chapters, vocabulary, and real sentences</span>
+                </span>
+            </button>
+            <button type="button" class="amharic-gate-btn no" onclick="submitFidelGateAnswer(false)">
+                <span class="amharic-gate-btn-icon">🔤</span>
+                <span>
+                    <span class="amharic-gate-btn-title">Not yet</span>
+                    <span class="amharic-gate-btn-desc">Start with the Fidel Practice letter board first</span>
+                </span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- My Amharic Path — Choose Path (Independent Study vs. Study Together).
+     Reachable from the gate above, and again any time via "Switch path". -->
+<div id="amharicPathChooseScreen" style="display:none; max-width:640px; margin:60px auto; padding:0 16px;">
+    <div class="workspace-title">
+        <span>📘 My Amharic Path</span>
+        <button class="btn-secondary" onclick="exitAmharicPath()">← Back</button>
+    </div>
+    <p class="subtitle" style="text-align:center; margin-bottom:22px;">Start where you are — choose the pace that fits your life right now.</p>
+    <div class="amharic-path-grid">
+        <button type="button" class="amharic-path-card independent" onclick="chooseAmharicPathMode('independent')">
+            <span class="amharic-path-card-icon">📖</span>
+            <span class="amharic-path-card-title">Independent Study</span>
+        </button>
+        <button type="button" class="amharic-path-card study-together" onclick="chooseAmharicPathMode('study_together')">
+            <span class="amharic-path-card-icon">🤝</span>
+            <span class="amharic-path-card-title">Study Together</span>
+        </button>
+    </div>
+</div>
+
 <div id="readingLevelsScreen" style="display:none; max-width:900px; margin:40px auto; padding:0 16px;">
     <div class="workspace-title">
         <span>📘 My Amharic Path</span>
         <button class="btn-secondary" onclick="exitAmharicPath()">← Back</button>
     </div>
-    <p class="subtitle" style="text-align:left; margin-bottom:16px;">From Fidel to Fluent </p>
+    <p class="subtitle" style="text-align:left; margin-bottom:4px;">From Fidel to Fluent </p>
+    <a href="javascript:void(0)" onclick="openAmharicPathChooser()" class="amharic-switch-path-link">Switch path</a>
     <div id="growthEntryMount"></div>
     <div id="readingLevelsGrid" class="chapter-list-grid"></div>
 </div>
@@ -1110,6 +1162,50 @@
     <!-- Final lesson: Chapter Challenge quiz -->
     <div id="lessonChallengeView" style="display:none;">
         <div id="chapterCheckpointMount" class="chapter-tab-panel"></div>
+    </div>
+</div>
+
+<!-- My Amharic Path — Study Together dashboard. Same chapters as
+     Independent Study, plus Daily Wordle, Verse of the Day, the team's
+     Lesson Schedule (Community Check-In), and a class-wide Chapter Feed.
+     Voice Prompt is a placeholder — recording/playback isn't built yet. -->
+<div id="studyTogetherScreen" style="display:none; max-width:600px; margin:40px auto; padding:0 16px;">
+    <div class="workspace-title">
+        <span>🤝 Study Together</span>
+        <button class="btn-secondary" onclick="exitAmharicPath()">← Back</button>
+    </div>
+    <p class="subtitle" style="text-align:left; margin-bottom:4px;">Same chapters as Independent Study, with a little company along the way</p>
+    <a href="javascript:void(0)" onclick="openAmharicPathChooser()" class="amharic-switch-path-link">Switch path</a>
+
+    <div id="studyTogetherChapterMount" class="chapter-list-card study-together-card"></div>
+
+    <div class="chapter-list-card study-together-card">
+        <div class="study-together-card-title">🔤 Daily Wordle</div>
+        <p class="study-together-card-desc">A quick daily warm-up — guess the word, then see how you stack up.</p>
+        <button type="button" class="btn-primary" style="width:100%;" onclick="openWordleOverlay(true)">Play today's Wordle</button>
+    </div>
+
+    <div class="chapter-list-card study-together-card">
+        <div class="study-together-card-title">Verse of the Day</div>
+        <div id="studyTogetherVerseMount"></div>
+    </div>
+
+    <div id="studyTogetherCheckInCard" class="chapter-list-card study-together-card" style="display:none;">
+        <div id="studyTogetherCheckInMount"></div>
+    </div>
+
+    <div class="chapter-list-card study-together-card">
+        <div class="study-together-card-title">Chapter Feed</div>
+        <div id="studyTogetherFeedMount"></div>
+        <div class="study-together-feed-composer">
+            <textarea id="studyTogetherFeedInput" placeholder="Share something from your chapter..." maxlength="500"></textarea>
+            <button type="button" class="btn-primary" onclick="postChapterFeedUpdate()">Post</button>
+        </div>
+    </div>
+
+    <div class="chapter-list-card study-together-card study-together-coming-soon">
+        <div class="study-together-card-title">🎙️ Voice Prompt</div>
+        <p class="study-together-card-desc">Record-and-share is coming soon.</p>
     </div>
 </div>
 
@@ -1463,14 +1559,14 @@
 <!-- END CAN-DO STATEMENTS -->
 
 <script src="js/navigation.js?v=3" defer></script>
-<script src="js/app.js?v=18" defer></script>
-<script src="js/auth.js?v=12" defer></script>
+<script src="js/app.js?v=19" defer></script>
+<script src="js/auth.js?v=13" defer></script>
 <script src="js/guide.js?v=10" defer></script>
 <script src="js/utils/compress.js?v=9" defer></script>
 <script src="js/game.js?v=9" defer></script>
 <script src="js/submissions.js?v=14" defer></script>
 <script src="js/teacher.js?v=25" defer></script>
-<script src="js/reading.js?v=20" defer></script>
+<script src="js/reading.js?v=21" defer></script>
     <script src="js/letterboard.js?v=10" defer></script>
 <script src="js/team/progress.js?v=18" defer></script>
 <script src="js/team/levels.js?v=11" defer></script>

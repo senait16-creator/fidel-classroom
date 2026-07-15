@@ -8202,6 +8202,248 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
         grid-template-columns: 1fr;
     }
 }
+/* ── My Amharic Path — fluency gate + Choose Path ───────────── */
+
+.amharic-switch-path-link {
+    display: inline-block;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #4338ca;
+    text-decoration: none;
+    margin-bottom: 16px;
+}
+.amharic-switch-path-link:hover {
+    text-decoration: underline;
+}
+
+.amharic-gate-card {
+    background: #ffffff;
+    border: 1px solid #e7e5d8;
+    border-radius: 24px;
+    padding: 32px 24px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    text-align: center;
+}
+
+.amharic-gate-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #dcfce7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    margin: 0 auto 16px;
+}
+
+.amharic-gate-title {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 22px;
+    color: #14532d;
+    margin: 0 0 8px;
+}
+
+.amharic-gate-sub {
+    color: #64748b;
+    font-size: 13.5px;
+    max-width: 36ch;
+    margin: 0 auto 24px;
+}
+
+.amharic-gate-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-align: left;
+}
+
+.amharic-gate-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border: 1px solid #e7e5d8;
+    border-radius: 14px;
+    padding: 16px 18px;
+    background: #fffdf5;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.amharic-gate-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+}
+.amharic-gate-btn-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    background: #f1f5e9;
+}
+.amharic-gate-btn-title {
+    display: block;
+    font-weight: 800;
+    font-size: 14px;
+    color: #1e293b;
+}
+.amharic-gate-btn-desc {
+    display: block;
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+.amharic-path-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+@media (max-width: 480px) {
+    .amharic-path-grid { grid-template-columns: 1fr; }
+}
+
+.amharic-path-card {
+    text-align: center;
+    border: none;
+    border-radius: 18px;
+    padding: 30px 16px;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.amharic-path-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.1);
+}
+.amharic-path-card.independent {
+    background: linear-gradient(160deg, #c7d2fe 0%, #a5b4fc 100%);
+    color: #312e81;
+}
+.amharic-path-card.study-together {
+    background: linear-gradient(160deg, #fde68a 0%, #f2c94c 100%);
+    color: #78350f;
+}
+.amharic-path-card-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 12px;
+    background: rgba(255, 255, 255, 0.55);
+}
+.amharic-path-card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+/* ── Study Together ──────────────────────────────────────────── */
+
+.study-together-card {
+    text-align: left;
+}
+
+.study-together-card-title {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: #14532d;
+    margin-bottom: 10px;
+}
+
+.study-together-card-desc {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0 0 12px;
+}
+
+.study-together-verse-amharic {
+    font-family: 'Abyssinica SIL', serif;
+    font-size: 19px;
+    color: #1e293b;
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.study-together-verse-english {
+    font-size: 13px;
+    color: #64748b;
+    font-style: italic;
+    border-left: 3px solid #ca8a04;
+    padding-left: 12px;
+    margin: 0;
+}
+
+.study-together-feed-post {
+    display: flex;
+    gap: 10px;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee6d3;
+}
+.study-together-feed-post:last-child {
+    border-bottom: none;
+}
+.study-together-feed-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #e0e7ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+.study-together-feed-name {
+    font-weight: 700;
+    font-size: 13px;
+    color: #1e293b;
+}
+.study-together-feed-text {
+    font-size: 12.5px;
+    color: #475569;
+    margin-top: 2px;
+}
+.study-together-feed-meta {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 4px;
+}
+
+.study-together-feed-composer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 14px;
+}
+.study-together-feed-composer textarea {
+    border: 1px solid #e7e5d8;
+    border-radius: 12px;
+    padding: 10px 12px;
+    font: inherit;
+    font-size: 13px;
+    resize: vertical;
+    min-height: 60px;
+}
+
+.study-together-coming-soon {
+    opacity: 0.7;
+}
+
 .lesson-progress-mini {
     width: 100%;
     height: 9px;

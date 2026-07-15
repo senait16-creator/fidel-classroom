@@ -55,13 +55,75 @@ let activeLessonQuiz = [];       // lesson_quiz_blocks rows for the current less
 let activeStepList = [];         // computed once per lesson entry: ['goal', 'section-0', 'section-1', 'quiz'?, 'conversation', ...]
 let activeStepIndex = 0;
 
+// Which screen to return to when backing out of a lesson — the plain
+// chapter grid (Independent Study) or the Study Together dashboard,
+// depending on where the student entered the lesson from.
+let readingLevelDetailReturnScreen = "readingLevelsScreen";
+
+// Set while rendering the Study Together chapter card so its "Continue"
+// button and the Chapter Feed post box both know the student's current
+// chapter without a second fetch.
+let studyTogetherCurrentLevel = null;
+
 // -----------------------------------------------------------------------------
-// Entry point
+// Entry point — gated behind a self-reported "can you read the Fidel?"
+// question, then a one-time choice between Independent Study (solo,
+// self-paced) and Study Together (same chapters, plus a social layer).
+// Both are remembered on the profile so returning students skip straight
+// to their mode; a "Switch path" link on each mode's screen reopens the
+// choice without re-asking the fluency question.
 // -----------------------------------------------------------------------------
 
 function enterAmharicPath() {
-    showScreen("readingLevelsScreen");
-    renderReadingLevelsList();
+    if (!currentProfile) return;
+
+    if (currentProfile.can_read_fidel !== true) {
+        showScreen("amharicPathGateScreen");
+        return;
+    }
+
+    if (currentProfile.amharic_path_mode === "study_together") {
+        showScreen("studyTogetherScreen");
+        renderStudyTogetherScreen();
+    } else if (currentProfile.amharic_path_mode === "independent") {
+        showScreen("readingLevelsScreen");
+        renderReadingLevelsList();
+    } else {
+        showScreen("amharicPathChooseScreen");
+    }
+}
+
+// "Yes" persists the flag and moves on to the mode choice (or straight to
+// an already-chosen mode). "Not yet" is intentionally NOT persisted — it
+// just routes into the existing Fidel Practice flow, so the question is
+// asked again next time in case the student has progressed since.
+async function submitFidelGateAnswer(canRead) {
+    if (!canRead) {
+        if (typeof chooseModePractice === "function") chooseModePractice();
+        return;
+    }
+
+    currentProfile.can_read_fidel = true;
+    await _supabase.from('profiles').update({ can_read_fidel: true }).eq('id', currentUser.id);
+
+    enterAmharicPath();
+}
+
+function openAmharicPathChooser() {
+    showScreen("amharicPathChooseScreen");
+}
+
+async function chooseAmharicPathMode(mode) {
+    currentProfile.amharic_path_mode = mode;
+    await _supabase.from('profiles').update({ amharic_path_mode: mode }).eq('id', currentUser.id);
+
+    if (mode === "study_together") {
+        showScreen("studyTogetherScreen");
+        renderStudyTogetherScreen();
+    } else {
+        showScreen("readingLevelsScreen");
+        renderReadingLevelsList();
+    }
 }
 
 function exitAmharicPath() {
@@ -193,6 +255,7 @@ async function renderReadingLevelsList() {
 
         card.querySelector('.chapter-start-btn').onclick = (e) => {
             e.stopPropagation();
+            readingLevelDetailReturnScreen = "readingLevelsScreen";
             enterChapter(level.level_number);
         };
         card.querySelector('.chapter-goals-btn').onclick = (e) => {
@@ -202,6 +265,188 @@ async function renderReadingLevelsList() {
 
         container.appendChild(card);
     });
+}
+
+// Same per-chapter progress computation as renderReadingLevelsList, but
+// resolved down to a single "current chapter" (first incomplete, or the
+// last one if everything's done) — used by the Study Together dashboard.
+async function fetchCurrentChapterSummary() {
+    const [levels, lessons, chapterProgress, lessonProgress] = await Promise.all([
+        fetchReadingLevels(),
+        fetchAllLessons(),
+        fetchMyChapterProgressAll(),
+        fetchMyLessonProgressAll()
+    ]);
+
+    if (!levels || levels.length === 0) return null;
+
+    const passedByLevel = {};
+    chapterProgress.forEach(row => { passedByLevel[row.level_number] = row.checkpoint_passed; });
+
+    const completedLessonIds = new Set(
+        lessonProgress.filter(row => row.completed_at).map(row => row.lesson_id)
+    );
+
+    const withProgress = levels.map(level => {
+        const lessonsForLevel = lessons.filter(l => l.level_number === level.level_number);
+        const isComplete = !!passedByLevel[level.level_number];
+        const totalCount = lessonsForLevel.length;
+        const completedCount = lessonsForLevel.filter(l => completedLessonIds.has(l.id)).length;
+        const percent = totalCount ? Math.round((completedCount / totalCount) * 100) : 0;
+        return { level, isComplete, totalCount, completedCount, percent };
+    });
+
+    return withProgress.find(row => !row.isComplete) || withProgress[withProgress.length - 1];
+}
+
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str == null ? '' : String(str);
+    return div.innerHTML;
+}
+
+// -----------------------------------------------------------------------------
+// Study Together — the same chapters as Independent Study, plus a light
+// social layer: Daily Wordle, Verse of the Day, the team's Lesson Schedule
+// (Community Check-In), and a class-wide Chapter Feed. Voice Prompt is a
+// placeholder for now — recording/playback doesn't exist anywhere in the
+// app yet, so it's being scoped as its own project rather than bolted on
+// here.
+// -----------------------------------------------------------------------------
+
+const STUDY_TOGETHER_VERSES = [
+    { amharic: "አንድ ሰው ብቻውን ቢሮጥ፣ ሁለት ሰው ግን አብረው ይራመዳሉ።", english: "One person alone may run fast — but two people walking together go further." },
+    { amharic: "ትንሽ ትንሽ እያለ ራስ ማርያም ይደርሳል።", english: "Little by little, even the mountain peak is reached — small steps add up." },
+    { amharic: "የሚተባበሩ ወንድሞች ተራራ ያፈርሳሉ።", english: "Siblings who work together can move a mountain." },
+    { amharic: "ጠብታ ጠብታ ባሕር ይሆናል።", english: "Drop by drop becomes an ocean — small, steady practice adds up." },
+    { amharic: "እጅ ለእጅ ተያይዞ ሸክም ይቀላል።", english: "Hand in hand, the load gets lighter — you don't have to carry it alone." }
+];
+
+function getStudyTogetherVerseOfTheDay() {
+    const dayIndex = Math.floor(Date.now() / 86400000);
+    return STUDY_TOGETHER_VERSES[dayIndex % STUDY_TOGETHER_VERSES.length];
+}
+
+async function renderStudyTogetherScreen() {
+    renderStudyTogetherChapterCard();
+    renderStudyTogetherVerse();
+    renderStudyTogetherCheckIn();
+    renderStudyTogetherFeed();
+}
+
+async function renderStudyTogetherChapterCard() {
+    const mount = document.getElementById('studyTogetherChapterMount');
+    if (!mount) return;
+    mount.innerHTML = `<p style="color:#94a3b8;">Loading...</p>`;
+
+    const current = await fetchCurrentChapterSummary();
+    studyTogetherCurrentLevel = current ? current.level.level_number : null;
+
+    if (!current) {
+        mount.innerHTML = `<p style="color:#94a3b8;">No chapters yet — check back soon.</p>`;
+        return;
+    }
+
+    const { level, isComplete, totalCount, completedCount, percent } = current;
+
+    mount.innerHTML = `
+        <div class="challenge-level-number-badge">${level.level_number}</div>
+        <div class="chapter-list-card-body">
+            <div class="chapter-list-card-title">${level.title}</div>
+            <div class="chapter-list-card-meta">
+                ${completedCount} of ${totalCount} lesson${totalCount === 1 ? '' : 's'}${isComplete ? ' • Chapter complete ✓' : ''}
+            </div>
+            <div class="chapter-progress-track">
+                <div class="chapter-progress-fill" style="width:${percent}%;"></div>
+            </div>
+            <button type="button" class="btn-primary study-together-continue-btn" style="width:100%; margin-top:10px;">
+                ${isComplete ? 'Review Chapter →' : 'Continue Chapter →'}
+            </button>
+        </div>
+    `;
+
+    mount.querySelector('.study-together-continue-btn').onclick = () => {
+        continueChapterFromStudyTogether(level.level_number);
+    };
+}
+
+function renderStudyTogetherVerse() {
+    const mount = document.getElementById('studyTogetherVerseMount');
+    if (!mount) return;
+    const verse = getStudyTogetherVerseOfTheDay();
+    mount.innerHTML = `
+        <div class="study-together-verse-amharic">${verse.amharic}</div>
+        <p class="study-together-verse-english">"${verse.english}"</p>
+    `;
+}
+
+async function renderStudyTogetherCheckIn() {
+    const card = document.getElementById('studyTogetherCheckInCard');
+    const mount = document.getElementById('studyTogetherCheckInMount');
+    if (!card || !mount) return;
+
+    if (!currentProfile?.team_id || typeof buildLessonScheduleMarkup !== 'function') {
+        card.style.display = 'none';
+        return;
+    }
+
+    const markup = await buildLessonScheduleMarkup(currentProfile.team_id);
+    if (!markup) { card.style.display = 'none'; return; }
+
+    card.style.display = 'block';
+    mount.innerHTML = markup;
+}
+
+async function renderStudyTogetherFeed() {
+    const mount = document.getElementById('studyTogetherFeedMount');
+    if (!mount) return;
+    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
+
+    const { data: posts, error } = await _supabase
+        .from('chapter_feed_posts')
+        .select('id, student_id, level_number, body_text, created_at, profiles!chapter_feed_posts_student_id_fkey(nickname, avatar)')
+        .order('created_at', { ascending: false })
+        .limit(30);
+
+    if (error) {
+        mount.innerHTML = `<p style="color:#ef4444; font-size:13px;">Couldn't load the feed: ${error.message}</p>`;
+        return;
+    }
+
+    if (!posts || posts.length === 0) {
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No posts yet — be the first to share something from your chapter.</p>`;
+        return;
+    }
+
+    mount.innerHTML = posts.map(post => `
+        <div class="study-together-feed-post">
+            <span class="study-together-feed-avatar">${post.profiles?.avatar || '🦁'}</span>
+            <div>
+                <div class="study-together-feed-name">${escapeHtml(post.profiles?.nickname || 'A student')}</div>
+                <div class="study-together-feed-text">${escapeHtml(post.body_text)}</div>
+                <div class="study-together-feed-meta">Chapter ${post.level_number} • ${new Date(post.created_at).toLocaleDateString()}</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function postChapterFeedUpdate() {
+    const input = document.getElementById('studyTogetherFeedInput');
+    if (!input) return;
+    const text = input.value.trim();
+    if (!text) return;
+    if (!studyTogetherCurrentLevel) return showNotificationToast("Couldn't figure out your current chapter — try again in a moment.");
+
+    const { error } = await _supabase.from('chapter_feed_posts').insert({
+        student_id: currentUser.id,
+        level_number: studyTogetherCurrentLevel,
+        body_text: text
+    });
+
+    if (error) return showNotificationToast("Couldn't post: " + error.message);
+
+    input.value = '';
+    renderStudyTogetherFeed();
 }
 
 // -----------------------------------------------------------------------------
@@ -227,7 +472,7 @@ function openChapterGoals(level, mode) {
     const ctaBtn = document.getElementById('chapterGoalsCtaBtn');
     if (mode === 'start') {
         ctaBtn.innerText = 'Continue to Lesson 1 →';
-        ctaBtn.onclick = () => { closeChapterGoals(); enterChapter(level.level_number); };
+        ctaBtn.onclick = () => { closeChapterGoals(); readingLevelDetailReturnScreen = "readingLevelsScreen"; enterChapter(level.level_number); };
     } else {
         ctaBtn.innerText = 'Got it ✓';
         ctaBtn.onclick = closeChapterGoals;
@@ -276,9 +521,19 @@ async function enterChapter(levelNumber) {
     activeLessonIndex = resumeIndex;
 
     document.getElementById("readingLevelsScreen").style.display = "none";
+    const studyTogetherScreenEl = document.getElementById("studyTogetherScreen");
+    if (studyTogetherScreenEl) studyTogetherScreenEl.style.display = "none";
     document.getElementById("readingLevelDetailScreen").style.display = "block";
 
     await openCurrentLesson();
+}
+
+// Entry point used by the Study Together "Continue Lesson →" card, so
+// backing out of the lesson returns to the dashboard instead of the plain
+// chapter grid.
+function continueChapterFromStudyTogether(levelNumber) {
+    readingLevelDetailReturnScreen = "studyTogetherScreen";
+    enterChapter(levelNumber);
 }
 
 async function openCurrentLesson() {
@@ -369,8 +624,14 @@ async function restartCurrentChapter() {
 
 function exitReadingLevelDetail() {
     document.getElementById("readingLevelDetailScreen").style.display = "none";
-    document.getElementById("readingLevelsScreen").style.display = "block";
-    renderReadingLevelsList();
+
+    if (readingLevelDetailReturnScreen === "studyTogetherScreen") {
+        document.getElementById("studyTogetherScreen").style.display = "block";
+        renderStudyTogetherScreen();
+    } else {
+        document.getElementById("readingLevelsScreen").style.display = "block";
+        renderReadingLevelsList();
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -1616,6 +1877,11 @@ async function renderGrowthCanDo() {
 
 window.enterAmharicPath = enterAmharicPath;
 window.exitAmharicPath = exitAmharicPath;
+window.submitFidelGateAnswer = submitFidelGateAnswer;
+window.openAmharicPathChooser = openAmharicPathChooser;
+window.chooseAmharicPathMode = chooseAmharicPathMode;
+window.continueChapterFromStudyTogether = continueChapterFromStudyTogether;
+window.postChapterFeedUpdate = postChapterFeedUpdate;
 window.exitReadingLevelDetail = exitReadingLevelDetail;
 window.renderCheckpointSection = renderCheckpointSection;
 window.closeChapterGoals = closeChapterGoals;
