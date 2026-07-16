@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=21">
+    <link rel="stylesheet" href="style.css?v=22">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -1147,13 +1147,22 @@
         <button class="btn-secondary" onclick="exitReadingLevelDetail()">← Back to Chapters</button>
     </div>
 
+    <!-- Shown first when entering a chapter — every lesson, in order, with
+         completion marked and where you left off highlighted. Tap any
+         lesson to jump straight to it. -->
+    <div id="lessonPickerView">
+        <p class="subtitle" style="text-align:left; margin-bottom:14px;">Pick a lesson, or continue where you left off.</p>
+        <div id="lessonPickerList" class="lesson-picker-list"></div>
+    </div>
+
     <!-- Regular lesson: one step at a time, like a real class. A single
          mount instead of one div per step type — the number of teaching
          sections varies per lesson (data-driven), so the panels can't be
          pre-declared in HTML anymore. -->
-    <div id="lessonNormalView">
+    <div id="lessonNormalView" style="display:none;">
         <div class="lesson-step-header-row">
             <a href="javascript:void(0)" id="lessonPrevLessonLink" class="lesson-prev-lesson-link" onclick="goToPrevLesson()" style="display:none;">← Previous Lesson</a>
+            <a href="javascript:void(0)" class="lesson-prev-lesson-link" onclick="openLessonPicker()">☰ All Lessons</a>
             <div id="lessonStepProgress" class="lesson-step-progress"></div>
         </div>
         <div id="lessonStepMount" class="chapter-tab-panel"></div>
@@ -1566,7 +1575,7 @@
 <script src="js/game.js?v=9" defer></script>
 <script src="js/submissions.js?v=14" defer></script>
 <script src="js/teacher.js?v=25" defer></script>
-<script src="js/reading.js?v=23" defer></script>
+<script src="js/reading.js?v=24" defer></script>
     <script src="js/letterboard.js?v=10" defer></script>
 <script src="js/team/progress.js?v=18" defer></script>
 <script src="js/team/levels.js?v=11" defer></script>

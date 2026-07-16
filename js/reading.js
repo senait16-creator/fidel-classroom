@@ -47,6 +47,7 @@ let readingLevelsCache = null;
 let activeReadingLevel = null;   // current chapter row: {level_number, title, can_do_category, intro_summary, intro_highlights}
 let activeLessons = [];          // chapter_lessons rows for the current chapter, in order
 let activeLessonIndex = 0;
+let activeChapterCompletedIds = new Set(); // lesson ids completed, for the lesson picker
 let activeReadingItems = [];
 let activeReadingItemIndex = 0;
 
@@ -545,9 +546,9 @@ async function enterChapter(levelNumber) {
         .eq('student_id', currentUser.id)
         .in('lesson_id', lessons.map(l => l.id));
 
-    const completedIds = new Set((progressRows || []).filter(r => r.completed_at).map(r => r.lesson_id));
+    activeChapterCompletedIds = new Set((progressRows || []).filter(r => r.completed_at).map(r => r.lesson_id));
 
-    let resumeIndex = lessons.findIndex(l => !completedIds.has(l.id));
+    let resumeIndex = lessons.findIndex(l => !activeChapterCompletedIds.has(l.id));
     if (resumeIndex === -1) resumeIndex = lessons.length - 1;
     activeLessonIndex = resumeIndex;
 
@@ -556,7 +557,43 @@ async function enterChapter(levelNumber) {
     if (studyTogetherScreenEl) studyTogetherScreenEl.style.display = "none";
     document.getElementById("readingLevelDetailScreen").style.display = "block";
 
-    await openCurrentLesson();
+    openLessonPicker();
+}
+
+// Shown first when entering a chapter — every lesson in order, completion
+// marked, and the resume point (first not-yet-completed lesson) called out
+// so returning students still land somewhere sensible without being forced
+// to pick manually.
+function openLessonPicker() {
+    document.getElementById("lessonNormalView").style.display = "none";
+    document.getElementById("lessonChallengeView").style.display = "none";
+    document.getElementById("lessonPickerView").style.display = "block";
+    document.getElementById("readingLevelDetailTitle").innerText = activeReadingLevel.title;
+
+    const mount = document.getElementById("lessonPickerList");
+    mount.innerHTML = "";
+
+    activeLessons.forEach((lesson, index) => {
+        const isDone = activeChapterCompletedIds.has(lesson.id);
+        const isResume = index === activeLessonIndex;
+
+        const row = document.createElement('button');
+        row.type = 'button';
+        row.className = `lesson-picker-row${isDone ? ' done' : ''}${isResume ? ' resume' : ''}`;
+        row.innerHTML = `
+            <span class="lesson-picker-num">${isDone ? '✓' : (index + 1)}</span>
+            <span class="lesson-picker-body">
+                <span class="lesson-picker-title">${lesson.title}</span>
+                <span class="lesson-picker-meta">${lesson.is_challenge ? 'Chapter Challenge' : (lesson.lesson_focus || '')}</span>
+            </span>
+            ${isResume ? '<span class="lesson-picker-tag">Continue here</span>' : ''}
+        `;
+        row.onclick = () => {
+            activeLessonIndex = index;
+            openCurrentLesson();
+        };
+        mount.appendChild(row);
+    });
 }
 
 // Entry point used by the Study Together "Continue Lesson →" card, so
@@ -570,6 +607,7 @@ function continueChapterFromStudyTogether(levelNumber) {
 async function openCurrentLesson() {
     const lesson = activeLessons[activeLessonIndex];
 
+    document.getElementById("lessonPickerView").style.display = "none";
     document.getElementById("readingLevelDetailTitle").innerText =
         `${activeReadingLevel.title} · Lesson ${activeLessonIndex + 1} of ${activeLessons.length}: ${lesson.title}`;
 
@@ -613,6 +651,8 @@ async function goToNextLesson() {
         completed_at: new Date().toISOString()
     }, { onConflict: 'student_id,lesson_id' });
 
+    activeChapterCompletedIds.add(lesson.id);
+
     if (activeLessonIndex < activeLessons.length - 1) {
         activeLessonIndex++;
         await openCurrentLesson();
@@ -649,6 +689,7 @@ async function restartCurrentChapter() {
         .eq('student_id', currentUser.id)
         .eq('level_number', levelNumber);
 
+    activeChapterCompletedIds = new Set();
     activeLessonIndex = 0;
     await openCurrentLesson();
 }
@@ -1551,9 +1592,10 @@ async function renderCheckpointSection(levelNumber) {
         : "";
 
     const preSubmitNav = document.createElement('div');
-    preSubmitNav.style.cssText = 'display:flex; gap:10px; margin-bottom:14px;';
+    preSubmitNav.style.cssText = 'display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px;';
     preSubmitNav.innerHTML = `
         <button class="btn-secondary" onclick="goToPrevLesson()">← Previous Lesson</button>
+        <button class="btn-secondary" onclick="openLessonPicker()">☰ All Lessons</button>
         <button class="btn-secondary" onclick="renderCheckpointSection(${levelNumber})">↻ Start Over</button>
     `;
     mount.appendChild(preSubmitNav);
@@ -1924,6 +1966,7 @@ window.chooseAmharicPathMode = chooseAmharicPathMode;
 window.continueChapterFromStudyTogether = continueChapterFromStudyTogether;
 window.postChapterFeedUpdate = postChapterFeedUpdate;
 window.exitReadingLevelDetail = exitReadingLevelDetail;
+window.openLessonPicker = openLessonPicker;
 window.renderCheckpointSection = renderCheckpointSection;
 window.closeChapterGoals = closeChapterGoals;
 window.goToPrevLesson = goToPrevLesson;
