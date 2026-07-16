@@ -1550,6 +1550,14 @@ async function renderCheckpointSection(levelNumber) {
         ? `<div class="checkpoint-result passed">✓ Passed — ${myProgress.checkpoint_score}% last time. Retake anytime.</div>`
         : "";
 
+    const preSubmitNav = document.createElement('div');
+    preSubmitNav.style.cssText = 'display:flex; gap:10px; margin-bottom:14px;';
+    preSubmitNav.innerHTML = `
+        <button class="btn-secondary" onclick="goToPrevLesson()">← Previous Lesson</button>
+        <button class="btn-secondary" onclick="renderCheckpointSection(${levelNumber})">↻ Start Over</button>
+    `;
+    mount.appendChild(preSubmitNav);
+
     questions.forEach((q, qIndex) => {
         const card = document.createElement('div');
         card.className = 'checkpoint-question';
