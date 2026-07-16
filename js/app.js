@@ -27,7 +27,7 @@ const TEAMS = ["Red Team 🔴", "Blue Team 🔵", "Green Team 🟢", "Yellow Tea
 // ---------------------------------------------------------------------------
 
 let currentUser = null;
-let currentProfile = null; // { id, email, nickname, avatar, team_id, is_admin, is_captain, is_suspended }
+let currentProfile = null; // { id, email, nickname, avatar, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode }
 let masteredLetters = [];
 let activeBaseFidel = null;
 let activeFamilyArrayData = [];
