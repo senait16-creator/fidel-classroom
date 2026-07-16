@@ -65,6 +65,13 @@ let readingLevelDetailReturnScreen = "readingLevelsScreen";
 // chapter without a second fetch.
 let studyTogetherCurrentLevel = null;
 
+// Where the chapter LIST's own back button goes — null (default) means
+// Independent Study, so it exits My Amharic Path entirely. Set to
+// "studyTogetherScreen" when the list was opened via Study Together's
+// "See All Chapters" link, so backing out (and finishing/backing out of
+// any chapter started from that list) returns to Study Together instead.
+let chapterListReturnScreen = null;
+
 // -----------------------------------------------------------------------------
 // Entry point — gated behind a self-reported "can you read the Fidel?"
 // question, then a one-time choice between Independent Study (solo,
@@ -86,6 +93,7 @@ function enterAmharicPath() {
         showScreen("studyTogetherScreen");
         renderStudyTogetherScreen();
     } else if (currentProfile.amharic_path_mode === "independent") {
+        chapterListReturnScreen = null;
         showScreen("readingLevelsScreen");
         renderReadingLevelsList();
     } else {
@@ -121,6 +129,7 @@ async function chooseAmharicPathMode(mode) {
         showScreen("studyTogetherScreen");
         renderStudyTogetherScreen();
     } else {
+        chapterListReturnScreen = null;
         showScreen("readingLevelsScreen");
         renderReadingLevelsList();
     }
@@ -131,6 +140,26 @@ function exitAmharicPath() {
         enterModeSelect();
     } else {
         showScreen("studentDashboard");
+    }
+}
+
+// Opens the full chapter list from within Study Together — reuses the
+// exact same list/grid Independent Study uses (chapters are shared
+// between both modes), but remembers to route back to Study Together
+// instead of exiting My Amharic Path entirely.
+function openAllChaptersFromStudyTogether() {
+    chapterListReturnScreen = "studyTogetherScreen";
+    showScreen("readingLevelsScreen");
+    renderReadingLevelsList();
+}
+
+function exitChapterList() {
+    if (chapterListReturnScreen === "studyTogetherScreen") {
+        chapterListReturnScreen = null;
+        showScreen("studyTogetherScreen");
+        renderStudyTogetherScreen();
+    } else {
+        exitAmharicPath();
     }
 }
 
@@ -255,7 +284,7 @@ async function renderReadingLevelsList() {
 
         card.querySelector('.chapter-start-btn').onclick = (e) => {
             e.stopPropagation();
-            readingLevelDetailReturnScreen = "readingLevelsScreen";
+            readingLevelDetailReturnScreen = chapterListReturnScreen === "studyTogetherScreen" ? "studyTogetherScreen" : "readingLevelsScreen";
             enterChapter(level.level_number);
         };
         card.querySelector('.chapter-goals-btn').onclick = (e) => {
@@ -362,12 +391,14 @@ async function renderStudyTogetherChapterCard() {
             <button type="button" class="btn-primary study-together-continue-btn" style="width:100%; margin-top:10px;">
                 ${isComplete ? 'Review Chapter →' : 'Continue Chapter →'}
             </button>
+            <a href="javascript:void(0)" class="study-together-all-chapters-link">See all chapters →</a>
         </div>
     `;
 
     mount.querySelector('.study-together-continue-btn').onclick = () => {
         continueChapterFromStudyTogether(level.level_number);
     };
+    mount.querySelector('.study-together-all-chapters-link').onclick = openAllChaptersFromStudyTogether;
 }
 
 function renderStudyTogetherVerse() {
@@ -472,7 +503,7 @@ function openChapterGoals(level, mode) {
     const ctaBtn = document.getElementById('chapterGoalsCtaBtn');
     if (mode === 'start') {
         ctaBtn.innerText = 'Continue to Lesson 1 →';
-        ctaBtn.onclick = () => { closeChapterGoals(); readingLevelDetailReturnScreen = "readingLevelsScreen"; enterChapter(level.level_number); };
+        ctaBtn.onclick = () => { closeChapterGoals(); readingLevelDetailReturnScreen = chapterListReturnScreen === "studyTogetherScreen" ? "studyTogetherScreen" : "readingLevelsScreen"; enterChapter(level.level_number); };
     } else {
         ctaBtn.innerText = 'Got it ✓';
         ctaBtn.onclick = closeChapterGoals;
@@ -1879,6 +1910,8 @@ window.enterAmharicPath = enterAmharicPath;
 window.exitAmharicPath = exitAmharicPath;
 window.submitFidelGateAnswer = submitFidelGateAnswer;
 window.openAmharicPathChooser = openAmharicPathChooser;
+window.openAllChaptersFromStudyTogether = openAllChaptersFromStudyTogether;
+window.exitChapterList = exitChapterList;
 window.chooseAmharicPathMode = chooseAmharicPathMode;
 window.continueChapterFromStudyTogether = continueChapterFromStudyTogether;
 window.postChapterFeedUpdate = postChapterFeedUpdate;
