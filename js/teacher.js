@@ -253,6 +253,14 @@ async function removeStudentFromTeam(studentId, nickname) {
 
     showNotificationToast("Removing from team...");
 
+    // Grab the team BEFORE clearing it — removing a student lowers the
+    // team's required-member count, which can make it newly qualify for
+    // advancement even with no new approvals, but nothing else re-checks
+    // that automatically. Re-run the check right after so a team doesn't
+    // sit unlocked-but-not-advanced until someone manually hits Recalculate.
+    const { data: student } = await _supabase.from('profiles').select('team_id').eq('id', studentId).maybeSingle();
+    const previousTeamId = student?.team_id || null;
+
     const { error } = await _supabase
         .from('profiles')
         .update({ team_id: null })
@@ -264,6 +272,13 @@ async function removeStudentFromTeam(studentId, nickname) {
     }
 
     showNotificationToast(`${nickname} is now Practicing Solo.`);
+
+    if (previousTeamId) {
+        const { data: members } = await _supabase.from('profiles').select('id, is_captain').eq('team_id', previousTeamId);
+        const nonCaptain = (members || []).find(m => !m.is_captain);
+        if (nonCaptain) await checkAndUpdateTeamLevelCompletion(nonCaptain.id);
+    }
+
     await loadTeacherRosterData();
     await teacherRefreshConfigurationDropdowns();
 }
