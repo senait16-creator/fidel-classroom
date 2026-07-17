@@ -14,13 +14,20 @@
 // ---------------------------------------------------------------------------
 
 // Priority order when a student could match more than one status — most
-// actionable/blocking first. All-3-families-done wins outright (nothing
-// left for the student to practice), then the two attention-worthy
-// states, then plain progress. Label deliberately says "Ready for live
-// test" rather than "Level cleared" — clearing practice isn't the same
-// as being done with the level, and "cleared" reads like it is.
-function computeStudentChallengeStatus(team, familiesForLevel, studentRows, hasPendingWriting, hasHelpFlag) {
+// actionable/blocking first. Already-tested wins outright over everything
+// (nothing left for this student at all, individually) — checked BEFORE
+// all-3-families-done, since a student can have finished practice AND
+// already passed their live test; without this check they'd be stuck
+// showing "Ready for live test" forever even after actually taking it,
+// since student_family_progress alone can't tell the two states apart.
+// Then the two attention-worthy states, then plain progress. Label
+// deliberately says "Ready for live test" rather than "Level cleared" —
+// clearing practice isn't the same as being done with the level, and
+// "cleared" reads like it is.
+function computeStudentChallengeStatus(team, familiesForLevel, studentRows, hasPendingWriting, hasHelpFlag, hasApprovedLevelCompletion) {
     const rowFor = (base) => studentRows.find(r => r.base_letter === base);
+
+    if (hasApprovedLevelCompletion) return { key: 'test_passed', label: '✓ Passed — waiting on team', family: null };
 
     const allCleared = familiesForLevel.length > 0 && familiesForLevel.every(f => {
         const row = rowFor(f);
@@ -62,7 +69,8 @@ async function loadTeacherRosterData() {
         { data: progressRows },
         { data: pendingSubs },
         { data: helpFlags },
-        { data: userProgress }
+        { data: userProgress },
+        { data: approvedLevelCompletions }
     ] = await Promise.all([
         _supabase.from('profiles').select('id, nickname, avatar, email, team_id, is_captain, is_admin'),
         _supabase.from('teams').select('id, name, current_level'),
@@ -70,7 +78,8 @@ async function loadTeacherRosterData() {
         _supabase.from('student_family_progress').select('student_id, base_letter, level_number, streak_passed, writing_passed, best_streak'),
         _supabase.from('writing_submissions').select('student_id').eq('status', 'pending'),
         _supabase.from('help_flags').select('student_id').eq('is_resolved', false),
-        _supabase.from('user_progress').select('user_id, mastered_letters')
+        _supabase.from('user_progress').select('user_id, mastered_letters'),
+        _supabase.from('level_completion_requests').select('student_id, level_number').eq('status', 'approved')
     ]);
 
     const realStudents = (students || []).filter(s => !s.is_admin);
@@ -96,6 +105,16 @@ async function loadTeacherRosterData() {
     const pendingWritingStudentIds = new Set((pendingSubs || []).map(r => r.student_id));
     const helpFlagStudentIds = new Set((helpFlags || []).map(r => r.student_id));
 
+    // Keyed by student_id -> Set of level_numbers they have an approved
+    // level_completion_requests row for. A student can have old approvals
+    // from levels their team has since moved past, so this still needs to
+    // be checked against the team's CURRENT level, same as progressByStudent.
+    const approvedLevelsByStudent = {};
+    (approvedLevelCompletions || []).forEach(row => {
+        if (!approvedLevelsByStudent[row.student_id]) approvedLevelsByStudent[row.student_id] = new Set();
+        approvedLevelsByStudent[row.student_id].add(row.level_number);
+    });
+
     const masteredByStudent = {};
     (userProgress || []).forEach(row => { masteredByStudent[row.user_id] = (row.mastered_letters || []).length; });
 
@@ -115,9 +134,11 @@ async function loadTeacherRosterData() {
         const level = levelsByNumber[team.current_level || 1];
         const families = level?.letter_families || [];
         const rowsForLevel = (progressByStudent[s.id] || []).filter(r => r.level_number === (team.current_level || 1));
+        const hasApprovedLevelCompletion = (approvedLevelsByStudent[s.id] || new Set()).has(team.current_level || 1);
         statusByStudent[s.id] = computeStudentChallengeStatus(
             team, families, rowsForLevel,
-            pendingWritingStudentIds.has(s.id), helpFlagStudentIds.has(s.id)
+            pendingWritingStudentIds.has(s.id), helpFlagStudentIds.has(s.id),
+            hasApprovedLevelCompletion
         );
     });
 
