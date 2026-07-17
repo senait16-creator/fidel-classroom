@@ -114,7 +114,11 @@ async function computeTeamRaceStandings() {
     });
 
     const standings = Object.values(byTeam);
-    standings.sort((a, b) => b.overallPct - a.overallPct);
+    // Level always wins first — a team that just advanced and reset to 0%
+    // on the new level's families is still ahead of any team still on a
+    // lower level, no matter that team's percent. Percent only breaks
+    // ties between teams on the same level.
+    standings.sort((a, b) => (b.level - a.level) || (b.overallPct - a.overallPct));
     return standings;
 }
 
