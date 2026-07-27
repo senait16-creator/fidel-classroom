@@ -22,6 +22,8 @@ function resetToGate() {
     document.getElementById("credentialFields").style.display = "none";
     const adminGate = document.getElementById("adminViewSelectorGate");
     if (adminGate) adminGate.style.display = "none";
+    const accessPendingScreen = document.getElementById("accessPendingScreen");
+    if (accessPendingScreen) accessPendingScreen.style.display = "none";
 
     const emailField = document.getElementById("email");
     const passwordField = document.getElementById("password");
@@ -127,12 +129,22 @@ async function resolveCaptainStatus(profile) {
     return { ...profile, is_captain: actuallyCaptain };
 }
 
+// An account only unlocks the app once a teacher has either approved it
+// as a real Fidel Challenge student ('approved') or granted paid explore
+// access ('explore'). Everyone who already existed before this gate was
+// added was auto-approved in the same migration that created the column,
+// so this only ever blocks brand-new signups.
+function hasAppAccess(profile) {
+    return profile?.access_status === 'approved' || profile?.access_status === 'explore';
+}
+window.hasAppAccess = hasAppAccess;
+
 async function proceedFlowMap(user) {
     currentUser = user;
 
     const { data: profile, error: profileError } = await _supabase
         .from('profiles')
-        .select('id, email, nickname, avatar, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode')
+        .select('id, email, nickname, avatar, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode, access_status')
         .eq('id', user.id)
         .maybeSingle();
 
@@ -161,6 +173,12 @@ async function proceedFlowMap(user) {
     if (profile && profile.nickname) {
         selectedAvatarSymbol = profile.avatar || "🦁";
         document.getElementById("authScreen").style.display = "none";
+
+        if (!hasAppAccess(currentProfile)) {
+            showAccessPendingScreen();
+            return;
+        }
+
         await applyProfileToHeader(profile);
 
         const modeGreetSub = document.getElementById('modeGreetingSub');
@@ -188,6 +206,47 @@ if (SHOW_INTRO) {
         document.getElementById("authScreen").style.display = "none";
         document.getElementById("profileSetupScreen").style.display = "block";
         prefillProfileSetupScreen(null);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Access pending — shown instead of the dashboard/mode-select for any
+// account that isn't approved or paid-explore yet.
+// ---------------------------------------------------------------------------
+
+function showAccessPendingScreen() {
+    if (typeof hideAllScreens === 'function') hideAllScreens();
+    document.getElementById("authScreen").style.display = "none";
+    document.getElementById("profileSetupScreen").style.display = "none";
+    document.getElementById("accessPendingScreen").style.display = "flex";
+}
+
+// Re-fetches the profile without a full log-out/log-in, so a student can
+// just tap "Check Again" right after their teacher approves them.
+async function recheckAccessStatus() {
+    if (!currentUser) return resetToGate();
+
+    showNotificationToast("Checking...");
+
+    const { data: profile } = await _supabase
+        .from('profiles')
+        .select('id, email, nickname, avatar, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode, access_status')
+        .eq('id', currentUser.id)
+        .maybeSingle();
+
+    currentProfile = await resolveCaptainStatus(profile || currentProfile);
+
+    if (!hasAppAccess(currentProfile)) {
+        return showNotificationToast("Still pending — check back soon!");
+    }
+
+    document.getElementById("accessPendingScreen").style.display = "none";
+    await applyProfileToHeader(currentProfile);
+
+    if (typeof showCharacterGuide === 'function') {
+        showCharacterGuide();
+    } else {
+        enterModeSelect();
     }
 }
 
@@ -341,15 +400,20 @@ async function saveProfileData(event) {
     // Refresh local cache
     const { data: refreshedProfile } = await _supabase
         .from('profiles')
-        .select('id, email, nickname, avatar, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode')
+        .select('id, email, nickname, avatar, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode, access_status')
         .eq('id', user.id)
         .maybeSingle();
     currentProfile = await resolveCaptainStatus(refreshedProfile || currentProfile);
 
-    if (currentProfile) await applyProfileToHeader(currentProfile);
-
     document.getElementById("profileSetupScreen").style.display = "none";
     if (saveBtn) { saveBtn.disabled = false; saveBtn.innerText = "Save Changes"; }
+
+    if (!hasAppAccess(currentProfile)) {
+        showAccessPendingScreen();
+        return;
+    }
+
+    if (currentProfile) await applyProfileToHeader(currentProfile);
 
     if (isEditingProfile) {
         showNotificationToast("Profile updated!");
@@ -549,3 +613,5 @@ window.saveProfileData                = saveProfileData;
 window.switchAdminPanelsFromDashboard = switchAdminPanelsFromDashboard;
 window.showOnboardingCard             = showOnboardingCard;
 window.routeAdminTerminalDirectly     = switchAdminPanelsFromDashboard;
+window.showAccessPendingScreen        = showAccessPendingScreen;
+window.recheckAccessStatus            = recheckAccessStatus;
