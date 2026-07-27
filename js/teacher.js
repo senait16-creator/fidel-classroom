@@ -10,6 +10,77 @@
 // =============================================================================
 
 // ---------------------------------------------------------------------------
+// Access requests — new sign-ups start 'pending' and see nothing but a
+// waiting screen until approved here, either as a real Fidel Challenge
+// student ('approved') or as paid Explore access ('explore'), for anyone
+// who wants full access without being an enrolled student (e.g. a paying
+// non-student). See access_gate_setup.sql for the schema/migration.
+// ---------------------------------------------------------------------------
+
+async function loadTeacherAccessRequests(mountId) {
+    const mount = document.getElementById(mountId);
+    if (!mount) return;
+    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
+
+    const { data: pending, error } = await _supabase
+        .from('profiles')
+        .select('id, nickname, email, avatar')
+        .eq('access_status', 'pending')
+        .order('nickname');
+
+    if (error) {
+        console.error("Failed to load access requests:", error);
+        mount.innerHTML = `<p style="color:#ef4444; font-size:13px;">Couldn't load: ${error.message}</p>`;
+        return;
+    }
+
+    if (!pending || pending.length === 0) {
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No pending access requests.</p>`;
+        return;
+    }
+
+    mount.innerHTML = "";
+    pending.forEach(p => {
+        const row = document.createElement('div');
+        row.className = "teacher-submission-card";
+        row.style.cssText = "display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;";
+        row.innerHTML = `
+            <div>
+                <strong>${p.avatar || '🦁'} ${p.nickname || 'Unnamed'}</strong>
+                <div style="font-size:12px; color:#64748b;">${p.email || ''}</div>
+            </div>
+            <div style="display:flex; gap:8px;">
+                <button class="btn-approve">✓ Approve (Student)</button>
+                <button class="btn-primary" style="width:auto; padding:8px 14px; font-size:13px; background:#7c3aed;">💰 Grant Explore ($5)</button>
+            </div>
+        `;
+        row.querySelector('.btn-approve').onclick = () => approveAccessRequest(p.id, 'approved', mountId);
+        row.querySelector('.btn-primary').onclick = () => approveAccessRequest(p.id, 'explore', mountId);
+        mount.appendChild(row);
+    });
+}
+window.loadTeacherAccessRequests = loadTeacherAccessRequests;
+
+async function approveAccessRequest(studentId, status, mountId) {
+    showNotificationToast("Updating access...");
+
+    const { error } = await _supabase
+        .from('profiles')
+        .update({ access_status: status })
+        .eq('id', studentId);
+
+    if (error) {
+        console.error("Failed to update access status:", error);
+        return showNotificationToast("Couldn't update: " + error.message);
+    }
+
+    showGobezToast(status === 'explore' ? "Explore access granted! 🎉" : "Approved! 🎉");
+    await loadTeacherAccessRequests(mountId);
+    if (typeof loadTeacherClassroomOverview === 'function') await loadTeacherClassroomOverview();
+}
+window.approveAccessRequest = approveAccessRequest;
+
+// ---------------------------------------------------------------------------
 // Roster
 // ---------------------------------------------------------------------------
 
@@ -954,13 +1025,15 @@ async function renderTeacherHealthAndTasks() {
         { data: levelRequests },
         { data: helpFlags },
         { data: lessonsToday },
-        { data: allProfiles }
+        { data: allProfiles },
+        { data: pendingAccess }
     ] = await Promise.all([
         _supabase.from('writing_submissions').select('id, student_id').eq('status', 'pending'),
         _supabase.from('level_completion_requests').select('id').eq('status', 'pending'),
         _supabase.from('help_flags').select('id').eq('is_resolved', false),
         _supabase.from('team_meetings').select('team_id').eq('day_of_week', todayWeekday).not('lesson_time', 'is', null),
-        _supabase.from('profiles').select('id, is_admin')
+        _supabase.from('profiles').select('id, is_admin'),
+        _supabase.from('profiles').select('id').eq('access_status', 'pending')
     ]);
 
     const pendingWritingCount = (pendingSubs || []).length;
@@ -968,16 +1041,27 @@ async function renderTeacherHealthAndTasks() {
     const levelRequestCount = (levelRequests || []).length;
     const helpFlagCount = (helpFlags || []).length;
     const lessonsTodayCount = (lessonsToday || []).length;
+    const pendingAccessCount = (pendingAccess || []).length;
 
     setHealthTile('healthLessonsToday', lessonsTodayCount, false);
     setHealthTile('healthPendingReviews', pendingWritingCount);
     setHealthTile('healthLiveTestRequests', levelRequestCount);
     setHealthTile('healthHelpFlags', helpFlagCount);
+    setHealthTile('healthAccessRequests', pendingAccessCount);
 
     const tasksMount = document.getElementById('teacherTodaysTasksMount');
     if (!tasksMount) return;
 
     tasksMount.innerHTML = `
+        <div class="teacher-task-row">
+            <div class="teacher-task-icon">🔑</div>
+            <div>
+                <div class="teacher-task-label">Access requests waiting</div>
+                <div class="teacher-task-sub">${pendingAccessCount > 0 ? 'New sign-ups need a decision' : 'None right now'}</div>
+            </div>
+            ${pendingAccessCount > 0 ? `<span class="teacher-task-count">${pendingAccessCount}</span>` : ''}
+            <button class="teacher-task-go" onclick="jumpToTeacherPanel('accessRequestsPanelBody')">View →</button>
+        </div>
         <div class="teacher-task-row">
             <div class="teacher-task-icon">✍️</div>
             <div>

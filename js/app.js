@@ -423,6 +423,7 @@ function launchDashboard(viewMode) {
 
 if (viewMode === "teacher") {
     showScreen("teacherOnlyDashboard");
+    if (typeof loadTeacherAccessRequests === 'function') loadTeacherAccessRequests('accessRequestsQueueMount');
     loadTeacherRosterData();
     teacherRefreshConfigurationDropdowns();
     loadTeacherWritingQueue();
