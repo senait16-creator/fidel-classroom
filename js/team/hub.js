@@ -585,7 +585,10 @@ async function captainApproveSubmission(submissionId, studentId, baseLetter) {
 
     if (subError) return showNotificationToast('Approval failed: ' + subError.message);
 
-    await creditApprovedWritingToProgress(studentId, baseLetter);
+    const creditError = await creditApprovedWritingToProgress(studentId, baseLetter);
+    if (creditError) {
+        showNotificationToast("⚠️ Writing approved, but progress wasn't credited: " + creditError.message);
+    }
 
     // Write a notification so the student sees it on next hub load
     await _supabase.from('team_notifications').insert({

@@ -625,9 +625,16 @@ async function approveWritingSubmission(submissionId, studentId, baseLetter) {
         return showNotificationToast("Approval failed: " + subError.message);
     }
 
-    await creditApprovedWritingToProgress(studentId, baseLetter);
+    const creditError = await creditApprovedWritingToProgress(studentId, baseLetter);
 
-    showNotificationToast("Submission approved! ✓");
+    if (creditError) {
+        // Don't claim success when the actual progress credit failed — this
+        // exact silent failure went undetected for weeks before. Surface
+        // the real Postgres/PostgREST error so it can actually get fixed.
+        showNotificationToast("⚠️ Writing approved, but progress wasn't credited: " + creditError.message);
+    } else {
+        showNotificationToast("Submission approved! ✓");
+    }
     await loadTeacherWritingQueue();
     await checkAndUpdateTeamLevelCompletion(studentId);
     if (typeof loadTeacherClassroomOverview === 'function') await loadTeacherClassroomOverview();

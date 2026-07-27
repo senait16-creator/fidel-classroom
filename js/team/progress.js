@@ -280,7 +280,11 @@ async function creditApprovedWritingToProgress(studentId, baseLetter) {
         .from('student_family_progress')
         .upsert(payload, { onConflict: 'student_id,base_letter' });
 
+    // Returned (not just logged) so the caller can surface a visible error
+    // instead of showing "Submission approved!" while this silently failed
+    // — which is exactly what happened undetected for weeks before this.
     if (error) console.error("Failed to credit approved writing to progress:", error);
+    return error || null;
 }
 
 // Lazy, per-team fetch of the protected, student-identifying tables —
