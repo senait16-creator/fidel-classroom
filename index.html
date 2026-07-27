@@ -94,6 +94,17 @@
     <button id="saveNewPasswordBtn" class="btn-primary">Save New Password</button>
 </div>
 
+<div id="accessPendingScreen" class="app-card screen-fade-in" style="display:none; text-align:center;">
+    <div style="font-size:40px; margin-bottom:8px;">⏳</div>
+    <h2 class="main-title" style="font-size:22px;">Almost there!</h2>
+    <p class="subtitle" style="margin-bottom:24px;">
+        Your account is waiting for your teacher to approve access.
+        Reach out to your teacher, then check back here.
+    </p>
+    <button class="btn-primary" onclick="recheckAccessStatus()">🔄 Check Again</button>
+    <button class="btn-secondary" style="margin-top:10px;" onclick="logout()">Log Out</button>
+</div>
+
 <!-- ============================================================
      PROFILE SETUP
      ============================================================ -->
@@ -158,6 +169,10 @@
          the same tables the panels below already use.
          ============================================================ -->
     <div class="teacher-health-grid" id="teacherHealthGrid">
+        <div class="teacher-health-tile" id="healthAccessRequests">
+            <div class="teacher-health-value">–</div>
+            <div class="teacher-health-label">Access Requests</div>
+        </div>
         <div class="teacher-health-tile" id="healthLessonsToday">
             <div class="teacher-health-value">–</div>
             <div class="teacher-health-label">Lessons Today</div>
@@ -192,6 +207,17 @@
     </div>
 
     <div class="teacher-overview-divider">everything below continues to work exactly as it does now</div>
+
+<div class="teacher-panel" style="margin-bottom:20px;">
+    <div class="teacher-panel-header" onclick="toggleTeacherPanel('accessRequestsPanelBody', this)">
+        <h2 style="font-size:18px; color:var(--neutral-dark);">🔑 Access Requests</h2>
+        <button class="teacher-panel-toggle">▼</button>
+    </div>
+    <div class="teacher-panel-body" id="accessRequestsPanelBody">
+        <p style="font-size:13px; color:#64748b; margin-bottom:12px;">New sign-ups waiting for access — approve real students into the Fidel Challenge classroom, or grant paid Explore access to anyone else.</p>
+        <div id="accessRequestsQueueMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
+    </div>
+</div>
 
 <div class="teacher-panel" style="margin-bottom:20px;">
     <div class="teacher-panel-header" onclick="toggleTeacherPanel('rosterPanelBody', this)">
@@ -1568,13 +1594,13 @@
 <!-- END CAN-DO STATEMENTS -->
 
 <script src="js/navigation.js?v=3" defer></script>
-<script src="js/app.js?v=19" defer></script>
-<script src="js/auth.js?v=13" defer></script>
+<script src="js/app.js?v=20" defer></script>
+<script src="js/auth.js?v=14" defer></script>
 <script src="js/guide.js?v=10" defer></script>
 <script src="js/utils/compress.js?v=9" defer></script>
 <script src="js/game.js?v=9" defer></script>
 <script src="js/submissions.js?v=14" defer></script>
-<script src="js/teacher.js?v=28" defer></script>
+<script src="js/teacher.js?v=29" defer></script>
 <script src="js/reading.js?v=24" defer></script>
     <script src="js/letterboard.js?v=10" defer></script>
 <script src="js/team/progress.js?v=20" defer></script>
