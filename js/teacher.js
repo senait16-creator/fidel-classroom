@@ -497,9 +497,12 @@ async function teacherAssignStudentToPod() {
 
     showNotificationToast("Updating team assignment...");
 
+    // Being on a team IS being in the Fidel Challenge — assigning one
+    // should count as access approval too, so this doesn't also require a
+    // separate click in the Access Requests panel.
     const { error } = await _supabase
         .from('profiles')
-        .update({ team_id: chosenTeamId })
+        .update({ team_id: chosenTeamId, access_status: 'approved' })
         .eq('id', studentId);
 
     if (error) {
@@ -511,6 +514,8 @@ async function teacherAssignStudentToPod() {
 
     await loadTeacherRosterData();
     await teacherRefreshConfigurationDropdowns();
+    if (typeof loadTeacherAccessRequests === 'function') await loadTeacherAccessRequests('accessRequestsQueueMount');
+    if (typeof loadTeacherClassroomOverview === 'function') await loadTeacherClassroomOverview();
 }
 
 // ---------------------------------------------------------------------------
