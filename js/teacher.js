@@ -143,7 +143,7 @@ async function loadTeacherRosterData() {
         { data: userProgress },
         { data: approvedLevelCompletions }
     ] = await Promise.all([
-        _supabase.from('profiles').select('id, nickname, avatar, email, team_id, is_captain, is_admin'),
+        _supabase.from('profiles').select('id, nickname, avatar, email, team_id, is_captain, is_admin, access_status'),
         _supabase.from('teams').select('id, name, current_level'),
         (typeof fetchChallengeLevels === 'function' ? fetchChallengeLevels() : Promise.resolve([])),
         _supabase.from('student_family_progress').select('student_id, base_letter, level_number, streak_passed, writing_passed, best_streak'),
@@ -292,11 +292,14 @@ async function loadTeacherRosterData() {
             soloMount.innerHTML = `<div class="roster-solo-card">${soloStudents.map(s => {
                 const masteredCount = masteredByStudent[s.id] || 0;
                 const sub = masteredCount > 0 ? `${masteredCount} / 34 letters practiced` : 'Not started yet';
+                const isPending = s.access_status === 'pending';
                 return `
                     <div class="roster-solo-row">
                         <span class="roster-solo-avatar">${s.avatar || '🦁'}</span>
                         <span class="roster-solo-name">${s.nickname}</span>
-                        <span class="roster-solo-sub">${sub}</span>
+                        ${isPending
+                            ? `<span class="roster-pending-chip">⏳ Pending Access</span>`
+                            : `<span class="roster-solo-sub">${sub}</span>`}
                         <button class="roster-student-menu-btn" onclick="toggleRosterActions('solo-${s.id}')" aria-label="Actions">⋯</button>
                         <div class="roster-student-actions roster-solo-actions" id="rosterActions-solo-${s.id}" style="display:none;">
                             <button class="btn-secondary" style="font-size:11px; padding:6px 10px; color:#b45309; border:1px solid #fed7aa;" onclick="teacherResetStudentLevel('${s.id}', '${s.nickname.replace(/'/g, "\\'")}')">🔄 Reset a Level</button>
@@ -907,7 +910,7 @@ async function loadTeacherTeamProgress() {
                 </div>
                 <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
                     <button class="btn-secondary btn-edit-meeting" style="font-size:11px; padding:6px 10px;" title="Edit this team's lesson day/time">📅 Lesson Schedule</button>
-                    <button class="btn-secondary btn-recheck" style="font-size:11px; padding:6px 10px;" title="Recalculate this team's advancement status. Safe to run any time, only advances a team that's actually ready">🔄 Recalculate</button>
+                    <button class="btn-secondary btn-recheck" style="font-size:12px; padding:10px 14px; min-height:40px;" title="Recalculate this team's advancement status. Safe to run any time, only advances a team that's actually ready">🔄 Recalculate</button>
                     <button class="team-members-toggle" aria-label="Show team members">▼</button>
                 </div>
             </div>
@@ -1028,14 +1031,12 @@ async function renderTeacherHealthAndTasks() {
     const [
         { data: pendingSubs },
         { data: levelRequests },
-        { data: helpFlags },
         { data: lessonsToday },
         { data: allProfiles },
         { data: pendingAccess }
     ] = await Promise.all([
         _supabase.from('writing_submissions').select('id, student_id').eq('status', 'pending'),
         _supabase.from('level_completion_requests').select('id').eq('status', 'pending'),
-        _supabase.from('help_flags').select('id').eq('is_resolved', false),
         _supabase.from('team_meetings').select('team_id').eq('day_of_week', todayWeekday).not('lesson_time', 'is', null),
         _supabase.from('profiles').select('id, is_admin'),
         _supabase.from('profiles').select('id').eq('access_status', 'pending')
@@ -1044,14 +1045,12 @@ async function renderTeacherHealthAndTasks() {
     const pendingWritingCount = (pendingSubs || []).length;
     const pendingWritingStudents = new Set((pendingSubs || []).map(s => s.student_id)).size;
     const levelRequestCount = (levelRequests || []).length;
-    const helpFlagCount = (helpFlags || []).length;
     const lessonsTodayCount = (lessonsToday || []).length;
     const pendingAccessCount = (pendingAccess || []).length;
 
     setHealthTile('healthLessonsToday', lessonsTodayCount, false);
     setHealthTile('healthPendingReviews', pendingWritingCount);
     setHealthTile('healthLiveTestRequests', levelRequestCount);
-    setHealthTile('healthHelpFlags', helpFlagCount);
     setHealthTile('healthAccessRequests', pendingAccessCount);
 
     const tasksMount = document.getElementById('teacherTodaysTasksMount');
@@ -1084,15 +1083,6 @@ async function renderTeacherHealthAndTasks() {
             </div>
             ${levelRequestCount > 0 ? `<span class="teacher-task-count">${levelRequestCount}</span>` : ''}
             <button class="teacher-task-go" onclick="jumpToTeacherPanel('levelCompletionPanelBody')">View →</button>
-        </div>
-        <div class="teacher-task-row">
-            <div class="teacher-task-icon">🙋</div>
-            <div>
-                <div class="teacher-task-label">Help flags open</div>
-                <div class="teacher-task-sub">${helpFlagCount > 0 ? 'Students waiting on their captain' : 'No help flags right now'}</div>
-            </div>
-            ${helpFlagCount > 0 ? `<span class="teacher-task-count">${helpFlagCount}</span>` : ''}
-            <button class="teacher-task-go" onclick="jumpToTeacherPanel('rosterPanelBody')">View →</button>
         </div>
     `;
 }
