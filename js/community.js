@@ -70,7 +70,7 @@ async function renderCommunityFeed() {
         mount.innerHTML = `
             <div class="team-hub-empty" style="text-align:center; padding:32px 16px;">
                 <div style="font-size:32px; margin-bottom:8px;">🎨</div>
-                No posts yet — approved writing shared from levels will show up here!
+                No posts yet. Approved writing shared from levels will show up here!
             </div>`;
         return;
     }
@@ -258,7 +258,7 @@ async function openFeaturedWritingPicker(weekStart) {
                             data-letter="${sub.base_letter}" data-image="${sub.image_url}"
                             data-name="${(sub.profiles?.nickname || 'Student').replace(/"/g, '&quot;')}">
                         <img src="${sub.image_url}" alt="writing sample">
-                        <span>${sub.profiles?.avatar || '🦁'} ${sub.profiles?.nickname || 'Student'} — ${sub.base_letter}</span>
+                        <span>${sub.profiles?.avatar || '🦁'} ${sub.profiles?.nickname || 'Student'}: ${sub.base_letter}</span>
                     </button>
                 `).join('')}
             </div>
@@ -351,7 +351,7 @@ async function renderRecentAchievements(mountId) {
     const recent = events.slice(0, 12);
 
     if (recent.length === 0) {
-        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px; margin:0;">Nothing new this week yet — check back soon!</p>`;
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px; margin:0;">Nothing new this week yet. Check back soon!</p>`;
         return;
     }
 

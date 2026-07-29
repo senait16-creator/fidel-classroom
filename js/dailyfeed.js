@@ -28,9 +28,9 @@ const VERSE_LIBRARY = [
             { amharic: "እግዚአብሔር", translit: "Igziabiher", meaning: "God / the LORD" },
             { amharic: "ሰማይንና", translit: "semayinna", meaning: "heaven(s), and (ሰማይ \"sky\" + -ን object marker + -ና \"and\")" },
             { amharic: "ምድርን", translit: "midirin", meaning: "the earth (object) (ምድር \"earth\" + -ን object marker)" },
-            { amharic: "ፈጠረ", translit: "fetere", meaning: "created (he) — past tense verb" }
+            { amharic: "ፈጠረ", translit: "fetere", meaning: "created (he), past tense verb" }
         ],
-        grammarNote: "Amharic is verb-final: the verb ፈጠረ (\"created\") comes at the very end, after both objects. Notice -ን attached to ሰማይ and ምድር — that suffix marks the direct object of the sentence."
+        grammarNote: "Amharic is verb-final: the verb ፈጠረ (\"created\") comes at the very end, after both objects. Notice -ን attached to ሰማይ and ምድር: that suffix marks the direct object of the sentence."
     },
     {
         amharic: "እግዚአብሔር እረኛዬ ነው፤ የሚያሳጣኝ የለም።",
@@ -40,10 +40,10 @@ const VERSE_LIBRARY = [
         breakdown: [
             { amharic: "እግዚአብሔር", translit: "Igziabiher", meaning: "the LORD" },
             { amharic: "እረኛዬ", translit: "irenyaye", meaning: "my shepherd (እረኛ \"shepherd\" + -ዬ \"my\")" },
-            { amharic: "ነው", translit: "now", meaning: "is — the verb \"to be\"" },
+            { amharic: "ነው", translit: "now", meaning: "is (the verb \"to be\")" },
             { amharic: "የለም", translit: "yelem", meaning: "there is not / does not exist" }
         ],
-        grammarNote: "-ዬ is a common possessive ending meaning \"my\" — attach it straight onto a noun, like እረኛ (\"shepherd\") → እረኛዬ (\"my shepherd\")."
+        grammarNote: "-ዬ is a common possessive ending meaning \"my\": attach it straight onto a noun, like እረኛ (\"shepherd\") → እረኛዬ (\"my shepherd\")."
     },
     {
         amharic: "ይህ እግዚአብሔር የሠራው ቀን ነው፤ በእርሱ ደስ ይበለን ሐሴትም እናድርግ።",
@@ -52,10 +52,10 @@ const VERSE_LIBRARY = [
         reference: "Psalm 118:24",
         breakdown: [
             { amharic: "ይህ", translit: "yih", meaning: "this" },
-            { amharic: "የሠራው", translit: "yeserawi", meaning: "that (he) made — relative clause (የ- \"that/which\" + ሠራ \"made\")" },
+            { amharic: "የሠራው", translit: "yeserawi", meaning: "that (he) made, relative clause (የ- \"that/which\" + ሠራ \"made\")" },
             { amharic: "ቀን", translit: "k'en", meaning: "day" },
             { amharic: "በእርሱ", translit: "be'irsu", meaning: "in it (በ- \"in\" + እርሱ \"it/he\")" },
-            { amharic: "እናድርግ", translit: "inadirig", meaning: "let us do / let us make — \"we\" command form" }
+            { amharic: "እናድርግ", translit: "inadirig", meaning: "let us do / let us make (\"we\" command form)" }
         ],
         grammarNote: "የ- at the front of a verb turns it into a relative clause (\"that/which...\"): ሠራ (\"made\") → የሠራው (\"that he made\"). This is one of the most useful patterns in Amharic."
     },
@@ -66,10 +66,10 @@ const VERSE_LIBRARY = [
         reference: "Proverbs 3:5",
         breakdown: [
             { amharic: "ልብህ", translit: "libih", meaning: "your heart (ልብ \"heart\" + -ህ \"your,\" masculine)" },
-            { amharic: "ታመን", translit: "tamen", meaning: "trust! — command form" },
+            { amharic: "ታመን", translit: "tamen", meaning: "trust! (command form)" },
             { amharic: "ራስህ", translit: "rasih", meaning: "yourself (ራስ \"self\" + -ህ \"your\")" },
             { amharic: "ማስተዋል", translit: "mastewal", meaning: "understanding" },
-            { amharic: "አትደገፍ", translit: "atidegef", meaning: "do not lean/rely — negative command" }
+            { amharic: "አትደገፍ", translit: "atidegef", meaning: "do not lean/rely (negative command)" }
         ],
         grammarNote: "-ህ is \"your\" for a masculine \"you.\" አት- at the front of a verb makes a negative command (\"don't...\"): ደገፈ (\"lean on\") → አትደገፍ (\"don't lean on\")."
     },
@@ -80,12 +80,12 @@ const VERSE_LIBRARY = [
         reference: "Philippians 4:13",
         breakdown: [
             { amharic: "ኃይልን", translit: "hayilin", meaning: "strength (object) (ኃይል \"strength\" + -ን object marker)" },
-            { amharic: "በሚሰጠኝ", translit: "bemiset'egn", meaning: "who gives me — relative clause + -ኝ \"me\"" },
+            { amharic: "በሚሰጠኝ", translit: "bemiset'egn", meaning: "who gives me (relative clause + -ኝ \"me\")" },
             { amharic: "ክርስቶስ", translit: "kristos", meaning: "Christ" },
             { amharic: "ሁሉን", translit: "hulun", meaning: "all (of it) (ሁሉ \"all\" + -ን object marker)" },
-            { amharic: "እችላለሁ", translit: "ichilalehu", meaning: "I am able / I can — \"I\" present tense" }
+            { amharic: "እችላለሁ", translit: "ichilalehu", meaning: "I am able / I can (\"I\" present tense)" }
         ],
-        grammarNote: "-ኝ tacked onto a verb means \"me\": ይሰጠኝ (\"gives me\"). Compare with -ህ (\"your\") and -ዬ (\"my\") above — Amharic verbs and nouns both take these short person endings."
+        grammarNote: "-ኝ tacked onto a verb means \"me\": ይሰጠኝ (\"gives me\"). Compare with -ህ (\"your\") and -ዬ (\"my\") above. Amharic verbs and nouns both take these short person endings."
     }
 ];
 
@@ -138,7 +138,7 @@ function renderVerseOfDay(targetId = 'verseOfDayMount') {
         <div class="eyebrow">Verse of the Day</div>
         <p class="verse-amharic">${verse.amharic}</p>
         <p class="verse-translit">${verse.translit}</p>
-        <p class="verse-en">"${verse.english}" — ${verse.reference}</p>
+        <p class="verse-en">"${verse.english}" (${verse.reference})</p>
         <button type="button" class="verse-grammar-toggle" onclick="toggleVerseGrammar('${panelId}', this)">🔤 Grammar &amp; Vocab</button>
         <div id="${panelId}" class="verse-grammar-panel" style="display:none;">
             ${breakdownHTML}
@@ -257,7 +257,7 @@ async function renderTodayBanners(targetId = 'todayBannersMount') {
 
     const names = [...new Set((approvedToday || []).map(r => r.profiles?.nickname).filter(Boolean))];
     const levelUpSub = names.length === 0
-        ? 'No one yet today — could be you!'
+        ? 'No one yet today, could be you!'
         : names.length <= 2
             ? `${names.join(' and ')} cleared a level today.`
             : `${names.slice(0, 2).join(', ')} and ${names.length - 2} more cleared a level today.`;

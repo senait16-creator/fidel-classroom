@@ -56,7 +56,7 @@ function chooseModePractice() {
 
 async function chooseModeChallenge() {
     if (!currentProfile?.team_id) {
-        showNotificationToast("Fidel Challenge is team-based — your teacher will assign you to a team soon!");
+        showNotificationToast("Fidel Challenge is team-based. Your teacher will assign you to a team soon!");
         return;
     }
 
@@ -276,7 +276,7 @@ async function renderTeamUrgencyCard(team) {
         html = `
             <div class="team-urgency-title">🏁 ${team.name}</div>
             <p class="team-urgency-body">Everyone's working on Level ${currentLevel} together.</p>
-            <p class="team-urgency-sub">Keep practicing — every family you clear helps the team.</p>`;
+            <p class="team-urgency-sub">Keep practicing. Every family you clear helps the team.</p>`;
     }
 
     mount.innerHTML = html;
@@ -799,7 +799,7 @@ async function openChallengeFamilyDetail(fidelObj, levelNumber) {
         if (body) body.style.display = "none";
         const box = document.getElementById("challengeWritingStatusBox");
         box.style.display = "block";
-        box.innerHTML = `<div class="challenge-writing-status approved">👑 As team captain, you're exempt — focus on reviewing your team's submissions!</div>`;
+        box.innerHTML = `<div class="challenge-writing-status approved">👑 As team captain, you're exempt. Focus on reviewing your team's submissions!</div>`;
         return;
     }
 

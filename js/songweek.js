@@ -89,7 +89,7 @@ async function renderSongOfWeek(targetId = 'songOfWeekMount') {
                 <span class="song-platform-icon">${platform.icon}</span>
                 <div class="song-my-pick-text">
                     <strong>Your team's pick</strong>
-                    <span class="mini-sub">${platform.label} — tap to listen ↗</span>
+                    <span class="mini-sub">${platform.label}, tap to listen ↗</span>
                 </div>
             </a>
             <button type="button" class="qotd-edit-btn" onclick="toggleSongSubmitForm('${targetId}')">Change song</button>

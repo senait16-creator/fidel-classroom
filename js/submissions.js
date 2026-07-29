@@ -360,7 +360,7 @@ async function uploadSketchpadDrawingCanvasData() {
 
     } catch (err) {
         console.error('Share failed:', err);
-        showNotificationToast('Share failed — try again.');
+        showNotificationToast('Share failed. Try again.');
     }
 }
 
@@ -371,7 +371,7 @@ async function uploadSketchpadDrawingCanvasData() {
 async function submitWritingPhoto(file) {
     if (!file) return;
     if (!writingSubmitContext?.baseLetter) return showNotificationToast("Choose a letter before submitting.");
-    if (file.size > 25 * 1024 * 1024) return showNotificationToast("Photo is too large — please use one under 25MB.");
+    if (file.size > 25 * 1024 * 1024) return showNotificationToast("Photo is too large. Please use one under 25MB.");
 
     showNotificationToast("Compressing and uploading...");
     const compressed = typeof compressImage === 'function' ? await compressImage(file) : file;
@@ -480,7 +480,7 @@ async function shareApprovedWritingToClass(imageUrl, baseLetter, btnEl) {
     showGobezToast("Shared with the class! 🎉");
     if (btnEl) btnEl.outerHTML = `
         <p style="font-size:12px; color:#047857; margin-top:8px;">
-            🎉 Shared with the class — check the Community feed!
+            🎉 Shared with the class. Check the Community feed!
         </p>`;
 }
 
@@ -521,7 +521,7 @@ async function renderWritingStatusForFamily(baseLetter, targetId = "challengeWri
         if (existingShare && existingShare.length > 0) {
             statusHTML += `
                 <p style="font-size:12px; color:#047857; margin-top:8px;">
-                    🎉 Shared with the class — check the Community feed!
+                    🎉 Shared with the class. Check the Community feed!
                 </p>`;
         } else {
             statusHTML += `
@@ -531,7 +531,7 @@ async function renderWritingStatusForFamily(baseLetter, targetId = "challengeWri
                     🎉 Share to Community
                 </button>
                 <p style="font-size:11px; color:#94a3b8; margin-top:6px;">
-                    Optional — post your approved work to the Community feed for reactions.
+                    Optional: post your approved work to the Community feed for reactions.
                 </p>`;
         }
     } else if (latest.status === 'rejected') {
@@ -545,7 +545,7 @@ async function renderWritingStatusForFamily(baseLetter, targetId = "challengeWri
             const date  = new Date(sub.submitted_at).toLocaleDateString();
             const icon  = sub.status === 'approved' ? '✓' : sub.status === 'rejected' ? '✗' : '⏳';
             const color = sub.status === 'approved' ? '#166534' : sub.status === 'rejected' ? '#991b1b' : '#92400e';
-            return `<div style="font-size:11px; color:${color}; padding:3px 0; border-top:1px solid #f1f5f9; margin-top:4px;">${icon} ${date}${sub.reviewer_note ? ` — "${sub.reviewer_note}"` : ''}</div>`;
+            return `<div style="font-size:11px; color:${color}; padding:3px 0; border-top:1px solid #f1f5f9; margin-top:4px;">${icon} ${date}${sub.reviewer_note ? ` ("${sub.reviewer_note}")` : ''}</div>`;
         }).join('');
         statusHTML += `<div style="margin-top:8px;">${history}</div>`;
     }

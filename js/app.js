@@ -270,8 +270,8 @@ function maybeShowStreakExplainer(onConfirm) {
                       margin-bottom:16px;">
                 Match each Amharic letter to its sound.
                 Get <strong>20 correct in a row</strong> to pass.<br><br>
-                Miss one and your streak resets to zero —
-                take your time and think before you tap!
+                Miss one and your streak resets to zero.
+                Take your time and think before you tap!
             </p>
             <div style="background:#fffbeb; border:1px solid #fde68a;
                         border-radius:12px; padding:12px; margin-bottom:20px;
@@ -283,7 +283,7 @@ function maybeShowStreakExplainer(onConfirm) {
                     style="background:#166534; color:white; border:none;
                            border-radius:12px; padding:14px; width:100%;
                            font-size:15px; font-weight:700; cursor:pointer;">
-                Got it — Let's Play!
+                Got it, let's play!
             </button>
         </div>
     `;
@@ -514,7 +514,7 @@ const LOCKED_MODES = {
 
 function enterModeIfUnlocked(modeKey, enterFn) {
     if (LOCKED_MODES[modeKey]) {
-        showNotificationToast('🔒 Not available yet — coming soon!');
+        showNotificationToast('🔒 Not available yet, coming soon!');
         return;
     }
     enterFn();
@@ -862,7 +862,7 @@ async function loadTeamDashboard(user) {
         if (toggleBtn) toggleBtn.style.display = "none";
         headerRow.onclick = null;
         mount.classList.add("open");
-        mount.innerHTML = `<p class="pod-solo-message">You're practicing solo — no team chat here, but you can still use Practice mode anytime!</p>`;
+        mount.innerHTML = `<p class="pod-solo-message">You're practicing solo. No team chat here, but you can still use Practice mode anytime!</p>`;
         return;
     }
 

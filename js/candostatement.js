@@ -46,7 +46,7 @@ const CAN_DO_STATEMENTS = [
     { key: 'likes_dislikes',      category: 'Food & Dining',    text: "I can say what I like and don't like.",          verification: 'speaking' },
     { key: 'say_feelings',        category: 'Health & Feelings', text: "I can say how I'm feeling.",                    verification: 'speaking' },
     { key: 'describe_health_problem', category: 'Health & Feelings', text: 'I can describe a simple health problem.',   verification: 'speaking' },
-    { key: 'tell_my_story',       category: 'Fluency Milestones', text: 'I can tell my story in Amharic — introductions, family, and daily life.', verification: 'speaking' },
+    { key: 'tell_my_story',       category: 'Fluency Milestones', text: 'I can tell my story in Amharic: introductions, family, and daily life.', verification: 'speaking' },
     { key: 'extended_conversation', category: 'Fluency Milestones', text: 'I can have an extended conversation covering the past, present, and future.', verification: 'speaking' },
     { key: 'talk_weather',        category: 'Weather & Seasons', text: 'I can talk about the weather.',                  verification: 'speaking' },
     { key: 'talk_seasons',        category: 'Weather & Seasons', text: 'I can talk about the seasons.',                  verification: 'speaking' },
