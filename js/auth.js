@@ -237,7 +237,7 @@ async function recheckAccessStatus() {
     currentProfile = await resolveCaptainStatus(profile || currentProfile);
 
     if (!hasAppAccess(currentProfile)) {
-        return showNotificationToast("Still pending — check back soon!");
+        return showNotificationToast("Still pending. Check back soon!");
     }
 
     document.getElementById("accessPendingScreen").style.display = "none";

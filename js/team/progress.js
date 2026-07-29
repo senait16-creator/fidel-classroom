@@ -232,11 +232,11 @@ function computeLevelPacing(dayOfWeek, lessonTime, approved, required) {
         return { hoursUntil, status: 'ready', label: 'Ready for next lesson ✓' };
     }
     if (hoursUntil <= 24) {
-        return { hoursUntil, status: 'urgent', label: hoursUntil < 1 ? 'Lesson starting soon' : `Lesson in ${Math.round(hoursUntil)}h — not finished yet` };
+        return { hoursUntil, status: 'urgent', label: hoursUntil < 1 ? 'Lesson starting soon' : `Lesson in ${Math.round(hoursUntil)}h, not finished yet` };
     }
     if (hoursUntil <= 72) {
         const days = Math.round(hoursUntil / 24);
-        return { hoursUntil, status: 'watch', label: `Lesson in ${days} day${days === 1 ? '' : 's'} — keep going` };
+        return { hoursUntil, status: 'watch', label: `Lesson in ${days} day${days === 1 ? '' : 's'}, keep going` };
     }
     const days = Math.round(hoursUntil / 24);
     return { hoursUntil, status: 'ok', label: `Lesson in ${days} day${days === 1 ? '' : 's'}` };
@@ -661,7 +661,7 @@ async function renderLevelCompletionBanner(mountId) {
                 </p>
                 <p style="font-size:13px; color:#b45309; margin-bottom:16px;">
                     You've cleared all 3 families in Level ${status.level}! Book your live
-                    test now — read a letter aloud, then write a few from memory.
+                    test now: read a letter aloud, then write a few from memory.
                 </p>
                 <a href="${buildLiveTestSchedulingLink()}" target="_blank" rel="noopener"
                    class="btn-primary"
@@ -669,8 +669,8 @@ async function renderLevelCompletionBanner(mountId) {
                     📅 Schedule Your Live Test
                 </a>
                 <p style="font-size:12px; color:#92400e; margin-top:12px;">
-                    While you wait for your teammates, keep practicing —
-                    check the Community page for the class streak board!
+                    While you wait for your teammates, keep practicing.
+                    Check the Community page for the class streak board!
                 </p>
             </div>`;
     } else {

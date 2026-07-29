@@ -164,8 +164,8 @@ function selectBlockTokenTrackElement(element, index) {
         // animation on the cards is enough feedback and doesn't cover the
         // next cards. Toasts are reserved for real milestones.
         if (currentStreakScore === 5)        showNotificationToast("🔥 5 in a row!");
-        else if (currentStreakScore === 10)  showGobezToast("10 streak — halfway there!");
-        else if (currentStreakScore === 15)  showGobezToast("15 streak — almost there!");
+        else if (currentStreakScore === 10)  showGobezToast("10 streak, halfway there!");
+        else if (currentStreakScore === 15)  showGobezToast("15 streak, almost there!");
 
         if (activeChallengeContext) {
             activeChallengeContext.onStreakUpdate?.(currentStreakScore);

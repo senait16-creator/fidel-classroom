@@ -28,7 +28,7 @@
 
 async function renderTeamHub() {
     if (!currentProfile?.team_id) {
-        showNotificationToast("You're not on a team yet — your teacher will assign you soon!");
+        showNotificationToast("You're not on a team yet. Your teacher will assign you soon!");
         return;
     }
 
@@ -234,7 +234,7 @@ async function loadTeamPracticeFeed() {
     if (!posts || posts.length === 0) {
         mount.innerHTML = `
             <div class="team-hub-empty">
-                No practice posts yet — be the first to share! 🎉
+                No practice posts yet. Be the first to share! 🎉
             </div>`;
         return;
     }
@@ -357,7 +357,7 @@ function openTeamHubPracticePost() {
 
 async function uploadTeamPracticePhoto(file, baseLetter) {
     if (file.size > 20 * 1024 * 1024) {
-        return showNotificationToast('File too large — please use a photo under 20MB.');
+        return showNotificationToast('File too large. Please use a photo under 20MB.');
     }
     showNotificationToast('Compressing and uploading...');
 
@@ -471,7 +471,7 @@ async function loadCaptainWritingQueue() {
                     No pending submissions
                 </p>
                 <p style="font-size:12px; margin:0;">
-                    Your team is on it — nothing to review right now!
+                    Your team is on it, nothing to review right now!
                 </p>
             </div>`;
         return;
@@ -558,7 +558,7 @@ async function loadCaptainRecentlyApproved() {
 
         return `
             <div class="captain-approved-row">
-                <span>${sub.profiles?.avatar || '🦁'} <strong>${sub.profiles?.nickname || 'Student'}</strong> —
+                <span>${sub.profiles?.avatar || '🦁'} <strong>${sub.profiles?.nickname || 'Student'}</strong>:
                     <span class="captain-approved-letter">${sub.base_letter}</span>
                 </span>
                 <span class="captain-approved-by">✓ by ${reviewerLabel}</span>
@@ -638,7 +638,7 @@ async function captainRejectSubmission(submissionId, note, studentId, baseLetter
         .eq('id', submissionId);
 
     if (error) return showNotificationToast('Reject failed: ' + error.message);
-    showNotificationToast('Rejected — student can resubmit.');
+    showNotificationToast('Rejected. Student can resubmit.');
     await loadCaptainWritingQueue();
 
     if (typeof sendPushNotification === 'function' && studentId && baseLetter) {
@@ -693,7 +693,7 @@ async function loadCaptainTeamProgress() {
             row.innerHTML = `
                 <div class="captain-member-header" style="cursor:default;">
                     <span>${member.avatar || '🦁'} ${member.nickname}</span>
-                    <span class="team-member-progress" style="color:#b45309;">👑 Captain — exempt</span>
+                    <span class="team-member-progress" style="color:#b45309;">👑 Captain, exempt</span>
                 </div>`;
             mount.appendChild(row);
             return;
@@ -709,10 +709,10 @@ async function loadCaptainTeamProgress() {
             const latestSub = (submissions || []).find(s => s.student_id === member.id && s.base_letter === letter);
             const streak    = progress?.best_streak || 0;
 
-            let subStatus = '— No submission';
+            let subStatus = 'No submission';
             if (progress?.writing_passed) subStatus = '<span class="captain-stat-done">✓ Approved</span>';
             else if (latestSub?.status === 'pending')  subStatus = '⏳ Pending review';
-            else if (latestSub?.status === 'rejected') subStatus = '✗ Rejected — needs redo';
+            else if (latestSub?.status === 'rejected') subStatus = '✗ Rejected, needs redo';
 
             return `
                 <div class="captain-family-detail">
@@ -838,10 +838,10 @@ async function loadDailyTeamChallenge() {
         title = "📖 Lesson Challenge";
         bodyHtml = current
             ? `Practice today's lesson together: <strong>${current.title}</strong>. Read it aloud, review the vocabulary, and try today's conversation prompt.`
-            : `Review your most recent lesson together — read it aloud and practice the vocabulary as a team.`;
+            : `Review your most recent lesson together: read it aloud and practice the vocabulary as a team.`;
         shareText = current
-            ? `📖 Lesson Challenge: Practice "${current.title}" together — read it aloud, review the vocabulary, and try today's conversation prompt!`
-            : `📖 Lesson Challenge: Review your most recent lesson together — read it aloud and practice the vocabulary as a team!`;
+            ? `📖 Lesson Challenge: Practice "${current.title}" together. Read it aloud, review the vocabulary, and try today's conversation prompt!`
+            : `📖 Lesson Challenge: Review your most recent lesson together. Read it aloud and practice the vocabulary as a team!`;
     }
 
     mount.innerHTML = `
@@ -869,7 +869,7 @@ async function shareTeamChallenge(text) {
         await navigator.clipboard.writeText(text);
         showNotificationToast("Copied! Paste it into your team chat 📋");
     } catch (e) {
-        showNotificationToast("Couldn't copy automatically — select and copy the challenge text.");
+        showNotificationToast("Couldn't copy automatically. Select and copy the challenge text.");
     }
 }
 

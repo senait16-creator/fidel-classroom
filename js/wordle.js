@@ -112,7 +112,7 @@ function renderWordleGame() {
     </div>
 
     <div class="wordle-phrase-area">
-      ${hint ? `<div class="wordle-hint-badge">Hint ${currentAttempt} of 5 — ${hint}</div>` : `<div class="wordle-hint-badge no-hint">Attempt 1 — no hints yet</div>`}
+      ${hint ? `<div class="wordle-hint-badge">Hint ${currentAttempt} of 5: ${hint}</div>` : `<div class="wordle-hint-badge no-hint">Attempt 1, no hints yet</div>`}
       <div class="wordle-amharic">${phrase.amharic}</div>
       ${hint ? '' : '<div class="wordle-prompt">What does this phrase mean?</div>'}
     </div>

@@ -59,7 +59,7 @@ async function enablePushNotifications() {
         return showNotificationToast('Add Fidel Classroom to your Home Screen first (Share → Add to Home Screen), then enable notifications from there.');
     }
     if (state === 'denied') {
-        return showNotificationToast("Notifications are blocked for this app — enable them in your device's notification settings.");
+        return showNotificationToast("Notifications are blocked for this app. Enable them in your device's notification settings.");
     }
 
     try {

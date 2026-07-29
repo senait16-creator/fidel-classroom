@@ -50,7 +50,7 @@ async function renderStarBoard(mountId) {
     if (!stars || stars.length === 0) {
         mount.innerHTML = `
             <div class="card star-board-empty">
-                No stars yet this week — captains, pick a teammate to celebrate!
+                No stars yet this week. Captains, pick a teammate to celebrate!
             </div>`;
         return;
     }
@@ -130,7 +130,7 @@ async function renderStarPicker(mountId) {
         <div class="star-current-banner">
             ⭐ This week: <strong>${existing.student?.avatar || '🦁'}
             ${existing.student?.nickname || 'Student'}</strong>
-            <span style="color:#92400e;"> — tap a name to change your pick</span>
+            <span style="color:#92400e;"> · tap a name to change your pick</span>
         </div>` : `
         <p style="font-size:12px; color:#64748b; margin:0 0 10px;">
             Pick one teammate to celebrate on the class Star Board this week.
@@ -179,14 +179,14 @@ async function starPickMember(idx) {
                    </div>`).join('')}
            </div>`
         : `<p style="font-size:12px; color:#94a3b8; margin-top:10px;">
-               No approved writing yet — you can still make them the star,
+               No approved writing yet, but you can still make them the star,
                their writing spot will just be empty.
            </p>`;
 
     detail.innerHTML = `
         ${thumbs}
         <input type="text" id="starShoutoutInput" class="star-shoutout-input"
-               maxlength="90" placeholder="Add a shout-out (optional) — e.g. Amazing ሀ family work!">
+               maxlength="90" placeholder="Add a shout-out (optional), e.g. Amazing ሀ family work!">
         <button class="btn-primary star-save-btn" onclick="saveStarOfWeek()">
             ⭐ Make ${member.nickname} the Star of the Week
         </button>`;

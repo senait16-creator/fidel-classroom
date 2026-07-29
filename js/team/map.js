@@ -381,7 +381,7 @@ async function renderTodayCard(mountId) {
             ` : `
                 <div style="background:#f0fdf4; border-radius:10px; padding:10px 14px;
                             margin-bottom:14px; font-size:13px; color:#166534; font-weight:600;">
-                    ✓ Streak passed — submit your handwriting next!
+                    ✓ Streak passed. Submit your handwriting next!
                 </div>
                 <button onclick="openFamilyFromTodayCard('${nextFamily}', ${team.current_level})"
                         class="today-action-btn"

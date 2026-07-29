@@ -98,7 +98,7 @@ window.approveAccessRequest = approveAccessRequest;
 function computeStudentChallengeStatus(team, familiesForLevel, studentRows, hasPendingWriting, hasHelpFlag, hasApprovedLevelCompletion) {
     const rowFor = (base) => studentRows.find(r => r.base_letter === base);
 
-    if (hasApprovedLevelCompletion) return { key: 'test_passed', label: '✓ Passed — waiting on team', family: null };
+    if (hasApprovedLevelCompletion) return { key: 'test_passed', label: '✓ Passed, waiting on team', family: null };
 
     const allCleared = familiesForLevel.length > 0 && familiesForLevel.every(f => {
         const row = rowFor(f);
@@ -371,7 +371,7 @@ async function teacherResetStudentLevel(studentId, nickname) {
         return showNotificationToast("Enter a valid level number.");
     }
 
-    if (!confirm(`Reset ${nickname}'s Level ${levelNumber}? They'll need to redo every family's streak and writing submission for that level. This only affects ${nickname} — not their team or any other level.`)) return;
+    if (!confirm(`Reset ${nickname}'s Level ${levelNumber}? They'll need to redo every family's streak and writing submission for that level. This only affects ${nickname}, not their team or any other level.`)) return;
 
     showNotificationToast(`Resetting Level ${levelNumber} for ${nickname}...`);
 
@@ -399,7 +399,7 @@ async function teacherResetStudentLevel(studentId, nickname) {
 
     if (progressError || subError || reqError) {
         console.error("Failed to reset student level:", progressError, subError, reqError);
-        return showNotificationToast("Reset had errors — check the console.");
+        return showNotificationToast("Reset had errors. Check the console.");
     }
 
     // If this reset means the team is no longer fully cleared for this
@@ -430,11 +430,11 @@ async function teacherForgetStudent(studentId, nickname) {
     const typed = prompt(
         `This permanently erases ${nickname}'s name, email, progress, and submissions from this app, ` +
         `and removes them from their team. It cannot be undone from here. Their login will still exist in ` +
-        `Supabase Auth but disconnected from all data — delete it there yourself if you want it fully gone.\n\n` +
+        `Supabase Auth but disconnected from all data. Delete it there yourself if you want it fully gone.\n\n` +
         'Type REMOVE to confirm:'
     );
     if (typed !== 'REMOVE') {
-        showNotificationToast('Cancelled — nothing was changed.');
+        showNotificationToast('Cancelled. Nothing was changed.');
         return;
     }
 
@@ -648,7 +648,7 @@ async function loadTeacherWritingQueue() {
     }
 
     if (!submissions || submissions.length === 0) {
-        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No pending submissions — all caught up!</p>`;
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No pending submissions. All caught up!</p>`;
         return;
     }
 
@@ -738,7 +738,7 @@ async function rejectWritingSubmission(submissionId, note, studentId, baseLetter
         return showNotificationToast("Reject failed: " + error.message);
     }
 
-    showNotificationToast("Submission rejected — student can resubmit.");
+    showNotificationToast("Submission rejected. Student can resubmit.");
     await loadTeacherWritingQueue();
     if (typeof loadTeacherClassroomOverview === 'function') await loadTeacherClassroomOverview();
 
@@ -802,7 +802,7 @@ async function recheckTeamReadiness(teamId) {
     if (!nonCaptain) return showNotificationToast("No competing students on this team.");
 
     await checkAndUpdateTeamLevelCompletion(nonCaptain.id);
-    showNotificationToast("Recheck complete — see console for details.");
+    showNotificationToast("Recheck complete. See console for details.");
     if (typeof loadTeacherClassroomOverview === 'function') await loadTeacherClassroomOverview();
 }
 
@@ -907,7 +907,7 @@ async function loadTeacherTeamProgress() {
                 </div>
                 <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
                     <button class="btn-secondary btn-edit-meeting" style="font-size:11px; padding:6px 10px;" title="Edit this team's lesson day/time">📅 Lesson Schedule</button>
-                    <button class="btn-secondary btn-recheck" style="font-size:11px; padding:6px 10px;" title="Recalculate this team's advancement status — safe to run any time, only advances a team that's actually ready">🔄 Recalculate</button>
+                    <button class="btn-secondary btn-recheck" style="font-size:11px; padding:6px 10px;" title="Recalculate this team's advancement status. Safe to run any time, only advances a team that's actually ready">🔄 Recalculate</button>
                     <button class="team-members-toggle" aria-label="Show team members">▼</button>
                 </div>
             </div>
@@ -979,7 +979,7 @@ async function loadTeamMembersForRoster(teamId, currentLevel, mountEl) {
         if (member.is_captain) {
             memberRow.innerHTML = `
                 <span>${member.avatar || '🦁'} ${member.nickname}</span>
-                <span class="team-member-progress" style="color:#b45309;">👑 Captain — exempt</span>
+                <span class="team-member-progress" style="color:#b45309;">👑 Captain, exempt</span>
             `;
         } else {
             const clearedCount = (level?.letter_families || []).filter(letter => {
@@ -1265,12 +1265,12 @@ async function loadTeacherCaptainOverview() {
             : `Team health: ${[
                 pending > 0 ? `${pending} review${pending > 1 ? 's' : ''}` : null,
                 help > 0 ? `${help} help flag${help > 1 ? 's' : ''}` : null
-            ].filter(Boolean).join(', ')} — consider a nudge`;
+            ].filter(Boolean).join(', ')}, consider a nudge`;
         return `
             <div class="teacher-captain-row ${backlog > 0 ? 'needs-nudge' : ''}">
                 <div class="teacher-captain-avatar">${cap.avatar || '👑'}</div>
                 <div>
-                    <div class="teacher-captain-name">${cap.nickname || 'Captain'} — ${cap.teams?.name || 'No team'}</div>
+                    <div class="teacher-captain-name">${cap.nickname || 'Captain'}: ${cap.teams?.name || 'No team'}</div>
                     <div class="teacher-captain-meta">${health}</div>
                 </div>
                 <div class="teacher-captain-pending ${backlog === 0 ? 'caught-up' : ''}">${backlog === 0 ? 'Caught up ✓' : `${backlog} waiting on them`}</div>
@@ -1362,7 +1362,7 @@ async function resetEverythingForDayOne() {
         'Type RESET to confirm:'
     );
     if (typed !== 'RESET') {
-        showNotificationToast('Reset cancelled — nothing was changed.');
+        showNotificationToast('Reset cancelled. Nothing was changed.');
         return;
     }
 

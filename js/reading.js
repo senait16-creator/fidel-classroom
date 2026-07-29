@@ -345,11 +345,11 @@ function escapeHtml(str) {
 // -----------------------------------------------------------------------------
 
 const STUDY_TOGETHER_VERSES = [
-    { amharic: "አንድ ሰው ብቻውን ቢሮጥ፣ ሁለት ሰው ግን አብረው ይራመዳሉ።", english: "One person alone may run fast — but two people walking together go further." },
-    { amharic: "ትንሽ ትንሽ እያለ ራስ ማርያም ይደርሳል።", english: "Little by little, even the mountain peak is reached — small steps add up." },
+    { amharic: "አንድ ሰው ብቻውን ቢሮጥ፣ ሁለት ሰው ግን አብረው ይራመዳሉ።", english: "One person alone may run fast, but two people walking together go further." },
+    { amharic: "ትንሽ ትንሽ እያለ ራስ ማርያም ይደርሳል።", english: "Little by little, even the mountain peak is reached. Small steps add up." },
     { amharic: "የሚተባበሩ ወንድሞች ተራራ ያፈርሳሉ።", english: "Siblings who work together can move a mountain." },
-    { amharic: "ጠብታ ጠብታ ባሕር ይሆናል።", english: "Drop by drop becomes an ocean — small, steady practice adds up." },
-    { amharic: "እጅ ለእጅ ተያይዞ ሸክም ይቀላል።", english: "Hand in hand, the load gets lighter — you don't have to carry it alone." }
+    { amharic: "ጠብታ ጠብታ ባሕር ይሆናል።", english: "Drop by drop becomes an ocean. Small, steady practice adds up." },
+    { amharic: "እጅ ለእጅ ተያይዞ ሸክም ይቀላል።", english: "Hand in hand, the load gets lighter. You don't have to carry it alone." }
 ];
 
 function getStudyTogetherVerseOfTheDay() {
@@ -373,7 +373,7 @@ async function renderStudyTogetherChapterCard() {
     studyTogetherCurrentLevel = current ? current.level.level_number : null;
 
     if (!current) {
-        mount.innerHTML = `<p style="color:#94a3b8;">No chapters yet — check back soon.</p>`;
+        mount.innerHTML = `<p style="color:#94a3b8;">No chapters yet, check back soon.</p>`;
         return;
     }
 
@@ -446,7 +446,7 @@ async function renderStudyTogetherFeed() {
     }
 
     if (!posts || posts.length === 0) {
-        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No posts yet — be the first to share something from your chapter.</p>`;
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No posts yet. Be the first to share something from your chapter.</p>`;
         return;
     }
 
@@ -467,7 +467,7 @@ async function postChapterFeedUpdate() {
     if (!input) return;
     const text = input.value.trim();
     if (!text) return;
-    if (!studyTogetherCurrentLevel) return showNotificationToast("Couldn't figure out your current chapter — try again in a moment.");
+    if (!studyTogetherCurrentLevel) return showNotificationToast("Couldn't figure out your current chapter. Try again in a moment.");
 
     const { error } = await _supabase.from('chapter_feed_posts').insert({
         student_id: currentUser.id,
@@ -1084,7 +1084,7 @@ async function renderVocabSection(mount, levelNumber, lessonOrder) {
                 <div class="vocab-meaning" style="display:none;">
                     <strong>${word.english_meaning}</strong>
                     ${word.part_of_speech ? `<span class="vocab-pos">${word.part_of_speech}</span>` : ''}
-                    ${word.example_sentence ? `<p class="vocab-example">${word.example_sentence}${word.example_translation ? ` — "${word.example_translation}"` : ''}</p>` : ''}
+                    ${word.example_sentence ? `<p class="vocab-example">${word.example_sentence}${word.example_translation ? ` ("${word.example_translation}")` : ''}</p>` : ''}
                 </div>
             </div>
             <button class="btn-secondary vocab-known-btn">${isKnown ? '✓ Known' : 'Mark Known'}</button>
@@ -1308,7 +1308,7 @@ function renderReadingStep(item, progress, progressByItemId) {
                 <strong>Why it's structured this way:</strong>
                 <p>${item.grammar_note || "No grammar note for this item yet."}</p>
             </div>
-            <button class="btn-primary" id="readingFinishItemBtn">Got It — Next →</button>
+            <button class="btn-primary" id="readingFinishItemBtn">Got It, Next →</button>
         `;
         document.getElementById("readingFinishItemBtn").onclick = () => markReadingStep(item, 'has_understood_grammar', progress, progressByItemId, true);
         return;
@@ -1391,7 +1391,7 @@ function checkReadingTranslation(item, progress, progressByItemId) {
         setTimeout(() => markReadingStep(item, 'has_translated', progress, progressByItemId), 800);
     } else {
         feedback.innerHTML = `
-            <p style="color:#9a3412; font-size:13px;">Not quite — here's the correct translation:</p>
+            <p style="color:#9a3412; font-size:13px;">Not quite. Here's the correct translation:</p>
             <p style="font-weight:700; margin-top:4px;">"${item.passage_translation}"</p>
             <button class="btn-secondary" id="readingContinueAnywayBtn" style="margin-top:8px;">Continue Anyway</button>
         `;
@@ -1488,7 +1488,7 @@ function renderPracticeCard(mount) {
         mount.innerHTML = `
             <div style="text-align:center; padding:20px 0;">
                 <p style="font-size:40px;">🎉</p>
-                <p class="subtitle" style="font-weight:700; color:#10b981;">Nice work — you've reviewed every word in this lesson!</p>
+                <p class="subtitle" style="font-weight:700; color:#10b981;">Nice work. You've reviewed every word in this lesson!</p>
                 <button class="btn-secondary" id="practiceRestartBtn" style="margin-top:10px;">Review Again</button>
             </div>`;
         document.getElementById('practiceRestartBtn').onclick = () => { practiceIndex = 0; renderPracticeCard(mount); };
@@ -1588,7 +1588,7 @@ async function renderCheckpointSection(levelNumber) {
     checkpointAnswers = {};
 
     mount.innerHTML = myProgress?.checkpoint_passed
-        ? `<div class="checkpoint-result passed">✓ Passed — ${myProgress.checkpoint_score}% last time. Retake anytime.</div>`
+        ? `<div class="checkpoint-result passed">✓ Passed: ${myProgress.checkpoint_score}% last time. Retake anytime.</div>`
         : "";
 
     const preSubmitNav = document.createElement('div');
@@ -1604,7 +1604,7 @@ async function renderCheckpointSection(levelNumber) {
         const card = document.createElement('div');
         card.className = 'checkpoint-question';
         card.innerHTML = `
-            <p class="checkpoint-question-text">${qIndex + 1}. ${q.question_amharic ? q.question_amharic + ' — ' : ''}${q.question_english}</p>
+            <p class="checkpoint-question-text">${qIndex + 1}. ${q.question_amharic ? q.question_amharic + ': ' : ''}${q.question_english}</p>
             <div class="checkpoint-choices">
                 ${(q.choices || []).map((choice, cIndex) => `
                     <button class="checkpoint-choice" data-c="${cIndex}">${choice}</button>
@@ -1660,7 +1660,7 @@ async function submitCheckpoint(levelNumber) {
     const mount = document.getElementById("chapterCheckpointMount");
     let html = `
         <div class="checkpoint-result ${passed ? 'passed' : 'failed'}">
-            ${passed ? '✓' : '✗'} You scored ${score}% (${correct} / ${total}) — ${passed ? 'Chapter Challenge passed!' : 'Try again to pass (70%+).'}
+            ${passed ? '✓' : '✗'} You scored ${score}% (${correct} / ${total}). ${passed ? 'Chapter Challenge passed!' : 'Try again to pass (70%+).'}
         </div>
     `;
 
@@ -1816,7 +1816,7 @@ async function renderGrowthToday(chapterTitleByLevel) {
             <div class="growth-today-date">${dateLabel}</div>
             ${rows.length
                 ? rows.map(r => `<div class="growth-today-row"><span class="growth-today-icon">${r.icon}</span> ${r.text}</div>`).join('')
-                : `<div class="growth-today-empty">Nothing yet today — pick a lesson to get started!</div>`}
+                : `<div class="growth-today-empty">Nothing yet today. Pick a lesson to get started!</div>`}
         </div>`;
 }
 
@@ -1836,7 +1836,7 @@ async function renderGrowthVocab(chapterTitleByLevel) {
     if (countEl) countEl.innerText = `${vocabIds.length} word${vocabIds.length === 1 ? '' : 's'}`;
 
     if (vocabIds.length === 0) {
-        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No words marked known yet — they'll show up here as you work through lessons.</p>`;
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No words marked known yet. They'll show up here as you work through lessons.</p>`;
         return;
     }
 
@@ -1900,7 +1900,7 @@ async function renderGrowthGrammar(chapterTitleByLevel) {
 
     if (itemIds.length === 0) {
         if (countEl) countEl.innerText = 0;
-        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No grammar notes reached yet — they'll show up here as you read through lessons.</p>`;
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No grammar notes reached yet. They'll show up here as you read through lessons.</p>`;
         return;
     }
 
