@@ -26,6 +26,7 @@ async function loadTeacherAccessRequests(mountId) {
         .from('profiles')
         .select('id, nickname, email, avatar')
         .eq('access_status', 'pending')
+        .eq('is_admin', false)
         .order('nickname');
 
     if (error) {
@@ -1039,7 +1040,7 @@ async function renderTeacherHealthAndTasks() {
         _supabase.from('level_completion_requests').select('id').eq('status', 'pending'),
         _supabase.from('team_meetings').select('team_id').eq('day_of_week', todayWeekday).not('lesson_time', 'is', null),
         _supabase.from('profiles').select('id, is_admin'),
-        _supabase.from('profiles').select('id').eq('access_status', 'pending')
+        _supabase.from('profiles').select('id').eq('access_status', 'pending').eq('is_admin', false)
     ]);
 
     const pendingWritingCount = (pendingSubs || []).length;
