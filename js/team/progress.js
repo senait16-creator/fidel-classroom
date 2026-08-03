@@ -280,11 +280,39 @@ async function creditApprovedWritingToProgress(studentId, baseLetter) {
         .from('student_family_progress')
         .upsert(payload, { onConflict: 'student_id,base_letter' });
 
-    // Returned (not just logged) so the caller can surface a visible error
-    // instead of showing "Submission approved!" while this silently failed
-    // — which is exactly what happened undetected for weeks before this.
-    if (error) console.error("Failed to credit approved writing to progress:", error);
-    return error || null;
+    if (error) {
+        console.error("Failed to credit approved writing to progress:", error);
+        return error;
+    }
+
+    // A successful upsert() call here does NOT guarantee the row was
+    // actually written — this was the missing piece behind a recurring,
+    // silent bug (Kash, kindeh, Adam, Toda): if an RLS UPDATE policy's
+    // USING clause excludes the specific conflicting row, Postgres just
+    // performs 0 rows of the DO UPDATE, no error at all, and Supabase
+    // reports success. The only way to actually know is to read the row
+    // back and check the field really changed.
+    const { data: verifyRow, error: verifyError } = await _supabase
+        .from('student_family_progress')
+        .select('writing_passed')
+        .eq('student_id', studentId)
+        .eq('base_letter', baseLetter)
+        .maybeSingle();
+
+    if (verifyError) {
+        console.error("Failed to verify writing credit:", verifyError);
+        return verifyError;
+    }
+
+    if (!verifyRow?.writing_passed) {
+        const silentFailure = new Error(
+            `Upsert reported success but writing_passed is still false for ${baseLetter} — likely an RLS policy silently blocking the update.`
+        );
+        console.error(silentFailure.message);
+        return silentFailure;
+    }
+
+    return null;
 }
 
 // Lazy, per-team fetch of the protected, student-identifying tables —
