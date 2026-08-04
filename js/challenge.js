@@ -578,9 +578,11 @@ async function openChallengeFamilyPicker(level) {
     const challengeDashboard = document.getElementById("challengeDashboardScreen");
     const challengeLevels = document.getElementById("challengeLevelsScreen");
     const challengeFamily = document.getElementById("challengeFamilyScreen");
+    const challengeFamilyDetail = document.getElementById("challengeFamilyDetailScreen");
 
     if (challengeDashboard) challengeDashboard.style.display = "none";
     if (challengeLevels) challengeLevels.style.display = "none";
+    if (challengeFamilyDetail) challengeFamilyDetail.style.display = "none";
     if (challengeFamily) challengeFamily.style.display = "block";
 
     await renderChallengeFamilyPicker();
@@ -743,6 +745,7 @@ async function openChallengeFamilyDetail(fidelObj, levelNumber, returnTo = 'pick
     activeChallengeFamilyLevel = levelNumber;
     challengeFamilyDetailReturnTo = returnTo;
     document.getElementById("challengeFamilyScreen").style.display = "none";
+    document.getElementById("challengeDashboardScreen").style.display = "none";
     document.getElementById("challengeFamilyDetailScreen").style.display = "block";
     document.getElementById("challengeFamilyDetailTitle").innerText = `Family: "${fidelObj.base}"`;
     renderChallengeFamilyDetailGiantRow(fidelObj);
