@@ -78,29 +78,32 @@ const LETTER_BOARD_QUICK_LINKS = [
     }
 ];
 
+// Compact icon-only bar (icons carry the row's meaning; tapping one briefly
+// reveals its label before running it, rather than always showing full
+// icon+title+description cards like the old bottom-of-page library did).
 function renderLetterBoardQuickLinks() {
     const mount = document.getElementById('lbQuickLinksMount');
     if (!mount) return;
 
     mount.innerHTML = '';
     LETTER_BOARD_QUICK_LINKS.forEach(item => {
-        const el = document.createElement(item.href ? 'a' : 'div');
-        el.className = 'challenge-resource-link';
-        if (item.href) {
-            el.href = item.href;
-            el.target = '_blank';
-            el.rel = 'noopener';
-        } else {
-            el.style.cursor = 'pointer';
-            el.onclick = item.action;
-        }
-        el.innerHTML = `
-            <span>${item.icon}</span>
-            <div>
-                <strong>${item.label}</strong>
-                <small>${item.desc}</small>
-            </div>`;
-        mount.appendChild(el);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'lb-icon-bar-btn';
+        btn.title = item.label;
+        btn.innerHTML = `
+            <span class="lb-icon-bar-icon">${item.icon}</span>
+            <span class="lb-icon-bar-label">${item.label}</span>`;
+        btn.onclick = () => {
+            btn.classList.add('lb-icon-bar-btn-active');
+            setTimeout(() => btn.classList.remove('lb-icon-bar-btn-active'), 900);
+            if (item.href) {
+                window.open(item.href, '_blank', 'noopener');
+            } else if (item.action) {
+                item.action();
+            }
+        };
+        mount.appendChild(btn);
     });
 }
 

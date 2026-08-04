@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=31">
+    <link rel="stylesheet" href="style.css?v=32">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -1456,7 +1456,7 @@
                 ← Back
             </button>
         </div>
-        <div class="lb-title">Fidel Practice Library</div>
+        <div class="lb-title">Fidel Practice</div>
 
         <input id="lbSearchInput"
                class="lb-search"
@@ -1465,21 +1465,14 @@
     </div>
 </div>
 
+<!-- Compact icon bar — Flashcards, Wordle, videos, external links.
+     Icons only; tapping one briefly reveals its label, then runs it. -->
+<div id="lbQuickLinksMount" class="lb-icon-bar"></div>
+
 <!-- Body (overlaps header) -->
 <div class="letter-board-body" id="lbBodyMount">
     <p style="color:#94a3b8; font-size:13px; padding:16px 0;">Loading...</p>
 </div>
-
-<section class="lb-resource-library">
-    <div class="lb-resource-library-header">
-        <span><span data-icon="books"></span></span>
-        <div>
-            <h3>Practice Library</h3>
-            <p>Videos, sounds, flashcards, and extra review</p>
-        </div>
-    </div>
-    <div id="lbQuickLinksMount" class="challenge-resource-links"></div>
-</section>
 
 </div>
 
@@ -1622,7 +1615,7 @@
 <script src="js/teacher.js?v=31" defer></script>
 <script src="js/reading.js?v=24" defer></script>
 <script src="js/wordbuilder.js?v=6" defer></script>
-    <script src="js/letterboard.js?v=12" defer></script>
+    <script src="js/letterboard.js?v=13" defer></script>
 <script src="js/team/progress.js?v=20" defer></script>
 <script src="js/team/levels.js?v=13" defer></script>
 <script src="js/team/map.js?v=9" defer></script>

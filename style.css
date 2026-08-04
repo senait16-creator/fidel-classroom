@@ -4784,22 +4784,58 @@ header {
     background: #e8e5de;
 }
 
-.lb-quick-links {
-    margin-top: 28px;
-    padding-top: 16px;
-    border-top: 1px solid #e8e5de;
+.lb-icon-bar {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 10px 14px;
+    background: #ffffff;
+    border-bottom: 1px solid #e8e5de;
 }
 
-.lb-quick-links summary {
-    font-size: 12px;
-    font-weight: 700;
-    color: #64748b;
+.lb-icon-bar-btn {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    background: #f7f5ef;
+    border: 1px solid #e7e5d8;
+    border-radius: 12px;
+    width: 46px;
+    min-height: 46px;
     cursor: pointer;
-    font-family: 'Inter', sans-serif;
+    transition: background .15s ease;
 }
 
-.lb-quick-links .challenge-resource-links {
-    margin-top: 12px;
+.lb-icon-bar-icon {
+    font-size: 18px;
+    line-height: 1;
+}
+
+.lb-icon-bar-label {
+    display: block;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    font-size: 8.5px;
+    font-weight: 700;
+    color: #14532d;
+    font-family: 'Inter', sans-serif;
+    text-align: center;
+    line-height: 1.2;
+    transition: max-height .15s ease, opacity .15s ease;
+}
+
+.lb-icon-bar-btn-active {
+    background: #dcfce7;
+}
+
+.lb-icon-bar-btn-active .lb-icon-bar-label {
+    max-height: 22px;
+    opacity: 1;
+    margin-top: 1px;
 }
 
 .lb-family-grid {
@@ -4877,7 +4913,7 @@ header {
 
 .lbt-letter {
     font-family: 'Abyssinica SIL', serif;
-    font-size: 22px;
+    font-size: 32px;
     color: #1e293b;
     line-height: 1;
 }
@@ -7935,40 +7971,6 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 
 /* Remove overly colorful resource blocks */
 
-.lb-resource-library {
-    max-width: 820px;
-    width: calc(100% - 28px);
-    margin: 18px auto 90px;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 24px;
-    padding: 18px;
-    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
-}
-
-.lb-resource-library-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 14px;
-}
-
-.lb-resource-library-header span {
-    font-size: 30px;
-}
-
-.lb-resource-library-header h3 {
-    margin: 0;
-    color: #14532d;
-    font-size: 18px;
-    font-weight: 900;
-}
-
-.lb-resource-library-header p {
-    margin: 3px 0 0;
-    color: #64748b;
-    font-size: 12px;
-}
 .challenge-mission-card {
     position: relative;
     overflow: hidden;
