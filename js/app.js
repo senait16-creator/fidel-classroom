@@ -55,8 +55,8 @@ let canvas, ctx, isDrawing = false;
 // Alphabet data
 // ---------------------------------------------------------------------------
 
-const vowelFrameworkLabels = ["ha", "hu", "hee", "ha", "hay", "hih", "ho"];
-const standardVowelSubscripts = ["eh", "u", "ee", "ah", "ay", "ih", "o"];
+const vowelFrameworkLabels = ["ha", "hu", "hee", "ha", "hay", "h", "ho"];
+const standardVowelSubscripts = ["e", "u", "ee", "ah", "ay", "", "o"];
 
 const alphabetData = [
     {base:"ሀ", family:['ሀ','ሁ','ሂ','ሃ','ሄ','ህ','ሆ'], prefix:"h"},
