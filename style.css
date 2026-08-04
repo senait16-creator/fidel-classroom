@@ -7098,21 +7098,6 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     box-shadow: 0 2px 12px rgba(0,0,0,0.15) !important;
 }
 
-/* Word Builder's lock state — dims the card (via .cup-card-locked
-   above) but keeps its text readable, unlike .cup-card-lock-badge's
-   full overlay, since this is a real per-student progress gate the
-   student should understand, not a "not built yet" placeholder. */
-.cup-card-lock-note {
-    margin-top: 8px;
-    font-size: 10.5px;
-    font-weight: 700;
-    color: #d97706;
-    background: #fffbeb;
-    border-radius: 8px;
-    padding: 5px 9px;
-    display: inline-block;
-}
-
 .cup-card-lock-badge {
     position: absolute;
     inset: 0;

@@ -1,16 +1,33 @@
 // =============================================================================
 // WORD BUILDER — js/wordbuilder.js
 // Self-paced reading path, independent of Fidel Competition's team/level
-// progress but loosely mirrors its 12 levels' letter families. Unlocks
-// once a student clears their very first letter family (via Competition's
-// streak game OR solo Fidel Practice mastery — whichever happens first,
-// so students without a team aren't locked out).
+// progress but loosely mirrors its 12 levels' letter families. The card
+// itself is always open — each individual LEVEL unlocks on its own once
+// the student has learned that level's letters, checked primarily
+// against Fidel Practice (available to every student, team or solo)
+// with Competition's streak progress also counting if they have it.
 //
 // Loads AFTER app.js/reading.js — relies on globals defined there:
 //   _supabase, currentUser, currentProfile, showNotificationToast, showScreen
 // =============================================================================
 
-const WORD_BUILDER_LEVEL_1_LETTERS = ['ሀ', 'ለ', 'ሐ'];
+// Mirrors challenge_levels.letter_families exactly (pulled from Supabase,
+// not guessed) — kept as a constant here since Word Builder's own level
+// rows are a separate table and need this mapping to check unlock state.
+const WORD_BUILDER_LEVEL_LETTERS = {
+    1: ['ሀ', 'ለ', 'ሐ'],
+    2: ['መ', 'ሠ', 'ረ'],
+    3: ['ሰ', 'ሸ', 'ቀ'],
+    4: ['በ', 'ቨ', 'ተ'],
+    5: ['ቸ', 'ኀ', 'ነ'],
+    6: ['ኘ', 'አ', 'ከ'],
+    7: ['ኸ', 'ወ', 'ዐ'],
+    8: ['ዘ', 'ዠ', 'የ'],
+    9: ['ደ', 'ጀ', 'ገ'],
+    10: ['ጠ', 'ጨ', 'ጰ'],
+    11: ['ጸ', 'ፀ', 'ፈ'],
+    12: ['ፐ']
+};
 
 let wordBuilderCurrentLevel = null;
 let wordBuilderWords = [];
@@ -18,67 +35,45 @@ let wordBuilderReadWordIds = new Set();
 let wordBuilderIndex = 0;
 
 // ---------------------------------------------------------------------------
-// Unlock check
+// Per-level unlock check
 // ---------------------------------------------------------------------------
 
-async function checkWordBuilderUnlocked() {
-    if (!currentUser) return false;
+// Returns a Set of level numbers (1-12) the student has earned access to —
+// a level counts as unlocked once every one of its letters is either
+// mastered in Fidel Practice or streak-passed in Fidel Competition.
+async function getWordBuilderUnlockedLevels() {
+    if (!currentUser) return new Set();
 
     const [{ data: familyRows }, { data: practiceRow }] = await Promise.all([
         _supabase.from('student_family_progress')
             .select('base_letter, streak_passed')
-            .eq('student_id', currentUser.id)
-            .in('base_letter', WORD_BUILDER_LEVEL_1_LETTERS),
+            .eq('student_id', currentUser.id),
         _supabase.from('user_progress')
             .select('mastered_letters')
             .eq('user_id', currentUser.id)
             .maybeSingle()
     ]);
 
-    const clearedViaCompetition = WORD_BUILDER_LEVEL_1_LETTERS.every(letter =>
-        (familyRows || []).some(r => r.base_letter === letter && r.streak_passed)
-    );
-    const masteredViaPractice = WORD_BUILDER_LEVEL_1_LETTERS.every(letter =>
-        (practiceRow?.mastered_letters || []).includes(letter)
-    );
+    const streakPassedLetters = new Set((familyRows || []).filter(r => r.streak_passed).map(r => r.base_letter));
+    const masteredLetters = new Set(practiceRow?.mastered_letters || []);
 
-    return clearedViaCompetition || masteredViaPractice;
+    const unlocked = new Set();
+    Object.keys(WORD_BUILDER_LEVEL_LETTERS).forEach(levelKey => {
+        const levelNumber = Number(levelKey);
+        const knowsAll = WORD_BUILDER_LEVEL_LETTERS[levelNumber].every(
+            letter => streakPassedLetters.has(letter) || masteredLetters.has(letter)
+        );
+        if (knowsAll) unlocked.add(levelNumber);
+    });
+    return unlocked;
 }
 
-// Called from enterModeSelect() so the cup card reflects real unlock
-// state every time the home screen is shown, not just once at login.
-async function refreshWordBuilderCupCard() {
-    const card = document.getElementById('wordBuilderCupCard');
-    const desc = document.getElementById('wordBuilderCupDesc');
-    if (!card || !desc) return;
-
-    const unlocked = await checkWordBuilderUnlocked();
-    card.classList.toggle('cup-card-locked', !unlocked);
-
-    let lockNote = card.querySelector('.cup-card-lock-note');
-    if (!unlocked) {
-        desc.innerText = 'Sound out real words, one small step at a time';
-        if (!lockNote) {
-            lockNote = document.createElement('div');
-            lockNote.className = 'cup-card-lock-note';
-            card.appendChild(lockNote);
-        }
-        lockNote.innerText = '🔒 Unlocks after your first letter family';
-    } else if (lockNote) {
-        lockNote.remove();
-    }
-}
-window.refreshWordBuilderCupCard = refreshWordBuilderCupCard;
-
 // ---------------------------------------------------------------------------
-// Entry point
+// Entry point — the card itself is always open now; individual levels
+// carry their own lock state inside the list.
 // ---------------------------------------------------------------------------
 
-async function enterWordBuilder() {
-    const unlocked = await checkWordBuilderUnlocked();
-    if (!unlocked) {
-        return showNotificationToast('🔒 Word Builder unlocks after your first letter family — keep going in Fidel Practice or Competition!');
-    }
+function enterWordBuilder() {
     showScreen('wordBuilderLevelsScreen');
     renderWordBuilderLevelsList();
 }
@@ -93,10 +88,11 @@ async function renderWordBuilderLevelsList() {
     if (!mount) return;
     mount.innerHTML = '<p style="color:#94a3b8; font-size:13px;">Loading...</p>';
 
-    const [{ data: levels }, { data: wordRows }, { data: levelProgress }] = await Promise.all([
+    const [{ data: levels }, { data: wordRows }, { data: levelProgress }, unlockedLevels] = await Promise.all([
         _supabase.from('word_builder_levels').select('level_number, topic_title, topic_emoji').order('level_number'),
         _supabase.from('word_builder_words').select('id, level_number'),
-        _supabase.from('word_builder_level_progress').select('level_number').eq('student_id', currentUser.id)
+        _supabase.from('word_builder_level_progress').select('level_number').eq('student_id', currentUser.id),
+        getWordBuilderUnlockedLevels()
     ]);
 
     if (!levels || levels.length === 0) {
@@ -109,34 +105,36 @@ async function renderWordBuilderLevelsList() {
 
     const completedLevels = new Set((levelProgress || []).map(r => r.level_number));
 
-    // Resume at the first not-yet-completed level with content — same
-    // "first incomplete" pattern used everywhere else in the app.
-    let reachedFirstIncomplete = false;
-
     mount.innerHTML = levels.map(level => {
         const done = completedLevels.has(level.level_number);
         const hasWords = (wordCountByLevel[level.level_number] || 0) > 0;
-        const isNext = !done && hasWords && !reachedFirstIncomplete;
-        if (isNext) reachedFirstIncomplete = true;
-        const locked = !done && !isNext;
+        const practiceUnlocked = unlockedLevels.has(level.level_number);
+        const locked = !done && !practiceUnlocked;
+        const clickable = !locked && hasWords;
 
         const stateIcon = done ? '✓' : (locked ? '🔒' : level.level_number);
-        const rowStyle = locked
-            ? 'opacity:0.55;'
-            : '';
         const numBg = done ? 'rgba(22,101,52,0.1)' : (locked ? '#e2e8f0' : '#fffbeb');
         const numColor = done ? '#166534' : (locked ? '#94a3b8' : '#d97706');
 
+        let subLabel;
+        if (!practiceUnlocked && !done) {
+            subLabel = `🔒 Learn ${WORD_BUILDER_LEVEL_LETTERS[level.level_number].join(' ')} in Fidel Practice first`;
+        } else if (!hasWords) {
+            subLabel = 'Coming soon';
+        } else {
+            subLabel = `${wordCountByLevel[level.level_number]} words`;
+        }
+
         return `
             <div class="word-builder-level-row" style="display:flex; align-items:center; gap:12px; background:white;
-                        border:1px solid #e2e8f0; border-radius:14px; padding:12px 14px; margin-bottom:9px; ${rowStyle}
-                        ${!locked ? 'cursor:pointer;' : ''}"
-                 ${!locked ? `onclick="openWordBuilderLevel(${level.level_number})"` : ''}>
+                        border:1px solid #e2e8f0; border-radius:14px; padding:12px 14px; margin-bottom:9px;
+                        ${!clickable ? 'opacity:0.6;' : 'cursor:pointer;'}"
+                 ${clickable ? `onclick="openWordBuilderLevel(${level.level_number})"` : ''}>
                 <div style="width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center;
                             font-weight:800; font-size:13px; flex-shrink:0; background:${numBg}; color:${numColor};">${stateIcon}</div>
                 <div style="flex:1;">
                     <div style="font-size:13.5px; font-weight:700; color:#1e293b;">${level.level_number} · ${level.topic_emoji || ''} ${level.topic_title}</div>
-                    <div style="font-size:11px; color:#94a3b8; margin-top:1px;">${hasWords ? `${wordCountByLevel[level.level_number]} words` : 'Coming soon'}</div>
+                    <div style="font-size:11px; color:#94a3b8; margin-top:1px;">${subLabel}</div>
                 </div>
                 ${done ? '<span style="font-size:15px; color:#166534;">✓</span>' : ''}
             </div>`;
@@ -255,11 +253,15 @@ async function completeWordBuilderLevel() {
 
     if (error) console.error('Failed to save level completion:', error);
 
-    const { data: nextLevel } = await _supabase
-        .from('word_builder_levels')
-        .select('level_number, topic_title')
-        .eq('level_number', level.level_number + 1)
-        .maybeSingle();
+    // Finishing a level doesn't automatically mean the NEXT level's
+    // letters have been learned yet — that's tracked separately via
+    // Fidel Practice/Competition — so check before offering to continue
+    // straight into it.
+    const [{ data: nextLevel }, unlockedLevels] = await Promise.all([
+        _supabase.from('word_builder_levels').select('level_number, topic_title').eq('level_number', level.level_number + 1).maybeSingle(),
+        getWordBuilderUnlockedLevels()
+    ]);
+    const nextLevelReady = nextLevel && unlockedLevels.has(nextLevel.level_number);
 
     const crumb = document.getElementById('wordBuilderLessonCrumb');
     if (crumb) crumb.innerText = '';
@@ -284,9 +286,12 @@ async function completeWordBuilderLevel() {
                         ${w.english_meaning ? `<span style="color:#94a3b8; font-weight:400; font-size:12.5px;">"${w.english_meaning}"</span>` : ''}
                     </div>`).join('')}
             </div>
-            ${nextLevel
+            ${nextLevelReady
                 ? `<button class="btn-primary" onclick="openWordBuilderLevel(${nextLevel.level_number})">Continue to Level ${nextLevel.level_number} →</button>`
                 : `<button class="btn-primary" onclick="showScreen('wordBuilderLevelsScreen'); renderWordBuilderLevelsList();">Back to Levels</button>`}
+            ${(nextLevel && !nextLevelReady)
+                ? `<p style="font-size:11.5px; color:#94a3b8; margin-top:12px;">Level ${nextLevel.level_number} unlocks once you've learned ${WORD_BUILDER_LEVEL_LETTERS[nextLevel.level_number].join(' ')} in Fidel Practice.</p>`
+                : ''}
         </div>
     `;
 
