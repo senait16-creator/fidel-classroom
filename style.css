@@ -8534,12 +8534,20 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     color: #78350f;
 }
 .amharic-path-card.guided-path {
-    background: linear-gradient(160deg, #bbf7d0 0%, #86efac 100%);
+    background: #ffffff;
+    border: 2px solid #166534;
     color: #14532d;
 }
+.amharic-path-card.guided-path .amharic-path-card-icon {
+    background: rgba(22, 101, 52, 0.1);
+}
 .amharic-path-card.original-path {
-    background: linear-gradient(160deg, #c7d2fe 0%, #a5b4fc 100%);
+    background: #ffffff;
+    border: 2px solid #4338ca;
     color: #312e81;
+}
+.amharic-path-card.original-path .amharic-path-card-icon {
+    background: rgba(67, 56, 202, 0.1);
 }
 .amharic-path-card-icon {
     width: 50px;
