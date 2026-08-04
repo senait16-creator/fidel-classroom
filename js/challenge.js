@@ -783,7 +783,7 @@ async function renderChallengeFamilyPicker() {
 // Family detail
 // -----------------------------------------------------------------------------
 
-const vowelSoundLabels = ["eh", "oo", "ee", "ah", "ay", "ih", "o"];
+const vowelSoundLabels = ["eh", "u", "ee", "ah", "ay", "ih", "o"];
 
 async function openChallengeFamilyDetail(fidelObj, levelNumber) {
     activeChallengeFamilyObj = fidelObj;

@@ -229,8 +229,8 @@ function openEmbeddedFamilyPractice(fidelObj, levelNumber, progress, returnTo = 
     const lettersMount = document.getElementById('practiceSheetLetters');
     lettersMount.innerHTML = "";
     const subs = (fidelObj.prefix === "h" || fidelObj.prefix === "ḥ")
-        ? ["ha", "hoo", "hee", "ha", "hay", "hih", "ho"]
-        : ["eh", "oo", "ee", "ah", "ay", "ih", "o"].map(s => `${fidelObj.prefix}${s}`);
+        ? ["ha", "hu", "hee", "ha", "hay", "hih", "ho"]
+        : ["eh", "u", "ee", "ah", "ay", "ih", "o"].map(s => `${fidelObj.prefix}${s}`);
 
     fidelObj.family.forEach((char, idx) => {
         const card = document.createElement('div');
