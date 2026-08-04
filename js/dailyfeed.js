@@ -264,7 +264,7 @@ async function renderTodayBanners(targetId = 'todayBannersMount') {
 
     mount.innerHTML = `
         <div class="banner-card">
-            <div class="banner-icon">🎉</div>
+            <div class="banner-icon">${icon('confetti')}</div>
             <p class="banner-title">${names.length} Leveled Up Today</p>
             <p class="banner-sub">${levelUpSub}</p>
         </div>`;

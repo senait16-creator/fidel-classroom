@@ -1,6 +1,6 @@
 const INTRO_CARDS = [
     {
-        title: "Selam! 👋",
+        title: `Selam! ${icon('wave')}`,
         text: "Welcome to the Ultimate Fidel Challenge."
     },
     {

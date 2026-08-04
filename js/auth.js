@@ -498,7 +498,7 @@ function showOnboardingCard() {
             </p>
             <div style="text-align:left; display:flex; flex-direction:column; gap:14px; margin-bottom:22px;">
                 <div style="display:flex; gap:12px; align-items:flex-start;">
-                    <span style="font-size:24px; flex-shrink:0; margin-top:2px;">📖</span>
+                    <span style="font-size:24px; flex-shrink:0; margin-top:2px;">${icon('book-open')}</span>
                     <div>
                         <strong style="font-size:14px; color:#166534; display:block; margin-bottom:3px;">
                             Practice the Fidel
@@ -509,7 +509,7 @@ function showOnboardingCard() {
                     </div>
                 </div>
                 <div style="display:flex; gap:12px; align-items:flex-start;">
-                    <span style="font-size:24px; flex-shrink:0; margin-top:2px;">🏆</span>
+                    <span style="font-size:24px; flex-shrink:0; margin-top:2px;">${icon('trophy')}</span>
                     <div>
                         <strong style="font-size:14px; color:#166534; display:block; margin-bottom:3px;">
                             Fidel Challenge
@@ -520,7 +520,7 @@ function showOnboardingCard() {
                     </div>
                 </div>
                 <div style="display:flex; gap:12px; align-items:flex-start;">
-                    <span style="font-size:24px; flex-shrink:0; margin-top:2px;">📘</span>
+                    <span style="font-size:24px; flex-shrink:0; margin-top:2px;">${icon('book')}</span>
                     <div>
                         <strong style="font-size:14px; color:#166534; display:block; margin-bottom:3px;">
                             Reading Path
@@ -534,7 +534,7 @@ function showOnboardingCard() {
             <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:12px;
                         padding:12px 14px; margin-bottom:20px; font-size:13px;
                         color:#92400e; text-align:left;">
-                💡 <strong>New here?</strong> Start with <em>Practice the Fidel</em>
+                ${icon('idea')} <strong>New here?</strong> Start with <em>Practice the Fidel</em>
             </div>
             <button onclick="document.getElementById('onboardingOverlay').remove();"
                     style="background:#166534; color:white; border:none; border-radius:12px;

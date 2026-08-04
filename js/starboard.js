@@ -64,7 +64,7 @@ async function renderStarBoard(mountId) {
             <div class="star-board-card-top">
                 <div class="star-avatar-badge">
                     <span class="star-avatar-emoji">${avatar}</span>
-                    <span class="star-gold-star">⭐</span>
+                    <span class="star-gold-star">${icon('star')}</span>
                 </div>
                 <div>
                     <div class="star-student-name">${name}</div>
@@ -128,7 +128,7 @@ async function renderStarPicker(mountId) {
 
     const currentBanner = existing ? `
         <div class="star-current-banner">
-            ⭐ This week: <strong>${existing.student?.avatar || '🦁'}
+            ${icon('star')} This week: <strong>${existing.student?.avatar || '🦁'}
             ${existing.student?.nickname || 'Student'}</strong>
             <span style="color:#92400e;"> · tap a name to change your pick</span>
         </div>` : `
@@ -188,7 +188,7 @@ async function starPickMember(idx) {
         <input type="text" id="starShoutoutInput" class="star-shoutout-input"
                maxlength="90" placeholder="Add a shout-out (optional), e.g. Amazing ሀ family work!">
         <button class="btn-primary star-save-btn" onclick="saveStarOfWeek()">
-            ⭐ Make ${member.nickname} the Star of the Week
+            ${icon('star')} Make ${member.nickname} the Star of the Week
         </button>`;
 }
 
@@ -221,7 +221,7 @@ async function saveStarOfWeek() {
         return;
     }
 
-    showNotificationToast(`⭐ ${member.nickname} is your Star of the Week!`);
+    showNotificationToast(`${icon('star')} ${member.nickname} is your Star of the Week!`);
     renderStarPicker('starPickerMount');
 }
 

@@ -189,7 +189,7 @@ async function toggleCanDo(statementKey, targetId, categoryFilter, checked) {
         return renderCanDoRows(targetId, categoryFilter || null);
     }
 
-    if (checked) showGobezToast('Marked as achieved! 🎉');
+    if (checked) showGobezToast(`Marked as achieved! ${icon('confetti')}`);
     renderCanDoRows(targetId, categoryFilter || null);
 }
 

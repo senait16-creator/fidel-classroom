@@ -18,7 +18,7 @@ async function renderChallengeMap() {
     const mount = document.getElementById('challengeMapMount');
     mount.innerHTML = `
         <div style="text-align:center; padding:60px 20px; color:#94a3b8;">
-            <div style="font-size:32px; margin-bottom:12px;">☕</div>
+            <div style="font-size:32px; margin-bottom:12px;">${icon('coffee')}</div>
             Loading map...
         </div>`;
 
@@ -330,7 +330,7 @@ async function renderTodayCard(mountId) {
     if (allDone) {
         mount.innerHTML = `
             <div class="today-card today-card-complete">
-                <div style="font-size:28px; margin-bottom:8px;">⭐</div>
+                <div style="font-size:28px; margin-bottom:8px;">${icon('star')}</div>
                 <p class="today-card-heading">Level ${team.current_level} Complete!</p>
                 <p class="today-card-sub">You cleared all 3 families. Submit for teacher approval to advance your team.</p>
                 <button onclick="submitLevelCompletion(${team.current_level})" class="btn-primary today-action-btn">

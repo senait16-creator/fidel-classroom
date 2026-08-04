@@ -108,7 +108,7 @@ function renderWordleGame() {
   mount.innerHTML = `
     <div class="wordle-header">
       <div class="wordle-day-label">Day ${getDayIndex() + 1} · ${new Date().toLocaleDateString('en-US', {weekday:'long'})}</div>
-      <div class="wordle-streak-badge">🔥 ${streak} day streak</div>
+      <div class="wordle-streak-badge">${icon('fire')} ${streak} day streak</div>
     </div>
 
     <div class="wordle-phrase-area">

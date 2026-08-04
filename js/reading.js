@@ -277,7 +277,7 @@ async function renderReadingLevelsList() {
                     <div class="chapter-progress-fill" style="width:${percent}%;"></div>
                 </div>
                 <div class="chapter-card-actions">
-                    <button type="button" class="btn-secondary chapter-goals-btn">🎯 Chapter Goals</button>
+                    <button type="button" class="btn-secondary chapter-goals-btn">${icon('target')} Chapter Goals</button>
                     <button type="button" class="btn-primary chapter-start-btn">▶️ Start Chapter</button>
                 </div>
             </div>
@@ -489,7 +489,7 @@ async function postChapterFeedUpdate() {
 // -----------------------------------------------------------------------------
 
 function openChapterGoals(level, mode) {
-    document.getElementById('chapterGoalsTitle').innerText = `📘 ${level.title}`;
+    document.getElementById('chapterGoalsTitle').innerText = `${icon('book')} ${level.title}`;
 
     const summaryEl = document.getElementById('chapterGoalsSummary');
     summaryEl.innerHTML = `
@@ -843,7 +843,7 @@ function appendStepNav(mount, { showBack = true, continueLabel = 'Continue →' 
 function renderGoalStep(mount, lesson) {
     mount.innerHTML = `
         <div class="lesson-goal-card">
-            <div class="eyebrow">🎯 Today's Goal</div>
+            <div class="eyebrow">${icon('target')} Today's Goal</div>
             <p class="lesson-goal-text">${lesson.learning_objective || 'Complete this lesson to build your Amharic skills.'}</p>
             ${lesson.estimated_minutes ? `<p class="lesson-goal-time">⏱ About ${lesson.estimated_minutes} minutes</p>` : ''}
         </div>
@@ -892,7 +892,7 @@ function renderQuizStep(mount, quiz) {
     if (!quiz.length) {
         mount.innerHTML = `
             <div class="lesson-section-card">
-                <div class="eyebrow">🧩 Quick Check</div>
+                <div class="eyebrow">${icon('puzzle')} Quick Check</div>
                 <p>No quick check has been added for this lesson yet.</p>
             </div>
         `;
@@ -901,7 +901,7 @@ function renderQuizStep(mount, quiz) {
 
     mount.innerHTML = `
         <div class="lesson-section-card">
-            <div class="eyebrow">🧩 Quick Check</div>
+            <div class="eyebrow">${icon('puzzle')} Quick Check</div>
             <h3>Can you understand it?</h3>
             <p class="subtitle" style="text-align:left; margin-bottom:12px;">
                 Read each prompt first. Tap to reveal the answer.
@@ -924,7 +924,7 @@ function renderLessonCompleteStep(mount) {
     mount.innerHTML = `
         <div class="lesson-complete-card">
             <div class="lesson-complete-badge">ጎበዝ!</div>
-            <p class="lesson-complete-icon">🎉</p>
+            <p class="lesson-complete-icon">${icon('confetti')}</p>
             <h3>Lesson Complete</h3>
             <p>You finished <strong>${lesson?.title || 'this lesson'}</strong>.</p>
             <p class="lesson-complete-sub">You’re building real Amharic step by step.</p>
@@ -948,7 +948,7 @@ function renderLessonCompleteStep(mount) {
 // -----------------------------------------------------------------------------
 
 async function renderConversationSection(mount, levelNumber, lessonOrder) {
-    mount.innerHTML = `<div class="eyebrow">💬 Conversation</div><p style="color:#94a3b8; font-size:13px;">Loading conversation...</p>`;
+    mount.innerHTML = `<div class="eyebrow">${icon('chat')} Conversation</div><p style="color:#94a3b8; font-size:13px;">Loading conversation...</p>`;
 
     const { data: lines, error } = await _supabase
         .from('lesson_conversations')
@@ -958,7 +958,7 @@ async function renderConversationSection(mount, levelNumber, lessonOrder) {
         .order('item_order', { ascending: true });
 
     if (error || !lines || lines.length === 0) {
-        mount.innerHTML = `<div class="eyebrow">💬 Conversation</div><p style="color:#94a3b8; font-size:13px;">No conversation added for this lesson yet.</p>`;
+        mount.innerHTML = `<div class="eyebrow">${icon('chat')} Conversation</div><p style="color:#94a3b8; font-size:13px;">No conversation added for this lesson yet.</p>`;
         return;
     }
 
@@ -973,7 +973,7 @@ async function renderConversationSection(mount, levelNumber, lessonOrder) {
     const hasRead = !!progress?.has_read;
 
     mount.innerHTML = `
-        <div class="eyebrow">💬 Conversation</div>
+        <div class="eyebrow">${icon('chat')} Conversation</div>
         <div class="conversation-lines">
             ${lines.map(line => `
                 <div class="conversation-line">
@@ -1058,18 +1058,18 @@ async function saveVocabKnown(vocabId, isKnown) {
 }
 
 async function renderVocabSection(mount, levelNumber, lessonOrder) {
-    mount.innerHTML = `<div class="eyebrow">📖 Today's Words</div><p style="color:#94a3b8; font-size:13px;">Loading vocabulary...</p>`;
+    mount.innerHTML = `<div class="eyebrow">${icon('book-open')} Today's Words</div><p style="color:#94a3b8; font-size:13px;">Loading vocabulary...</p>`;
 
     const words = await fetchChapterVocab(levelNumber, lessonOrder);
     if (words.length === 0) {
-        mount.innerHTML = `<div class="eyebrow">📖 Today's Words</div><p style="color:#94a3b8; font-size:13px;">No vocabulary added for this lesson yet.</p>`;
+        mount.innerHTML = `<div class="eyebrow">${icon('book-open')} Today's Words</div><p style="color:#94a3b8; font-size:13px;">No vocabulary added for this lesson yet.</p>`;
         return;
     }
 
     const knownById = await fetchMyVocabProgress(words.map(w => w.id));
 
     mount.innerHTML = `
-        <div class="eyebrow">📖 Today's Words</div>
+        <div class="eyebrow">${icon('book-open')} Today's Words</div>
         <p class="subtitle" style="text-align:left; margin-bottom:12px;">Tap a word to reveal its meaning. Mark it known once you've got it down.</p>
     `;
 
@@ -1158,17 +1158,17 @@ async function fetchMyConjugationProgress(conjugationIds) {
 }
 
 async function renderConjugationSection(mount, levelNumber, lessonOrder) {
-    mount.innerHTML = `<div class="eyebrow">🧠 Grammar Spotlight</div><p style="color:#94a3b8; font-size:13px;">Loading grammar...</p>`;
+    mount.innerHTML = `<div class="eyebrow">${icon('brain')} Grammar Spotlight</div><p style="color:#94a3b8; font-size:13px;">Loading grammar...</p>`;
 
     const verbs = await fetchChapterConjugations(levelNumber, lessonOrder);
     if (verbs.length === 0) {
-        mount.innerHTML = `<div class="eyebrow">🧠 Grammar Spotlight</div><p style="color:#94a3b8; font-size:13px;">No grammar added for this lesson yet.</p>`;
+        mount.innerHTML = `<div class="eyebrow">${icon('brain')} Grammar Spotlight</div><p style="color:#94a3b8; font-size:13px;">No grammar added for this lesson yet.</p>`;
         return;
     }
 
     const practicedById = await fetchMyConjugationProgress(verbs.map(v => v.id));
 
-    mount.innerHTML = `<div class="eyebrow">🧠 Grammar Spotlight</div>`;
+    mount.innerHTML = `<div class="eyebrow">${icon('brain')} Grammar Spotlight</div>`;
 
     verbs.forEach(verb => {
         const isPracticed = !!practicedById[verb.id];
@@ -1220,7 +1220,7 @@ async function markConjugationPracticed(conjugationId, card) {
 // -----------------------------------------------------------------------------
 
 async function renderLessonReadingSection(mount, levelNumber, lessonOrder) {
-    mount.innerHTML = `<div class="eyebrow">📚 Read the Conversation Again</div><p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
+    mount.innerHTML = `<div class="eyebrow">${icon('books')} Read the Conversation Again</div><p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
 
     const { data: items, error } = await _supabase
         .from('reading_items')
@@ -1230,7 +1230,7 @@ async function renderLessonReadingSection(mount, levelNumber, lessonOrder) {
         .order('item_order', { ascending: true });
 
     if (error || !items || items.length === 0) {
-        mount.innerHTML = `<div class="eyebrow">📚 Read the Conversation Again</div><p style="color:#94a3b8; font-size:13px;">No reading passages added for this lesson yet.</p>`;
+        mount.innerHTML = `<div class="eyebrow">${icon('books')} Read the Conversation Again</div><p style="color:#94a3b8; font-size:13px;">No reading passages added for this lesson yet.</p>`;
         return;
     }
 
@@ -1252,7 +1252,7 @@ async function renderLessonReadingSection(mount, levelNumber, lessonOrder) {
     if (resumeIndex === -1) resumeIndex = items.length - 1; // all done — show the last item
     activeReadingItemIndex = resumeIndex;
 
-    mount.innerHTML = `<div class="eyebrow">📚 Read the Conversation Again</div><div id="readingStepContent"></div>`;
+    mount.innerHTML = `<div class="eyebrow">${icon('books')} Read the Conversation Again</div><div id="readingStepContent"></div>`;
     renderCurrentReadingItem(progressByItemId);
 }
 
@@ -1364,7 +1364,7 @@ function renderReadingLevelComplete() {
     const container = document.getElementById("readingStepContent");
     container.innerHTML = `
         <div style="text-align:center; padding: 20px 0;">
-            <p style="font-size:48px;">🎉</p>
+            <p style="font-size:48px;">${icon('confetti')}</p>
             <p class="subtitle" style="font-size:16px; font-weight:700; color:#10b981;">You've completed every sentence in this lesson!</p>
         </div>
     `;
@@ -1469,17 +1469,17 @@ let practiceDeck = [];
 let practiceIndex = 0;
 
 async function renderPracticeSection(mount, levelNumber, lessonOrder) {
-    mount.innerHTML = `<div class="eyebrow">✍ Practice</div><p style="color:#94a3b8; font-size:13px;">Loading practice...</p>`;
+    mount.innerHTML = `<div class="eyebrow">${icon('pencil')} Practice</div><p style="color:#94a3b8; font-size:13px;">Loading practice...</p>`;
 
     const words = await fetchChapterVocab(levelNumber, lessonOrder);
     if (words.length === 0) {
-        mount.innerHTML = `<div class="eyebrow">✍ Practice</div><p style="color:#94a3b8; font-size:13px;">Add vocabulary to this lesson to unlock a practice drill.</p>`;
+        mount.innerHTML = `<div class="eyebrow">${icon('pencil')} Practice</div><p style="color:#94a3b8; font-size:13px;">Add vocabulary to this lesson to unlock a practice drill.</p>`;
         return;
     }
 
     practiceDeck = words;
     practiceIndex = 0;
-    mount.innerHTML = `<div class="eyebrow">✍ Practice</div><div id="practiceCardMount"></div>`;
+    mount.innerHTML = `<div class="eyebrow">${icon('pencil')} Practice</div><div id="practiceCardMount"></div>`;
     renderPracticeCard(document.getElementById('practiceCardMount'));
 }
 
@@ -1487,7 +1487,7 @@ function renderPracticeCard(mount) {
     if (practiceIndex >= practiceDeck.length) {
         mount.innerHTML = `
             <div style="text-align:center; padding:20px 0;">
-                <p style="font-size:40px;">🎉</p>
+                <p style="font-size:40px;">${icon('confetti')}</p>
                 <p class="subtitle" style="font-weight:700; color:#10b981;">Nice work. You've reviewed every word in this lesson!</p>
                 <button class="btn-secondary" id="practiceRestartBtn" style="margin-top:10px;">Review Again</button>
             </div>`;
@@ -1679,7 +1679,7 @@ async function submitCheckpoint(levelNumber) {
                 <button class="btn-secondary" onclick="restartCurrentChapter()">↻ Restart Chapter ${levelNumber}</button>
                 <button class="btn-primary" onclick="exitReadingLevelDetail()">Back to Chapters ✓</button>
             </div>
-            <div class="eyebrow" style="margin-top:22px;">🎯 What You Can Now Do</div>
+            <div class="eyebrow" style="margin-top:22px;">${icon('target')} What You Can Now Do</div>
             <div id="chapterCompleteCanDoMount"></div>
         `;
     } else {
@@ -1734,7 +1734,7 @@ async function renderGrowthEntryCard(targetId = 'growthEntryMount') {
 
     mount.innerHTML = `
         <div class="growth-entry-card" onclick="enterMyGrowth()">
-            <div class="growth-entry-icon">🌱</div>
+            <div class="growth-entry-icon">${icon('plant')}</div>
             <div>
                 <div class="growth-entry-title">My Growth</div>
                 <div class="growth-entry-sub">${vocabCount || 0} words · ${grammarCount || 0} grammar points · ${canDoCount || 0} Can-Dos</div>
@@ -1790,7 +1790,7 @@ async function renderGrowthToday(chapterTitleByLevel) {
             const lesson = allLessons.find(l => l.id === row.lesson_id);
             const chapterTitle = lesson ? chapterTitleByLevel[lesson.level_number] : null;
             rows.push({
-                icon: '📖',
+                icon: icon('book-open'),
                 text: lesson
                     ? `Completed ${lesson.is_challenge ? 'the Chapter Challenge' : lesson.title}${chapterTitle ? ` · ${chapterTitle}` : ''}`
                     : 'Completed a lesson'
@@ -1805,7 +1805,7 @@ async function renderGrowthToday(chapterTitleByLevel) {
     if (canDoRows?.length) {
         canDoRows.forEach(row => {
             const statement = CAN_DO_STATEMENTS.find(s => s.key === row.statement_key);
-            rows.push({ icon: '✅', text: `Checked off "${statement?.text || row.statement_key}"` });
+            rows.push({ icon: icon('check-circle'), text: `Checked off "${statement?.text || row.statement_key}"` });
         });
     }
 

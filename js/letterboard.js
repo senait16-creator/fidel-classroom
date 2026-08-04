@@ -110,17 +110,17 @@ const LETTER_BOARD_QUICK_LINKS = [
         href: 'https://www.youtube.com/watch?v=QgssO7_WkSk&t=160s'
     },
     {
-        icon: '🔊', label: 'Letter Sounds',
+        icon: icon('speaker'), label: 'Letter Sounds',
         desc: 'Hear Fidel sounds pronounced out loud',
         href: 'https://amharicteacher.com/hahu'
     },
     {
-        icon: '🎵', label: 'Alphabet Songs',
+        icon: icon('music'), label: 'Alphabet Songs',
         desc: 'Use music for extra letter review',
         href: 'https://www.youtube.com/results?search_query=amharic+alphabet+song'
     },
     {
-        icon: '🌐', label: 'AmharicTeacher.com',
+        icon: icon('globe'), label: 'AmharicTeacher.com',
         desc: 'Full external course library',
         href: 'https://amharicteacher.com'
     }

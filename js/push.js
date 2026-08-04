@@ -89,7 +89,7 @@ async function enablePushNotifications() {
             return showNotificationToast("Couldn't save notification settings: " + error.message);
         }
 
-        showGobezToast('Notifications enabled! 🔔');
+        showGobezToast(`Notifications enabled! ${icon('bell')}`);
         updatePushMenuButton();
     } catch (err) {
         console.error('Push subscribe failed:', err);

@@ -283,7 +283,7 @@ async function openFeaturedWritingPicker(weekStart) {
 
             overlay.remove();
             if (saveError) return showNotificationToast("Couldn't save: " + saveError.message);
-            showGobezToast('Featured Writing updated! ✨');
+            showGobezToast(`Featured Writing updated! ${icon('sparkle')}`);
             await renderFeaturedWriting('featuredWritingMount');
         };
     });
@@ -331,11 +331,11 @@ async function renderRecentAchievements(mountId) {
     ]);
 
     (chapters.data || []).forEach(row => events.push({
-        icon: '📘', time: row.completed_at,
+        icon: icon('book'), time: row.completed_at,
         text: `${row.profiles?.nickname || 'A student'} completed Chapter ${row.level_number}`
     }));
     (streaks.data || []).forEach(row => events.push({
-        icon: '🔥', time: row.completed_at,
+        icon: icon('fire'), time: row.completed_at,
         text: `${row.profiles?.nickname || 'A student'} reached a ${row.best_streak} streak`
     }));
     (teamsAdvanced.data || []).forEach(row => events.push({

@@ -441,7 +441,7 @@ async function finalizeWritingSubmission(imageUrl) {
         return showNotificationToast("Couldn't submit: " + (error.message || "unknown error"));
     }
 
-    showNotificationToast("Submitted! Your captain will review it soon. 🎉");
+    showNotificationToast(`Submitted! Your captain will review it soon. ${icon("confetti")}`);
     closeWritingSubmitScreen();
 
     if (typeof sendPushNotification === 'function' && currentProfile?.team_id) {
@@ -477,10 +477,10 @@ async function shareApprovedWritingToClass(imageUrl, baseLetter, btnEl) {
         return showNotificationToast("Couldn't share: " + error.message);
     }
 
-    showGobezToast("Shared with the class! 🎉");
+    showGobezToast(`Shared with the class! ${icon("confetti")}`);
     if (btnEl) btnEl.outerHTML = `
         <p style="font-size:12px; color:#047857; margin-top:8px;">
-            🎉 Shared with the class. Check the Community feed!
+            ${icon('confetti')} Shared with the class. Check the Community feed!
         </p>`;
 }
 
@@ -521,14 +521,14 @@ async function renderWritingStatusForFamily(baseLetter, targetId = "challengeWri
         if (existingShare && existingShare.length > 0) {
             statusHTML += `
                 <p style="font-size:12px; color:#047857; margin-top:8px;">
-                    🎉 Shared with the class. Check the Community feed!
+                    ${icon('confetti')} Shared with the class. Check the Community feed!
                 </p>`;
         } else {
             statusHTML += `
                 <button class="btn-primary"
                         style="margin-top:10px; font-size:13px; padding:10px 16px;"
                         onclick="shareApprovedWritingToClass('${latest.image_url}', '${baseLetter}', this)">
-                    🎉 Share to Community
+                    ${icon('confetti')} Share to Community
                 </button>
                 <p style="font-size:11px; color:#94a3b8; margin-top:6px;">
                     Optional: post your approved work to the Community feed for reactions.

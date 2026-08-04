@@ -234,7 +234,7 @@ async function loadTeamPracticeFeed() {
     if (!posts || posts.length === 0) {
         mount.innerHTML = `
             <div class="team-hub-empty">
-                No practice posts yet. Be the first to share! 🎉
+                No practice posts yet. Be the first to share! ${icon('confetti')}
             </div>`;
         return;
     }
@@ -383,7 +383,7 @@ async function uploadTeamPracticePhoto(file, baseLetter) {
 
     if (insertError) return showNotificationToast("Couldn't save post: " + insertError.message);
 
-    showGobezToast('Practice post shared with your team! 🎉');
+    showGobezToast(`Practice post shared with your team! ${icon('confetti')}`);
     // Open the feed section if it's closed
     const feedMount = document.getElementById('teamHubPracticeFeed');
     if (feedMount && feedMount.style.display === 'none') toggleTeamFeed();
@@ -424,7 +424,7 @@ function updateCaptainPendingBadge(count) {
         }
     }
     if (btn) {
-        btn.innerText = count > 0 ? `📝 Review Writing` : `🎉 All caught up!`;
+        btn.innerText = count > 0 ? `${icon('note-pencil')} Review Writing` : `${icon('confetti')} All caught up!`;
     }
 }
 
@@ -466,7 +466,7 @@ async function loadCaptainWritingQueue() {
     if (!submissions || submissions.length === 0) {
         mount.innerHTML = `
             <div style="text-align:center; padding:24px 16px; color:#94a3b8;">
-                <div style="font-size:26px; margin-bottom:8px;">☕</div>
+                <div style="font-size:26px; margin-bottom:8px;">${icon('coffee')}</div>
                 <p style="font-size:13px; font-weight:600; color:#64748b; margin-bottom:4px;">
                     No pending submissions
                 </p>
@@ -587,7 +587,7 @@ async function captainApproveSubmission(submissionId, studentId, baseLetter) {
 
     const creditError = await creditApprovedWritingToProgress(studentId, baseLetter);
     if (creditError) {
-        showNotificationToast("⚠️ Writing approved, but progress wasn't credited: " + creditError.message);
+        showNotificationToast(`${icon("warning")} Writing approved, but progress wasn't credited: ` + creditError.message);
     }
 
     // Write a notification so the student sees it on next hub load
@@ -693,7 +693,7 @@ async function loadCaptainTeamProgress() {
             row.innerHTML = `
                 <div class="captain-member-header" style="cursor:default;">
                     <span>${member.avatar || '🦁'} ${member.nickname}</span>
-                    <span class="team-member-progress" style="color:#b45309;">👑 Captain, exempt</span>
+                    <span class="team-member-progress" style="color:#b45309;">${icon('crown')} Captain, exempt</span>
                 </div>`;
             mount.appendChild(row);
             return;
@@ -719,7 +719,7 @@ async function loadCaptainTeamProgress() {
                     <span class="captain-family-letter">${letter}</span>
                     <div class="captain-family-meta">
                         <span class="${progress?.streak_passed ? 'captain-stat-done' : ''}">
-                            🔥 Streak: ${streak}/20${progress?.streak_passed ? ' ✓' : ''}
+                            ${icon('fire')} Streak: ${streak}/20${progress?.streak_passed ? ' ✓' : ''}
                         </span>
                         <span>${subStatus}</span>
                     </div>
@@ -835,13 +835,13 @@ async function loadDailyTeamChallenge() {
         let current = lessons.find(l => !completedIds.has(l.id));
         if (!current && lessons.length > 0) current = lessons[lessons.length - 1];
 
-        title = "📖 Lesson Challenge";
+        title = `${icon('book-open')} Lesson Challenge`;
         bodyHtml = current
             ? `Practice today's lesson together: <strong>${current.title}</strong>. Read it aloud, review the vocabulary, and try today's conversation prompt.`
             : `Review your most recent lesson together: read it aloud and practice the vocabulary as a team.`;
         shareText = current
-            ? `📖 Lesson Challenge: Practice "${current.title}" together. Read it aloud, review the vocabulary, and try today's conversation prompt!`
-            : `📖 Lesson Challenge: Review your most recent lesson together. Read it aloud and practice the vocabulary as a team!`;
+            ? `${icon('book-open')} Lesson Challenge: Practice "${current.title}" together. Read it aloud, review the vocabulary, and try today's conversation prompt!`
+            : `${icon('book-open')} Lesson Challenge: Review your most recent lesson together. Read it aloud and practice the vocabulary as a team!`;
     }
 
     mount.innerHTML = `
@@ -849,7 +849,7 @@ async function loadDailyTeamChallenge() {
             <div class="daily-challenge-title">${title}</div>
             <p class="daily-challenge-body">${bodyHtml}</p>
         </div>
-        <button class="daily-challenge-share-btn" id="dailyChallengeShareBtn">📤 Share with Team</button>
+        <button class="daily-challenge-share-btn" id="dailyChallengeShareBtn">${icon('send')} Share with Team</button>
     `;
 
     const shareBtn = document.getElementById('dailyChallengeShareBtn');
@@ -867,7 +867,7 @@ async function shareTeamChallenge(text) {
     }
     try {
         await navigator.clipboard.writeText(text);
-        showNotificationToast("Copied! Paste it into your team chat 📋");
+        showNotificationToast(`Copied! Paste it into your team chat ${icon("clipboard")}`);
     } catch (e) {
         showNotificationToast("Couldn't copy automatically. Select and copy the challenge text.");
     }
@@ -964,7 +964,7 @@ async function checkCaptainInboxBadge() {
         .eq('status', 'pending');
 
     if (count && count > 0) {
-        showGobezToast(`👑 ${count} writing submission${count > 1 ? 's' : ''} waiting for your review!`);
+        showGobezToast(`${icon('crown')} ${count} writing submission${count > 1 ? 's' : ''} waiting for your review!`);
     }
 }
 function exitCaptainDashboard() {
