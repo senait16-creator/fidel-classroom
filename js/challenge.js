@@ -72,16 +72,16 @@ async function renderChallengeDashboard() {
 
     const teamHex = getTeamHex(team.name);
 
-    // ── Hero team row — colored dot + name, one line, plus a small
-    //    "Level N" line underneath. Replaces the old plain-text subtitle
-    //    and the separate stat chips row (redundant with this and with
-    //    the collapsed "Your Team" row further down the page). ──
+    // ── Hero meta row — colored dot + "Team • Level N • Week N" as one
+    //    line, so the title above it stays a single line instead of
+    //    fighting a second and third line of detail for space. ──
     const heroTeamDot = document.getElementById("challengeHeroTeamDot");
-    const heroTeamName = document.getElementById("challengeHeroTeamName");
-    const heroLevelLine = document.getElementById("challengeHeroLevelLine");
+    const heroMetaLine = document.getElementById("challengeHeroMetaLine");
     if (heroTeamDot) heroTeamDot.style.background = teamHex;
-    if (heroTeamName) heroTeamName.innerText = team.name;
-    if (heroLevelLine) heroLevelLine.innerText = `Level ${team.current_level}`;
+    if (heroMetaLine) {
+        const week = typeof getProgramWeekNumber === "function" ? getProgramWeekNumber() : null;
+        heroMetaLine.innerText = `${team.name} • Level ${team.current_level}${week ? ` • Week ${week}` : ''}`;
+    }
 
     // ── Progress to ፐ — shared hero, so this renders once and shows
     //    up automatically on both the student and captain dashboard. ──
@@ -90,13 +90,8 @@ async function renderChallengeDashboard() {
     const pePercent = Math.min(100, Math.max(0, Math.round(((currentLevelNum - 1) / totalLevels) * 100)));
     const peLabel = document.getElementById("peProgressLabel");
     const peFill = document.getElementById("peProgressFill");
-    if (peLabel) peLabel.innerText = `${currentLevelNum} / ${totalLevels}`;
+    if (peLabel) peLabel.innerText = `${currentLevelNum} / ${totalLevels} Levels`;
     if (peFill) peFill.style.width = `${pePercent}%`;
-
-    const peWeekLabel = document.getElementById("peWeekLabel");
-    if (peWeekLabel && typeof getProgramWeekNumber === "function") {
-        peWeekLabel.innerText = `📅 Week ${getProgramWeekNumber()}`;
-    }
 
     // ── Your Team — collapsed to one row (dot, name, rank/percent),
     //    tap to expand the full status panel below. Team is information
