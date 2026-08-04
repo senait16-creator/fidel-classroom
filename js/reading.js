@@ -85,21 +85,8 @@ let chapterListReturnScreen = null;
 function enterAmharicPath() {
     if (!currentProfile) return;
 
-    if (currentProfile.can_read_fidel !== true) {
-        showScreen("amharicPathGateScreen");
-        return;
-    }
-
-    if (currentProfile.amharic_path_mode === "study_together") {
-        showScreen("studyTogetherScreen");
-        renderStudyTogetherScreen();
-    } else if (currentProfile.amharic_path_mode === "independent") {
-        chapterListReturnScreen = null;
-        showScreen("readingLevelsScreen");
-        renderReadingLevelsList();
-    } else {
-        showScreen("amharicPathChooseScreen");
-    }
+    showScreen("amharicPathHomeScreen");
+    renderAmharicPathChapterCard();
 }
 
 // "Yes" persists the flag and moves on to the mode choice (or straight to
@@ -159,6 +146,10 @@ function exitChapterList() {
         chapterListReturnScreen = null;
         showScreen("studyTogetherScreen");
         renderStudyTogetherScreen();
+    } else if (chapterListReturnScreen === "amharicPathHomeScreen") {
+        chapterListReturnScreen = null;
+        showScreen("amharicPathHomeScreen");
+        renderAmharicPathChapterCard();
     } else {
         exitAmharicPath();
     }
@@ -285,7 +276,7 @@ async function renderReadingLevelsList() {
 
         card.querySelector('.chapter-start-btn').onclick = (e) => {
             e.stopPropagation();
-            readingLevelDetailReturnScreen = chapterListReturnScreen === "studyTogetherScreen" ? "studyTogetherScreen" : "readingLevelsScreen";
+            readingLevelDetailReturnScreen = chapterListReturnScreen || "readingLevelsScreen";
             enterChapter(level.level_number);
         };
         card.querySelector('.chapter-goals-btn').onclick = (e) => {
@@ -336,7 +327,65 @@ function escapeHtml(str) {
 }
 
 // -----------------------------------------------------------------------------
-// Study Together — the same chapters as Independent Study, plus a light
+// Amharic Path home — single landing screen: resume the current chapter,
+// browse all chapters, or a quick daily Wordle. Reuses the same
+// fetchCurrentChapterSummary() the (currently paused) Study Together
+// dashboard used for its own chapter card.
+// -----------------------------------------------------------------------------
+
+async function renderAmharicPathChapterCard() {
+    const mount = document.getElementById('amharicPathChapterMount');
+    if (!mount) return;
+    mount.innerHTML = `<p style="color:#94a3b8;">Loading...</p>`;
+
+    const current = await fetchCurrentChapterSummary();
+
+    if (!current) {
+        mount.innerHTML = `<p style="color:#94a3b8;">No chapters yet, check back soon.</p>`;
+        return;
+    }
+
+    const { level, isComplete, totalCount, completedCount, percent } = current;
+
+    mount.innerHTML = `
+        <div class="challenge-level-number-badge">${level.level_number}</div>
+        <div class="chapter-list-card-body">
+            <div class="chapter-list-card-title">${level.title}</div>
+            <div class="chapter-list-card-meta">
+                ${completedCount} of ${totalCount} lesson${totalCount === 1 ? '' : 's'}${isComplete ? ' • Chapter complete ✓' : ''}
+            </div>
+            <div class="chapter-progress-track">
+                <div class="chapter-progress-fill" style="width:${percent}%;"></div>
+            </div>
+            <button type="button" class="btn-primary amharic-path-continue-btn" style="width:100%; margin-top:10px;">
+                ${isComplete ? 'Review Chapter →' : 'Continue Chapter →'}
+            </button>
+            <a href="javascript:void(0)" class="study-together-all-chapters-link">See All Chapters →</a>
+        </div>
+    `;
+
+    mount.querySelector('.amharic-path-continue-btn').onclick = () => {
+        continueChapterFromHome(level.level_number);
+    };
+    mount.querySelector('.study-together-all-chapters-link').onclick = openAllChaptersFromHome;
+}
+
+function continueChapterFromHome(levelNumber) {
+    readingLevelDetailReturnScreen = "amharicPathHomeScreen";
+    enterChapter(levelNumber);
+}
+
+function openAllChaptersFromHome() {
+    chapterListReturnScreen = "amharicPathHomeScreen";
+    showScreen("readingLevelsScreen");
+    renderReadingLevelsList();
+}
+
+// -----------------------------------------------------------------------------
+// Study Together — PAUSED for now (see renderAmharicPathChapterCard above,
+// the new single landing screen). Left in place, unreached from the normal
+// entry flow, in case a social layer comes back later. Same chapters as
+// Independent Study, plus a light
 // social layer: Daily Wordle, Verse of the Day, the team's Lesson Schedule
 // (Community Check-In), and a class-wide Chapter Feed. Voice Prompt is a
 // placeholder for now — recording/playback doesn't exist anywhere in the
@@ -504,7 +553,7 @@ function openChapterGoals(level, mode) {
     const ctaBtn = document.getElementById('chapterGoalsCtaBtn');
     if (mode === 'start') {
         ctaBtn.innerText = 'Continue to Lesson 1 →';
-        ctaBtn.onclick = () => { closeChapterGoals(); readingLevelDetailReturnScreen = chapterListReturnScreen === "studyTogetherScreen" ? "studyTogetherScreen" : "readingLevelsScreen"; enterChapter(level.level_number); };
+        ctaBtn.onclick = () => { closeChapterGoals(); readingLevelDetailReturnScreen = chapterListReturnScreen || "readingLevelsScreen"; enterChapter(level.level_number); };
     } else {
         ctaBtn.innerText = 'Got it ✓';
         ctaBtn.onclick = closeChapterGoals;
@@ -552,10 +601,7 @@ async function enterChapter(levelNumber) {
     if (resumeIndex === -1) resumeIndex = lessons.length - 1;
     activeLessonIndex = resumeIndex;
 
-    document.getElementById("readingLevelsScreen").style.display = "none";
-    const studyTogetherScreenEl = document.getElementById("studyTogetherScreen");
-    if (studyTogetherScreenEl) studyTogetherScreenEl.style.display = "none";
-    document.getElementById("readingLevelDetailScreen").style.display = "block";
+    showScreen("readingLevelDetailScreen", "block");
 
     openLessonPicker();
 }
@@ -700,6 +746,9 @@ function exitReadingLevelDetail() {
     if (readingLevelDetailReturnScreen === "studyTogetherScreen") {
         document.getElementById("studyTogetherScreen").style.display = "block";
         renderStudyTogetherScreen();
+    } else if (readingLevelDetailReturnScreen === "amharicPathHomeScreen") {
+        document.getElementById("amharicPathHomeScreen").style.display = "block";
+        renderAmharicPathChapterCard();
     } else {
         document.getElementById("readingLevelsScreen").style.display = "block";
         renderReadingLevelsList();

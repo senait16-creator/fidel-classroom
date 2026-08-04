@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=34">
+    <link rel="stylesheet" href="style.css?v=35">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -372,7 +372,7 @@
             <div class="workspace-action-row">
                 <button class="workspace-action-btn" onclick="openMatchingGameWorkspaceMode('all')">Matching Game</button>
                 <button id="studyAllFlashcardsBtn" class="workspace-action-btn"> Study All Letters</button>
-                <button class="workspace-action-btn" style="background:#4338ca; color:white; border-color:#4338ca;" onclick="enterAmharicPath()"><span data-icon="book" data-icon-color="white"></span> My Amharic Path</button>
+                <button class="workspace-action-btn" style="background:#4338ca; color:white; border-color:#4338ca;" onclick="enterAmharicPath()"><span data-icon="book" data-icon-color="white"></span> Amharic Path</button>
                 <button id="captainDashboardEntryBtn" class="workspace-action-btn" style="background:#b45309; color:white; border-color:#b45309; display:none;" onclick="enterCaptainDashboard()"><span data-icon="crown" data-icon-color="white"></span> Captain Review</button>
                 <button class="workspace-action-btn challenge-variant" onclick="enterModeSelect()"><span data-icon="trophy" data-icon-color="white"></span> Fidel Challenge</button>
             </div>
@@ -522,7 +522,7 @@
                 <path d="M23 15 Q23 11 26 13 Q29 15 26 18" fill="none" stroke="#4338ca" stroke-width="1.1" stroke-linecap="round"/>
                 <text x="22" y="42" text-anchor="middle" font-size="9" font-weight="700" fill="#4338ca" font-family="sans-serif">ጉዞዬ</text>
             </svg>
-            <div class="cup-card-label">My Amharic Path</div>
+            <div class="cup-card-label">Amharic Path</div>
         </div>
 
 
@@ -1065,7 +1065,7 @@
      the question is simply asked again next visit. -->
 <div id="amharicPathGateScreen" style="display:none; max-width:520px; margin:60px auto; padding:0 16px;">
     <div class="workspace-title">
-        <span><span data-icon="book"></span> My Amharic Path</span>
+        <span><span data-icon="book"></span> Amharic Path</span>
         <button class="btn-secondary" onclick="exitAmharicPath()">← Back</button>
     </div>
     <div class="amharic-gate-card">
@@ -1095,7 +1095,7 @@
      Reachable from the gate above, and again any time via "Switch path". -->
 <div id="amharicPathChooseScreen" style="display:none; max-width:640px; margin:60px auto; padding:0 16px;">
     <div class="workspace-title">
-        <span><span data-icon="book"></span> My Amharic Path</span>
+        <span><span data-icon="book"></span> Amharic Path</span>
         <button class="btn-secondary" onclick="exitAmharicPath()">← Back</button>
     </div>
     <p class="subtitle" style="text-align:center; margin-bottom:22px;">Start where you are. Choose the pace that fits your life right now.</p>
@@ -1111,13 +1111,32 @@
     </div>
 </div>
 
+<!-- Amharic Path — home. Everyone lands here after tapping the cup card:
+     resume the current chapter, browse all chapters, or a quick daily
+     Wordle. The fluency gate and Independent/Study Together choice above
+     are paused for now — this is the single unified entry point. -->
+<div id="amharicPathHomeScreen" style="display:none; max-width:480px; margin:60px auto; padding:0 16px;">
+    <div class="workspace-title">
+        <span><span data-icon="book"></span> Amharic Path</span>
+        <button class="btn-secondary" onclick="exitAmharicPath()">← Back</button>
+    </div>
+    <p class="subtitle" style="text-align:left; margin-bottom:18px;">From Fidel to Fluent</p>
+
+    <div id="amharicPathChapterMount" class="chapter-list-card"><p style="color:#94a3b8;">Loading...</p></div>
+
+    <div class="amharic-path-wordle-card" onclick="openWordleOverlay(true)">
+        <span class="amharic-path-wordle-icon">🟩</span>
+        <span class="amharic-path-wordle-label">Daily Wordle</span>
+        <span class="amharic-path-wordle-arrow">→</span>
+    </div>
+</div>
+
 <div id="readingLevelsScreen" style="display:none; max-width:900px; margin:40px auto; padding:0 16px;">
     <div class="workspace-title">
-        <span><span data-icon="book"></span> My Amharic Path</span>
+        <span><span data-icon="book"></span> Amharic Path</span>
         <button class="btn-secondary" onclick="exitChapterList()">← Back</button>
     </div>
     <p class="subtitle" style="text-align:left; margin-bottom:4px;">From Fidel to Fluent </p>
-    <a href="javascript:void(0)" onclick="openAmharicPathChooser()" class="amharic-switch-path-link">Switch path</a>
     <div id="growthEntryMount"></div>
     <div id="readingLevelsGrid" class="chapter-list-grid"></div>
 </div>
@@ -1127,7 +1146,7 @@
         <span><span data-icon="plant"></span> My Growth</span>
         <button class="btn-secondary" onclick="exitMyGrowth()">← Back</button>
     </div>
-    <p class="subtitle" style="text-align:left; margin-bottom:16px;">Everything you've picked up so far on My Amharic Path</p>
+    <p class="subtitle" style="text-align:left; margin-bottom:16px;">Everything you've picked up so far on Amharic Path</p>
 
     <div class="growth-section-label"><span data-icon="calendar"></span> Today</div>
     <div id="growthTodayMount"></div>
@@ -1605,7 +1624,7 @@
 <!-- END CAN-DO STATEMENTS -->
 
 <script src="js/icons.js?v=1" defer></script>
-<script src="js/navigation.js?v=3" defer></script>
+<script src="js/navigation.js?v=4" defer></script>
 <script src="js/app.js?v=22" defer></script>
 <script src="js/auth.js?v=14" defer></script>
 <script src="js/guide.js?v=10" defer></script>
@@ -1613,7 +1632,7 @@
 <script src="js/game.js?v=9" defer></script>
 <script src="js/submissions.js?v=14" defer></script>
 <script src="js/teacher.js?v=31" defer></script>
-<script src="js/reading.js?v=24" defer></script>
+<script src="js/reading.js?v=25" defer></script>
 <script src="js/wordbuilder.js?v=7" defer></script>
     <script src="js/letterboard.js?v=15" defer></script>
 <script src="js/team/progress.js?v=20" defer></script>

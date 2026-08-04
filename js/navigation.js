@@ -36,6 +36,7 @@ const ALL_SCREENS = [
     "challengeFamilyDetailScreen",
     "amharicPathGateScreen",
     "amharicPathChooseScreen",
+    "amharicPathHomeScreen",
     "readingLevelsScreen",
     "readingLevelDetailScreen",
     "studyTogetherScreen",
