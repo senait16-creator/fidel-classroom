@@ -32,9 +32,24 @@ let wordBuilderCurrentLevel = null;
 let wordBuilderWords = [];
 let wordBuilderReadWordIds = new Set();
 let wordBuilderIndex = 0;
-let wordBuilderCurrentWordMarkedRead = false;
 let wordBuilderSentencesByWordId = {};
 let wordBuilderSentenceRevealed = false;
+
+// One challenge at a time, Duolingo-style, instead of one busy page: each
+// word walks through the same fixed sequence, one screen per step, so the
+// learner only ever thinks about the thing in front of them. A step is
+// skipped automatically when its content doesn't exist yet for a word
+// (no picture authored, no sentence authored, not enough other words in
+// the level to build a believable multiple-choice match) rather than
+// showing a broken or trivial step.
+const WORD_BUILDER_STEPS = ['build', 'picture', 'sentence', 'flashcard', 'spell', 'match'];
+let wordBuilderStepIndex = 0;
+let wordBuilderFlashcardFlipped = false;
+let wordBuilderSpellForWordId = null;
+let wordBuilderSpellPool = [];   // [{ch, placed}], shuffled once per word
+let wordBuilderSpellSlots = [];  // per-slot: index into wordBuilderSpellPool, or null
+let wordBuilderMatchChoicesForWordId = null;
+let wordBuilderMatchChoices = [];
 
 // ---------------------------------------------------------------------------
 // Per-level unlock check
@@ -157,7 +172,7 @@ async function openWordBuilderLevel(levelNumber) {
 
     const { data: words } = await _supabase
         .from('word_builder_words')
-        .select('id, item_order, amharic_text, transliteration, english_meaning, grammar_note')
+        .select('id, item_order, amharic_text, transliteration, english_meaning, grammar_note, emoji')
         .eq('level_number', levelNumber)
         .order('item_order');
 
@@ -209,76 +224,135 @@ async function openWordBuilderLevel(levelNumber) {
 window.openWordBuilderLevel = openWordBuilderLevel;
 
 function renderWordBuilderWordCard() {
+    wordBuilderStepIndex = 0;
+    wordBuilderSentenceRevealed = false;
+    wordBuilderFlashcardFlipped = false;
+    renderWordBuilderStep();
+}
+
+// A step is skipped when its content doesn't exist for this word — rather
+// than rendering a broken or trivial screen — so the sequence gracefully
+// shrinks to whatever content has actually been authored.
+function wordBuilderStepShouldSkip(word, stepName) {
+    if (stepName === 'picture') return !word.emoji;
+    if (stepName === 'sentence') {
+        const s = wordBuilderSentencesByWordId[word.id];
+        return !s || !s.glosses || s.glosses.length === 0;
+    }
+    if (stepName === 'match') {
+        if (!word.emoji) return true;
+        const distractorPool = wordBuilderWords.filter(w => w.id !== word.id);
+        return distractorPool.length < 2;
+    }
+    return false;
+}
+
+// Central dispatcher — one screen per step, like a level in a game rather
+// than a page of reading. advanceWordBuilderStep() below just increments
+// wordBuilderStepIndex and calls back in here.
+function renderWordBuilderStep() {
     const crumb = document.getElementById('wordBuilderLessonCrumb');
     const mount = document.getElementById('wordBuilderLessonMount');
     if (!crumb || !mount) return;
 
-    wordBuilderCurrentWordMarkedRead = false;
-    wordBuilderSentenceRevealed = false;
-
     const level = wordBuilderCurrentLevel;
     const word = wordBuilderWords[wordBuilderIndex];
+
+    while (wordBuilderStepIndex < WORD_BUILDER_STEPS.length &&
+           wordBuilderStepShouldSkip(word, WORD_BUILDER_STEPS[wordBuilderStepIndex])) {
+        wordBuilderStepIndex++;
+    }
+
+    if (wordBuilderStepIndex >= WORD_BUILDER_STEPS.length) {
+        finishWordBuilderWord();
+        return;
+    }
+
     crumb.innerText = `LEVEL ${level.level_number}${level.topic_title ? ` · ${level.topic_title.toUpperCase()}` : ''}`;
 
+    const stepName = WORD_BUILDER_STEPS[wordBuilderStepIndex];
+    const stepBuilders = {
+        build: wbStepBuildHtml,
+        picture: wbStepPictureHtml,
+        sentence: wbStepSentenceHtml,
+        flashcard: wbStepFlashcardHtml,
+        spell: wbStepSpellHtml,
+        match: wbStepMatchHtml
+    };
+    const dots = WORD_BUILDER_STEPS.map((_, i) => `
+        <span style="width:7px; height:7px; border-radius:50%; background:${
+            i === wordBuilderStepIndex ? '#166534' : (i < wordBuilderStepIndex ? '#86efac' : '#e2e8f0')
+        };"></span>
+    `).join('');
+
+    mount.innerHTML = `
+        ${stepBuilders[stepName](word)}
+        <div style="display:flex; justify-content:center; gap:6px; margin-top:20px;">${dots}</div>
+        <p style="font-size:11px; color:#cbd5e1; text-align:center; margin-top:6px;">Word ${wordBuilderIndex + 1} of ${wordBuilderWords.length}</p>
+    `;
+}
+
+function advanceWordBuilderStep() {
+    wordBuilderStepIndex++;
+    renderWordBuilderStep();
+}
+window.advanceWordBuilderStep = advanceWordBuilderStep;
+
+// Step 1 — Build: the word, its breakdown into letters, "I Built It".
+function wbStepBuildHtml(word) {
     // Ethiopic syllables are each a single Unicode code point already, so
     // splitting the string into an array of characters is enough to get
     // one chip per Fidel character — no combining marks to worry about.
     const letters = Array.from(word.amharic_text.replace(/\s+/g, ''));
-    const progressPct = Math.round((wordBuilderIndex / wordBuilderWords.length) * 100);
-
-    mount.innerHTML = `
-        <div style="background:white; border:1px solid #e2e8f0; border-radius:18px; padding:26px 20px;
-                    text-align:center; box-shadow:0 4px 20px rgba(20,83,45,0.07); margin-bottom:16px;">
-            <div style="font-family:'Abyssinica SIL',serif; font-size:42px; color:#1e293b; margin-bottom:10px;">${word.amharic_text}</div>
+    return `
+        <div style="background:white; border:1px solid #e2e8f0; border-radius:18px; padding:30px 20px;
+                    text-align:center; box-shadow:0 4px 20px rgba(20,83,45,0.07);">
+            <div style="font-family:'Abyssinica SIL',serif; font-size:44px; color:#1e293b; margin-bottom:10px;">${word.amharic_text}</div>
             ${word.transliteration ? `<div style="font-size:13px; color:#64748b; margin-bottom:4px;">${word.transliteration}</div>` : ''}
             ${word.english_meaning ? `<div style="font-size:13.5px; color:#94a3b8; font-style:italic;">"${word.english_meaning}"</div>` : ''}
-            <div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; align-items:center; margin-top:14px;">
+            <div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; align-items:center; margin-top:16px;">
                 ${letters.map((ch, i) => `${i > 0 ? '<span style="color:#cbd5e1; font-size:16px; font-weight:700;">+</span>' : ''}<span style="font-family:'Abyssinica SIL',serif; font-size:20px; background:#fffbeb; color:#d97706; border-radius:10px; padding:6px 12px; cursor:pointer;" onclick="showWordBuilderLetterInfo('${ch}')">${ch}</span>`).join('')}
             </div>
             <div style="font-size:10px; color:#cbd5e1; margin-top:8px;">tap a letter to hear how it fits in</div>
         </div>
         ${word.grammar_note ? `
-        <div style="background:#eef2ff; border:1px solid #c7d2fe; border-radius:14px; padding:14px 16px; margin-bottom:16px;">
+        <div style="background:#eef2ff; border:1px solid #c7d2fe; border-radius:14px; padding:14px 16px; margin-top:14px;">
             <div style="font-size:10.5px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#4f46e5; margin-bottom:5px;">Why this word looks this way</div>
             <div style="font-size:13px; color:#3730a3; line-height:1.5;">${word.grammar_note}</div>
         </div>` : ''}
-        <div id="wbSentenceMount"></div>
-        <div id="wbActionMount"></div>
-        <div style="height:6px; background:#e2e8f0; border-radius:999px; overflow:hidden; margin-top:16px;">
-            <div style="height:100%; width:${progressPct}%; background:#166534; border-radius:999px;"></div>
-        </div>
-        <p style="font-size:11.5px; color:#94a3b8; text-align:center; margin-top:8px;">${wordBuilderIndex + 1} / ${wordBuilderWords.length}</p>
+        <button class="btn-primary" style="width:100%; margin-top:16px;" onclick="advanceWordBuilderStep()">I Built It</button>
     `;
-    renderWordBuilderSentenceSection();
-    renderWordBuilderActionButton();
 }
 
-// "See it in a sentence" — shown only when the current word has one
-// authored. Starts collapsed: the sentence is visible but every word
-// except the target is grayed out, so it reads as a gentle preview rather
-// than a second decoding task. Tapping "Learn from the sentence" reveals
-// the translation, a word-by-word gloss table, and the grammar notice.
-function renderWordBuilderSentenceSection() {
-    const mount = document.getElementById('wbSentenceMount');
-    if (!mount) return;
+// Step 2 — Picture: the payoff for building the word, shown full-screen so
+// every step after this one can lean on the same picture-word connection.
+function wbStepPictureHtml(word) {
+    const meaning = word.english_meaning ? word.english_meaning.charAt(0).toUpperCase() + word.english_meaning.slice(1) : '';
+    return `
+        <div style="background:white; border:1px solid #e2e8f0; border-radius:18px; padding:44px 20px;
+                    text-align:center; box-shadow:0 4px 20px rgba(20,83,45,0.07);">
+            <div style="font-size:64px; margin-bottom:14px;">${word.emoji}</div>
+            <div style="font-family:'Abyssinica SIL',serif; font-size:32px; color:#1e293b; margin-bottom:6px;">${word.amharic_text}</div>
+            ${meaning ? `<div style="font-size:15px; font-weight:700; color:#166534;">${meaning}</div>` : ''}
+        </div>
+        <button class="btn-primary" style="width:100%; margin-top:16px;" onclick="advanceWordBuilderStep()">Continue</button>
+    `;
+}
 
-    const word = wordBuilderWords[wordBuilderIndex];
+// Step 3 — Sentence: same reveal design as before, now gated behind its
+// own "Continue" so the learner reads it before moving on.
+function wbStepSentenceHtml(word) {
     const sentence = wordBuilderSentencesByWordId[word.id];
-    if (!sentence || !sentence.glosses || sentence.glosses.length === 0) {
-        mount.innerHTML = '';
-        return;
-    }
-
     const revealed = wordBuilderSentenceRevealed;
 
-    mount.innerHTML = `
-        <div style="background:#f7f5ef; border:1px solid #e2e8f0; border-radius:14px; padding:16px; margin-bottom:16px;">
-            <div style="font-size:10.5px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#94a3b8; margin-bottom:10px;">See it in a sentence</div>
-            <div style="font-family:'Abyssinica SIL',serif; font-size:22px; text-align:center; margin-bottom:10px; line-height:1.7;">
+    return `
+        <div style="background:#f7f5ef; border:1px solid #e2e8f0; border-radius:14px; padding:20px 16px;">
+            <div style="font-size:10.5px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#94a3b8; margin-bottom:12px; text-align:center;">See it in a sentence</div>
+            <div style="font-family:'Abyssinica SIL',serif; font-size:24px; text-align:center; margin-bottom:10px; line-height:1.8;">
                 ${sentence.glosses.map(g => `<span style="color:${(g.is_target || revealed) ? '#1e293b' : '#cbd5e1'}; transition:color .2s;">${g.amharic_chunk}</span>`).join(' ')}
             </div>
             ${revealed ? `
-                <div style="font-size:13px; color:#64748b; text-align:center; font-style:italic; margin-bottom:14px;">"${sentence.translation}"</div>
+                <div style="font-size:13.5px; color:#64748b; text-align:center; font-style:italic; margin-bottom:14px;">"${sentence.translation}"</div>
                 <div style="border-top:1px solid #e2e8f0; padding-top:12px;">
                     ${sentence.glosses.map(g => `
                         <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; padding:5px 0; font-size:13px;">
@@ -290,29 +364,160 @@ function renderWordBuilderSentenceSection() {
                 ${sentence.grammar_notice ? `<div style="margin-top:12px; font-size:12.5px; color:#78350f; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 12px;">💡 ${sentence.grammar_notice}</div>` : ''}
             ` : `
                 <button onclick="toggleWordBuilderSentenceReveal()"
-                        style="display:block; margin:0 auto; background:none; border:1px solid #d97706; color:#d97706;
-                               font-size:12.5px; font-weight:700; border-radius:999px; padding:7px 16px; cursor:pointer;">
+                        style="display:block; margin:16px auto 0; background:none; border:1px solid #d97706; color:#d97706;
+                               font-size:12.5px; font-weight:700; border-radius:999px; padding:8px 18px; cursor:pointer;">
                     Learn from the sentence
                 </button>
             `}
         </div>
+        ${revealed ? `<button class="btn-primary" style="width:100%; margin-top:16px;" onclick="advanceWordBuilderStep()">Continue</button>` : ''}
     `;
 }
 
 function toggleWordBuilderSentenceReveal() {
     wordBuilderSentenceRevealed = !wordBuilderSentenceRevealed;
-    renderWordBuilderSentenceSection();
+    renderWordBuilderStep();
 }
 window.toggleWordBuilderSentenceReveal = toggleWordBuilderSentenceReveal;
 
-function renderWordBuilderActionButton() {
-    const actionMount = document.getElementById('wbActionMount');
-    if (!actionMount) return;
-    const isLast = wordBuilderIndex === wordBuilderWords.length - 1;
-    actionMount.innerHTML = wordBuilderCurrentWordMarkedRead
-        ? `<button class="btn-primary" onclick="advanceWordBuilderWord()">${isLast ? 'Finish Level →' : 'Next →'}</button>`
-        : `<button class="btn-primary" onclick="markWordBuilderWordRead()">✓ I Read It</button>`;
+// Step 4 — Flashcard: front is the picture (or the word itself if this
+// word has no picture yet), back is word + transliteration + meaning.
+function wbStepFlashcardHtml(word) {
+    const front = word.emoji
+        ? `<div style="font-size:64px;">${word.emoji}</div>`
+        : `<div style="font-family:'Abyssinica SIL',serif; font-size:40px; color:#1e293b;">${word.amharic_text}</div>`;
+    const back = `
+        <div style="font-family:'Abyssinica SIL',serif; font-size:32px; color:#1e293b; margin-bottom:6px;">${word.amharic_text}</div>
+        ${word.transliteration ? `<div style="font-size:13px; color:#64748b; margin-bottom:4px;">${word.transliteration}</div>` : ''}
+        ${word.english_meaning ? `<div style="font-size:15px; font-weight:700; color:#166534;">${word.english_meaning}</div>` : ''}
+    `;
+    return `
+        <div onclick="flipWordBuilderFlashcard()"
+             style="background:white; border:1px solid #e2e8f0; border-radius:18px; padding:44px 20px; text-align:center;
+                    box-shadow:0 4px 20px rgba(20,83,45,0.07); cursor:pointer; min-height:160px;
+                    display:flex; flex-direction:column; align-items:center; justify-content:center;">
+            ${wordBuilderFlashcardFlipped ? back : front}
+        </div>
+        <p style="font-size:11px; color:#94a3b8; text-align:center; margin-top:10px;">${wordBuilderFlashcardFlipped ? 'Tap to flip back' : 'Tap the card to flip it'}</p>
+        ${wordBuilderFlashcardFlipped ? `<button class="btn-primary" style="width:100%; margin-top:6px;" onclick="advanceWordBuilderStep()">Continue</button>` : ''}
+    `;
 }
+
+function flipWordBuilderFlashcard() {
+    wordBuilderFlashcardFlipped = !wordBuilderFlashcardFlipped;
+    renderWordBuilderStep();
+}
+window.flipWordBuilderFlashcard = flipWordBuilderFlashcard;
+
+// Step 5 — Spell: tap letter tiles into slots in order (tap-to-place
+// rather than literal drag-and-drop — the standard mobile-friendly
+// substitute; real HTML5 drag events are unreliable on touch, and this is
+// the same interaction Duolingo itself actually uses). Tap a filled slot
+// to send its tile back to the pool.
+function wbStepSpellHtml(word) {
+    const letters = Array.from(word.amharic_text.replace(/\s+/g, ''));
+
+    if (wordBuilderSpellForWordId !== word.id) {
+        wordBuilderSpellForWordId = word.id;
+        wordBuilderSpellPool = wordBuilderShuffle(letters.map(ch => ({ ch, placed: false })));
+        wordBuilderSpellSlots = new Array(letters.length).fill(null);
+    }
+
+    const allPlaced = wordBuilderSpellSlots.every(s => s !== null);
+    const isCorrect = allPlaced &&
+        wordBuilderSpellSlots.map(i => wordBuilderSpellPool[i].ch).join('') === letters.join('');
+
+    return `
+        <div style="background:white; border:1px solid #e2e8f0; border-radius:18px; padding:26px 20px;
+                    text-align:center; box-shadow:0 4px 20px rgba(20,83,45,0.07);">
+            <div style="font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#94a3b8; margin-bottom:16px;">Spell "${word.english_meaning || word.amharic_text}"</div>
+            <div style="display:flex; justify-content:center; gap:8px; margin-bottom:22px; flex-wrap:wrap;">
+                ${wordBuilderSpellSlots.map((poolIdx, slotIdx) => `
+                    <div ${poolIdx !== null ? `onclick="unplaceWordBuilderSpellTile(${slotIdx})"` : ''}
+                         style="width:44px; height:52px; border:2px ${poolIdx !== null ? 'solid #166534' : 'dashed #cbd5e1'}; border-radius:10px;
+                                display:flex; align-items:center; justify-content:center; font-family:'Abyssinica SIL',serif; font-size:22px;
+                                background:${poolIdx !== null ? '#f0fdf4' : '#fafaf9'}; cursor:${poolIdx !== null ? 'pointer' : 'default'};">
+                        ${poolIdx !== null ? wordBuilderSpellPool[poolIdx].ch : ''}
+                    </div>
+                `).join('')}
+            </div>
+            <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
+                ${wordBuilderSpellPool.map((tile, i) => tile.placed ? '' : `
+                    <button onclick="placeWordBuilderSpellTile(${i})"
+                            style="width:44px; height:44px; border:1px solid #e2e8f0; border-radius:10px; background:#fffbeb; color:#d97706;
+                                   font-family:'Abyssinica SIL',serif; font-size:20px; cursor:pointer;">${tile.ch}</button>
+                `).join('')}
+            </div>
+        </div>
+        ${allPlaced ? (isCorrect
+            ? `<p style="text-align:center; color:#166534; font-weight:700; font-size:13px; margin-top:12px;">✓ That's it!</p>
+               <button class="btn-primary" style="width:100%; margin-top:6px;" onclick="advanceWordBuilderStep()">Continue</button>`
+            : `<p style="text-align:center; color:#dc2626; font-weight:700; font-size:13px; margin-top:12px;">Not quite — tap a tile to take it back.</p>`)
+        : ''}
+    `;
+}
+
+function placeWordBuilderSpellTile(poolIdx) {
+    const slotIdx = wordBuilderSpellSlots.findIndex(s => s === null);
+    if (slotIdx === -1) return;
+    wordBuilderSpellPool[poolIdx].placed = true;
+    wordBuilderSpellSlots[slotIdx] = poolIdx;
+    renderWordBuilderStep();
+}
+window.placeWordBuilderSpellTile = placeWordBuilderSpellTile;
+
+function unplaceWordBuilderSpellTile(slotIdx) {
+    const poolIdx = wordBuilderSpellSlots[slotIdx];
+    if (poolIdx === null) return;
+    wordBuilderSpellPool[poolIdx].placed = false;
+    wordBuilderSpellSlots[slotIdx] = null;
+    renderWordBuilderStep();
+}
+window.unplaceWordBuilderSpellTile = unplaceWordBuilderSpellTile;
+
+// Step 6 — Match: the picture, and 3 word choices (this word plus 2
+// distractors from the same level). Wrong taps just re-enable so the
+// learner has to actually land on the right one, matching the retry-until-
+// correct feel of the rest of Word Builder's review games.
+function wbStepMatchHtml(word) {
+    if (wordBuilderMatchChoicesForWordId !== word.id) {
+        wordBuilderMatchChoicesForWordId = word.id;
+        const distractors = wordBuilderShuffle(wordBuilderWords.filter(w => w.id !== word.id)).slice(0, 2);
+        wordBuilderMatchChoices = wordBuilderShuffle([word, ...distractors]);
+    }
+
+    return `
+        <div style="text-align:center;">
+            <div style="font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#94a3b8; margin-bottom:14px;">Which word is this?</div>
+            <div style="font-size:64px; margin-bottom:20px;">${word.emoji}</div>
+            <div id="wbMatchChoices" style="display:flex; flex-direction:column; gap:10px;">
+                ${wordBuilderMatchChoices.map(c => `
+                    <button onclick="answerWordBuilderMatchStep(this, '${c.id}')"
+                            style="font-family:'Abyssinica SIL',serif; font-size:22px; padding:14px; background:white;
+                                   border:1px solid #e2e8f0; border-radius:14px; cursor:pointer; color:#1e293b;">${c.amharic_text}</button>
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
+
+function answerWordBuilderMatchStep(btnEl, chosenId) {
+    const word = wordBuilderWords[wordBuilderIndex];
+    const buttons = document.querySelectorAll('#wbMatchChoices button');
+    buttons.forEach(btn => btn.setAttribute('disabled', 'true'));
+
+    if (chosenId === word.id) {
+        btnEl.style.borderColor = '#166534';
+        btnEl.style.background = 'rgba(22,101,52,0.08)';
+        if (typeof showGobezToast === 'function') showGobezToast('Nice! ✓');
+        setTimeout(() => advanceWordBuilderStep(), 500);
+    } else {
+        btnEl.style.borderColor = '#dc2626';
+        btnEl.style.background = 'rgba(220,38,38,0.06)';
+        setTimeout(() => buttons.forEach(btn => btn.removeAttribute('disabled')), 700);
+    }
+}
+window.answerWordBuilderMatchStep = answerWordBuilderMatchStep;
 
 // Looks up which family/pronunciation a tapped syllable belongs to, reusing
 // the same verified alphabetData/vowel-label tables Fidel Practice uses
@@ -337,7 +542,10 @@ function showWordBuilderLetterInfo(ch) {
 }
 window.showWordBuilderLetterInfo = showWordBuilderLetterInfo;
 
-async function markWordBuilderWordRead() {
+// Called once a word has run through every step of its sequence — replaces
+// the old manual "I Read It" tap with an automatic save the moment the
+// learner has actually done the work.
+async function finishWordBuilderWord() {
     const word = wordBuilderWords[wordBuilderIndex];
 
     const { error } = await _supabase.from('word_builder_progress').upsert({
@@ -348,16 +556,16 @@ async function markWordBuilderWordRead() {
 
     if (error) {
         console.error('Failed to save word progress:', error);
-        return showNotificationToast("Couldn't save progress: " + error.message);
+        showNotificationToast("Couldn't save progress: " + error.message);
     }
 
     wordBuilderReadWordIds.add(word.id);
-    wordBuilderCurrentWordMarkedRead = true;
-    renderWordBuilderActionButton();
+    advanceWordBuilderWord();
 }
-window.markWordBuilderWordRead = markWordBuilderWordRead;
 
 async function advanceWordBuilderWord() {
+    wordBuilderSpellForWordId = null;
+    wordBuilderMatchChoicesForWordId = null;
     if (wordBuilderIndex < wordBuilderWords.length - 1) {
         wordBuilderIndex++;
         renderWordBuilderWordCard();
