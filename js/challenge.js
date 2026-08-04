@@ -42,6 +42,7 @@ function enterModeSelect() {
     showScreen("modeSelectScreen", "flex");
 
     if (typeof applyModeLockStyling === 'function') applyModeLockStyling();
+    if (typeof refreshWordBuilderCupCard === 'function') refreshWordBuilderCupCard();
 
     localStorage.setItem('fidel_has_visited', '1');
 }

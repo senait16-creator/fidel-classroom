@@ -46,7 +46,9 @@ const ALL_SCREENS = [
     "canDoScreen",
     "gameWorkspace",
     "flashcardScreen",
-    "familyPracticeSheet"
+    "familyPracticeSheet",
+    "wordBuilderLevelsScreen",
+    "wordBuilderLessonScreen"
 ];
 
 function hideAllScreens() {
@@ -64,6 +66,12 @@ function showScreen(screenId, displayMode) {
 
     const hamburger = document.getElementById("hamburgerBtn");
     if (hamburger) hamburger.style.display = "flex";
+
+    // Community's icon only makes sense as a shortcut off the home
+    // screen — everywhere else it'd just be a second, confusing way
+    // back into a screen the hamburger menu already reaches.
+    const communityIcon = document.getElementById("communityIconBtn");
+    if (communityIcon) communityIcon.style.display = (screenId === "modeSelectScreen") ? "flex" : "none";
 }
 
 window.showScreen = showScreen;
