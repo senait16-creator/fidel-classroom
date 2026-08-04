@@ -27,6 +27,13 @@ const FIDEL_BOARD_LEVELS = [
 // not 35) — kept as a standalone bonus row at the end rather than dropped.
 const FIDEL_BOARD_BONUS_FAMILY = { base: 'ቐ', sound: 'qʷe' };
 
+// "1st set", "2nd set" ... instead of "Level N" — Fidel Practice is free
+// play, not a leveled mode, so "set" better matches what it actually is.
+const ORDINAL_WORDS = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th', '11th', '12th'];
+function ordinalSetLabel(n) {
+    return `${ORDINAL_WORDS[n - 1] || `${n}th`} set`;
+}
+
 let _lbProgressCache = null;
 let _lbSearchQuery = '';
 
@@ -168,16 +175,6 @@ function renderLetterBoard(query) {
 
     const progress = _lbProgressCache || {};
 
-    // Legend
-    const legend = document.createElement('div');
-    legend.className = 'lb-legend';
-    legend.innerHTML = `
-        <div class="lb-legend-item"><div class="lb-legend-dot" style="background:#10b981;"></div>Mastered</div>
-        <div class="lb-legend-item"><div class="lb-legend-dot" style="background:#ca8a04;"></div>Practicing</div>
-        <div class="lb-legend-item"><div class="lb-legend-dot" style="background:#e2e8f0;"></div>Not started</div>
-    `;
-    mount.appendChild(legend);
-
     const renderFamilyRow = (label, families) => {
         const filtered = query
             ? families.filter(f =>
@@ -224,7 +221,7 @@ function renderLetterBoard(query) {
     };
 
     FIDEL_BOARD_LEVELS.forEach(row => {
-        const label = `Level ${row.level} · ${row.families.map(f => f.base).join(' ')}`;
+        const label = `${ordinalSetLabel(row.level)} · ${row.families.map(f => f.base).join(' ')}`;
         renderFamilyRow(label, row.families);
 
         // Every 2 rows = 6 letters = one Word Builder level's worth of
@@ -234,7 +231,7 @@ function renderLetterBoard(query) {
             const wbLevel = row.level / 2;
             const link = document.createElement('div');
             link.className = 'lb-wordbuilder-link';
-            link.innerHTML = `${icon('book-open')} Ready for these? Try Word Builder Level ${wbLevel} <span class="lb-wordbuilder-link-arrow">→</span>`;
+            link.innerHTML = `${icon('book-open')} Go to Word Builder Level ${wbLevel} <span class="lb-wordbuilder-link-arrow">→</span>`;
             link.onclick = () => { if (typeof enterWordBuilder === 'function') enterWordBuilder(); };
             mount.appendChild(link);
         }

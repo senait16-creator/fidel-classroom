@@ -4764,27 +4764,6 @@ header {
     margin-right: auto;
 }
 
-.lb-legend {
-    display: flex;
-    gap: 14px;
-    padding: 12px 0 4px;
-}
-
-.lb-legend-item {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 11px;
-    color: #64748b;
-    font-family: 'Inter', sans-serif;
-}
-
-.lb-legend-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-}
-
 .lb-group-label {
     font-size: 10px;
     font-weight: 700;
