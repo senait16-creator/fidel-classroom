@@ -3842,7 +3842,7 @@ header {
 
 @media (max-width: 640px) {
     #modeSelectScreen {
-        padding: 72px 16px 32px !important;
+        padding: 140px 16px 32px !important;
     }
 
     .mode-greeting-main {
