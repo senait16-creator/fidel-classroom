@@ -4786,6 +4786,7 @@ header {
 
 .lb-icon-bar {
     display: flex;
+    flex-shrink: 0;
     gap: 6px;
     overflow-x: auto;
     padding: 10px 14px;
