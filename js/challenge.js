@@ -6,6 +6,10 @@ let challengeLevelsCache = null;
 let activeChallengeLevel = null;
 let activeChallengeFamilyObj = null;
 let activeChallengeFamilyLevel = null;
+// Where the family detail screen's "Back" button should go: 'dashboard' when
+// reached via the Continue button's direct jump, 'picker' when reached via
+// the Level Overview (family picker) grid or its own "View All Families" link.
+let challengeFamilyDetailReturnTo = 'picker';
 
 const TEAM_COLORS = {
     Red: '#b91c1c',
@@ -448,13 +452,18 @@ async function renderChallengeDashboardMap(levels, team) {
 
     const goalBtn = document.getElementById("challengeGoalBtn");
     if (goalBtn) {
-        goalBtn.onclick = async () => {
+        goalBtn.onclick = () => {
+            // Jump straight to the current family — the Level Overview
+            // (family picker) is no longer a required stop along the way.
+            // It's still reachable as an optional browse screen via the
+            // family detail page's "View All Families" link.
+            activeChallengeLevel = currentLevel;
             const fidelObj = targetFamily ? alphabetData.find(f => f.base === targetFamily) : null;
-            // Go through the picker first so its navigation state (activeChallengeLevel,
-            // the rendered family grid) is set up correctly for the "back" button,
-            // then immediately layer the detail screen on top for a one-tap jump.
-            await openChallengeFamilyPicker(currentLevel);
-            if (fidelObj) openChallengeFamilyDetail(fidelObj, currentLevel.level_number);
+            if (fidelObj) {
+                openChallengeFamilyDetail(fidelObj, currentLevel.level_number, 'dashboard');
+            } else {
+                openChallengeFamilyPicker(currentLevel);
+            }
         };
     }
 }
@@ -729,9 +738,10 @@ async function renderChallengeFamilyPicker() {
 // Family detail
 // -----------------------------------------------------------------------------
 
-async function openChallengeFamilyDetail(fidelObj, levelNumber) {
+async function openChallengeFamilyDetail(fidelObj, levelNumber, returnTo = 'picker') {
     activeChallengeFamilyObj = fidelObj;
     activeChallengeFamilyLevel = levelNumber;
+    challengeFamilyDetailReturnTo = returnTo;
     document.getElementById("challengeFamilyScreen").style.display = "none";
     document.getElementById("challengeFamilyDetailScreen").style.display = "block";
     document.getElementById("challengeFamilyDetailTitle").innerText = `Family: "${fidelObj.base}"`;
@@ -797,8 +807,18 @@ async function refreshChallengeDetailWritingGate(fidelObj, levelNumber) {
 
 function exitChallengeFamilyDetail() {
     document.getElementById("challengeFamilyDetailScreen").style.display = "none";
-    document.getElementById("challengeFamilyScreen").style.display = "block";
+    if (challengeFamilyDetailReturnTo === 'dashboard') {
+        exitChallengeBackToDashboard();
+    } else {
+        document.getElementById("challengeFamilyScreen").style.display = "block";
+    }
 }
+
+function openChallengeFamilyPickerFromDetail() {
+    if (!activeChallengeLevel) return;
+    openChallengeFamilyPicker(activeChallengeLevel);
+}
+window.openChallengeFamilyPickerFromDetail = openChallengeFamilyPickerFromDetail;
 
 // Practice pad stays collapsed until tapped — its canvas can't size itself
 // while hidden, so the sketchpad only gets initialized on first expand
