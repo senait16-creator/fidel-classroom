@@ -33,6 +33,8 @@ let wordBuilderWords = [];
 let wordBuilderReadWordIds = new Set();
 let wordBuilderIndex = 0;
 let wordBuilderCurrentWordMarkedRead = false;
+let wordBuilderSentencesByWordId = {};
+let wordBuilderSentenceRevealed = false;
 
 // ---------------------------------------------------------------------------
 // Per-level unlock check
@@ -164,9 +166,31 @@ async function openWordBuilderLevel(levelNumber) {
         .select('word_id')
         .eq('student_id', currentUser.id);
 
+    const wordIds = (words || []).map(w => w.id);
+    const { data: sentenceRows } = wordIds.length
+        ? await _supabase.from('word_builder_sentences')
+            .select('id, word_id, amharic_sentence, translation, grammar_notice')
+            .in('word_id', wordIds)
+        : { data: [] };
+
+    const sentenceIds = (sentenceRows || []).map(s => s.id);
+    const { data: glossRows } = sentenceIds.length
+        ? await _supabase.from('word_builder_sentence_glosses')
+            .select('sentence_id, item_order, amharic_chunk, gloss_meaning, is_target')
+            .in('sentence_id', sentenceIds)
+            .order('item_order')
+        : { data: [] };
+
     wordBuilderCurrentLevel = level;
     wordBuilderWords = words || [];
     wordBuilderReadWordIds = new Set((progress || []).map(r => r.word_id));
+    wordBuilderSentencesByWordId = {};
+    (sentenceRows || []).forEach(s => {
+        wordBuilderSentencesByWordId[s.word_id] = {
+            ...s,
+            glosses: (glossRows || []).filter(g => g.sentence_id === s.id)
+        };
+    });
 
     if (wordBuilderWords.length === 0) {
         showScreen('wordBuilderLessonScreen');
@@ -190,6 +214,7 @@ function renderWordBuilderWordCard() {
     if (!crumb || !mount) return;
 
     wordBuilderCurrentWordMarkedRead = false;
+    wordBuilderSentenceRevealed = false;
 
     const level = wordBuilderCurrentLevel;
     const word = wordBuilderWords[wordBuilderIndex];
@@ -217,14 +242,67 @@ function renderWordBuilderWordCard() {
             <div style="font-size:10.5px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#4f46e5; margin-bottom:5px;">Why this word looks this way</div>
             <div style="font-size:13px; color:#3730a3; line-height:1.5;">${word.grammar_note}</div>
         </div>` : ''}
+        <div id="wbSentenceMount"></div>
         <div id="wbActionMount"></div>
         <div style="height:6px; background:#e2e8f0; border-radius:999px; overflow:hidden; margin-top:16px;">
             <div style="height:100%; width:${progressPct}%; background:#166534; border-radius:999px;"></div>
         </div>
         <p style="font-size:11.5px; color:#94a3b8; text-align:center; margin-top:8px;">${wordBuilderIndex + 1} / ${wordBuilderWords.length}</p>
     `;
+    renderWordBuilderSentenceSection();
     renderWordBuilderActionButton();
 }
+
+// "See it in a sentence" — shown only when the current word has one
+// authored. Starts collapsed: the sentence is visible but every word
+// except the target is grayed out, so it reads as a gentle preview rather
+// than a second decoding task. Tapping "Learn from the sentence" reveals
+// the translation, a word-by-word gloss table, and the grammar notice.
+function renderWordBuilderSentenceSection() {
+    const mount = document.getElementById('wbSentenceMount');
+    if (!mount) return;
+
+    const word = wordBuilderWords[wordBuilderIndex];
+    const sentence = wordBuilderSentencesByWordId[word.id];
+    if (!sentence || !sentence.glosses || sentence.glosses.length === 0) {
+        mount.innerHTML = '';
+        return;
+    }
+
+    const revealed = wordBuilderSentenceRevealed;
+
+    mount.innerHTML = `
+        <div style="background:#f7f5ef; border:1px solid #e2e8f0; border-radius:14px; padding:16px; margin-bottom:16px;">
+            <div style="font-size:10.5px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#94a3b8; margin-bottom:10px;">See it in a sentence</div>
+            <div style="font-family:'Abyssinica SIL',serif; font-size:22px; text-align:center; margin-bottom:10px; line-height:1.7;">
+                ${sentence.glosses.map(g => `<span style="color:${(g.is_target || revealed) ? '#1e293b' : '#cbd5e1'}; transition:color .2s;">${g.amharic_chunk}</span>`).join(' ')}
+            </div>
+            ${revealed ? `
+                <div style="font-size:13px; color:#64748b; text-align:center; font-style:italic; margin-bottom:14px;">"${sentence.translation}"</div>
+                <div style="border-top:1px solid #e2e8f0; padding-top:12px;">
+                    ${sentence.glosses.map(g => `
+                        <div style="display:flex; justify-content:space-between; align-items:baseline; padding:4px 0; font-size:13px;">
+                            <span style="font-family:'Abyssinica SIL',serif; font-size:15px; font-weight:${g.is_target ? '700' : '400'}; color:${g.is_target ? '#166534' : '#1e293b'};">${g.amharic_chunk}</span>
+                            <span style="color:#94a3b8;">${g.gloss_meaning}</span>
+                        </div>`).join('')}
+                </div>
+                ${sentence.grammar_notice ? `<div style="margin-top:12px; font-size:12.5px; color:#78350f; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 12px;">💡 ${sentence.grammar_notice}</div>` : ''}
+            ` : `
+                <button onclick="toggleWordBuilderSentenceReveal()"
+                        style="display:block; margin:0 auto; background:none; border:1px solid #d97706; color:#d97706;
+                               font-size:12.5px; font-weight:700; border-radius:999px; padding:7px 16px; cursor:pointer;">
+                    Learn from the sentence
+                </button>
+            `}
+        </div>
+    `;
+}
+
+function toggleWordBuilderSentenceReveal() {
+    wordBuilderSentenceRevealed = !wordBuilderSentenceRevealed;
+    renderWordBuilderSentenceSection();
+}
+window.toggleWordBuilderSentenceReveal = toggleWordBuilderSentenceReveal;
 
 function renderWordBuilderActionButton() {
     const actionMount = document.getElementById('wbActionMount');
