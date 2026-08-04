@@ -526,10 +526,6 @@
         <button class="mode-jump-btn" id="modeNotifBtn" style="display:none;" onclick="togglePushNotifications()">
             <span data-icon="bell"></span> Enable Notifications
         </button>
-
-        <button class="mode-jump-btn" onclick="openChallengeMap()">
-            Open map
-        </button>
     </div>
 
 </div>
@@ -1322,6 +1318,10 @@
         <button onclick="switchModeFromMenu()" style="width:100%; background:none; border:none; padding:16px 20px; display:flex; align-items:center; gap:14px; cursor:pointer; font-size:15px; font-weight:600; color:#1e293b; text-align:left; transition:background 0.15s; border-bottom:1px solid #f1f5f9;">
             <span style="font-size:22px; width:32px; text-align:center;"><span data-icon="refresh"></span></span>
             <div><div>Switch Mode</div><div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">Practice, Challenge, or Reading</div></div>
+        </button>
+        <button onclick="closeHamburgerMenu(); openChallengeMap();" style="width:100%; background:none; border:none; padding:16px 20px; display:flex; align-items:center; gap:14px; cursor:pointer; font-size:15px; font-weight:600; color:#1e293b; text-align:left; transition:background 0.15s; border-bottom:1px solid #f1f5f9;">
+            <span style="font-size:22px; width:32px; text-align:center;"><span data-icon="target"></span></span>
+            <div><div>Open Map</div><div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">See the Fidel Competition level map</div></div>
         </button>
         <button onclick="chooseModeCanDo()" style="width:100%; background:none; border:none; padding:16px 20px; display:flex; align-items:center; gap:14px; cursor:pointer; font-size:15px; font-weight:600; color:#1e293b; text-align:left; transition:background 0.15s; border-bottom:1px solid #f1f5f9;">
             <span style="font-size:22px; width:32px; text-align:center;"><span data-icon="clipboard"></span></span>
