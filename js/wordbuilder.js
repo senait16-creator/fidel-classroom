@@ -33,7 +33,8 @@ let wordBuilderWords = [];
 let wordBuilderReadWordIds = new Set();
 let wordBuilderIndex = 0;
 let wordBuilderSentencesByWordId = {};
-let wordBuilderSentenceRevealed = false;
+let wordBuilderSentenceForWordId = null;
+let wordBuilderSentenceTapped = new Set();  // indices into this word's gloss array the learner has tapped
 
 // One challenge at a time, Duolingo-style, instead of one busy page: each
 // word walks through the same fixed sequence, one screen per step, so the
@@ -225,7 +226,6 @@ window.openWordBuilderLevel = openWordBuilderLevel;
 
 function renderWordBuilderWordCard() {
     wordBuilderStepIndex = 0;
-    wordBuilderSentenceRevealed = false;
     wordBuilderFlashcardFlipped = false;
     renderWordBuilderStep();
 }
@@ -241,8 +241,8 @@ function wordBuilderStepShouldSkip(word, stepName) {
     }
     if (stepName === 'match') {
         if (!word.emoji) return true;
-        const distractorPool = wordBuilderWords.filter(w => w.id !== word.id);
-        return distractorPool.length < 2;
+        const distractorPool = wordBuilderWords.filter(w => w.id !== word.id && w.emoji);
+        return distractorPool.length < 3;
     }
     return false;
 }
@@ -324,61 +324,77 @@ function wbStepBuildHtml(word) {
     `;
 }
 
-// Step 2 — Picture: the payoff for building the word, shown full-screen so
-// every step after this one can lean on the same picture-word connection.
+// Step 2 — Picture: the payoff for building the word, shown as a small
+// celebration (not just a label) so the picture becomes the memory anchor
+// every later step leans on.
+const WORD_BUILDER_CELEBRATE_LINES = [
+    "Great! You built your first word.",
+    "Nice! You've got this word now.",
+    "That's another word you can read.",
+    "You're building real vocabulary."
+];
+
 function wbStepPictureHtml(word) {
     const meaning = word.english_meaning ? word.english_meaning.charAt(0).toUpperCase() + word.english_meaning.slice(1) : '';
+    const celebrateLine = wordBuilderIndex === 0
+        ? WORD_BUILDER_CELEBRATE_LINES[0]
+        : WORD_BUILDER_CELEBRATE_LINES[Math.min(wordBuilderIndex, WORD_BUILDER_CELEBRATE_LINES.length - 1)];
     return `
         <div style="background:white; border:1px solid #e2e8f0; border-radius:18px; padding:44px 20px;
                     text-align:center; box-shadow:0 4px 20px rgba(20,83,45,0.07);">
             <div style="font-size:64px; margin-bottom:14px;">${word.emoji}</div>
             <div style="font-family:'Abyssinica SIL',serif; font-size:32px; color:#1e293b; margin-bottom:6px;">${word.amharic_text}</div>
+            ${word.transliteration ? `<div style="font-size:13px; color:#94a3b8; margin-bottom:6px;">${word.transliteration}</div>` : ''}
             ${meaning ? `<div style="font-size:15px; font-weight:700; color:#166534;">${meaning}</div>` : ''}
         </div>
-        <button class="btn-primary" style="width:100%; margin-top:16px;" onclick="advanceWordBuilderStep()">Continue</button>
+        <p style="font-size:12.5px; color:#94a3b8; text-align:center; margin-top:12px;">${celebrateLine}</p>
+        <button class="btn-primary" style="width:100%; margin-top:6px;" onclick="advanceWordBuilderStep()">Continue</button>
     `;
 }
 
-// Step 3 — Sentence: same reveal design as before, now gated behind its
-// own "Continue" so the learner reads it before moving on.
+// Step 3 — Sentence: tap each word to explore what it means, one at a
+// time, instead of a single reveal-everything button. The translation and
+// grammar note only show up once every word's been tapped — so the
+// grammar note answers a question the learner has actually just had
+// ("why does the verb come last?"), instead of being dumped up front.
 function wbStepSentenceHtml(word) {
     const sentence = wordBuilderSentencesByWordId[word.id];
-    const revealed = wordBuilderSentenceRevealed;
+
+    if (wordBuilderSentenceForWordId !== word.id) {
+        wordBuilderSentenceForWordId = word.id;
+        wordBuilderSentenceTapped = new Set();
+    }
+
+    const allTapped = sentence.glosses.every((_, i) => wordBuilderSentenceTapped.has(i));
 
     return `
         <div style="background:#f7f5ef; border:1px solid #e2e8f0; border-radius:14px; padding:20px 16px;">
-            <div style="font-size:10.5px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#94a3b8; margin-bottom:12px; text-align:center;">See it in a sentence</div>
-            <div style="font-family:'Abyssinica SIL',serif; font-size:24px; text-align:center; margin-bottom:10px; line-height:1.8;">
-                ${sentence.glosses.map(g => `<span style="color:${(g.is_target || revealed) ? '#1e293b' : '#cbd5e1'}; transition:color .2s;">${g.amharic_chunk}</span>`).join(' ')}
+            <div style="font-size:10.5px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#94a3b8; margin-bottom:14px; text-align:center;">See it in a sentence</div>
+            <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:14px;">
+                ${sentence.glosses.map((g, i) => `
+                    <div onclick="tapWordBuilderSentenceWord(${i})" style="cursor:pointer; text-align:center; min-width:44px;">
+                        <div style="font-family:'Abyssinica SIL',serif; font-size:24px; color:${wordBuilderSentenceTapped.has(i) ? '#166534' : '#1e293b'};">${g.amharic_chunk}</div>
+                        <div style="font-size:11px; color:#94a3b8; min-height:14px; margin-top:2px;">${wordBuilderSentenceTapped.has(i) ? g.gloss_meaning : ''}</div>
+                    </div>
+                `).join('')}
             </div>
-            ${revealed ? `
-                <div style="font-size:13.5px; color:#64748b; text-align:center; font-style:italic; margin-bottom:14px;">"${sentence.translation}"</div>
-                <div style="border-top:1px solid #e2e8f0; padding-top:12px;">
-                    ${sentence.glosses.map(g => `
-                        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; padding:5px 0; font-size:13px;">
-                            <span style="font-family:'Abyssinica SIL',serif; font-size:15px; font-weight:${g.is_target ? '700' : '400'}; color:${g.is_target ? '#166534' : '#1e293b'}; flex-shrink:0;">${g.amharic_chunk}</span>
-                            <span style="color:#94a3b8; font-style:italic; font-size:12px; flex:1;">${g.transliteration || ''}</span>
-                            <span style="color:#1e293b; font-size:12.5px; text-align:right;">${g.gloss_meaning}</span>
-                        </div>`).join('')}
+            ${!allTapped ? `<p style="font-size:11.5px; color:#94a3b8; text-align:center; margin-top:10px;">Tap each word to see what it means</p>` : ''}
+            ${allTapped ? `
+                <div style="border-top:1px solid #e2e8f0; margin-top:16px; padding-top:14px;">
+                    <div style="font-size:13.5px; color:#64748b; text-align:center; font-style:italic; margin-bottom:${sentence.grammar_notice ? '12px' : '0'};">"${sentence.translation}"</div>
+                    ${sentence.grammar_notice ? `<div style="font-size:12.5px; color:#78350f; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 12px;">💡 ${sentence.grammar_notice}</div>` : ''}
                 </div>
-                ${sentence.grammar_notice ? `<div style="margin-top:12px; font-size:12.5px; color:#78350f; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 12px;">💡 ${sentence.grammar_notice}</div>` : ''}
-            ` : `
-                <button onclick="toggleWordBuilderSentenceReveal()"
-                        style="display:block; margin:16px auto 0; background:none; border:1px solid #d97706; color:#d97706;
-                               font-size:12.5px; font-weight:700; border-radius:999px; padding:8px 18px; cursor:pointer;">
-                    Learn from the sentence
-                </button>
-            `}
+            ` : ''}
         </div>
-        ${revealed ? `<button class="btn-primary" style="width:100%; margin-top:16px;" onclick="advanceWordBuilderStep()">Continue</button>` : ''}
+        ${allTapped ? `<button class="btn-primary" style="width:100%; margin-top:16px;" onclick="advanceWordBuilderStep()">Continue</button>` : ''}
     `;
 }
 
-function toggleWordBuilderSentenceReveal() {
-    wordBuilderSentenceRevealed = !wordBuilderSentenceRevealed;
+function tapWordBuilderSentenceWord(i) {
+    wordBuilderSentenceTapped.add(i);
     renderWordBuilderStep();
 }
-window.toggleWordBuilderSentenceReveal = toggleWordBuilderSentenceReveal;
+window.tapWordBuilderSentenceWord = tapWordBuilderSentenceWord;
 
 // Step 4 — Flashcard: front is the picture (or the word itself if this
 // word has no picture yet), back is word + transliteration + meaning.
@@ -387,6 +403,7 @@ function wbStepFlashcardHtml(word) {
         ? `<div style="font-size:64px;">${word.emoji}</div>`
         : `<div style="font-family:'Abyssinica SIL',serif; font-size:40px; color:#1e293b;">${word.amharic_text}</div>`;
     const back = `
+        ${word.emoji ? `<div style="font-size:44px; margin-bottom:8px;">${word.emoji}</div>` : ''}
         <div style="font-family:'Abyssinica SIL',serif; font-size:32px; color:#1e293b; margin-bottom:6px;">${word.amharic_text}</div>
         ${word.transliteration ? `<div style="font-size:13px; color:#64748b; margin-bottom:4px;">${word.transliteration}</div>` : ''}
         ${word.english_meaning ? `<div style="font-size:15px; font-weight:700; color:#166534;">${word.english_meaning}</div>` : ''}
@@ -430,7 +447,12 @@ function wbStepSpellHtml(word) {
     return `
         <div style="background:white; border:1px solid #e2e8f0; border-radius:18px; padding:26px 20px;
                     text-align:center; box-shadow:0 4px 20px rgba(20,83,45,0.07);">
-            <div style="font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#94a3b8; margin-bottom:16px;">Spell "${word.english_meaning || word.amharic_text}"</div>
+            ${word.emoji ? `
+                <div style="font-size:48px; margin-bottom:8px;">${word.emoji}</div>
+                <div style="font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#94a3b8; margin-bottom:16px;">Build this word</div>
+            ` : `
+                <div style="font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#94a3b8; margin-bottom:16px;">Spell "${word.english_meaning || word.amharic_text}"</div>
+            `}
             <div style="display:flex; justify-content:center; gap:8px; margin-bottom:22px; flex-wrap:wrap;">
                 ${wordBuilderSpellSlots.map((poolIdx, slotIdx) => `
                     <div ${poolIdx !== null ? `onclick="unplaceWordBuilderSpellTile(${slotIdx})"` : ''}
@@ -475,26 +497,28 @@ function unplaceWordBuilderSpellTile(slotIdx) {
 }
 window.unplaceWordBuilderSpellTile = unplaceWordBuilderSpellTile;
 
-// Step 6 — Match: the picture, and 3 word choices (this word plus 2
-// distractors from the same level). Wrong taps just re-enable so the
-// learner has to actually land on the right one, matching the retry-until-
-// correct feel of the rest of Word Builder's review games.
+// Step 6 — Match: the final victory. This word plus 3 picture distractors
+// from the same level, prompted by the WORD itself (not the picture) so
+// the learner has to recall the picture from the Fidel text — the
+// opposite retrieval direction from every step before it. A correct tap
+// gets its own "quest complete" beat instead of just advancing straight
+// through.
 function wbStepMatchHtml(word) {
     if (wordBuilderMatchChoicesForWordId !== word.id) {
         wordBuilderMatchChoicesForWordId = word.id;
-        const distractors = wordBuilderShuffle(wordBuilderWords.filter(w => w.id !== word.id)).slice(0, 2);
+        const distractors = wordBuilderShuffle(wordBuilderWords.filter(w => w.id !== word.id && w.emoji)).slice(0, 3);
         wordBuilderMatchChoices = wordBuilderShuffle([word, ...distractors]);
     }
 
     return `
         <div style="text-align:center;">
-            <div style="font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#94a3b8; margin-bottom:14px;">Which word is this?</div>
-            <div style="font-size:64px; margin-bottom:20px;">${word.emoji}</div>
-            <div id="wbMatchChoices" style="display:flex; flex-direction:column; gap:10px;">
+            <div style="font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#94a3b8; margin-bottom:8px;">Which picture is</div>
+            <div style="font-family:'Abyssinica SIL',serif; font-size:30px; color:#1e293b; margin-bottom:20px;">${word.amharic_text}</div>
+            <div id="wbMatchChoices" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
                 ${wordBuilderMatchChoices.map(c => `
                     <button onclick="answerWordBuilderMatchStep(this, '${c.id}')"
-                            style="font-family:'Abyssinica SIL',serif; font-size:22px; padding:14px; background:white;
-                                   border:1px solid #e2e8f0; border-radius:14px; cursor:pointer; color:#1e293b;">${c.amharic_text}</button>
+                            style="font-size:44px; padding:22px; background:white; border:1px solid #e2e8f0;
+                                   border-radius:14px; cursor:pointer;">${c.emoji}</button>
                 `).join('')}
             </div>
         </div>
@@ -509,8 +533,7 @@ function answerWordBuilderMatchStep(btnEl, chosenId) {
     if (chosenId === word.id) {
         btnEl.style.borderColor = '#166534';
         btnEl.style.background = 'rgba(22,101,52,0.08)';
-        if (typeof showGobezToast === 'function') showGobezToast('Nice! ✓');
-        setTimeout(() => advanceWordBuilderStep(), 500);
+        setTimeout(() => renderWordBuilderMatchSuccess(), 500);
     } else {
         btnEl.style.borderColor = '#dc2626';
         btnEl.style.background = 'rgba(220,38,38,0.06)';
@@ -518,6 +541,20 @@ function answerWordBuilderMatchStep(btnEl, chosenId) {
     }
 }
 window.answerWordBuilderMatchStep = answerWordBuilderMatchStep;
+
+function renderWordBuilderMatchSuccess() {
+    const mount = document.getElementById('wordBuilderLessonMount');
+    if (mount) {
+        mount.innerHTML = `
+            <div style="text-align:center; padding:40px 20px;">
+                <div style="font-size:44px; margin-bottom:10px;">✨</div>
+                <div style="font-size:18px; font-weight:800; color:#166534;">Correct!</div>
+                <div style="font-size:13px; color:#94a3b8; margin-top:6px;">Word Complete ✓</div>
+            </div>
+        `;
+    }
+    setTimeout(() => advanceWordBuilderStep(), 1100);
+}
 
 // Looks up which family/pronunciation a tapped syllable belongs to, reusing
 // the same verified alphabetData/vowel-label tables Fidel Practice uses
@@ -566,6 +603,7 @@ async function finishWordBuilderWord() {
 async function advanceWordBuilderWord() {
     wordBuilderSpellForWordId = null;
     wordBuilderMatchChoicesForWordId = null;
+    wordBuilderSentenceForWordId = null;
     if (wordBuilderIndex < wordBuilderWords.length - 1) {
         wordBuilderIndex++;
         renderWordBuilderWordCard();
