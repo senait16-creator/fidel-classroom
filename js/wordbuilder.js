@@ -176,7 +176,7 @@ async function openWordBuilderLevel(levelNumber) {
     const sentenceIds = (sentenceRows || []).map(s => s.id);
     const { data: glossRows } = sentenceIds.length
         ? await _supabase.from('word_builder_sentence_glosses')
-            .select('sentence_id, item_order, amharic_chunk, gloss_meaning, is_target')
+            .select('sentence_id, item_order, amharic_chunk, transliteration, gloss_meaning, is_target')
             .in('sentence_id', sentenceIds)
             .order('item_order')
         : { data: [] };
@@ -281,9 +281,10 @@ function renderWordBuilderSentenceSection() {
                 <div style="font-size:13px; color:#64748b; text-align:center; font-style:italic; margin-bottom:14px;">"${sentence.translation}"</div>
                 <div style="border-top:1px solid #e2e8f0; padding-top:12px;">
                     ${sentence.glosses.map(g => `
-                        <div style="display:flex; justify-content:space-between; align-items:baseline; padding:4px 0; font-size:13px;">
-                            <span style="font-family:'Abyssinica SIL',serif; font-size:15px; font-weight:${g.is_target ? '700' : '400'}; color:${g.is_target ? '#166534' : '#1e293b'};">${g.amharic_chunk}</span>
-                            <span style="color:#94a3b8;">${g.gloss_meaning}</span>
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; padding:5px 0; font-size:13px;">
+                            <span style="font-family:'Abyssinica SIL',serif; font-size:15px; font-weight:${g.is_target ? '700' : '400'}; color:${g.is_target ? '#166534' : '#1e293b'}; flex-shrink:0;">${g.amharic_chunk}</span>
+                            <span style="color:#94a3b8; font-style:italic; font-size:12px; flex:1;">${g.transliteration || ''}</span>
+                            <span style="color:#1e293b; font-size:12.5px; text-align:right;">${g.gloss_meaning}</span>
                         </div>`).join('')}
                 </div>
                 ${sentence.grammar_notice ? `<div style="margin-top:12px; font-size:12.5px; color:#78350f; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 12px;">💡 ${sentence.grammar_notice}</div>` : ''}
