@@ -51,6 +51,13 @@
     -webkit-tap-highlight-color: transparent;
 }
 
+/* Phosphor icons — inline SVGs from js/icons.js, sized to sit inline with text */
+
+.picon {
+    display: inline-block;
+    flex-shrink: 0;
+}
+
 /* Typography */
 
 .main-title {
