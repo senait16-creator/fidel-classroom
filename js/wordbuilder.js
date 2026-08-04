@@ -154,7 +154,7 @@ async function openWordBuilderLevel(levelNumber) {
 
     const { data: words } = await _supabase
         .from('word_builder_words')
-        .select('id, item_order, amharic_text, transliteration, english_meaning')
+        .select('id, item_order, amharic_text, transliteration, english_meaning, grammar_note')
         .eq('level_number', levelNumber)
         .order('item_order');
 
@@ -207,6 +207,11 @@ function renderWordBuilderWordCard() {
                 ${letters.map(ch => `<span style="font-family:'Abyssinica SIL',serif; font-size:20px; background:#fffbeb; color:#d97706; border-radius:10px; padding:6px 12px;">${ch}</span>`).join('')}
             </div>
         </div>
+        ${word.grammar_note ? `
+        <div style="background:#eef2ff; border:1px solid #c7d2fe; border-radius:14px; padding:14px 16px; margin-bottom:16px;">
+            <div style="font-size:10.5px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#4f46e5; margin-bottom:5px;">Why this word looks this way</div>
+            <div style="font-size:13px; color:#3730a3; line-height:1.5;">${word.grammar_note}</div>
+        </div>` : ''}
         <button class="btn-primary" onclick="markWordBuilderWordRead()">I Read It ✓ ${wordBuilderIndex < wordBuilderWords.length - 1 ? 'Next Word →' : 'Finish Level →'}</button>
         <p style="font-size:11.5px; color:#94a3b8; text-align:center; margin-top:14px;">Word ${wordBuilderIndex + 1} of ${wordBuilderWords.length}</p>
     `;
