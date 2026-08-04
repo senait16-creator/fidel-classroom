@@ -72,11 +72,16 @@ async function renderChallengeDashboard() {
 
     const teamHex = getTeamHex(team.name);
 
-    // ── Hero subtitle ────────────────────────────────────────
-    const sub = document.getElementById("challengeDashSub");
-    if (sub) {
-        sub.innerText = `${team.name} • Level ${team.current_level}`;
-    }
+    // ── Hero team row — colored dot + name, one line, plus a small
+    //    "Level N" line underneath. Replaces the old plain-text subtitle
+    //    and the separate stat chips row (redundant with this and with
+    //    the collapsed "Your Team" row further down the page). ──
+    const heroTeamDot = document.getElementById("challengeHeroTeamDot");
+    const heroTeamName = document.getElementById("challengeHeroTeamName");
+    const heroLevelLine = document.getElementById("challengeHeroLevelLine");
+    if (heroTeamDot) heroTeamDot.style.background = teamHex;
+    if (heroTeamName) heroTeamName.innerText = team.name;
+    if (heroLevelLine) heroLevelLine.innerText = `Level ${team.current_level}`;
 
     // ── Progress to ፐ — shared hero, so this renders once and shows
     //    up automatically on both the student and captain dashboard. ──
@@ -85,25 +90,12 @@ async function renderChallengeDashboard() {
     const pePercent = Math.min(100, Math.max(0, Math.round(((currentLevelNum - 1) / totalLevels) * 100)));
     const peLabel = document.getElementById("peProgressLabel");
     const peFill = document.getElementById("peProgressFill");
-    if (peLabel) peLabel.innerText = `Level ${currentLevelNum} of ${totalLevels}`;
+    if (peLabel) peLabel.innerText = `${currentLevelNum} / ${totalLevels}`;
     if (peFill) peFill.style.width = `${pePercent}%`;
 
     const peWeekLabel = document.getElementById("peWeekLabel");
     if (peWeekLabel && typeof getProgramWeekNumber === "function") {
         peWeekLabel.innerText = `📅 Week ${getProgramWeekNumber()}`;
-    }
-
-    // ── Small stat chips — streak, team, total levels — folded into the
-    //    hero instead of a separate card, so the whole "where am I"
-    //    picture is one glance. ──
-    const heroChips = document.getElementById("challengeHeroChips");
-    if (heroChips) {
-        const streak = team.streak_count || 0;
-        heroChips.innerHTML = `
-            <span class="challenge-hero-chip">🔥 ${streak} day${streak === 1 ? '' : 's'}</span>
-            <span class="challenge-hero-chip">👥 ${team.name}</span>
-            <span class="challenge-hero-chip">${totalLevels} Levels</span>
-        `;
     }
 
     // ── Your Team — collapsed to one row (dot, name, rank/percent),

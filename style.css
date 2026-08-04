@@ -2204,8 +2204,8 @@ header {
     border: none;
     border-radius: 14px;
     padding: 16px;
-    background: linear-gradient(135deg, #166534, #15803d);
-    color: white;
+    background: white;
+    color: #14532d;
     font-size: 15px;
     font-weight: 800;
     cursor: pointer;
@@ -2213,7 +2213,7 @@ header {
 
 .challenge-continue-next {
     font-size: 12px;
-    color: #94a3b8;
+    color: rgba(255,255,255,.65);
     text-align: center;
     margin: 8px 0 0;
     font-family: 'Abyssinica SIL', serif;
@@ -5396,11 +5396,26 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     box-shadow: 0 14px 36px rgba(0,0,0,.18);
 }
 
-.challenge-dash-hero-top {
+.challenge-hero-team-row {
     display: flex;
-    justify-content: space-between;
-    gap: 14px;
-    align-items: flex-start;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.challenge-hero-team-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: rgba(255,255,255,.5);
+}
+
+.challenge-hero-level {
+    font-size: 13px;
+    opacity: .8;
+    margin-top: -6px;
 }
 
 .pe-progress-row {
@@ -5410,6 +5425,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     font-size: 12px;
     font-weight: 800;
     margin-bottom: -6px;
+    margin-top: 6px;
 }
 
 .pe-progress-track {
@@ -5429,23 +5445,8 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 
 .pe-progress-caption {
-    font-size: 11px;
-    opacity: .75;
-}
-
-.challenge-hero-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.challenge-hero-chip {
-    background: rgba(255,255,255,.16);
-    border: 1px solid rgba(255,255,255,.3);
-    border-radius: 999px;
-    padding: 5px 12px;
-    font-size: 11.5px;
-    font-weight: 700;
+    font-size: 10px;
+    opacity: .5;
 }
 
 .challenge-dash-kicker {
@@ -5460,24 +5461,13 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 .challenge-dash-hero h1 {
     font-family: Lora, Georgia, serif;
     font-size: 30px;
-    margin: 0 0 6px;
+    margin: 0 0 10px;
 }
 
 .challenge-dash-hero p {
     font-size: 13px;
     opacity: .86;
     margin: 0;
-}
-
-.challenge-back-home {
-    background: rgba(255,255,255,.16);
-    border: 1px solid rgba(255,255,255,.35);
-    color: white;
-    border-radius: 999px;
-    padding: 9px 13px;
-    font-weight: 800;
-    cursor: pointer;
-    white-space: nowrap;
 }
 
 .challenge-dash-grid {
@@ -5676,10 +5666,6 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 @media (max-width: 760px) {
     .challenge-dash-grid {
         grid-template-columns: 1fr;
-    }
-
-    .challenge-map-card {
-        grid-row: auto;
     }
 
     .challenge-dash-hero {
