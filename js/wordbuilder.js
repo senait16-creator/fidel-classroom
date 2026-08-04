@@ -493,8 +493,71 @@ function renderWordBuilderFindWordStage() {
     const subset = wordBuilderShuffle(pool).slice(0, Math.min(2, pool.length));
     renderWordBuilderMatchStage(subset, {
         crumb: 'FIND THE WORD', title: 'Find the Word', promptLabel: 'Find the word for'
-    }, renderWordBuilderFinalChallenge);
+    }, renderWordBuilderFindInSentenceStage);
 }
+
+// The payoff game — tap the target word right inside a real sentence,
+// instead of picking it out of an isolated multiple-choice list. Only
+// runs for words that actually have a sentence authored (via the
+// "See it in a sentence" feature); skips straight to Final Challenge if
+// this level has none yet, or once its 1-2 questions are done.
+let wordBuilderSentenceGameQueue = [];
+
+function renderWordBuilderFindInSentenceStage() {
+    const pool = wordBuilderWords.filter(w => wordBuilderSentencesByWordId[w.id]);
+    if (pool.length === 0) {
+        return renderWordBuilderFinalChallenge();
+    }
+    wordBuilderSentenceGameQueue = wordBuilderShuffle(pool).slice(0, Math.min(2, pool.length));
+    renderWordBuilderFindInSentenceQuestion();
+}
+
+function renderWordBuilderFindInSentenceQuestion() {
+    if (wordBuilderSentenceGameQueue.length === 0) {
+        return renderWordBuilderFinalChallenge();
+    }
+
+    const target = wordBuilderSentenceGameQueue[0];
+    const sentence = wordBuilderSentencesByWordId[target.id];
+
+    const crumb = document.getElementById('wordBuilderLessonCrumb');
+    if (crumb) crumb.innerText = 'FIND IT IN THE SENTENCE';
+
+    const mount = document.getElementById('wordBuilderLessonMount');
+    if (!mount) return;
+
+    mount.innerHTML = `
+        <div style="text-align:center; padding-top:16px;">
+            <div style="font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#94a3b8; margin-bottom:10px;">Find</div>
+            <div style="font-size:20px; font-weight:800; color:#1e293b; margin-bottom:22px;">"${target.english_meaning}"</div>
+            <div id="wbSentenceGameRow" style="font-family:'Abyssinica SIL',serif; font-size:26px; margin-bottom:14px; line-height:1.9;">
+                ${sentence.glosses.map(g => `<span style="cursor:pointer; padding:3px 6px; border-radius:8px;" onclick="answerWordBuilderFindInSentence(this, '${g.is_target}')">${g.amharic_chunk}</span>`).join(' ')}
+            </div>
+            <p style="font-size:11.5px; color:#94a3b8;">Tap the word that means "${target.english_meaning}"</p>
+        </div>
+    `;
+}
+
+function answerWordBuilderFindInSentence(spanEl, isTargetStr) {
+    const isTarget = isTargetStr === 'true';
+
+    if (isTarget) {
+        spanEl.style.background = 'rgba(22,101,52,0.12)';
+        spanEl.style.color = '#166534';
+        spanEl.style.fontWeight = '700';
+        document.getElementById('wbSentenceGameRow').querySelectorAll('span').forEach(s => s.style.pointerEvents = 'none');
+        if (typeof showGobezToast === 'function') showGobezToast('Found it! ✓');
+        setTimeout(() => {
+            wordBuilderSentenceGameQueue = wordBuilderSentenceGameQueue.slice(1);
+            renderWordBuilderFindInSentenceQuestion();
+        }, 700);
+    } else {
+        spanEl.style.background = 'rgba(220,38,38,0.1)';
+        spanEl.style.color = '#dc2626';
+        spanEl.style.pointerEvents = 'none';
+    }
+}
+window.answerWordBuilderFindInSentence = answerWordBuilderFindInSentence;
 
 function renderWordBuilderFinalChallenge() {
     renderWordBuilderRecapScreen(
