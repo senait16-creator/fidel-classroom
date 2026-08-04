@@ -1,86 +1,31 @@
 // =============================================================================
 // letterboard.js — Full Letter Board (free exploration, no levels)
-// All 33+ Amharic families in traditional Ge'ez order, grouped by 8.
+// All 34 Amharic families in traditional Ge'ez order, grouped in rows of 3 —
+// one row per Fidel Competition level, so a student practicing solo sees the
+// exact same level boundaries a Competition team would. Every 2 rows (6
+// letters) lines up with one Word Builder level, so a link to that level
+// appears after every 2nd row.
 // Load order: after app.js, before challenge.js
 // =============================================================================
 
-const FIDEL_BOARD_GROUPS = [
-    {
-        label: 'Group 1 · ሀ ለ ሐ መ',
-        families: [
-            { base: 'ሀ', sound: 'ha' },
-            { base: 'ለ', sound: 'le' },
-            { base: 'ሐ', sound: 'ḥa' },
-            { base: 'መ', sound: 'me' },
-        ]
-    },
-    {
-        label: 'Group 2 · ሠ ረ ሰ ሸ',
-        families: [
-            { base: 'ሠ', sound: 'śe' },
-            { base: 'ረ', sound: 're' },
-            { base: 'ሰ', sound: 'se' },
-            { base: 'ሸ', sound: 'she' },
-        ]
-    },
-    {
-        label: 'Group 3 · ቀ ቐ በ ቨ',
-        families: [
-            { base: 'ቀ', sound: 'qe' },
-            { base: 'ቐ', sound: 'qʷe' },
-            { base: 'በ', sound: 'be' },
-            { base: 'ቨ', sound: 've' },
-        ]
-    },
-    {
-        label: 'Group 4 · ተ ቸ ኀ ነ',
-        families: [
-            { base: 'ተ', sound: 'te' },
-            { base: 'ቸ', sound: 'che' },
-            { base: 'ኀ', sound: 'ḫa' },
-            { base: 'ነ', sound: 'ne' },
-        ]
-    },
-    {
-        label: 'Group 5 · ኘ አ ከ ኸ',
-        families: [
-            { base: 'ኘ', sound: 'ñe' },
-            { base: 'አ', sound: 'a' },
-            { base: 'ከ', sound: 'ke' },
-            { base: 'ኸ', sound: 'ḵe' },
-        ]
-    },
-    {
-        label: 'Group 6 · ወ ዐ ዘ ዠ',
-        families: [
-            { base: 'ወ', sound: 'we' },
-            { base: 'ዐ', sound: 'ʿa' },
-            { base: 'ዘ', sound: 'ze' },
-            { base: 'ዠ', sound: 'zhe' },
-        ]
-    },
-    {
-        label: 'Group 7 · የ ደ ጀ ገ',
-        families: [
-            { base: 'የ', sound: 'ye' },
-            { base: 'ደ', sound: 'de' },
-            { base: 'ጀ', sound: 'je' },
-            { base: 'ገ', sound: 'ge' },
-        ]
-    },
-    {
-        label: 'Group 8 · ጠ ጨ ጰ ጸ ፀ ፈ ፐ',
-        families: [
-            { base: 'ጠ', sound: 'ṭe' },
-            { base: 'ጨ', sound: 'č̣e' },
-            { base: 'ጰ', sound: 'p̣e' },
-            { base: 'ጸ', sound: 'ṣe' },
-            { base: 'ፀ', sound: 'ṣ́e' },
-            { base: 'ፈ', sound: 'fe' },
-            { base: 'ፐ', sound: 'pe' },
-        ]
-    }
+const FIDEL_BOARD_LEVELS = [
+    { level: 1,  families: [{ base: 'ሀ', sound: 'ha' },  { base: 'ለ', sound: 'le' },   { base: 'ሐ', sound: 'ḥa' }] },
+    { level: 2,  families: [{ base: 'መ', sound: 'me' },  { base: 'ሠ', sound: 'śe' },   { base: 'ረ', sound: 're' }] },
+    { level: 3,  families: [{ base: 'ሰ', sound: 'se' },  { base: 'ሸ', sound: 'she' },  { base: 'ቀ', sound: 'qe' }] },
+    { level: 4,  families: [{ base: 'በ', sound: 'be' },  { base: 'ቨ', sound: 've' },   { base: 'ተ', sound: 'te' }] },
+    { level: 5,  families: [{ base: 'ቸ', sound: 'che' }, { base: 'ኀ', sound: 'ḫa' },   { base: 'ነ', sound: 'ne' }] },
+    { level: 6,  families: [{ base: 'ኘ', sound: 'ñe' },  { base: 'አ', sound: 'a' },    { base: 'ከ', sound: 'ke' }] },
+    { level: 7,  families: [{ base: 'ኸ', sound: 'ḵe' },  { base: 'ወ', sound: 'we' },   { base: 'ዐ', sound: 'ʿa' }] },
+    { level: 8,  families: [{ base: 'ዘ', sound: 'ze' },  { base: 'ዠ', sound: 'zhe' },  { base: 'የ', sound: 'ye' }] },
+    { level: 9,  families: [{ base: 'ደ', sound: 'de' },  { base: 'ጀ', sound: 'je' },   { base: 'ገ', sound: 'ge' }] },
+    { level: 10, families: [{ base: 'ጠ', sound: 'ṭe' },  { base: 'ጨ', sound: 'č̣e' },  { base: 'ጰ', sound: 'p̣e' }] },
+    { level: 11, families: [{ base: 'ጸ', sound: 'ṣe' },  { base: 'ፀ', sound: 'ṣ́e' },  { base: 'ፈ', sound: 'fe' }] },
+    { level: 12, families: [{ base: 'ፐ', sound: 'pe' }] },
 ];
+
+// ቐ isn't part of the Competition/Word Builder level system (34 families,
+// not 35) — kept as a standalone bonus row at the end rather than dropped.
+const FIDEL_BOARD_BONUS_FAMILY = { base: 'ቐ', sound: 'qʷe' };
 
 let _lbProgressCache = null;
 let _lbSearchQuery = '';
@@ -233,19 +178,19 @@ function renderLetterBoard(query) {
     `;
     mount.appendChild(legend);
 
-    FIDEL_BOARD_GROUPS.forEach(group => {
+    const renderFamilyRow = (label, families) => {
         const filtered = query
-            ? group.families.filter(f =>
+            ? families.filter(f =>
                 f.sound.toLowerCase().includes(query) ||
                 f.base.includes(query)
               )
-            : group.families;
+            : families;
 
         if (filtered.length === 0) return;
 
         const groupLabel = document.createElement('div');
         groupLabel.className = 'lb-group-label';
-        groupLabel.innerText = group.label;
+        groupLabel.innerText = label;
         mount.appendChild(groupLabel);
 
         const grid = document.createElement('div');
@@ -276,7 +221,26 @@ function renderLetterBoard(query) {
         });
 
         mount.appendChild(grid);
+    };
+
+    FIDEL_BOARD_LEVELS.forEach(row => {
+        const label = `Level ${row.level} · ${row.families.map(f => f.base).join(' ')}`;
+        renderFamilyRow(label, row.families);
+
+        // Every 2 rows = 6 letters = one Word Builder level's worth of
+        // Fidel, so a solo practicer can jump straight there once they've
+        // covered them — mirrors how Competition levels pair up already.
+        if (row.level % 2 === 0 && !query) {
+            const wbLevel = row.level / 2;
+            const link = document.createElement('div');
+            link.className = 'lb-wordbuilder-link';
+            link.innerHTML = `${icon('book-open')} Ready for these? Try Word Builder Level ${wbLevel} <span class="lb-wordbuilder-link-arrow">→</span>`;
+            link.onclick = () => { if (typeof enterWordBuilder === 'function') enterWordBuilder(); };
+            mount.appendChild(link);
+        }
     });
+
+    renderFamilyRow('Extra · not in a Competition level', [FIDEL_BOARD_BONUS_FAMILY]);
 
     if (mount.querySelectorAll('.lb-family-tile').length === 0) {
         mount.innerHTML += `
