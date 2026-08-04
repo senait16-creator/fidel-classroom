@@ -76,3 +76,14 @@ function icon(name, opts) {
 }
 window.icon = icon;
 
+// Static markup (index.html itself) can't call icon() inline, so it marks a
+// spot with <span data-icon="trophy" data-icon-size="16px"></span> instead;
+// this fills every one of those in on load. Dynamically-rendered screens
+// call icon() directly in their own template strings and don't need this.
+function renderStaticIcons() {
+    document.querySelectorAll('[data-icon]').forEach(el => {
+        el.innerHTML = icon(el.dataset.icon, { size: el.dataset.iconSize, class: el.dataset.iconClass });
+    });
+}
+window.addEventListener('DOMContentLoaded', renderStaticIcons);
+
