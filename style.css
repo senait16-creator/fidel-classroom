@@ -3842,7 +3842,7 @@ header {
 
 @media (max-width: 640px) {
     #modeSelectScreen {
-        padding: 24px 16px 32px !important;
+        padding: 72px 16px 32px !important;
     }
 
     .mode-greeting-main {
@@ -5073,14 +5073,14 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 
 .mode-greeting-sub {
     font-family: 'Inter', sans-serif;
-    font-size: 11px !important;
+    font-size: 15px !important;
     font-weight: 800 !important;
     letter-spacing: 0.6px !important;
     text-transform: uppercase !important;
     color: rgba(255,255,255,0.62) !important;
     text-align: center !important;
     margin-top: 8px !important;
-    margin-bottom: 6px !important;
+    margin-bottom: 22px !important;
 }
 
 .mode-greeting-main {
