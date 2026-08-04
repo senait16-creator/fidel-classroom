@@ -5445,8 +5445,9 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 
 .challenge-dash-hero h1 {
-    font-family: Lora, Georgia, serif;
-    font-size: 23px;
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-weight: 800;
+    font-size: 28px;
     white-space: nowrap;
     margin: 0 0 10px;
 }
