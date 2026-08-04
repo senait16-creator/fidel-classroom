@@ -114,13 +114,13 @@ async function renderWordBuilderLevelsList() {
         const locked = !done && !practiceUnlocked;
         const clickable = !locked && hasWords;
 
-        const stateIcon = done ? '✓' : (locked ? '🔒' : level.level_number);
+        const stateIcon = done ? '✓' : (locked ? icon('lock') : level.level_number);
         const numBg = done ? 'rgba(22,101,52,0.1)' : (locked ? '#e2e8f0' : '#fffbeb');
         const numColor = done ? '#166534' : (locked ? '#94a3b8' : '#d97706');
 
         let subLabel;
         if (!practiceUnlocked && !done) {
-            subLabel = `🔒 Learn ${WORD_BUILDER_LEVEL_LETTERS[level.level_number].join(' ')} in Fidel Practice first`;
+            subLabel = `${icon('lock')} Learn ${WORD_BUILDER_LEVEL_LETTERS[level.level_number].join(' ')} in Fidel Practice first`;
         } else if (!hasWords) {
             subLabel = 'Coming soon';
         } else {
@@ -600,7 +600,7 @@ async function completeWordBuilderLevel() {
 
     mount.innerHTML = `
         <div style="text-align:center; padding-top:36px;">
-            <div style="font-size:52px; margin-bottom:10px;">🎉</div>
+            <div style="font-size:52px; margin-bottom:10px;">${icon('confetti')}</div>
             <div style="font-size:19px; font-weight:800; color:#1e293b; margin-bottom:4px;">You can now read:</div>
             <div style="font-size:13px; color:#64748b; margin-bottom:22px;">Level ${level.level_number} · ${level.topic_title}</div>
             <div style="background:white; border:1px solid #e2e8f0; border-radius:16px; padding:18px;
@@ -624,5 +624,5 @@ async function completeWordBuilderLevel() {
         </div>
     `;
 
-    if (typeof showGobezToast === 'function') showGobezToast(`Level ${level.level_number} complete! 🎉`);
+    if (typeof showGobezToast === 'function') showGobezToast(`Level ${level.level_number} complete! ${icon('confetti')}`);
 }

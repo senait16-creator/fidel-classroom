@@ -52,7 +52,7 @@ async function loadTeacherAccessRequests(mountId) {
             </div>
             <div style="display:flex; gap:8px;">
                 <button class="btn-approve">✓ Approve (Student)</button>
-                <button class="btn-primary" style="width:auto; padding:8px 14px; font-size:13px; background:#7c3aed;">💰 Grant Explore ($5)</button>
+                <button class="btn-primary" style="width:auto; padding:8px 14px; font-size:13px; background:#7c3aed;">${icon('coins')} Grant Explore ($5)</button>
             </div>
         `;
         row.querySelector('.btn-approve').onclick = () => approveAccessRequest(p.id, 'approved', mountId);
@@ -75,7 +75,7 @@ async function approveAccessRequest(studentId, status, mountId) {
         return showNotificationToast("Couldn't update: " + error.message);
     }
 
-    showGobezToast(status === 'explore' ? "Explore access granted! 🎉" : "Approved! 🎉");
+    showGobezToast(status === 'explore' ? `Explore access granted! ${icon('confetti')}` : `Approved! ${icon('confetti')}`);
     await loadTeacherAccessRequests(mountId);
     if (typeof loadTeacherClassroomOverview === 'function') await loadTeacherClassroomOverview();
 }
@@ -221,7 +221,7 @@ async function loadTeacherRosterData() {
 
     if (attentionMount) {
         attentionMount.innerHTML = attentionList.length === 0
-            ? `<div class="roster-attention-empty">🎉 Nothing needs attention right now.</div>`
+            ? `<div class="roster-attention-empty">${icon('confetti')} Nothing needs attention right now.</div>`
             : `<div class="roster-attention-card">${attentionList.map(s => {
                 const status = statusByStudent[s.id];
                 const reason = status.key === 'help'
@@ -267,8 +267,8 @@ async function loadTeacherRosterData() {
                         </div>
                         <div class="roster-student-actions" id="rosterActions-${s.id}" style="display:none;">
                             <button class="btn-secondary" style="font-size:11px; padding:6px 10px; color:#ef4444; border:1px solid #fecaca;" onclick="removeStudentFromTeam('${s.id}', '${s.nickname.replace(/'/g, "\\'")}')">Remove from Team</button>
-                            <button class="btn-secondary" style="font-size:11px; padding:6px 10px; color:#b45309; border:1px solid #fed7aa;" onclick="teacherResetStudentLevel('${s.id}', '${s.nickname.replace(/'/g, "\\'")}')">🔄 Reset a Level</button>
-                            <button class="btn-secondary" style="font-size:11px; padding:6px 10px; color:#991b1b; border:1px solid #fecaca; font-weight:800;" onclick="teacherForgetStudent('${s.id}', '${s.nickname.replace(/'/g, "\\'")}')">🗑️ Forget Student</button>
+                            <button class="btn-secondary" style="font-size:11px; padding:6px 10px; color:#b45309; border:1px solid #fed7aa;" onclick="teacherResetStudentLevel('${s.id}', '${s.nickname.replace(/'/g, "\\'")}')">${icon('refresh')} Reset a Level</button>
+                            <button class="btn-secondary" style="font-size:11px; padding:6px 10px; color:#991b1b; border:1px solid #fecaca; font-weight:800;" onclick="teacherForgetStudent('${s.id}', '${s.nickname.replace(/'/g, "\\'")}')">${icon('trash')} Forget Student</button>
                         </div>`;
                 }).join('');
 
@@ -604,7 +604,7 @@ async function setTeamCaptain() {
 
     if (flagError) console.error("Failed to set is_captain flag:", flagError);
 
-    showNotificationToast(`${studentLabel} is now the captain! 👑`);
+    showNotificationToast(`${studentLabel} is now the captain! ${icon('crown')}`);
     await loadCurrentCaptains();
 }
 
@@ -622,7 +622,7 @@ async function loadCurrentCaptains() {
         if (!team.captain_id) return;
         const row = document.createElement('div');
         row.className = 'current-captain-row';
-        row.innerHTML = `<span>${team.name}</span><strong>👑 ${team.profiles?.avatar || '🦁'} ${team.profiles?.nickname || 'Unknown'}</strong>`;
+        row.innerHTML = `<span>${team.name}</span><strong>${icon('crown')} ${team.profiles?.avatar || '🦁'} ${team.profiles?.nickname || 'Unknown'}</strong>`;
         mount.appendChild(row);
     });
 
@@ -711,7 +711,7 @@ async function approveWritingSubmission(submissionId, studentId, baseLetter) {
         // Don't claim success when the actual progress credit failed — this
         // exact silent failure went undetected for weeks before. Surface
         // the real Postgres/PostgREST error so it can actually get fixed.
-        showNotificationToast("⚠️ Writing approved, but progress wasn't credited: " + creditError.message);
+        showNotificationToast(`${icon("warning")} Writing approved, but progress wasn't credited: ` + creditError.message);
     } else {
         showNotificationToast("Submission approved! ✓");
     }
@@ -910,8 +910,8 @@ async function loadTeacherTeamProgress() {
                     <span>Level ${team.current_level} • Streak: ${team.streak_count || 0}</span>
                 </div>
                 <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
-                    <button class="btn-secondary btn-edit-meeting" style="font-size:11px; padding:6px 10px;" title="Edit this team's lesson day/time">📅 Lesson Schedule</button>
-                    <button class="btn-secondary btn-recheck" style="font-size:12px; padding:10px 14px; min-height:40px;" title="Recalculate this team's advancement status. Safe to run any time, only advances a team that's actually ready">🔄 Recalculate</button>
+                    <button class="btn-secondary btn-edit-meeting" style="font-size:11px; padding:6px 10px;" title="Edit this team's lesson day/time">${icon('calendar')} Lesson Schedule</button>
+                    <button class="btn-secondary btn-recheck" style="font-size:12px; padding:10px 14px; min-height:40px;" title="Recalculate this team's advancement status. Safe to run any time, only advances a team that's actually ready">${icon('refresh')} Recalculate</button>
                     <button class="team-members-toggle" aria-label="Show team members">▼</button>
                 </div>
             </div>
@@ -983,7 +983,7 @@ async function loadTeamMembersForRoster(teamId, currentLevel, mountEl) {
         if (member.is_captain) {
             memberRow.innerHTML = `
                 <span>${member.avatar || '🦁'} ${member.nickname}</span>
-                <span class="team-member-progress" style="color:#b45309;">👑 Captain, exempt</span>
+                <span class="team-member-progress" style="color:#b45309;">${icon('crown')} Captain, exempt</span>
             `;
         } else {
             const clearedCount = (level?.letter_families || []).filter(letter => {
@@ -1059,7 +1059,7 @@ async function renderTeacherHealthAndTasks() {
 
     tasksMount.innerHTML = `
         <div class="teacher-task-row">
-            <div class="teacher-task-icon">🔑</div>
+            <div class="teacher-task-icon">${icon('key')}</div>
             <div>
                 <div class="teacher-task-label">Access requests waiting</div>
                 <div class="teacher-task-sub">${pendingAccessCount > 0 ? 'New sign-ups need a decision' : 'None right now'}</div>
@@ -1068,7 +1068,7 @@ async function renderTeacherHealthAndTasks() {
             <button class="teacher-task-go" onclick="jumpToTeacherPanel('accessRequestsPanelBody')">View →</button>
         </div>
         <div class="teacher-task-row">
-            <div class="teacher-task-icon">✍️</div>
+            <div class="teacher-task-icon">${icon('pencil')}</div>
             <div>
                 <div class="teacher-task-label">Writing submissions waiting</div>
                 <div class="teacher-task-sub">${pendingWritingStudents > 0 ? `From ${pendingWritingStudents} student${pendingWritingStudents > 1 ? 's' : ''}` : 'All writing reviewed'}</div>
@@ -1077,7 +1077,7 @@ async function renderTeacherHealthAndTasks() {
             <button class="teacher-task-go" onclick="jumpToTeacherPanel('writingQueuePanelBody')">Review →</button>
         </div>
         <div class="teacher-task-row">
-            <div class="teacher-task-icon">🎤</div>
+            <div class="teacher-task-icon">${icon('mic')}</div>
             <div>
                 <div class="teacher-task-label">Live test requests waiting</div>
                 <div class="teacher-task-sub">${levelRequestCount > 0 ? 'Students who cleared all 3 families' : 'None right now'}</div>
@@ -1188,7 +1188,7 @@ async function loadTeacherLeaderboard() {
                     <span class="snapshot-level">Lvl ${team.current_level} · ${percent}%</span>
                 </div>
                 <div class="snapshot-track"><div class="snapshot-fill" style="width:${percent}%; background:${color};"></div></div>
-                <div class="snapshot-lesson">📅 ${lessonText}</div>
+                <div class="snapshot-lesson">${icon('calendar')} ${lessonText}</div>
                 ${pacing ? `<div class="snapshot-pacing pacing-${pacing.status}">${pacing.label}</div>` : ''}
                 <div class="snapshot-stats">
                     <div class="snapshot-stat-row"><span class="k">Pending reviews</span><span class="v ${pending === 0 ? 'zero' : ''}">${pending}</span></div>
@@ -1388,7 +1388,7 @@ async function resetEverythingForDayOne() {
         return showNotificationToast('Reset partially failed: ' + (teamsError?.message || profilesError?.message));
     }
 
-    showGobezToast('Everyone has been reset for Day One! 🌱');
+    showGobezToast(`Everyone has been reset for Day One! ${icon('plant')}`);
 
     // Refresh every teacher dashboard view so the reset is visible immediately
     await loadTeacherRosterData();

@@ -75,7 +75,7 @@ async function renderChallengeDashboard() {
     // ── Hero subtitle ────────────────────────────────────────
     const sub = document.getElementById("challengeDashSub");
     if (sub) {
-        sub.innerText = `${team.name} • Level ${team.current_level} • 🔥 ${team.streak_count || 0} streak`;
+        sub.innerText = `${team.name} • Level ${team.current_level} • ${icon('fire')} ${team.streak_count || 0} streak`;
     }
 
     // ── Progress to ፐ — shared hero, so this renders once and shows
@@ -90,7 +90,7 @@ async function renderChallengeDashboard() {
 
     const peWeekLabel = document.getElementById("peWeekLabel");
     if (peWeekLabel && typeof getProgramWeekNumber === "function") {
-        peWeekLabel.innerText = `📅 Week ${getProgramWeekNumber()}`;
+        peWeekLabel.innerText = `${icon('calendar')} Week ${getProgramWeekNumber()}`;
     }
 
     // ── "View team status" button — toggles the inline panel.
@@ -189,7 +189,7 @@ function wireCurrentLevelResources(levels, team) {
     const currentLevel = levels.find(l => l.level_number === (team.current_level || 1)) || levels[0];
 
     const title = document.getElementById("currentLevelResourcesTitle");
-    if (title && currentLevel) title.innerText = `📚 Level ${currentLevel.level_number} Resources`;
+    if (title && currentLevel) title.innerText = `${icon('books')} Level ${currentLevel.level_number} Resources`;
 
     const practiceBtn = document.getElementById("currentLevelPracticeBtn");
     if (practiceBtn && currentLevel) {
@@ -440,7 +440,7 @@ async function renderChallengeDashboardMap(levels, team) {
             const percent = Math.min(100, Math.round((streak / STREAK_THRESHOLD) * 100));
             goalHtml = `
                 <div class="challenge-goal-card">
-                    <div class="challenge-goal-eyebrow">🎯 Today's Goal</div>
+                    <div class="challenge-goal-eyebrow">${icon('target')} Today's Goal</div>
                     <div class="challenge-goal-title">Complete the ${targetFamily} family</div>
                     <div class="challenge-goal-streak-row">
                         <span>Current streak</span><span>${streak} / ${STREAK_THRESHOLD}</span>
@@ -479,7 +479,7 @@ async function renderChallengeDashboardMap(levels, team) {
         }
 
         <button class="challenge-levels-toggle" onclick="toggleChallengeAllLevels()">
-            🔒 View all levels <span id="challengeAllLevelsChevron">▼</span>
+            ${icon('lock')} View all levels <span id="challengeAllLevelsChevron">▼</span>
         </button>
 
         <div id="challengeAllLevelsList" class="challenge-all-levels-list" style="display:none;">
@@ -697,28 +697,28 @@ async function renderChallengeFamilyPicker() {
     container.innerHTML = `
         <details class="challenge-start-here">
             <summary>
-                <span>📚 Start Here</span>
+                <span>${icon('books')} Start Here</span>
                 <small>songs + lesson + writing videos</small>
             </summary>
 
             <div class="challenge-lesson-briefing">
-                <div class="challenge-lesson-icon">📚</div>
+                <div class="challenge-lesson-icon">${icon('books')}</div>
                 <div class="challenge-lesson-level">Level ${level.level_number}</div>
                 <div class="challenge-lesson-families">${(level.letter_families || []).join(" ")}</div>
                 <p>Listen to the songs and SING along! Watch the lesson video and writing stroke videos to make your writing T and pass this level.</p>
             </div>
 
             <div class="challenge-resource-card songs visual">
-                <h3>🎵 Music First! Lets Jam 🎵</h3>
+                <h3>${icon('music')} Music First! Lets Jam ${icon('music')}</h3>
 
                 <div class="challenge-resource-icons">
                     <a href="https://www.youtube.com/watch?v=dWQQeHyIebk&list=RDdWQQeHyIebk&start_radio=1" target="_blank" rel="noopener">
-                        <span>🎵</span>
+                        <span>${icon('music')}</span>
                         <strong>Fidel Song</strong>
                     </a>
 
                     <a href="https://www.youtube.com/watch?v=gCXlWMXNfNw&list=RDdWQQeHyIebk&index=4" target="_blank" rel="noopener">
-                        <span>🎶</span>
+                        <span>${icon('music')}</span>
                         <strong>Fidel Rap</strong>
                     </a>
 
@@ -739,12 +739,12 @@ async function renderChallengeFamilyPicker() {
                     </a>
 
                     <a href="https://www.youtube.com/watch?v=4LIUwGr40dg&t=192s" target="_blank" rel="noopener">
-                        <span>📝</span>
+                        <span>${icon('note-pencil')}</span>
                         <strong>Writing 1</strong>
                     </a>
 
                     <a href="https://www.youtube.com/watch?v=j0jaSbFA30w" target="_blank" rel="noopener">
-                        <span>✏️</span>
+                        <span>${icon('pencil')}</span>
                         <strong>Writing 2</strong>
                     </a>
                 </div>
@@ -799,7 +799,7 @@ async function openChallengeFamilyDetail(fidelObj, levelNumber) {
         if (body) body.style.display = "none";
         const box = document.getElementById("challengeWritingStatusBox");
         box.style.display = "block";
-        box.innerHTML = `<div class="challenge-writing-status approved">👑 As team captain, you're exempt. Focus on reviewing your team's submissions!</div>`;
+        box.innerHTML = `<div class="challenge-writing-status approved">${icon('crown')} As team captain, you're exempt. Focus on reviewing your team's submissions!</div>`;
         return;
     }
 
@@ -979,7 +979,7 @@ function launchChallengeStreakGame(fidelObj, levelNumber) {
         },
         onStreakPassed: async (finalStreak) => {
             await recordStreakProgress(fidelObj.base, levelNumber, finalStreak, true);
-            showGobezToast(`🔥 Streak of ${STREAK_THRESHOLD} complete! "${fidelObj.base}" passed!`);
+            showGobezToast(`${icon('fire')} Streak of ${STREAK_THRESHOLD} complete! "${fidelObj.base}" passed!`);
             executeVictoryConfettiCelebration();
             setTimeout(() => {
                 document.getElementById('gameWorkspace').style.display = "none";

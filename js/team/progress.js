@@ -395,7 +395,11 @@ async function renderTeamRaceView(mountId, options = {}) {
 function renderDetailedRaceStandings(mount, mountId, standings) {
     const getTeamColor = getRaceTeamColor;
     const getTeamInitial = getRaceTeamInitial;
-    const medals = ['🥇', '🥈', '🥉'];
+    const medals = [
+        `<span style="color:#eab308;">${icon('medal')}</span>`,
+        `<span style="color:#9ca3af;">${icon('medal')}</span>`,
+        `<span style="color:#b45309;">${icon('medal')}</span>`
+    ];
 
     mount.innerHTML = '';
     const standings_div = document.createElement('div');
@@ -473,7 +477,11 @@ function renderDetailedRaceStandings(mount, mountId, standings) {
 // ---------------------------------------------------------------------------
 
 function renderCompactRaceStandings(mount, standings) {
-    const medals = ['🥇', '🥈', '🥉'];
+    const medals = [
+        `<span style="color:#eab308;">${icon('medal')}</span>`,
+        `<span style="color:#9ca3af;">${icon('medal')}</span>`,
+        `<span style="color:#b45309;">${icon('medal')}</span>`
+    ];
 
     const rowsHtml = standings.map((team, idx) => {
         const isYou = team.id === currentProfile?.team_id;
@@ -658,7 +666,7 @@ async function renderLevelCompletionBanner(mountId) {
         mount.innerHTML = `
             <div style="background:#f0fdf4; border:2px solid #166534; border-radius:16px;
                         padding:20px; text-align:center; margin-bottom:16px;">
-                <div style="font-size:36px; margin-bottom:8px;">🎉</div>
+                <div style="font-size:36px; margin-bottom:8px;">${icon('confetti')}</div>
                 <p style="font-size:16px; font-weight:800; color:#166534; margin-bottom:4px;">
                     Your teacher approved your level!
                 </p>
@@ -667,7 +675,7 @@ async function renderLevelCompletionBanner(mountId) {
                 </p>
                 <button id="levelApprovalEncourageBtn" class="btn-primary"
                         style="max-width:280px; margin:0 auto; display:block;">
-                    📣 Encourage Your Team
+                    ${icon('megaphone')} Encourage Your Team
                 </button>
             </div>`;
 
@@ -675,7 +683,7 @@ async function renderLevelCompletionBanner(mountId) {
         if (encourageBtn) {
             encourageBtn.onclick = () => {
                 if (typeof shareTeamChallenge === 'function') {
-                    shareTeamChallenge(`🎉 I just got Level ${status.level} approved! Let's finish up so our team can move to Level ${status.level + 1} together 💪`);
+                    shareTeamChallenge(`${icon('confetti')} I just got Level ${status.level} approved! Let's finish up so our team can move to Level ${status.level + 1} together 💪`);
                 }
             };
         }
@@ -694,7 +702,7 @@ async function renderLevelCompletionBanner(mountId) {
                 <a href="${buildLiveTestSchedulingLink()}" target="_blank" rel="noopener"
                    class="btn-primary"
                    style="max-width:280px; margin:0 auto; display:block; text-decoration:none;">
-                    📅 Schedule Your Live Test
+                    ${icon('calendar')} Schedule Your Live Test
                 </a>
                 <p style="font-size:12px; color:#92400e; margin-top:12px;">
                     While you wait for your teammates, keep practicing.
@@ -706,7 +714,7 @@ async function renderLevelCompletionBanner(mountId) {
         mount.innerHTML = `
             <div style="background:linear-gradient(135deg, #f0fdf4, #fffbeb); border:2px solid #166534;
                         border-radius:16px; padding:20px; text-align:center; margin-bottom:16px;">
-                <div style="font-size:36px; margin-bottom:8px;">⭐</div>
+                <div style="font-size:36px; margin-bottom:8px;">${icon('star')}</div>
                 <p style="font-size:16px; font-weight:800; color:#166534; margin-bottom:6px;">
                     You cleared all 3 families!
                 </p>
@@ -741,7 +749,7 @@ async function submitLevelCompletion(levelNumber) {
         return showNotificationToast("Couldn't submit: " + error.message);
     }
 
-    showGobezToast("Submitted! Your teacher will review your Level completion. 🌟");
+    showGobezToast(`Submitted! Your teacher will review your Level completion. ${icon("star")}`);
     await renderLevelCompletionBanner('levelCompletionMount');
 
     if (typeof sendPushNotification === 'function') {
@@ -826,7 +834,7 @@ async function loadHelpFlags(mountId) {
     if (!flags || flags.length === 0) {
         mount.innerHTML = `
             <div style="text-align:center; padding:16px 4px; color:#94a3b8;">
-                <div style="font-size:24px; margin-bottom:6px;">🙌</div>
+                <div style="font-size:24px; margin-bottom:6px;">${icon('applause')}</div>
                 <p style="font-size:13px; margin:0;">No help requests right now.</p>
             </div>`;
         return;
@@ -956,7 +964,7 @@ async function approveTeacherLevelCompletion(requestId, studentId, levelNumber, 
         await checkAndUpdateTeamLevelCompletion(studentId);
     }
 
-    showGobezToast("Level completion approved! 🌟");
+    showGobezToast(`Level completion approved! ${icon("star")}`);
     await loadTeacherLevelCompletionQueue(mountId);
     if (typeof loadTeacherClassroomOverview === "function") await loadTeacherClassroomOverview();
 }

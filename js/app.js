@@ -191,7 +191,7 @@ function showGobezToast(message) {
     const container = document.getElementById("toastContainer");
     const el = document.createElement("div");
     el.className = "toast-popup gobez-toast";
-    el.innerHTML = `✨ ጎበዝ! ${message}`;
+    el.innerHTML = `${icon('sparkle')} ጎበዝ! ${message}`;
     container.appendChild(el);
     playTwinkleSound();
     setTimeout(() => el.remove(), 4500);
@@ -263,7 +263,7 @@ function maybeShowStreakExplainer(onConfirm) {
         <div style="background:white; border-radius:20px; padding:28px 24px;
                     max-width:380px; width:100%; text-align:center;
                     box-shadow:0 20px 60px rgba(0,0,0,0.3);">
-            <div style="font-size:40px; margin-bottom:12px;">🔥</div>
+            <div style="font-size:40px; margin-bottom:12px;">${icon('fire')}</div>
             <h2 style="font-size:20px; font-weight:800; color:#166534;
                        margin-bottom:8px;">How the Streak Game Works</h2>
             <p style="font-size:14px; color:#475569; line-height:1.6;
@@ -276,7 +276,7 @@ function maybeShowStreakExplainer(onConfirm) {
             <div style="background:#fffbeb; border:1px solid #fde68a;
                         border-radius:12px; padding:12px; margin-bottom:20px;
                         font-size:13px; color:#92400e;">
-                💡 <strong>Tip:</strong> Study the flashcards first,
+                ${icon('idea')} <strong>Tip:</strong> Study the flashcards first,
                 then play when you feel ready.
             </div>
             <button id="streakExplainerBtn"
@@ -408,7 +408,7 @@ async function submitVerificationCounterBump(shareId, element) {
         .update({ meta_points: updatedVal })
         .eq('id', shareId);
     element.setAttribute('data-count', updatedVal);
-    element.innerHTML = `👍 Verified (${updatedVal})`;
+    element.innerHTML = `${icon('thumbs-up')} Verified (${updatedVal})`;
     showNotificationToast("Marked as verified!");
 }
 
@@ -484,7 +484,7 @@ async function renderStudentTeamProgress() {
                 ${team.name}${isOwnTeam ? ' (You)' : ''}
             </span>
             <span class="student-team-row-level">
-                Level ${team.current_level} • 🔥${team.streak_count || 0}
+                Level ${team.current_level} • ${icon('fire')}${team.streak_count || 0}
                 ${progress.approved > 0 && progress.approved < progress.required ? ` • ${progress.approved}/${progress.required} live tests approved 🎤` : ''}
             </span>
         `;
@@ -514,7 +514,7 @@ const LOCKED_MODES = {
 
 function enterModeIfUnlocked(modeKey, enterFn) {
     if (LOCKED_MODES[modeKey]) {
-        showNotificationToast('🔒 Not available yet, coming soon!');
+        showNotificationToast(`${icon('lock')} Not available yet, coming soon!`);
         return;
     }
     enterFn();
@@ -772,7 +772,7 @@ async function fetchDisappearingImageCanvasBoard() {
         const isOwner = currentUser && share.user_id === currentUser.id;
         const deleteBtn = isOwner
             ? `<button class="verify-badge-btn" style="color:#ef4444; border-color:#fecaca;"
-                       onclick="deleteSharedDrawing('${share.id}', '${share.image_url}')">🗑️ Delete</button>`
+                       onclick="deleteSharedDrawing('${share.id}', '${share.image_url}')">${icon('trash')} Delete</button>`
             : '';
 
         item.innerHTML = `
@@ -785,7 +785,7 @@ async function fetchDisappearingImageCanvasBoard() {
                 <div class="feed-meta-row" style="margin-top:4px; gap:6px;">
                     <button class="verify-badge-btn" data-count="${initialCount}"
                             onclick="submitVerificationCounterBump('${share.id}', this)">
-                        👍 Verify Form (${initialCount})
+                        ${icon('thumbs-up')} Verify Form (${initialCount})
                     </button>
                     ${deleteBtn}
                 </div>

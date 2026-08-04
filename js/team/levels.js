@@ -88,7 +88,7 @@ mount.appendChild(hint);
             `;
             lockedCard.innerHTML = `
                 <span style="font-size:13px; color:#94a3b8; font-weight:600;">
-                    🔒 Level ${level.level_number}: ${level.title || `Level ${level.level_number}`}
+                    ${icon('lock')} Level ${level.level_number}: ${level.title || `Level ${level.level_number}`}
                 </span>
                 <span style="font-family:'Abyssinica SIL',serif; font-size:16px; color:#cbd5e1; letter-spacing:2px;">
                     ${(level.letter_families || []).join(' ')}
@@ -324,7 +324,7 @@ function launchEmbeddedStreakGame(fidelObj, levelNumber) {
         },
         onStreakPassed: async (finalStreak) => {
             await recordEmbeddedStreakProgress(fidelObj.base, levelNumber, finalStreak, true);
-            showGobezToast(`🔥 Streak of 20! "${fidelObj.base}" game passed!`);
+            showGobezToast(`${icon('fire')} Streak of 20! "${fidelObj.base}" game passed!`);
             executeVictoryConfettiCelebration();
 
             // After brief celebration, close game and prompt writing submission
@@ -375,7 +375,7 @@ function showPostStreakWritingPrompt(fidelObj, levelNumber, returnMode) {
         <div style="background:white; border-radius:20px; padding:28px 24px;
                     max-width:380px; width:100%; text-align:center;
                     box-shadow:0 20px 60px rgba(0,0,0,0.3);">
-            <div style="font-size:44px; margin-bottom:10px;">✍️</div>
+            <div style="font-size:44px; margin-bottom:10px;">${icon('pencil')}</div>
             <h2 style="font-size:20px; font-weight:800; color:#166534; margin-bottom:8px;">
                 Streak passed! Now show your writing.
             </h2>
@@ -389,7 +389,7 @@ function showPostStreakWritingPrompt(fidelObj, levelNumber, returnMode) {
             </p>
             <button onclick="submitFromPostStreak('${fidelObj.base}', ${levelNumber}, '${mode}')"
                     class="btn-primary" style="margin-bottom:10px;">
-                ✍️ Submit My Writing Now
+                ${icon('pencil')} Submit My Writing Now
             </button>
             <button onclick="dismissPostStreakPrompt('${mode}')"
                     class="btn-secondary"
