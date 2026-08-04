@@ -5102,7 +5102,8 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
     gap: 10px !important;
-    margin-bottom: 10px !important;
+    max-width: 480px !important;
+    margin: 0 auto 10px !important;
 }
 
 .cup-card {
@@ -5122,6 +5123,18 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+
+.cup-card-outline-green {
+    border: 2px solid #166534 !important;
+}
+
+.cup-card-outline-indigo {
+    border: 2px solid #4f46e5 !important;
+}
+
+.cup-card-outline-blue {
+    border: 2px solid #4338ca !important;
 }
 
 .cup-card:hover {
