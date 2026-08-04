@@ -156,17 +156,17 @@ async function updatePushMenuButton() {
     row.style.display = 'flex';
 
     if (state === 'needs-install') {
-        label.innerText = 'Add to Home Screen to enable';
+        label.innerText = 'Needs install';
         return;
     }
     if (state === 'denied') {
-        label.innerText = 'Blocked — enable in browser settings';
+        label.innerText = 'Blocked';
         return;
     }
 
     const registration = await navigator.serviceWorker.getRegistration();
     const subscription = registration ? await registration.pushManager.getSubscription() : null;
-    label.innerText = subscription ? 'On — tap to turn off' : 'Off — tap to turn on';
+    label.innerText = subscription ? 'On' : 'Off';
 }
 
 // ---------------------------------------------------------------------------
