@@ -5435,15 +5435,6 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     opacity: .8;
 }
 
-.challenge-dash-kicker {
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: .8px;
-    opacity: .72;
-    margin-bottom: 6px;
-}
-
 .challenge-dash-hero h1 {
     font-family: 'Inter', -apple-system, sans-serif;
     font-weight: 800;
