@@ -42,7 +42,7 @@ let _lbSearchQuery = '';
 // board itself rather than needing their own destination screen.
 const LETTER_BOARD_QUICK_LINKS = [
     {
-        icon: '🗂️', label: 'Flashcards',
+        icon: icon('books'), label: 'Flashcards',
         desc: 'Flip through the full Fidel alphabet',
         action: () => {
             document.getElementById('letterBoardScreen').style.display = 'none';
@@ -52,12 +52,12 @@ const LETTER_BOARD_QUICK_LINKS = [
         }
     },
     {
-        icon: '🟩', label: 'Daily Wordle',
+        icon: icon('puzzle'), label: 'Daily Wordle',
         desc: "Today's Amharic word puzzle",
         action: () => openWordleOverlay(true)
     },
     {
-        icon: '▶️', label: 'Start Here Video',
+        icon: icon('video'), label: 'Start Here Video',
         desc: 'Watch the intro before starting the challenge',
         href: 'https://www.youtube.com/watch?v=QgssO7_WkSk&t=160s'
     },
