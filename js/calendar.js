@@ -3,29 +3,45 @@
 // Generic month-grid calendar + event system — not hardcoded to Fidel
 // Competition. Everything above the "Competition Calendar" section works
 // off a plain CalendarEvent shape:
-//   { id, type, date ('YYYY-MM-DD'), title, teamName, teamId, studentName,
-//     levelNumber, notes, recurring }
+//   { id, type, date ('YYYY-MM-DD'), title, shortLabel, teamName, teamId,
+//     studentName, levelNumber, notes }
 // and has no idea where that data came from. fetchCompetitionCalendarEvents()
 // is the one Competition-specific adapter that builds that shape from
-// writing_submissions / team_meetings / calendar_events. A future calendar
-// elsewhere in the app should add its own fetchXEvents() adapter and reuse
-// the renderer/day-detail/event-detail functions as-is, instead of building
-// a new calendar from scratch.
+// writing_submissions / calendar_events. A future calendar elsewhere in the
+// app should add its own fetchXEvents() adapter and reuse the renderer/
+// day-detail/event-detail functions as-is, instead of building a new
+// calendar from scratch.
 //
 // Loads AFTER app.js (alphabetData) and challenge.js (getTeamHex,
 // fetchChallengeLevels, challengeLevelsCache).
 // =============================================================================
 
+// `groupable: true` types get collapsed into a count header ("5 writing
+// approvals") in day detail, since a wall of near-identical rows doesn't
+// read as a story. `emphasize: true` types are milestones — they never
+// group, and get their own gold/banner treatment instead so they dominate
+// the day rather than getting buried in a list.
 const CALENDAR_EVENT_TYPES = {
-    writing_submitted: { icon: '📝', color: '#2563eb', label: 'Writing submitted' },
-    writing_approved:  { icon: '✅', color: '#166534', label: 'Writing approved' },
+    writing_submitted: { icon: '✍️', color: '#2563eb', label: 'Writing submitted', groupNoun: 'writing submission', groupable: true },
+    writing_approved:  { icon: '✅', color: '#166534', label: 'Writing approved', groupNoun: 'writing approval', groupable: true },
     team_level_up:     { icon: '🏆', color: '#ca8a04', label: 'Team leveled up', emphasize: true },
-    team_meeting:      { icon: '👥', color: '#7e22ce', label: 'Team meeting' },
-    announcement:      { icon: '📢', color: '#dc2626', label: 'Announcement' }
+    // Dormant until a captain-change write path is wired up (see the
+    // schema notes) — included now so the type exists end-to-end and
+    // proves out the "add a type without redesigning the calendar" promise.
+    captain_change:    { icon: '👑', color: '#7e22ce', label: 'New team captain', emphasize: true },
+    announcement:      { icon: '📢', color: '#dc2626', label: 'Announcement', groupNoun: 'announcement', groupable: true }
 };
 
+// Filter bar only covers the three things most people actually want to
+// narrow down to — captain changes/announcements still show under "All".
+const CALENDAR_FILTERS = [
+    { key: 'all', label: 'All' },
+    { key: 'writing_submitted', label: 'Submissions' },
+    { key: 'writing_approved', label: 'Approvals' },
+    { key: 'team_level_up', label: 'Level Ups' }
+];
+
 const CALENDAR_WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const CALENDAR_WEEKDAY_LABELS_FULL = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const CALENDAR_MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 // -----------------------------------------------------------------------------
@@ -45,15 +61,18 @@ function groupCalendarEventsByDate(events) {
     return map;
 }
 
-// mountEl: the grid container. events: CalendarEvent[] for the visible month.
-// onDayClick(dateKey, eventsForThatDay) fires when a day cell is tapped.
+// mountEl: the grid container. events: CalendarEvent[] for the visible month
+// (already filtered, if a filter is active). onDayClick(dateKey, eventsForThatDay)
+// fires when a day cell is tapped. Cells show at most one dot per event TYPE
+// present (not one per event) so they stay tiny regardless of volume, and a
+// level-up day gets a trophy badge + gold background instead of just another dot.
 function renderCalendarMonthGrid(mountEl, year, month, events, onDayClick) {
     if (!mountEl) return;
 
     const eventsByDate = groupCalendarEventsByDate(events);
     const firstOfMonth = new Date(year, month, 1);
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const leadingBlanks = (firstOfMonth.getDay() + 6) % 7; // Monday-first, matches day_of_week strings used elsewhere
+    const leadingBlanks = (firstOfMonth.getDay() + 6) % 7; // Monday-first
     const now = new Date();
     const todayKey = formatCalendarDateKey(now.getFullYear(), now.getMonth(), now.getDate());
 
@@ -67,19 +86,23 @@ function renderCalendarMonthGrid(mountEl, year, month, events, onDayClick) {
     for (let day = 1; day <= daysInMonth; day++) {
         const dateKey = formatCalendarDateKey(year, month, day);
         const dayEvents = eventsByDate[dateKey] || [];
-        const hasLevelUp = dayEvents.some(ev => CALENDAR_EVENT_TYPES[ev.type]?.emphasize);
+        const hasMilestone = dayEvents.some(ev => CALENDAR_EVENT_TYPES[ev.type]?.emphasize);
         const isToday = dateKey === todayKey;
 
-        const dots = dayEvents.slice(0, 3).map(ev => {
-            const meta = CALENDAR_EVENT_TYPES[ev.type] || {};
-            return `<span class="calendar-day-dot" style="background:${meta.color || '#94a3b8'};" title="${meta.label || ev.type}">${meta.icon || '•'}</span>`;
+        const typesPresent = [...new Set(
+            dayEvents.filter(ev => !CALENDAR_EVENT_TYPES[ev.type]?.emphasize).map(ev => ev.type)
+        )];
+        const dots = typesPresent.map(type => {
+            const meta = CALENDAR_EVENT_TYPES[type] || {};
+            return `<span class="calendar-day-dot" style="background:${meta.color || '#94a3b8'};" title="${meta.label || type}"></span>`;
         }).join('');
-        const overflow = dayEvents.length > 3 ? `<span class="calendar-day-more">+${dayEvents.length - 3}</span>` : '';
+        const badge = hasMilestone ? `<span class="calendar-day-trophy">🏆</span>` : '';
 
         html += `
-            <div class="calendar-day-cell ${dayEvents.length ? 'has-events' : ''} ${hasLevelUp ? 'has-levelup' : ''} ${isToday ? 'is-today' : ''}" data-date="${dateKey}">
+            <div class="calendar-day-cell ${dayEvents.length ? 'has-events' : ''} ${hasMilestone ? 'has-levelup' : ''} ${isToday ? 'is-today' : ''}" data-date="${dateKey}">
+                ${badge}
                 <div class="calendar-day-number">${day}</div>
-                <div class="calendar-day-dots">${dots}${overflow}</div>
+                <div class="calendar-day-dots">${dots}</div>
             </div>
         `;
     }
@@ -97,6 +120,12 @@ function renderCalendarMonthGrid(mountEl, year, month, events, onDayClick) {
 window.renderCalendarMonthGrid = renderCalendarMonthGrid;
 window.groupCalendarEventsByDate = groupCalendarEventsByDate;
 
+function filterCalendarEvents(events, filterKey) {
+    if (!filterKey || filterKey === 'all') return events;
+    return events.filter(ev => ev.type === filterKey);
+}
+window.filterCalendarEvents = filterCalendarEvents;
+
 // -----------------------------------------------------------------------------
 // Competition Calendar — the current consumer of the generic renderer above.
 // A future calendar elsewhere in the app adds its own adapter function and
@@ -106,6 +135,8 @@ window.groupCalendarEventsByDate = groupCalendarEventsByDate;
 
 let calendarViewYear = null;
 let calendarViewMonth = null; // 0-indexed
+let calendarActiveFilter = 'all';
+let calendarMonthEventsCache = [];
 let calendarBaseLetterLevelMap = null;
 
 async function getCalendarBaseLetterLevelMap() {
@@ -126,14 +157,13 @@ async function fetchCompetitionCalendarEvents(year, month) {
     const startKey = formatCalendarDateKey(year, month, 1);
     const endKey = formatCalendarDateKey(year, month, monthEnd.getDate());
 
-    const [profilesRes, teamsRes, submittedRes, approvedRes, meetingsRes, loggedRes, levelMap] = await Promise.all([
+    const [profilesRes, teamsRes, submittedRes, approvedRes, loggedRes, levelMap] = await Promise.all([
         _supabase.from('profiles').select('id, nickname, team_id'),
         _supabase.from('teams').select('id, name'),
         _supabase.from('writing_submissions').select('id, student_id, base_letter, submitted_at')
             .gte('submitted_at', startIso).lt('submitted_at', endIso),
         _supabase.from('writing_submissions').select('id, student_id, base_letter, reviewed_at, reviewer_note')
             .eq('status', 'approved').gte('reviewed_at', startIso).lt('reviewed_at', endIso),
-        _supabase.from('team_meetings').select('team_id, day_of_week, meeting_time'),
         _supabase.from('calendar_events').select('id, event_type, event_date, team_id, student_id, level_number, title, description')
             .gte('event_date', startKey).lte('event_date', endKey),
         getCalendarBaseLetterLevelMap()
@@ -149,67 +179,43 @@ async function fetchCompetitionCalendarEvents(year, month) {
     (submittedRes.data || []).forEach(row => {
         const student = profilesById[row.student_id];
         const team = student ? teamsById[student.team_id] : null;
+        const name = student?.nickname || 'A student';
         events.push({
             id: 'sub-' + row.id,
             type: 'writing_submitted',
             date: row.submitted_at.slice(0, 10),
-            title: `${student?.nickname || 'A student'} wrote ${row.base_letter}`,
+            title: `${name} submitted ${row.base_letter}`,
+            shortLabel: `${name} — ${row.base_letter}`,
             teamName: team?.name || null,
             teamId: team?.id || null,
             studentName: student?.nickname || null,
             levelNumber: levelMap[row.base_letter] || null,
-            notes: null,
-            recurring: false
+            notes: null
         });
     });
 
     (approvedRes.data || []).forEach(row => {
         const student = profilesById[row.student_id];
         const team = student ? teamsById[student.team_id] : null;
+        const name = student?.nickname || 'A student';
         events.push({
             id: 'appr-' + row.id,
             type: 'writing_approved',
             date: row.reviewed_at.slice(0, 10),
-            title: `${student?.nickname || 'A student'}'s ${row.base_letter} was approved`,
+            title: `${name} passed ${row.base_letter}`,
+            shortLabel: `${name} — ${row.base_letter}`,
             teamName: team?.name || null,
             teamId: team?.id || null,
             studentName: student?.nickname || null,
             levelNumber: levelMap[row.base_letter] || null,
-            notes: row.reviewer_note || null,
-            recurring: false
+            notes: row.reviewer_note || null
         });
     });
 
-    // Team meetings are stored as one recurring weekly slot per team, not
-    // dated rows — synthesize each occurrence that falls in the visible
-    // month instead of needing a stored row per instance.
-    (meetingsRes.data || []).forEach(row => {
-        if (!row.day_of_week) return;
-        const team = teamsById[row.team_id];
-        const targetWeekday = CALENDAR_WEEKDAY_LABELS_FULL.indexOf(row.day_of_week);
-        if (targetWeekday === -1) return;
-        for (let day = 1; day <= monthEnd.getDate(); day++) {
-            const jsWeekday = (new Date(year, month, day).getDay() + 6) % 7; // Monday-first
-            if (jsWeekday === targetWeekday) {
-                events.push({
-                    id: `meet-${row.team_id}-${year}-${month}-${day}`,
-                    type: 'team_meeting',
-                    date: formatCalendarDateKey(year, month, day),
-                    title: `${team?.name || 'Team'} meeting`,
-                    teamName: team?.name || null,
-                    teamId: row.team_id,
-                    studentName: null,
-                    levelNumber: null,
-                    notes: row.meeting_time || null,
-                    recurring: true
-                });
-            }
-        }
-    });
-
-    // team_level_up / announcement have no other natural source — read
-    // straight from calendar_events. Empty until either the optional DB
-    // trigger is enabled (level-ups) or a teacher authors one (announcements).
+    // team_level_up / captain_change / announcement have no other natural
+    // source — read straight from calendar_events. Empty until either an
+    // optional DB trigger is enabled (level-ups, captain changes) or a
+    // teacher authors one (announcements).
     (loggedRes.data || []).forEach(row => {
         const team = teamsById[row.team_id];
         const student = row.student_id ? profilesById[row.student_id] : null;
@@ -218,12 +224,12 @@ async function fetchCompetitionCalendarEvents(year, month) {
             type: row.event_type,
             date: row.event_date,
             title: row.title,
+            shortLabel: row.title,
             teamName: team?.name || null,
             teamId: row.team_id || null,
             studentName: student?.nickname || null,
             levelNumber: row.level_number || null,
-            notes: row.description || null,
-            recurring: false
+            notes: row.description || null
         });
     });
 
@@ -234,8 +240,10 @@ async function openCompetitionCalendar() {
     const now = new Date();
     calendarViewYear = now.getFullYear();
     calendarViewMonth = now.getMonth();
+    calendarActiveFilter = 'all';
     const overlay = document.getElementById('competitionCalendarOverlay');
     if (overlay) overlay.style.display = 'flex';
+    renderCalendarFilterBar();
     await renderCompetitionCalendarMonth();
 }
 window.openCompetitionCalendar = openCompetitionCalendar;
@@ -254,19 +262,59 @@ async function navigateCalendarMonth(delta) {
 }
 window.navigateCalendarMonth = navigateCalendarMonth;
 
+function renderCalendarFilterBar() {
+    const mount = document.getElementById('calendarFilterBar');
+    if (!mount) return;
+    mount.innerHTML = CALENDAR_FILTERS.map(f => `
+        <button type="button" class="calendar-filter-pill ${f.key === calendarActiveFilter ? 'active' : ''}" data-filter="${f.key}">${f.label}</button>
+    `).join('');
+    mount.querySelectorAll('.calendar-filter-pill').forEach(btn => {
+        btn.onclick = () => {
+            calendarActiveFilter = btn.getAttribute('data-filter');
+            renderCalendarFilterBar();
+            renderCalendarFromCache();
+        };
+    });
+}
+
+function renderCalendarMonthSummary(events) {
+    const mount = document.getElementById('calendarSummaryBar');
+    if (!mount) return;
+    const submitted = events.filter(ev => ev.type === 'writing_submitted').length;
+    const approved = events.filter(ev => ev.type === 'writing_approved').length;
+    const levelUps = events.filter(ev => ev.type === 'team_level_up').length;
+
+    mount.innerHTML = `
+        <span><strong>${submitted}</strong> submission${submitted === 1 ? '' : 's'}</span>
+        <span><strong>${approved}</strong> approval${approved === 1 ? '' : 's'}</span>
+        <span><strong>${levelUps}</strong> level up${levelUps === 1 ? '' : 's'}</span>
+    `;
+}
+
+// Re-renders the grid + summary from the already-fetched month cache —
+// used when switching filters so that doesn't need a network round trip.
+function renderCalendarFromCache() {
+    const mount = document.getElementById('calendarGridMount');
+    renderCalendarMonthSummary(calendarMonthEventsCache);
+    const visible = filterCalendarEvents(calendarMonthEventsCache, calendarActiveFilter);
+    renderCalendarMonthGrid(mount, calendarViewYear, calendarViewMonth, visible, openCalendarDay);
+}
+
 async function renderCompetitionCalendarMonth() {
     const mount = document.getElementById('calendarGridMount');
     const label = document.getElementById('calendarMonthLabel');
     if (label) label.innerText = `${CALENDAR_MONTH_NAMES[calendarViewMonth]} ${calendarViewYear}`;
     if (mount) mount.innerHTML = `<p style="color:#94a3b8; font-size:13px; text-align:center; padding:24px 0;">Loading...</p>`;
 
-    const events = await fetchCompetitionCalendarEvents(calendarViewYear, calendarViewMonth);
-    renderCalendarMonthGrid(mount, calendarViewYear, calendarViewMonth, events, openCalendarDay);
+    calendarMonthEventsCache = await fetchCompetitionCalendarEvents(calendarViewYear, calendarViewMonth);
+    renderCalendarFromCache();
 }
 
 // -----------------------------------------------------------------------------
-// Day detail + event detail — generic, driven entirely by the CalendarEvent
-// shape passed in.
+// Day detail — groups same-type events into an expandable count header
+// ("5 writing approvals") instead of a wall of near-identical rows.
+// Milestone events (team_level_up, captain_change) never group — they get
+// their own gold banner at the top of the day so they dominate.
 // -----------------------------------------------------------------------------
 
 function openCalendarDay(dateKey, dayEvents) {
@@ -280,24 +328,69 @@ function openCalendarDay(dateKey, dayEvents) {
 
     if (dayEvents.length === 0) {
         list.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Nothing happened this day.</p>`;
-    } else {
-        list.innerHTML = dayEvents.map((ev, idx) => {
-            const meta = CALENDAR_EVENT_TYPES[ev.type] || {};
-            return `
-                <button type="button" class="calendar-day-event-row" data-idx="${idx}">
-                    <span class="calendar-day-event-icon" style="background:${meta.color || '#94a3b8'};">${meta.icon || '•'}</span>
-                    <span class="calendar-day-event-text">
-                        <span class="calendar-day-event-title">${ev.title}</span>
-                        ${ev.teamName ? `<span class="calendar-day-event-sub">${ev.teamName}</span>` : ''}
-                    </span>
-                </button>
-            `;
-        }).join('');
-
-        list.querySelectorAll('.calendar-day-event-row').forEach(row => {
-            row.onclick = () => openCalendarEventDetail(dayEvents[Number(row.getAttribute('data-idx'))]);
-        });
+        overlay.style.display = 'flex';
+        return;
     }
+
+    const eventsById = {};
+    dayEvents.forEach(ev => { eventsById[ev.id] = ev; });
+
+    const milestones = dayEvents.filter(ev => CALENDAR_EVENT_TYPES[ev.type]?.emphasize);
+    const groupable = dayEvents.filter(ev => !CALENDAR_EVENT_TYPES[ev.type]?.emphasize);
+
+    let html = milestones.map(ev => {
+        const meta = CALENDAR_EVENT_TYPES[ev.type] || {};
+        return `
+            <button type="button" class="calendar-banner-card" data-event-id="${ev.id}">
+                <span class="calendar-banner-icon">${meta.icon || '🏆'}</span>
+                <span class="calendar-banner-text">${ev.title}</span>
+            </button>
+        `;
+    }).join('');
+
+    const byType = {};
+    groupable.forEach(ev => {
+        if (!byType[ev.type]) byType[ev.type] = [];
+        byType[ev.type].push(ev);
+    });
+
+    html += Object.entries(byType).map(([type, group]) => {
+        const meta = CALENDAR_EVENT_TYPES[type] || {};
+        const noun = meta.groupNoun || type;
+        const groupId = `cal-group-${type}-${Math.random().toString(36).slice(2, 8)}`;
+        return `
+            <div class="calendar-group">
+                <button type="button" class="calendar-group-header" data-target="${groupId}">
+                    <span class="calendar-group-icon" style="background:${meta.color || '#94a3b8'};">${meta.icon || '•'}</span>
+                    <span class="calendar-group-label">${group.length} ${noun}${group.length === 1 ? '' : 's'}</span>
+                    <span class="calendar-group-arrow">▾</span>
+                </button>
+                <div class="calendar-group-body" id="${groupId}" style="display:none;">
+                    ${group.map(ev => `<button type="button" class="calendar-group-item" data-event-id="${ev.id}">${ev.shortLabel || ev.title}</button>`).join('')}
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    list.innerHTML = html;
+
+    list.querySelectorAll('.calendar-group-header').forEach(header => {
+        header.onclick = () => {
+            const body = document.getElementById(header.getAttribute('data-target'));
+            if (!body) return;
+            const isOpen = body.style.display === 'block';
+            body.style.display = isOpen ? 'none' : 'block';
+            header.classList.toggle('open', !isOpen);
+        };
+    });
+
+    list.querySelectorAll('[data-event-id]').forEach(el => {
+        el.onclick = (e) => {
+            e.stopPropagation();
+            const ev = eventsById[el.getAttribute('data-event-id')];
+            if (ev) openCalendarEventDetail(ev);
+        };
+    });
 
     overlay.style.display = 'flex';
 }

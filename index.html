@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=47">
+    <link rel="stylesheet" href="style.css?v=48">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -1528,13 +1528,16 @@
         <button type="button" class="calendar-month-arrow" onclick="navigateCalendarMonth(1)">›</button>
     </div>
 
+    <div id="calendarSummaryBar" class="calendar-summary-bar"></div>
+
+    <div id="calendarFilterBar" class="calendar-filter-bar"></div>
+
     <div id="calendarGridMount" class="calendar-grid-mount"></div>
 
     <div class="calendar-legend">
         <span><span class="calendar-legend-dot" style="background:#2563eb;"></span>Submitted</span>
         <span><span class="calendar-legend-dot" style="background:#166534;"></span>Approved</span>
-        <span><span class="calendar-legend-dot" style="background:#ca8a04;"></span>Level Up</span>
-        <span><span class="calendar-legend-dot" style="background:#7e22ce;"></span>Meeting</span>
+        <span><span class="calendar-legend-dot" style="background:#ca8a04;"></span>🏆 Level Up</span>
     </div>
 </div>
 
@@ -1699,7 +1702,7 @@
 <script src="js/wordle.js?v=9" defer></script>
 <script src="intro.js?v=1" defer></script>
 <script src="js/challenge.js?v=29" defer></script>
-<script src="js/calendar.js?v=1" defer></script>
+<script src="js/calendar.js?v=2" defer></script>
 <script src="js/menu.js?v=11" defer></script>
 <script src="js/push.js?v=7" defer></script>
 
