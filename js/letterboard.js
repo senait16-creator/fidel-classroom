@@ -234,7 +234,7 @@ function renderLetterBoard(query) {
             const wbLevel = row.level / 2;
             const link = document.createElement('div');
             link.className = 'lb-wordbuilder-link';
-            link.innerHTML = `${icon('book-open')} Go to Word Builder Level ${wbLevel} <span class="lb-wordbuilder-link-arrow">→</span>`;
+            link.innerHTML = `${icon('book-open')} Word Builder ${wbLevel} <span class="lb-wordbuilder-link-arrow">→</span>`;
             link.onclick = () => { if (typeof enterWordBuilder === 'function') enterWordBuilder(); };
             mount.appendChild(link);
         }
