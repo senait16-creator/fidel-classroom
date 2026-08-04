@@ -366,7 +366,7 @@ async function fetchTeamStudentDetail(teamId, level, families) {
 // Both modes are built from the same computeTeamRaceStandings() call, so
 // they can never disagree about a team's rank or percentage.
 async function renderTeamRaceView(mountId, options = {}) {
-    const mode = options.mode === 'compact' ? 'compact' : 'challenge';
+    const mode = options.mode === 'compact' ? 'compact' : options.mode === 'top3' ? 'top3' : 'challenge';
     const mount = document.getElementById(mountId);
     if (!mount) return;
     mount.innerHTML = `<p style="color:#94a3b8;font-size:13px;padding:8px 0;">Loading...</p>`;
@@ -383,6 +383,8 @@ async function renderTeamRaceView(mountId, options = {}) {
 
         if (mode === 'compact') {
             renderCompactRaceStandings(mount, standings);
+        } else if (mode === 'top3') {
+            renderTop3RaceStandings(mount, mountId, standings);
         } else {
             renderDetailedRaceStandings(mount, mountId, standings);
         }
@@ -466,6 +468,55 @@ function renderDetailedRaceStandings(mount, mountId, standings) {
     });
 
     mount.appendChild(standings_div);
+}
+
+// ---------------------------------------------------------------------------
+// Top 3 + "View Full Leaderboard" — the Competition dashboard's default
+// view. Showing every team's full per-family breakdown up front (the old
+// default) was "by far the biggest offender" for page weight; this shows
+// just enough to answer "how am I doing," and the full renderDetailedRace-
+// Standings view above is one tap away instead of always-on. If the
+// student's own team isn't in the top 3, its row is appended below a
+// divider so the page stays personally relevant even outside first place.
+// ---------------------------------------------------------------------------
+
+function renderTop3RaceStandings(mount, mountId, standings) {
+    const medals = [
+        icon('medal', { color: '#eab308' }),
+        icon('medal', { color: '#9ca3af' }),
+        icon('medal', { color: '#b45309' })
+    ];
+
+    const top3 = standings.slice(0, 3);
+    const yourRankIdx = standings.findIndex(t => t.id === currentProfile?.team_id);
+    const yourTeamOutsideTop3 = yourRankIdx >= 3 ? standings[yourRankIdx] : null;
+
+    const rowHtml = (team, idx) => {
+        const isYou = team.id === currentProfile?.team_id;
+        const color = getRaceTeamColor(team.name);
+        const rankHtml = idx < 3
+            ? `<div class="race-top3-medal">${medals[idx]}</div>`
+            : `<div class="race-top3-medal race-top3-num">${idx + 1}</div>`;
+        return `
+            <div class="race-top3-row${isYou ? ' race-you' : ''}">
+                ${rankHtml}
+                <div class="race-team-dot" style="background:${color};">${getRaceTeamInitial(team.name)}</div>
+                <div class="race-top3-name">${team.name}${isYou ? ' <span class="race-you-tag">You</span>' : ''}</div>
+                <div class="race-top3-pct">${team.overallPct}%</div>
+            </div>`;
+    };
+
+    const top3Html = top3.map((team, idx) => rowHtml(team, idx)).join('');
+    const yourRowHtml = yourTeamOutsideTop3
+        ? `<div class="race-top3-divider"></div>${rowHtml(yourTeamOutsideTop3, yourRankIdx)}`
+        : '';
+
+    mount.innerHTML = `
+        <div class="race-top3-list">${top3Html}${yourRowHtml}</div>
+        <button type="button" class="race-view-full-btn" onclick="renderTeamRaceView('${mountId}', { mode: 'challenge' })">
+            View Full Leaderboard ↓
+        </button>
+    `;
 }
 
 // ---------------------------------------------------------------------------

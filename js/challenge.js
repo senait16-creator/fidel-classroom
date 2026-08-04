@@ -75,7 +75,7 @@ async function renderChallengeDashboard() {
     // ── Hero subtitle ────────────────────────────────────────
     const sub = document.getElementById("challengeDashSub");
     if (sub) {
-        sub.innerText = `${team.name} • Level ${team.current_level} • 🔥 ${team.streak_count || 0} streak`;
+        sub.innerText = `${team.name} • Level ${team.current_level}`;
     }
 
     // ── Progress to ፐ — shared hero, so this renders once and shows
@@ -93,28 +93,51 @@ async function renderChallengeDashboard() {
         peWeekLabel.innerText = `📅 Week ${getProgramWeekNumber()}`;
     }
 
-    // ── "View team status" button — toggles the inline panel.
-    //    Team is information on this page, not a separate destination.
-    //    Captains get the richer Captain Dashboard's Team Progress card
-    //    instead, so this whole card is hidden for them to avoid showing
-    //    the same information twice. ──
+    // ── Small stat chips — streak, team, total levels — folded into the
+    //    hero instead of a separate card, so the whole "where am I"
+    //    picture is one glance. ──
+    const heroChips = document.getElementById("challengeHeroChips");
+    if (heroChips) {
+        const streak = team.streak_count || 0;
+        heroChips.innerHTML = `
+            <span class="challenge-hero-chip">🔥 ${streak} day${streak === 1 ? '' : 's'}</span>
+            <span class="challenge-hero-chip">👥 ${team.name}</span>
+            <span class="challenge-hero-chip">${totalLevels} Levels</span>
+        `;
+    }
+
+    // ── Your Team — collapsed to one row (dot, name, rank/percent),
+    //    tap to expand the full status panel below. Team is information
+    //    on this page, not a separate destination. Captains get the
+    //    richer Captain Dashboard's Team Progress card instead, so this
+    //    whole card is hidden for them to avoid showing the same
+    //    information twice. ──
     const teamStatusSection = document.getElementById("challengeTeamStatusMount");
     const teamBtn = document.getElementById("challengeYourTeamBtn");
+    const teamDot = document.getElementById("challengeYourTeamDot");
+    const teamNameEl = document.getElementById("challengeYourTeamName");
+    const teamStatEl = document.getElementById("challengeYourTeamStat");
     const statusContent = document.getElementById("challengeTeamStatusContent");
     if (currentProfile?.is_captain) {
         if (teamStatusSection) teamStatusSection.style.display = "none";
     } else {
         if (teamStatusSection) teamStatusSection.style.display = "";
+        if (teamDot) teamDot.style.background = teamHex;
+        if (teamNameEl) teamNameEl.innerText = team.name;
+        if (teamStatEl && typeof computeTeamRaceStandings === "function") {
+            const ordinals = ["1st", "2nd", "3rd", "4th", "5th", "6th"];
+            computeTeamRaceStandings().then(standings => {
+                const rankIdx = standings.findIndex(s => s.id === currentProfile.team_id);
+                if (rankIdx !== -1) {
+                    teamStatEl.innerText = `${standings[rankIdx].overallPct}% (${ordinals[rankIdx] || `${rankIdx + 1}th`})`;
+                }
+            });
+        }
         if (teamBtn) {
-            teamBtn.style.background = `linear-gradient(135deg, ${teamHex}, ${teamHex}cc)`;
-            teamBtn.innerText = `View ${team.name} status ↓`;
             teamBtn.onclick = () => {
                 if (!statusContent) return;
                 const isOpen = statusContent.style.display === "block";
                 statusContent.style.display = isOpen ? "none" : "block";
-                teamBtn.innerText = isOpen
-                    ? `View ${team.name} status ↓`
-                    : `Hide ${team.name} status ↑`;
             };
         }
         if (statusContent) statusContent.style.display = "none";
@@ -397,35 +420,31 @@ function teamHexForStatus(teamName) {
     return typeof getTeamHex === 'function' ? getTeamHex(teamName) : '#166534';
 }
 
+// The whole page answers one question — "what should I do next?" — so
+// this is now just the single next action: continue the specific
+// next-incomplete family in the current level. No separate Today's Goal
+// card, no Next Up preview of the following (locked) level, no "view all
+// levels" browse list — the Continue button already tells you what's
+// next, and the Team Race / Level Resources cards below cover everything
+// else this page used to spread across three sections.
 async function renderChallengeDashboardMap(levels, team) {
     const mount = document.getElementById("challengeDashMapMount");
     if (!mount) return;
 
     const currentLevelNumber = team.current_level || 1;
     const currentLevel = levels.find(l => l.level_number === currentLevelNumber) || levels[0];
-    const nextLevel = levels.find(l => l.level_number === currentLevelNumber + 1);
 
     if (!currentLevel) {
         mount.innerHTML = `<p style="font-size:13px; color:#94a3b8;">No challenge levels found yet.</p>`;
         return;
     }
 
-    const hiddenLevels = levels.filter(level =>
-        level.level_number !== currentLevel.level_number &&
-        (!nextLevel || level.level_number !== nextLevel.level_number)
-    );
-
-    // "Today's Goal" — the student's specific next-incomplete family in the
-    // current level, with their live streak, instead of a flat level label.
-    // Hidden once every family is cleared — the "cleared all 3" banner at
-    // the very top of the page already covers that state.
-    let goalHtml = '';
     let targetFamily = null;
     const families = currentLevel.letter_families || [];
     if (!currentProfile?.is_captain && families.length > 0) {
         const { data: progressRows } = await _supabase
             .from('student_family_progress')
-            .select('base_letter, streak_passed, writing_passed, best_streak')
+            .select('base_letter, streak_passed, writing_passed')
             .eq('student_id', currentUser.id)
             .eq('level_number', currentLevel.level_number);
 
@@ -433,72 +452,11 @@ async function renderChallengeDashboardMap(levels, team) {
             const row = (progressRows || []).find(r => r.base_letter === fam);
             return !(row?.streak_passed && row?.writing_passed);
         });
-
-        if (targetFamily) {
-            const row = (progressRows || []).find(r => r.base_letter === targetFamily);
-            const streak = row?.best_streak || 0;
-            const percent = Math.min(100, Math.round((streak / STREAK_THRESHOLD) * 100));
-            goalHtml = `
-                <div class="challenge-goal-card">
-                    <div class="challenge-goal-eyebrow">${icon('target')} Today's Goal</div>
-                    <div class="challenge-goal-title">Complete the ${targetFamily} family</div>
-                    <div class="challenge-goal-streak-row">
-                        <span>Current streak</span><span>${streak} / ${STREAK_THRESHOLD}</span>
-                    </div>
-                    <div class="challenge-goal-track"><div class="challenge-goal-fill" style="width:${percent}%;"></div></div>
-                    <button class="challenge-goal-btn" id="challengeGoalBtn">Continue Practicing →</button>
-                </div>`;
-        }
     }
 
     mount.innerHTML = `
-        ${goalHtml}
-
-        ${
-            nextLevel
-                ? `
-                    <div class="challenge-next-card">
-                        <div class="challenge-next-icon">🔒</div>
-                        <div>
-                            <div class="challenge-next-label">Next Up</div>
-                            <div class="challenge-next-title">Level ${nextLevel.level_number} · ${(nextLevel.letter_families || []).join(" ")}</div>
-                            <div class="challenge-next-copy">Unlock by completing Level ${currentLevel.level_number}.</div>
-                        </div>
-                    </div>
-                `
-                : `
-                    <div class="challenge-next-card complete">
-                        <div class="challenge-next-icon">🏁</div>
-                        <div>
-                            <div class="challenge-next-label">Final Stretch</div>
-                            <div class="challenge-next-title">You are on the last level.</div>
-                            <div class="challenge-next-copy">Finish strong with your team.</div>
-                        </div>
-                    </div>
-                `
-        }
-
-        <button class="challenge-levels-toggle" onclick="toggleChallengeAllLevels()">
-            ${icon('lock')} View all levels <span id="challengeAllLevelsChevron">▼</span>
-        </button>
-
-        <div id="challengeAllLevelsList" class="challenge-all-levels-list" style="display:none;">
-            ${hiddenLevels.map(level => {
-                const isCompleted = level.level_number < currentLevelNumber;
-                const isLocked = level.level_number > currentLevelNumber;
-
-                return `
-                    <div class="challenge-mini-level ${isCompleted ? "completed" : isLocked ? "locked" : "unlocked"}"
-                         ${!isLocked ? `onclick="openChallengeFamilyPickerByNumber(${level.level_number})"` : ""}>
-                        <span>${isCompleted ? "✓" : isLocked ? "🔒" : level.level_number}</span>
-                        <div>
-                            <strong>Level ${level.level_number}</strong>
-                            <small>${(level.letter_families || []).join(" ")}</small>
-                        </div>
-                    </div>
-                `;
-            }).join("")}
-        </div>
+        <button class="challenge-continue-btn" id="challengeGoalBtn">Continue Level ${currentLevel.level_number} →</button>
+        <p class="challenge-continue-next">Next: ${families.join(' ')}</p>
     `;
 
     const goalBtn = document.getElementById("challengeGoalBtn");
@@ -514,19 +472,9 @@ async function renderChallengeDashboardMap(levels, team) {
     }
 }
 
-function toggleChallengeAllLevels() {
-    const list = document.getElementById("challengeAllLevelsList");
-    const chevron = document.getElementById("challengeAllLevelsChevron");
-    if (!list) return;
-
-    const isOpen = list.style.display === "block";
-    list.style.display = isOpen ? "none" : "block";
-
-    if (chevron) {
-        chevron.innerText = isOpen ? "▼" : "▲";
-    }
-}
-
+// Still used by the Challenge Map overlay (js/team/map.js) to jump
+// straight to a specific level, even though the dashboard's own "view all
+// levels" browse list (which used to call this too) is gone.
 function openChallengeFamilyPickerByNumber(levelNumber) {
     if (!challengeLevelsCache) return;
 
@@ -540,7 +488,7 @@ async function renderChallengeDashboardRace() {
     if (!mount) return;
 
     if (typeof renderTeamRaceView === "function") {
-        await renderTeamRaceView("challengeDashRaceMount", { mode: "challenge" });
+        await renderTeamRaceView("challengeDashRaceMount", { mode: "top3" });
     } else {
         mount.innerHTML = `<p style="font-size:13px; color:#94a3b8;">Team race loading soon.</p>`;
     }
@@ -1034,7 +982,6 @@ window.chooseModeChallenge = chooseModeChallenge;
 window.exitChallengeBackToDashboard = exitChallengeBackToDashboard;
 
 window.openChallengeFamilyPickerByNumber = openChallengeFamilyPickerByNumber;
-window.toggleChallengeAllLevels = toggleChallengeAllLevels;
 
 window.exitChallengeFamilyPicker = exitChallengeFamilyPicker;
 window.returnToChallengeFamilyPicker = returnToChallengeFamilyPicker;

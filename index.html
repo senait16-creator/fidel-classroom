@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=37">
+    <link rel="stylesheet" href="style.css?v=38">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -555,6 +555,7 @@
         </div>
         <div class="pe-progress-track"><div class="pe-progress-fill" id="peProgressFill" style="width:0%;"></div></div>
         <div class="pe-progress-caption" id="peWeekLabel"></div>
+        <div id="challengeHeroChips" class="challenge-hero-chips"></div>
     </div>
 
     <!-- All 3 families cleared → this becomes the primary call-to-action,
@@ -655,11 +656,11 @@
         </section>
 
         <section class="challenge-dash-card" id="challengeTeamStatusMount">
-            <div class="challenge-card-title"><span data-icon="users"></span> Your Team</div>
-
-            <button id="challengeYourTeamBtn"
-                    class="challenge-your-team-btn">
-                View team status ↓
+            <button id="challengeYourTeamBtn" class="challenge-team-row-btn">
+                <span class="challenge-team-row-dot" id="challengeYourTeamDot"></span>
+                <span class="challenge-team-row-name" id="challengeYourTeamName">Your Team</span>
+                <span class="challenge-team-row-arrow">→</span>
+                <span class="challenge-team-row-stat" id="challengeYourTeamStat"></span>
             </button>
 
             <div id="challengeTeamStatusContent" class="challenge-team-status-content">
@@ -680,12 +681,12 @@
         </section>
 
         <section class="challenge-dash-card">
-            <div class="challenge-card-title" id="currentLevelResourcesTitle"><span data-icon="books"></span> Current Level Resources</div>
+            <div class="challenge-card-title" id="currentLevelResourcesTitle"><span data-icon="books"></span> Level Resources</div>
 
             <button class="challenge-resource-btn" onclick="window.open('https://amharicteacher.com/hahu','_blank')">
                 <span><span data-icon="speaker"></span></span>
                 <div>
-                    <strong>Letter Sounds</strong>
+                    <strong>Sounds</strong>
                     <small>Hear Fidel sounds pronounced out loud</small>
                 </div>
             </button>
@@ -694,63 +695,30 @@
                     onclick="window.open('https://www.youtube.com/watch?v=QgssO7_WkSk&t=160s','_blank')">
                 <span class="resource-play">▶</span>
                 <div>
-                    <strong>Lesson Video</strong>
+                    <strong>Lesson</strong>
                     <small>Watch first, then practice the letters</small>
                 </div>
             </button>
 
-            <button class="challenge-resource-btn"
-                    onclick="window.open('https://www.youtube.com/watch?v=dWQQeHyIebk&list=RDdWQQeHyIebk&start_radio=1','_blank')">
-                <span><span data-icon="music"></span></span>
-                <div>
-                    <strong>Fidel Song</strong>
-                    <small>Sing along for extra review</small>
+            <details class="challenge-writing-details">
+                <summary>
+                    <span><span data-icon="pencil"></span></span>
+                    <div>
+                        <strong>Writing</strong>
+                        <small>Stroke-by-stroke writing videos</small>
+                    </div>
+                </summary>
+                <div class="challenge-writing-sublinks">
+                    <a href="https://www.youtube.com/watch?v=4LIUwGr40dg&t=192s" target="_blank" rel="noopener">Demo 1 ↗</a>
+                    <a href="https://www.youtube.com/watch?v=j0jaSbFA30w" target="_blank" rel="noopener">Demo 2 ↗</a>
                 </div>
-            </button>
-
-            <button class="challenge-resource-btn"
-                    onclick="window.open('https://www.youtube.com/watch?v=4LIUwGr40dg&t=192s','_blank')">
-                <span><span data-icon="pencil"></span></span>
-                <div>
-                    <strong>Writing Demo 1</strong>
-                    <small>Stroke-by-stroke writing video</small>
-                </div>
-            </button>
-
-            <button class="challenge-resource-btn"
-                    onclick="window.open('https://www.youtube.com/watch?v=j0jaSbFA30w','_blank')">
-                <span><span data-icon="pencil"></span></span>
-                <div>
-                    <strong>Writing Demo 2</strong>
-                    <small>Stroke-by-stroke writing video</small>
-                </div>
-            </button>
+            </details>
 
             <button class="challenge-resource-btn" id="currentLevelPracticeBtn">
                 <span><span data-icon="controller"></span></span>
                 <div>
                     <strong>Practice</strong>
                     <small>Matching game for this level's families</small>
-                </div>
-            </button>
-        </section>
-
-        <section class="challenge-dash-card">
-            <div class="challenge-card-title"><span data-icon="clipboard"></span> Rules & Help</div>
-
-            <button class="challenge-resource-btn" onclick="showRulesCard()">
-                <span><span data-icon="clipboard"></span></span>
-                <div>
-                    <strong>Challenge Rules</strong>
-                    <small>How levels, writing, and approval work</small>
-                </div>
-            </button>
-
-            <button class="challenge-resource-btn" onclick="showResourcesCard()">
-                <span><span data-icon="link"></span></span>
-                <div>
-                    <strong>Learning Resources</strong>
-                    <small>Helpful Amharic tools</small>
                 </div>
             </button>
         </section>
@@ -1671,7 +1639,7 @@
 <script src="js/guidedpath.js?v=1" defer></script>
 <script src="js/wordbuilder.js?v=10" defer></script>
     <script src="js/letterboard.js?v=15" defer></script>
-<script src="js/team/progress.js?v=20" defer></script>
+<script src="js/team/progress.js?v=21" defer></script>
 <script src="js/team/levels.js?v=13" defer></script>
 <script src="js/team/map.js?v=9" defer></script>
 <script src="js/team/hub.js?v=21" defer></script>
@@ -1682,7 +1650,7 @@
         <script src="js/starboard.js?v=1" defer></script>
 <script src="js/wordle.js?v=9" defer></script>
 <script src="intro.js?v=1" defer></script>
-<script src="js/challenge.js?v=20" defer></script>
+<script src="js/challenge.js?v=21" defer></script>
 <script src="js/menu.js?v=11" defer></script>
 <script src="js/push.js?v=5" defer></script>
 
