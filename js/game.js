@@ -4,7 +4,7 @@
 // Updates: streak progress bar, flashcard swipe support.
 //
 // Loads AFTER app.js. Relies on globals:
-//   alphabetData, vowelFrameworkLabels, standardVowelSubscripts, STREAK_THRESHOLD,
+//   alphabetData, getIsolatedLetterPhonetic, STREAK_THRESHOLD,
 //   activeChallengeContext, currentStreakScore, activeGamePairs,
 //   selectedGameTokenId, gameModeScope,
 //   showNotificationToast, showGobezToast, executeVictoryConfettiCelebration
@@ -84,8 +84,7 @@ function generateNewGameRoundData() {
         const pool = [...alphabetData].sort(() => Math.random() - 0.5).slice(0, 4);
         pool.forEach(item => {
             const rIdx = Math.floor(Math.random() * 7);
-            const sub = standardVowelSubscripts[rIdx];
-            const phonetic = (item.prefix === "h" || item.prefix === "ḥ") ? vowelFrameworkLabels[rIdx] : `${item.prefix}${sub}`;
+            const phonetic = getIsolatedLetterPhonetic(item, rIdx);
             const matchKey = getFidelSoundKey(item.family[rIdx]);
             list.push({ char: item.family[rIdx], matchKey, displayTxt: item.family[rIdx], kind: "fidel" });
             list.push({ char: item.family[rIdx], matchKey, displayTxt: phonetic, kind: "phonetic" });
@@ -93,8 +92,7 @@ function generateNewGameRoundData() {
     } else {
         const indices = [0,1,2,3,4,5,6].sort(() => Math.random() - 0.5).slice(0, 4);
         indices.forEach(idx => {
-            const sub = standardVowelSubscripts[idx];
-            const phonetic = (gameModeScope.prefix === "h" || gameModeScope.prefix === "ḥ") ? vowelFrameworkLabels[idx] : `${gameModeScope.prefix}${sub}`;
+            const phonetic = getIsolatedLetterPhonetic(gameModeScope, idx);
             const matchKey = getFidelSoundKey(gameModeScope.family[idx]);
             list.push({ char: gameModeScope.family[idx], matchKey, displayTxt: gameModeScope.family[idx], kind: "fidel" });
             list.push({ char: gameModeScope.family[idx], matchKey, displayTxt: phonetic, kind: "phonetic" });
@@ -204,10 +202,7 @@ let flashcardTouchStartX = 0;
 let flashcardTouchStartY = 0;
 
 function buildFlashcardDeckForFamily(fidelObj) {
-    const subs = (fidelObj.prefix === "h" || fidelObj.prefix === "ḥ")
-        ? vowelFrameworkLabels
-        : standardVowelSubscripts.map(sub => `${fidelObj.prefix}${sub}`);
-    return fidelObj.family.map((char, idx) => ({ char, sound: subs[idx] }));
+    return fidelObj.family.map((char, idx) => ({ char, sound: getIsolatedLetterPhonetic(fidelObj, idx) }));
 }
 
 function buildFlashcardDeckForFullAlphabet() {

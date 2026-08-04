@@ -729,8 +729,6 @@ async function renderChallengeFamilyPicker() {
 // Family detail
 // -----------------------------------------------------------------------------
 
-const vowelSoundLabels = ["e", "u", "ee", "ah", "ay", "", "o"];
-
 async function openChallengeFamilyDetail(fidelObj, levelNumber) {
     activeChallengeFamilyObj = fidelObj;
     activeChallengeFamilyLevel = levelNumber;
@@ -904,9 +902,7 @@ function closeLevelResourcesOverlay() {
 function renderChallengeFamilyDetailGiantRow(fidelObj) {
     const mount = document.getElementById("challengeFamilyDetailGiantRow");
     mount.innerHTML = "";
-    const subs = (fidelObj.prefix === "h" || fidelObj.prefix === "ḥ")
-        ? vowelFrameworkLabels
-        : vowelSoundLabels.map(sub => `${fidelObj.prefix}${sub}`);
+    const subs = fidelObj.family.map((char, idx) => getIsolatedLetterPhonetic(fidelObj, idx));
     fidelObj.family.forEach((char, idx) => {
         const card = document.createElement('div');
         card.className = "giant-char-card";

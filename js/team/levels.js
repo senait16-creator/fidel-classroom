@@ -228,9 +228,7 @@ function openEmbeddedFamilyPractice(fidelObj, levelNumber, progress, returnTo = 
     // Render the 7 giant letters
     const lettersMount = document.getElementById('practiceSheetLetters');
     lettersMount.innerHTML = "";
-    const subs = (fidelObj.prefix === "h" || fidelObj.prefix === "ḥ")
-        ? ["ha", "hu", "hee", "ha", "hay", "h", "ho"]
-        : ["e", "u", "ee", "ah", "ay", "", "o"].map(s => `${fidelObj.prefix}${s}`);
+    const subs = fidelObj.family.map((char, idx) => getIsolatedLetterPhonetic(fidelObj, idx));
 
     fidelObj.family.forEach((char, idx) => {
         const card = document.createElement('div');

@@ -58,6 +58,22 @@ let canvas, ctx, isDrawing = false;
 const vowelFrameworkLabels = ["ha", "hu", "hee", "ha", "hay", "h", "ho"];
 const standardVowelSubscripts = ["e", "u", "ee", "ah", "ay", "", "o"];
 
+// Isolated-letter phonetic labels (Fidel Practice, Matching Game, Flashcards,
+// Streak Game) — used whenever a letter is shown/practiced on its own rather
+// than as part of a real word. The 6th order gets its own "-ih" suffix here
+// (e.g. "lih", "hih") since that's how the letter sounds by itself; contrast
+// with Word Builder's in-word letter lookup, which keeps the bare/silent
+// form because a word's real transliteration elides that vowel (ማር = "mar",
+// not "marih").
+const isolatedVowelFrameworkLabels = ["ha", "hu", "hee", "ha", "hay", "hih", "ho"];
+const isolatedVowelSubscripts = ["e", "u", "ee", "ah", "ay", "ih", "o"];
+
+function getIsolatedLetterPhonetic(fidelObj, idx) {
+    if (fidelObj.base === "አ" && idx === 5) return "ih";
+    if (fidelObj.prefix === "h" || fidelObj.prefix === "ḥ") return isolatedVowelFrameworkLabels[idx];
+    return `${fidelObj.prefix}${isolatedVowelSubscripts[idx]}`;
+}
+
 const alphabetData = [
     {base:"ሀ", family:['ሀ','ሁ','ሂ','ሃ','ሄ','ህ','ሆ'], prefix:"h"},
     {base:"ለ", family:['ለ','ሉ','ሊ','ላ','ሌ','ል','ሎ'], prefix:"l"},
@@ -563,15 +579,14 @@ function buildMatrixInterfaceGrid() {
     renderUIProgressUpdates();
 }
 
-function generateClassroomSubscripts(prefix) {
-    if (prefix === "h" || prefix === "ḥ") return vowelFrameworkLabels;
-    return standardVowelSubscripts.map(sub => `${prefix}${sub}`);
+function generateClassroomSubscripts(fidelObj) {
+    return fidelObj.family.map((char, idx) => getIsolatedLetterPhonetic(fidelObj, idx));
 }
 
 function launchIsolatedClassroomWorkspace(fidelObj) {
     activeBaseFidel = fidelObj.base;
     activeFamilyArrayData = fidelObj.family;
-    activeSubscriptsData = generateClassroomSubscripts(fidelObj.prefix);
+    activeSubscriptsData = generateClassroomSubscripts(fidelObj);
 
     document.getElementById("viewFidelGrid").style.display = "none";
     document.getElementById("isolatedFamilyClassroom").style.display = "block";
