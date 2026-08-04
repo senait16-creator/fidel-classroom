@@ -91,7 +91,7 @@ async function renderWordBuilderLevelsList() {
     mount.innerHTML = '<p style="color:#94a3b8; font-size:13px;">Loading...</p>';
 
     const [{ data: levels }, { data: wordRows }, { data: levelProgress }, unlockedLevels] = await Promise.all([
-        _supabase.from('word_builder_levels').select('level_number, topic_title, topic_emoji').order('level_number'),
+        _supabase.from('word_builder_levels').select('level_number, topic_title').order('level_number'),
         _supabase.from('word_builder_words').select('id, level_number'),
         _supabase.from('word_builder_level_progress').select('level_number').eq('student_id', currentUser.id),
         getWordBuilderUnlockedLevels()
@@ -120,7 +120,7 @@ async function renderWordBuilderLevelsList() {
 
         let subLabel;
         if (!practiceUnlocked && !done) {
-            subLabel = `${icon('lock', { color: '#94a3b8' })} Learn ${WORD_BUILDER_LEVEL_LETTERS[level.level_number].join(' ')} in Fidel Practice first`;
+            subLabel = `${icon('lock', { color: '#94a3b8' })} ${WORD_BUILDER_LEVEL_LETTERS[level.level_number].join(' ')}`;
         } else if (!hasWords) {
             subLabel = 'Coming soon';
         } else {
@@ -135,7 +135,7 @@ async function renderWordBuilderLevelsList() {
                 <div style="width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center;
                             font-weight:800; font-size:13px; flex-shrink:0; background:${numBg}; color:${numColor};">${stateIcon}</div>
                 <div style="flex:1;">
-                    <div style="font-size:13.5px; font-weight:700; color:#1e293b;">${level.level_number} · ${level.topic_emoji || ''} ${level.topic_title}</div>
+                    <div style="font-size:13.5px; font-weight:700; color:#1e293b;">${level.level_number}${level.topic_title ? ` · ${level.topic_title}` : ''}</div>
                     <div style="font-size:11px; color:#94a3b8; margin-top:1px;">${subLabel}</div>
                 </div>
                 ${done ? '<span style="font-size:15px; color:#166534;">✓</span>' : ''}
@@ -151,7 +151,7 @@ window.renderWordBuilderLevelsList = renderWordBuilderLevelsList;
 async function openWordBuilderLevel(levelNumber) {
     const { data: level } = await _supabase
         .from('word_builder_levels')
-        .select('level_number, topic_title, topic_emoji')
+        .select('level_number, topic_title')
         .eq('level_number', levelNumber)
         .maybeSingle();
 
@@ -218,7 +218,7 @@ function renderWordBuilderWordCard() {
 
     const level = wordBuilderCurrentLevel;
     const word = wordBuilderWords[wordBuilderIndex];
-    crumb.innerText = `LEVEL ${level.level_number} · ${(level.topic_title || '').toUpperCase()}`;
+    crumb.innerText = `LEVEL ${level.level_number}${level.topic_title ? ` · ${level.topic_title.toUpperCase()}` : ''}`;
 
     // Ethiopic syllables are each a single Unicode code point already, so
     // splitting the string into an array of characters is enough to get
@@ -602,7 +602,7 @@ async function completeWordBuilderLevel() {
         <div style="text-align:center; padding-top:36px;">
             <div style="font-size:52px; margin-bottom:10px;">${icon('confetti')}</div>
             <div style="font-size:19px; font-weight:800; color:#1e293b; margin-bottom:4px;">You can now read:</div>
-            <div style="font-size:13px; color:#64748b; margin-bottom:22px;">Level ${level.level_number} · ${level.topic_title}</div>
+            <div style="font-size:13px; color:#64748b; margin-bottom:22px;">Level ${level.level_number}${level.topic_title ? ` · ${level.topic_title}` : ''}</div>
             <div style="background:white; border:1px solid #e2e8f0; border-radius:16px; padding:18px;
                         box-shadow:0 4px 20px rgba(20,83,45,0.07); text-align:left; margin-bottom:20px;">
                 <div style="font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#94a3b8; margin-bottom:10px;">
