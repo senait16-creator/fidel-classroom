@@ -424,7 +424,7 @@ function updateCaptainPendingBadge(count) {
         }
     }
     if (btn) {
-        btn.innerText = count > 0 ? `${icon('note-pencil')} Review Writing` : `${icon('confetti')} All caught up!`;
+        btn.innerText = count > 0 ? `📝 Review Writing` : `🎉 All caught up!`;
     }
 }
 

@@ -489,7 +489,7 @@ async function postChapterFeedUpdate() {
 // -----------------------------------------------------------------------------
 
 function openChapterGoals(level, mode) {
-    document.getElementById('chapterGoalsTitle').innerText = `${icon('book')} ${level.title}`;
+    document.getElementById('chapterGoalsTitle').innerText = `📘 ${level.title}`;
 
     const summaryEl = document.getElementById('chapterGoalsSummary');
     summaryEl.innerHTML = `

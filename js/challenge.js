@@ -75,7 +75,7 @@ async function renderChallengeDashboard() {
     // ── Hero subtitle ────────────────────────────────────────
     const sub = document.getElementById("challengeDashSub");
     if (sub) {
-        sub.innerText = `${team.name} • Level ${team.current_level} • ${icon('fire')} ${team.streak_count || 0} streak`;
+        sub.innerText = `${team.name} • Level ${team.current_level} • 🔥 ${team.streak_count || 0} streak`;
     }
 
     // ── Progress to ፐ — shared hero, so this renders once and shows
@@ -90,7 +90,7 @@ async function renderChallengeDashboard() {
 
     const peWeekLabel = document.getElementById("peWeekLabel");
     if (peWeekLabel && typeof getProgramWeekNumber === "function") {
-        peWeekLabel.innerText = `${icon('calendar')} Week ${getProgramWeekNumber()}`;
+        peWeekLabel.innerText = `📅 Week ${getProgramWeekNumber()}`;
     }
 
     // ── "View team status" button — toggles the inline panel.
@@ -189,7 +189,7 @@ function wireCurrentLevelResources(levels, team) {
     const currentLevel = levels.find(l => l.level_number === (team.current_level || 1)) || levels[0];
 
     const title = document.getElementById("currentLevelResourcesTitle");
-    if (title && currentLevel) title.innerText = `${icon('books')} Level ${currentLevel.level_number} Resources`;
+    if (title && currentLevel) title.innerText = `📚 Level ${currentLevel.level_number} Resources`;
 
     const practiceBtn = document.getElementById("currentLevelPracticeBtn");
     if (practiceBtn && currentLevel) {
