@@ -8533,6 +8533,14 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     background: linear-gradient(160deg, #fde68a 0%, #f2c94c 100%);
     color: #78350f;
 }
+.amharic-path-card.guided-path {
+    background: linear-gradient(160deg, #bbf7d0 0%, #86efac 100%);
+    color: #14532d;
+}
+.amharic-path-card.original-path {
+    background: linear-gradient(160deg, #c7d2fe 0%, #a5b4fc 100%);
+    color: #312e81;
+}
 .amharic-path-card-icon {
     width: 50px;
     height: 50px;
@@ -8548,6 +8556,16 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     font-family: 'Playfair Display', serif;
     font-size: 16px;
     font-weight: 700;
+}
+.amharic-path-card-desc {
+    font-size: 11.5px;
+    margin-top: 5px;
+    line-height: 1.4;
+    opacity: 0.85;
+}
+
+.guided-path-locked {
+    opacity: 0.65;
 }
 
 /* ── Study Together ──────────────────────────────────────────── */
