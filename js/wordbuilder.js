@@ -621,6 +621,10 @@ async function completeWordBuilderLevel() {
             ${(nextLevel && !nextLevelReady)
                 ? `<p style="font-size:11.5px; color:#94a3b8; margin-top:12px;">Level ${nextLevel.level_number} unlocks once you've learned ${WORD_BUILDER_LEVEL_LETTERS[nextLevel.level_number].join(' ')} in Fidel Practice.</p>`
                 : ''}
+            <a href="javascript:void(0)" onclick="if (typeof enterAmharicPath === 'function') enterAmharicPath();"
+               style="display:block; margin-top:16px; font-size:12.5px; font-weight:700; color:#4338ca; text-decoration:none;">
+                ${icon('book')} Ready to read full sentences? Try Amharic Path →
+            </a>
         </div>
     `;
 

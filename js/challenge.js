@@ -777,6 +777,17 @@ async function renderChallengeFamilyPicker() {
         card.onclick = () => openChallengeFamilyDetail(fidelObj, level.level_number);
         container.appendChild(card);
     });
+
+    // Word Builder pairs two Competition levels per level (1,2)->WB1,
+    // (3,4)->WB2, etc. — same cross-link Fidel Practice offers, so a
+    // student practicing through the team challenge sees the same bridge.
+    const wbLevel = Math.ceil(level.level_number / 2);
+    const wbLink = document.createElement('div');
+    wbLink.className = 'lb-wordbuilder-link';
+    wbLink.style.gridColumn = '1 / -1';
+    wbLink.innerHTML = `${icon('book-open')} Word Builder ${wbLevel} <span class="lb-wordbuilder-link-arrow">→</span>`;
+    wbLink.onclick = () => { if (typeof enterWordBuilder === 'function') enterWordBuilder(); };
+    container.appendChild(wbLink);
 }
 
 // -----------------------------------------------------------------------------
