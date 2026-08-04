@@ -36,7 +36,7 @@
             width:40px; height:40px; border-radius:50%; border:none;
             background:rgba(255,255,255,0.95); box-shadow:0 2px 12px rgba(0,0,0,0.15);
             cursor:pointer; align-items:center; justify-content:center;
-            font-size:18px; backdrop-filter:blur(8px);">🎉</button>
+            font-size:18px; backdrop-filter:blur(8px);"><span data-icon="confetti"></span></button>
 
 <!-- Hamburger — doubles as menu trigger from team hub header too -->
 
@@ -112,7 +112,7 @@
         Your account is waiting for your teacher to approve access.
         Reach out to your teacher, then check back here.
     </p>
-    <button class="btn-primary" onclick="recheckAccessStatus()">🔄 Check Again</button>
+    <button class="btn-primary" onclick="recheckAccessStatus()"><span data-icon="refresh"></span> Check Again</button>
     <button class="btn-secondary" style="margin-top:10px;" onclick="logout()">Log Out</button>
 </div>
 
@@ -157,7 +157,7 @@
         <div class="intro-mascot-emoji" aria-hidden="true">👧🏽</div>
 
         <div class="intro-card" id="introCard">
-            <h2>Selam! 👋</h2>
+            <h2>Selam! <span data-icon="wave"></span></h2>
             <p>Welcome to the Ultimate Fidel Challenge.</p>
 
             <button id="introNextBtn">Next →</button>
@@ -199,17 +199,17 @@
     </div>
 
     <div class="teacher-overview-card">
-        <div class="teacher-overview-title">✅ Today's Tasks</div>
+        <div class="teacher-overview-title"><span data-icon="check-circle"></span> Today's Tasks</div>
         <div id="teacherTodaysTasksMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
     </div>
 
     <div class="teacher-overview-card">
-        <div class="teacher-overview-title">🏆 Team Snapshot</div>
+        <div class="teacher-overview-title"><span data-icon="trophy"></span> Team Snapshot</div>
         <div id="teacherLeaderboardMount" class="teacher-snapshot-grid"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
     </div>
 
     <div class="teacher-overview-card">
-        <div class="teacher-overview-title">👑 Captain Overview</div>
+        <div class="teacher-overview-title"><span data-icon="crown"></span> Captain Overview</div>
         <div id="teacherCaptainOverviewMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
     </div>
 
@@ -217,7 +217,7 @@
 
 <div class="teacher-panel" style="margin-bottom:20px;">
     <div class="teacher-panel-header" onclick="toggleTeacherPanel('accessRequestsPanelBody', this)">
-        <h2 style="font-size:18px; color:var(--neutral-dark);">🔑 Access Requests</h2>
+        <h2 style="font-size:18px; color:var(--neutral-dark);"><span data-icon="key"></span> Access Requests</h2>
         <button class="teacher-panel-toggle">▼</button>
     </div>
     <div class="teacher-panel-body" id="accessRequestsPanelBody">
@@ -240,17 +240,17 @@
         <div class="roster-section-title">🚨 Needs Attention</div>
         <div id="rosterAttentionMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
 
-        <div class="roster-section-title">🏆 In the Fidel Challenge</div>
+        <div class="roster-section-title"><span data-icon="trophy"></span> In the Fidel Challenge</div>
         <div id="rosterChallengeMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
 
-        <div class="roster-section-title">📝 Signed Up, Not Yet Competing</div>
+        <div class="roster-section-title"><span data-icon="note-pencil"></span> Signed Up, Not Yet Competing</div>
         <div id="rosterSoloMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
     </div>
 </div>
 
 <div class="teacher-panel" style="margin-bottom:20px;">
     <div class="teacher-panel-header" onclick="toggleTeacherPanel('levelCompletionPanelBody', this)">
-        <h2 style="font-size:18px; color:var(--neutral-dark);">⭐ Level Completion Requests</h2>
+        <h2 style="font-size:18px; color:var(--neutral-dark);"><span data-icon="star"></span> Level Completion Requests</h2>
         <button class="teacher-panel-toggle">▼</button>
     </div>
     <div class="teacher-panel-body" id="levelCompletionPanelBody">
@@ -298,7 +298,7 @@
 
 <div class="teacher-panel" style="margin-bottom:20px;">
     <div class="teacher-panel-header" onclick="toggleTeacherPanel('captainPanelBody', this)">
-        <h2 style="font-size:18px; color:var(--neutral-dark);">👑 Assign Team Captain</h2>
+        <h2 style="font-size:18px; color:var(--neutral-dark);"><span data-icon="crown"></span> Assign Team Captain</h2>
         <button class="teacher-panel-toggle collapsed">▼</button>
     </div>
     <div class="teacher-panel-body collapsed" id="captainPanelBody">
@@ -314,7 +314,7 @@
 
 <div class="teacher-panel teacher-panel-danger" style="margin-bottom:20px;">
     <div class="teacher-panel-header" onclick="toggleTeacherPanel('dangerZonePanelBody', this)">
-        <h2 style="font-size:18px; color:#991b1b;">⚠️ Danger Zone</h2>
+        <h2 style="font-size:18px; color:#991b1b;"><span data-icon="warning"></span> Danger Zone</h2>
         <button class="teacher-panel-toggle collapsed">▼</button>
     </div>
     <div class="teacher-panel-body collapsed" id="dangerZonePanelBody">
@@ -325,7 +325,7 @@
         </p>
         <button class="btn-primary" style="width:auto; padding:10px 20px; font-size:13px; background:#991b1b;"
                 onclick="resetEverythingForDayOne()">
-            🔄 Reset Everyone (Day One)
+            <span data-icon="refresh"></span> Reset Everyone (Day One)
         </button>
     </div>
 </div>
@@ -372,9 +372,9 @@
             <div class="workspace-action-row">
                 <button class="workspace-action-btn" onclick="openMatchingGameWorkspaceMode('all')">Matching Game</button>
                 <button id="studyAllFlashcardsBtn" class="workspace-action-btn"> Study All Letters</button>
-                <button class="workspace-action-btn" style="background:#4338ca; color:white; border-color:#4338ca;" onclick="enterAmharicPath()">📘 My Amharic Path</button>
-                <button id="captainDashboardEntryBtn" class="workspace-action-btn" style="background:#b45309; color:white; border-color:#b45309; display:none;" onclick="enterCaptainDashboard()">👑 Captain Review</button>
-                <button class="workspace-action-btn challenge-variant" onclick="enterModeSelect()">🏆 Fidel Challenge</button>
+                <button class="workspace-action-btn" style="background:#4338ca; color:white; border-color:#4338ca;" onclick="enterAmharicPath()"><span data-icon="book"></span> My Amharic Path</button>
+                <button id="captainDashboardEntryBtn" class="workspace-action-btn" style="background:#b45309; color:white; border-color:#b45309; display:none;" onclick="enterCaptainDashboard()"><span data-icon="crown"></span> Captain Review</button>
+                <button class="workspace-action-btn challenge-variant" onclick="enterModeSelect()"><span data-icon="trophy"></span> Fidel Challenge</button>
             </div>
         </div>
 
@@ -405,7 +405,7 @@
                 <canvas id="sketchpad" class="sketch-canvas-element"></canvas>
                 <div class="sketchpad-actions-row">
                     <button class="btn-primary" style="padding:6px 12px; font-size:12px; background:#64748b;" onclick="clearSketchpadCanvas()">Clear</button>
-                    <button class="btn-primary" style="padding:6px 12px; font-size:12px;" onclick="uploadSketchpadDrawingCanvasData()">📸 Share to Community</button>
+                    <button class="btn-primary" style="padding:6px 12px; font-size:12px;" onclick="uploadSketchpadDrawingCanvasData()"><span data-icon="camera"></span> Share to Community</button>
                 </div>
             </div>
             <button class="btn-secondary" style="margin-top:16px;" onclick="exitClassroomViewBackToGrid()">← Back to Letter Board</button>
@@ -485,7 +485,7 @@
 
         <!-- Challenge -->
         <div class="cup-card cup-card-featured" onclick="chooseModeChallenge()">
-<span class="cup-card-featured-tag">⭐ Start Here</span>
+<span class="cup-card-featured-tag"><span data-icon="star"></span> Start Here</span>
 <span class="cup-card-badge amber">Competition</span>
             <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
                 <rect x="6" y="22" width="32" height="30" rx="7" fill="#fef3c7" stroke="#b45309" stroke-width="1.5"/>
@@ -516,7 +516,7 @@
 
         <!-- My Amharic Path -->
         <div class="cup-card" data-mode="amharicPath" onclick="enterModeIfUnlocked('amharicPath', enterAmharicPath)">
-            <span class="cup-card-badge indigo">📘 Chapters</span>
+            <span class="cup-card-badge indigo"><span data-icon="book"></span> Chapters</span>
             <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
                 <rect x="6" y="22" width="32" height="30" rx="7" fill="#e0e7ff" stroke="#4338ca" stroke-width="1.5"/>
                 <path d="M38 28 Q47 28 47 35 Q47 42 38 42" fill="none" stroke="#4338ca" stroke-width="1.5" stroke-linecap="round"/>
@@ -538,7 +538,7 @@
         </button>
 
         <button class="mode-jump-btn" id="modeNotifBtn" style="display:none;" onclick="togglePushNotifications()">
-            🔔 Enable Notifications
+            <span data-icon="bell"></span> Enable Notifications
         </button>
 
         <button class="mode-jump-btn" onclick="openChallengeMap()">
@@ -588,7 +588,7 @@
          ============================================================ -->
     <div id="captainZone" class="captain-zone" style="display:none;">
         <div class="captain-zone-header">
-            <div class="captain-zone-badge">🛡️</div>
+            <div class="captain-zone-badge"><span data-icon="shield"></span></div>
             <div>
                 <div class="captain-zone-title">Captain Dashboard</div>
                 <div class="captain-zone-sub" id="captainZoneSub">Your leadership tools</div>
@@ -597,10 +597,10 @@
 
         <section class="captain-card">
             <div class="captain-card-title">
-                <span class="captain-card-title-left">✍️ Pending Writing Reviews</span>
+                <span class="captain-card-title-left"><span data-icon="pencil"></span> Pending Writing Reviews</span>
                 <span class="count-pill" id="captainPendingCount" style="display:none;"></span>
             </div>
-            <button class="pending-review-cta" id="captainReviewToggleBtn">📝 Review Writing</button>
+            <button class="pending-review-cta" id="captainReviewToggleBtn"><span data-icon="note-pencil"></span> Review Writing</button>
             <div id="captainWritingQueueMount" style="display:none; margin-top:12px;">
                 <p style="color:#94a3b8; font-size:13px;">Loading submissions...</p>
             </div>
@@ -618,14 +618,14 @@
 
         <section class="captain-card">
             <div class="captain-card-title">
-                <span class="captain-card-title-left">❤️ Students Who Need Help</span>
+                <span class="captain-card-title-left"><span data-icon="heart"></span> Students Who Need Help</span>
             </div>
             <div id="helpFlagsMount"></div>
         </section>
 
         <section class="captain-card">
             <div class="captain-card-title">
-                <span class="captain-card-title-left">📣 Daily Team Challenge</span>
+                <span class="captain-card-title-left"><span data-icon="megaphone"></span> Daily Team Challenge</span>
             </div>
             <div id="dailyChallengeMount">
                 <p style="color:#94a3b8; font-size:13px;">Loading...</p>
@@ -634,7 +634,7 @@
 
         <section class="captain-card">
             <div class="captain-card-title">
-                <span class="captain-card-title-left">📅 Team Lesson Schedule</span>
+                <span class="captain-card-title-left"><span data-icon="calendar"></span> Team Lesson Schedule</span>
             </div>
             <div id="teamMeetingMount">
                 <p style="color:#94a3b8; font-size:13px;">Loading...</p>
@@ -643,7 +643,7 @@
 
         <section class="captain-card">
             <div class="captain-card-title">
-                <span class="captain-card-title-left">⭐ Star of the Week</span>
+                <span class="captain-card-title-left"><span data-icon="star"></span> Star of the Week</span>
             </div>
             <div id="starPickerMount">
                 <p style="color:#94a3b8; font-size:13px;">Loading...</p>
@@ -673,7 +673,7 @@
         </section>
 
         <section class="challenge-dash-card" id="challengeTeamStatusMount">
-            <div class="challenge-card-title">👥 Your Team</div>
+            <div class="challenge-card-title"><span data-icon="users"></span> Your Team</div>
 
             <button id="challengeYourTeamBtn"
                     class="challenge-your-team-btn">
@@ -686,7 +686,7 @@
         </section>
 
         <section class="challenge-dash-card" id="studentMeetingCard" style="display:none;">
-            <div class="challenge-card-title">📅 Team Lesson Schedule</div>
+            <div class="challenge-card-title"><span data-icon="calendar"></span> Team Lesson Schedule</div>
             <div id="studentMeetingMount"></div>
         </section>
 
@@ -698,10 +698,10 @@
         </section>
 
         <section class="challenge-dash-card">
-            <div class="challenge-card-title" id="currentLevelResourcesTitle">📚 Current Level Resources</div>
+            <div class="challenge-card-title" id="currentLevelResourcesTitle"><span data-icon="books"></span> Current Level Resources</div>
 
             <button class="challenge-resource-btn" onclick="window.open('https://amharicteacher.com/hahu','_blank')">
-                <span>🔊</span>
+                <span><span data-icon="speaker"></span></span>
                 <div>
                     <strong>Letter Sounds</strong>
                     <small>Hear Fidel sounds pronounced out loud</small>
@@ -719,7 +719,7 @@
 
             <button class="challenge-resource-btn"
                     onclick="window.open('https://www.youtube.com/watch?v=dWQQeHyIebk&list=RDdWQQeHyIebk&start_radio=1','_blank')">
-                <span>🎵</span>
+                <span><span data-icon="music"></span></span>
                 <div>
                     <strong>Fidel Song</strong>
                     <small>Sing along for extra review</small>
@@ -728,7 +728,7 @@
 
             <button class="challenge-resource-btn"
                     onclick="window.open('https://www.youtube.com/watch?v=4LIUwGr40dg&t=192s','_blank')">
-                <span>✏️</span>
+                <span><span data-icon="pencil"></span></span>
                 <div>
                     <strong>Writing Demo 1</strong>
                     <small>Stroke-by-stroke writing video</small>
@@ -737,7 +737,7 @@
 
             <button class="challenge-resource-btn"
                     onclick="window.open('https://www.youtube.com/watch?v=j0jaSbFA30w','_blank')">
-                <span>✏️</span>
+                <span><span data-icon="pencil"></span></span>
                 <div>
                     <strong>Writing Demo 2</strong>
                     <small>Stroke-by-stroke writing video</small>
@@ -745,7 +745,7 @@
             </button>
 
             <button class="challenge-resource-btn" id="currentLevelPracticeBtn">
-                <span>🎮</span>
+                <span><span data-icon="controller"></span></span>
                 <div>
                     <strong>Practice</strong>
                     <small>Matching game for this level's families</small>
@@ -754,10 +754,10 @@
         </section>
 
         <section class="challenge-dash-card">
-            <div class="challenge-card-title">📋 Rules & Help</div>
+            <div class="challenge-card-title"><span data-icon="clipboard"></span> Rules & Help</div>
 
             <button class="challenge-resource-btn" onclick="showRulesCard()">
-                <span>📋</span>
+                <span><span data-icon="clipboard"></span></span>
                 <div>
                     <strong>Challenge Rules</strong>
                     <small>How levels, writing, and approval work</small>
@@ -765,7 +765,7 @@
             </button>
 
             <button class="challenge-resource-btn" onclick="showResourcesCard()">
-                <span>🔗</span>
+                <span><span data-icon="link"></span></span>
                 <div>
                     <strong>Learning Resources</strong>
                     <small>Helpful Amharic tools</small>
@@ -792,7 +792,7 @@
 
 <div id="challengeLevelsScreen" style="display:none; max-width:900px; margin:40px auto; padding:0 16px;">
     <div class="workspace-title">
-        <span>🏆 Fidel Challenge</span>
+        <span><span data-icon="trophy"></span> Fidel Challenge</span>
         <button class="btn-secondary" onclick="exitChallengeBackToDashboard()">← Back</button>
     </div>
     <div class="challenge-board-header">
@@ -804,7 +804,7 @@
             </div>
         </div>
         <div class="challenge-board-streak">
-            <span class="challenge-board-streak-icon">🔥</span>
+            <span class="challenge-board-streak-icon"><span data-icon="fire"></span></span>
             <div>
                 <div class="challenge-board-streak-value" id="challengeBoardStreakValue">0</div>
                 <div class="challenge-board-streak-label">level streak</div>
@@ -834,10 +834,10 @@
 
     <div class="row-resource-links">
         <a class="row-resource-link" href="https://amharicteacher.com/hahu" target="_blank" rel="noopener">
-            <span class="rl-icon">🔊</span> Hear These Sounds <span class="rl-arrow">↗</span>
+            <span class="rl-icon"><span data-icon="speaker"></span></span> Hear These Sounds <span class="rl-arrow">↗</span>
         </a>
         <button type="button" class="row-resource-link alt" onclick="openLevelResourcesOverlay()">
-            <span class="rl-icon">📚</span> Level Resources <span class="rl-arrow">↗</span>
+            <span class="rl-icon"><span data-icon="books"></span></span> Level Resources <span class="rl-arrow">↗</span>
         </button>
     </div>
 
@@ -847,7 +847,7 @@
     </div>
 
     <div id="challengeFamilyPracticeBody">
-        <div class="challenge-inline-section-label">📚 Flashcards <span id="challengeFlashCount" class="challenge-inline-section-count"></span></div>
+        <div class="challenge-inline-section-label"><span data-icon="books"></span> Flashcards <span id="challengeFlashCount" class="challenge-inline-section-count"></span></div>
         <div class="inline-flashcard-wrap">
             <div class="inline-flashcard" id="challengeInlineFlashcard">
                 <button type="button" class="flashcard-arrow left" id="challengeFlashPrevBtn" aria-label="Previous card">‹</button>
@@ -860,7 +860,7 @@
 
         <div class="challenge-lesson-step-list" style="display:flex; flex-direction:column; gap:12px; margin-bottom:16px;">
             <button id="challengeDetailPlayBtn" class="challenge-step-btn matching-step">
-                <span class="step-icon-circle">🎮</span>
+                <span class="step-icon-circle"><span data-icon="controller"></span></span>
                 <span class="step-label-stack">
                     <span>Matching Game</span>
                     <small>Get a streak of 20 to unlock writing</small>
@@ -868,7 +868,7 @@
             </button>
         </div>
 
-        <div class="challenge-inline-section-label">✏️ Practice Pad</div>
+        <div class="challenge-inline-section-label"><span data-icon="pencil"></span> Practice Pad</div>
         <div class="practice-pad-card">
             <span class="practice-pad-badge">Practice only</span>
             <div class="practice-pad-title" id="challengePracticeTitle">Try writing it with your finger</div>
@@ -880,18 +880,18 @@
         </div>
 
         <div class="challenge-photo-only-note">
-            💡 Writing submission is <strong>photo-only</strong>: write it on real paper, then upload a
+            <span data-icon="idea"></span> Writing submission is <strong>photo-only</strong>: write it on real paper, then upload a
             photo. No digital drawing is accepted here, since the point is proving you can write it with a pen.
         </div>
 
-        <div class="challenge-inline-section-label">✍️ Writing Submission</div>
+        <div class="challenge-inline-section-label"><span data-icon="pencil"></span> Writing Submission</div>
         <div id="challengeWritingLockCard" class="submit-card-locked" style="display:none;">
-            <div class="lock-icon">🔒</div>
+            <div class="lock-icon"><span data-icon="lock"></span></div>
             <div class="lock-title">Locked</div>
             <div class="lock-sub">Pass the matching game (streak of 20) to unlock</div>
         </div>
         <button id="challengeDetailWritingBtn" class="challenge-step-btn writing-step" style="display:none;">
-            <span class="step-icon-circle">✍️</span>
+            <span class="step-icon-circle"><span data-icon="pencil"></span></span>
             <span class="step-label-stack">
                 <span>Writing Submission</span>
                 <small id="challengeDetailWritingSub">Submit for captain review</small>
@@ -907,13 +907,13 @@
 <div id="levelResourcesOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9983; align-items:center; justify-content:center; padding:24px;">
     <div style="background:white; border-radius:20px; padding:28px 24px; max-width:420px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.3); max-height:90vh; overflow-y:auto;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h2 style="font-size:20px; font-weight:800; color:#166534; font-family:'Playfair Display',serif; margin:0;">📚 Level Resources</h2>
+            <h2 style="font-size:20px; font-weight:800; color:#166534; font-family:'Playfair Display',serif; margin:0;"><span data-icon="books"></span> Level Resources</h2>
             <button onclick="closeLevelResourcesOverlay()" style="background:#f1f5f9; border:none; border-radius:50%; width:32px; height:32px; font-size:16px; cursor:pointer;">✕</button>
         </div>
 
         <div style="display:flex; flex-direction:column; gap:10px;">
             <a href="https://amharicteacher.com/hahu" target="_blank" rel="noopener" style="display:flex; align-items:center; gap:12px; padding:14px 16px; background:#fff7ed; border:1px solid #fed7aa; border-radius:12px; text-decoration:none; color:#1e293b;">
-                <span style="font-size:24px; flex-shrink:0;">🔊</span>
+                <span style="font-size:24px; flex-shrink:0;"><span data-icon="speaker"></span></span>
                 <div>
                     <div style="font-size:14px; font-weight:700; color:#c2410c;">Letter Sounds</div>
                     <div style="font-size:12px; color:#64748b; margin-top:2px;">Hear Fidel sounds pronounced out loud</div>
@@ -931,7 +931,7 @@
             </a>
 
             <a href="https://www.youtube.com/watch?v=dWQQeHyIebk&list=RDdWQQeHyIebk&start_radio=1" target="_blank" rel="noopener" style="display:flex; align-items:center; gap:12px; padding:14px 16px; background:#fdf4ff; border:1px solid #e9d5ff; border-radius:12px; text-decoration:none; color:#1e293b;">
-                <span style="font-size:24px; flex-shrink:0;">🎵</span>
+                <span style="font-size:24px; flex-shrink:0;"><span data-icon="music"></span></span>
                 <div>
                     <div style="font-size:14px; font-weight:700; color:#7e22ce;">Fidel Song</div>
                     <div style="font-size:12px; color:#64748b; margin-top:2px;">Sing along for extra review</div>
@@ -940,7 +940,7 @@
             </a>
 
             <a href="https://www.youtube.com/watch?v=4LIUwGr40dg&t=192s" target="_blank" rel="noopener" style="display:flex; align-items:center; gap:12px; padding:14px 16px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:12px; text-decoration:none; color:#1e293b;">
-                <span style="font-size:24px; flex-shrink:0;">✏️</span>
+                <span style="font-size:24px; flex-shrink:0;"><span data-icon="pencil"></span></span>
                 <div>
                     <div style="font-size:14px; font-weight:700; color:#1d4ed8;">Writing Demo 1</div>
                     <div style="font-size:12px; color:#64748b; margin-top:2px;">Stroke-by-stroke writing video</div>
@@ -949,7 +949,7 @@
             </a>
 
             <a href="https://www.youtube.com/watch?v=j0jaSbFA30w" target="_blank" rel="noopener" style="display:flex; align-items:center; gap:12px; padding:14px 16px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:12px; text-decoration:none; color:#1e293b;">
-                <span style="font-size:24px; flex-shrink:0;">✏️</span>
+                <span style="font-size:24px; flex-shrink:0;"><span data-icon="pencil"></span></span>
                 <div>
                     <div style="font-size:14px; font-weight:700; color:#1d4ed8;">Writing Demo 2</div>
                     <div style="font-size:12px; color:#64748b; margin-top:2px;">Stroke-by-stroke writing video</div>
@@ -966,7 +966,7 @@
 <div id="teacherLessonTimeOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9983; align-items:center; justify-content:center; padding:24px;">
     <div style="background:white; border-radius:20px; padding:28px 24px; max-width:380px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-            <h2 style="font-size:19px; font-weight:800; color:#166534; font-family:'Playfair Display',serif; margin:0;">📅 Team Lesson Schedule</h2>
+            <h2 style="font-size:19px; font-weight:800; color:#166534; font-family:'Playfair Display',serif; margin:0;"><span data-icon="calendar"></span> Team Lesson Schedule</h2>
             <button onclick="closeTeacherLessonTimeOverlay()" style="background:#f1f5f9; border:none; border-radius:50%; width:32px; height:32px; font-size:16px; cursor:pointer;">✕</button>
         </div>
         <p id="teacherLessonTimeTeamName" style="font-size:13px; color:#64748b; margin:0 0 18px;"></p>
@@ -1008,14 +1008,14 @@
         <p id="writingSubmitPrompt" style="font-size:15px; font-weight:700; color:#1e293b; margin-bottom:6px;">How would you like to submit?</p>
         <p style="font-size:13px; color:#64748b; margin-bottom:20px;">Your captain will review your handwriting and approve or ask you to try again.</p>
         <button id="writingChoiceUploadCard" style="width:100%; background:white; border:2px solid #e2e8f0; border-radius:14px; padding:18px 20px; margin-bottom:12px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:all 0.2s; text-align:left;">
-            <span style="font-size:32px; flex-shrink:0;">📷</span>
+            <span style="font-size:32px; flex-shrink:0;"><span data-icon="camera"></span></span>
             <div>
                 <div style="font-size:15px; font-weight:700; color:#1e293b; margin-bottom:3px;">Upload a Photo</div>
                 <div style="font-size:13px; color:#64748b;">Take a picture of your handwriting on paper</div>
             </div>
         </button>
         <button id="writingChoiceSketchCard" style="width:100%; background:white; border:2px solid #e2e8f0; border-radius:14px; padding:18px 20px; margin-bottom:20px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:all 0.2s; text-align:left;">
-            <span style="font-size:32px; flex-shrink:0;">✏️</span>
+            <span style="font-size:32px; flex-shrink:0;"><span data-icon="pencil"></span></span>
             <div>
                 <div style="font-size:15px; font-weight:700; color:#1e293b; margin-bottom:3px;">Draw on Sketchpad</div>
                 <div style="font-size:13px; color:#64748b;">Write directly using your finger or stylus</div>
@@ -1083,16 +1083,16 @@
      the question is simply asked again next visit. -->
 <div id="amharicPathGateScreen" style="display:none; max-width:520px; margin:60px auto; padding:0 16px;">
     <div class="workspace-title">
-        <span>📘 My Amharic Path</span>
+        <span><span data-icon="book"></span> My Amharic Path</span>
         <button class="btn-secondary" onclick="exitAmharicPath()">← Back</button>
     </div>
     <div class="amharic-gate-card">
-        <div class="amharic-gate-icon">📗</div>
+        <div class="amharic-gate-icon"><span data-icon="book"></span></div>
         <h2 class="amharic-gate-title">Can you read the Fidel?</h2>
         <p class="amharic-gate-sub">This just helps point you to the right starting place. You can always come back and change it.</p>
         <div class="amharic-gate-options">
             <button type="button" class="amharic-gate-btn yes" onclick="submitFidelGateAnswer(true)">
-                <span class="amharic-gate-btn-icon">✅</span>
+                <span class="amharic-gate-btn-icon"><span data-icon="check-circle"></span></span>
                 <span>
                     <span class="amharic-gate-btn-title">Yes, I can read Fidel</span>
                     <span class="amharic-gate-btn-desc">Jump into chapters, vocabulary, and real sentences</span>
@@ -1113,17 +1113,17 @@
      Reachable from the gate above, and again any time via "Switch path". -->
 <div id="amharicPathChooseScreen" style="display:none; max-width:640px; margin:60px auto; padding:0 16px;">
     <div class="workspace-title">
-        <span>📘 My Amharic Path</span>
+        <span><span data-icon="book"></span> My Amharic Path</span>
         <button class="btn-secondary" onclick="exitAmharicPath()">← Back</button>
     </div>
     <p class="subtitle" style="text-align:center; margin-bottom:22px;">Start where you are. Choose the pace that fits your life right now.</p>
     <div class="amharic-path-grid">
         <button type="button" class="amharic-path-card independent" onclick="chooseAmharicPathMode('independent')">
-            <span class="amharic-path-card-icon">📖</span>
+            <span class="amharic-path-card-icon"><span data-icon="book-open"></span></span>
             <span class="amharic-path-card-title">Independent Study</span>
         </button>
         <button type="button" class="amharic-path-card study-together" onclick="chooseAmharicPathMode('study_together')">
-            <span class="amharic-path-card-icon">🤝</span>
+            <span class="amharic-path-card-icon"><span data-icon="handshake"></span></span>
             <span class="amharic-path-card-title">Study Together</span>
         </button>
     </div>
@@ -1131,7 +1131,7 @@
 
 <div id="readingLevelsScreen" style="display:none; max-width:900px; margin:40px auto; padding:0 16px;">
     <div class="workspace-title">
-        <span>📘 My Amharic Path</span>
+        <span><span data-icon="book"></span> My Amharic Path</span>
         <button class="btn-secondary" onclick="exitChapterList()">← Back</button>
     </div>
     <p class="subtitle" style="text-align:left; margin-bottom:4px;">From Fidel to Fluent </p>
@@ -1142,12 +1142,12 @@
 
 <div id="myGrowthScreen" style="display:none; max-width:600px; margin:40px auto; padding:0 16px;">
     <div class="workspace-title">
-        <span>🌱 My Growth</span>
+        <span><span data-icon="plant"></span> My Growth</span>
         <button class="btn-secondary" onclick="exitMyGrowth()">← Back</button>
     </div>
     <p class="subtitle" style="text-align:left; margin-bottom:16px;">Everything you've picked up so far on My Amharic Path</p>
 
-    <div class="growth-section-label">📅 Today</div>
+    <div class="growth-section-label"><span data-icon="calendar"></span> Today</div>
     <div id="growthTodayMount"></div>
 
     <div class="growth-section-label">🔤 Vocabulary <span id="growthVocabCount" class="growth-section-count"></span></div>
@@ -1156,7 +1156,7 @@
     <div class="growth-section-label">📐 Grammar Points <span id="growthGrammarCount" class="growth-section-count"></span></div>
     <div id="growthGrammarMount"></div>
 
-    <div class="growth-section-label">✅ Can-Do Skills</div>
+    <div class="growth-section-label"><span data-icon="check-circle"></span> Can-Do Skills</div>
     <div id="growthCanDoMount"></div>
 </div>
 
@@ -1166,7 +1166,7 @@
 <div id="chapterGoalsOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9983; align-items:center; justify-content:center; padding:24px;">
     <div style="background:white; border-radius:20px; padding:28px 24px; max-width:420px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.3); max-height:90vh; overflow-y:auto;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h2 id="chapterGoalsTitle" style="font-size:18px; font-weight:800; color:#4338ca; font-family:'Playfair Display',serif; margin:0;">📘 Chapter</h2>
+            <h2 id="chapterGoalsTitle" style="font-size:18px; font-weight:800; color:#4338ca; font-family:'Playfair Display',serif; margin:0;"><span data-icon="book"></span> Chapter</h2>
             <button onclick="closeChapterGoals()" style="background:#f1f5f9; border:none; border-radius:50%; width:32px; height:32px; font-size:16px; cursor:pointer;">✕</button>
         </div>
         <div id="chapterGoalsSummary" style="margin-bottom:20px;"></div>
@@ -1213,7 +1213,7 @@
      Voice Prompt is a placeholder — recording/playback isn't built yet. -->
 <div id="studyTogetherScreen" style="display:none; max-width:600px; margin:40px auto; padding:0 16px;">
     <div class="workspace-title">
-        <span>🤝 Study Together</span>
+        <span><span data-icon="handshake"></span> Study Together</span>
         <button class="btn-secondary" onclick="exitAmharicPath()">← Back</button>
     </div>
     <p class="subtitle" style="text-align:left; margin-bottom:4px;">Same chapters as Independent Study, with a little company along the way</p>
@@ -1280,21 +1280,21 @@
         </div>
         <div style="display:flex; flex-direction:column; gap:12px;">
             <button id="practiceSheetFlashcardBtn" class="challenge-step-btn flashcard-step">
-                <span class="step-icon-circle">📚</span>
+                <span class="step-icon-circle"><span data-icon="books"></span></span>
                 <span class="step-label-stack">
                     <span>1. Flashcards</span>
                     <small>Learn the sounds first</small>
                 </span>
             </button>
             <button id="practiceSheetPlayBtn" class="challenge-step-btn matching-step">
-                <span class="step-icon-circle">🎮</span>
+                <span class="step-icon-circle"><span data-icon="controller"></span></span>
                 <span class="step-label-stack">
                     <span>2. Matching Game</span>
                     <small>Get a streak of 20 to pass</small>
                 </span>
             </button>
             <button id="practiceSheetWriteBtn" class="challenge-step-btn writing-step">
-                <span class="step-icon-circle">✍️</span>
+                <span class="step-icon-circle"><span data-icon="pencil"></span></span>
                 <span class="step-label-stack">
                     <span>3. Writing Submission</span>
                     <small id="practiceSheetWriteHint">Unlocks after your streak</small>
@@ -1322,23 +1322,23 @@
     </div>
     <div style="flex:1; padding:12px 0;">
         <button onclick="openProfileFromMenu()" style="width:100%; background:none; border:none; padding:16px 20px; display:flex; align-items:center; gap:14px; cursor:pointer; font-size:15px; font-weight:600; color:#1e293b; text-align:left; transition:background 0.15s; border-bottom:1px solid #f1f5f9;">
-            <span style="font-size:22px; width:32px; text-align:center;">👤</span>
+            <span style="font-size:22px; width:32px; text-align:center;"><span data-icon="user"></span></span>
             <div><div>Profile</div><div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">Change nickname or avatar</div></div>
         </button>
         <button onclick="showRulesCard()" style="width:100%; background:none; border:none; padding:16px 20px; display:flex; align-items:center; gap:14px; cursor:pointer; font-size:15px; font-weight:600; color:#1e293b; text-align:left; transition:background 0.15s; border-bottom:1px solid #f1f5f9;">
-            <span style="font-size:22px; width:32px; text-align:center;">📋</span>
+            <span style="font-size:22px; width:32px; text-align:center;"><span data-icon="clipboard"></span></span>
             <div><div>Rules</div><div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">How the game works</div></div>
         </button>
         <button onclick="showResourcesCard()" style="width:100%; background:none; border:none; padding:16px 20px; display:flex; align-items:center; gap:14px; cursor:pointer; font-size:15px; font-weight:600; color:#1e293b; text-align:left; transition:background 0.15s; border-bottom:1px solid #f1f5f9;">
-            <span style="font-size:22px; width:32px; text-align:center;">🔗</span>
+            <span style="font-size:22px; width:32px; text-align:center;"><span data-icon="link"></span></span>
             <div><div>Resources</div><div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">Amharic learning tools &amp; links</div></div>
         </button>
         <button onclick="switchModeFromMenu()" style="width:100%; background:none; border:none; padding:16px 20px; display:flex; align-items:center; gap:14px; cursor:pointer; font-size:15px; font-weight:600; color:#1e293b; text-align:left; transition:background 0.15s; border-bottom:1px solid #f1f5f9;">
-            <span style="font-size:22px; width:32px; text-align:center;">🔄</span>
+            <span style="font-size:22px; width:32px; text-align:center;"><span data-icon="refresh"></span></span>
             <div><div>Switch Mode</div><div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">Practice, Challenge, or Reading</div></div>
         </button>
         <button onclick="chooseModeCanDo()" style="width:100%; background:none; border:none; padding:16px 20px; display:flex; align-items:center; gap:14px; cursor:pointer; font-size:15px; font-weight:600; color:#1e293b; text-align:left; transition:background 0.15s; border-bottom:1px solid #f1f5f9;">
-            <span style="font-size:22px; width:32px; text-align:center;">📋</span>
+            <span style="font-size:22px; width:32px; text-align:center;"><span data-icon="clipboard"></span></span>
             <div><div>Can-Do Skills</div><div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">Track what you can already do</div></div>
         </button>
         <button id="installMenuRow" onclick="installFidelApp()" style="width:100%; background:none; border:none; padding:16px 20px; display:flex; align-items:center; gap:14px; cursor:pointer; font-size:15px; font-weight:600; color:#1e293b; text-align:left; transition:background 0.15s; border-bottom:1px solid #f1f5f9;">
@@ -1346,17 +1346,17 @@
             <div><div>Add to Home Screen</div><div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">Install Fidel Classroom on your phone</div></div>
         </button>
         <button id="pushNotifRow" onclick="togglePushNotifications()" style="display:none; width:100%; background:none; border:none; padding:16px 20px; align-items:center; gap:14px; cursor:pointer; font-size:15px; font-weight:600; color:#1e293b; text-align:left; transition:background 0.15s; border-bottom:1px solid #f1f5f9;">
-            <span style="font-size:22px; width:32px; text-align:center;">🔔</span>
+            <span style="font-size:22px; width:32px; text-align:center;"><span data-icon="bell"></span></span>
             <div><div id="pushNotifLabel">Enable Notifications</div><div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">Get pinged when your writing is approved or your team levels up</div></div>
         </button>
         <a href="mailto:senaitrichmond16@gmail.com?subject=Fidel Classroom Question"
            style="display:flex; align-items:center; gap:14px; padding:16px 20px; text-decoration:none; color:#1e293b; font-size:15px; font-weight:600; border-bottom:1px solid #f1f5f9;">
-            <span style="font-size:22px; width:32px; text-align:center;">✉️</span>
+            <span style="font-size:22px; width:32px; text-align:center;"><span data-icon="mail"></span></span>
             <div><div>Contact Teacher</div><div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">Send a question or note</div></div>
         </a>
         <a href="sms:&body=Hey! Don't forget to practice your Amharic letters today on Fidel Classroom 📚 https://senait16-creator.github.io/fidel-classroom/"
            style="display:flex; align-items:center; gap:14px; padding:16px 20px; text-decoration:none; color:#1e293b; font-size:15px; font-weight:600; border-bottom:1px solid #f1f5f9;">
-            <span style="font-size:22px; width:32px; text-align:center;">💬</span>
+            <span style="font-size:22px; width:32px; text-align:center;"><span data-icon="chat"></span></span>
             <div><div>Send Practice Reminder</div><div style="font-size:12px; font-weight:400; color:#64748b; margin-top:2px;">Opens iMessage with a reminder link</div></div>
         </a>
     </div>
@@ -1427,7 +1427,7 @@
             </a>
 
             <a href="https://amharicteacher.com/hahu" target="_blank" rel="noopener" style="display:flex; align-items:center; gap:12px; padding:14px 16px; background:#fff7ed; border:1px solid #fed7aa; border-radius:12px; text-decoration:none; color:#1e293b; transition:all 0.2s;">
-                <span style="font-size:24px; flex-shrink:0;">🔊</span>
+                <span style="font-size:24px; flex-shrink:0;"><span data-icon="speaker"></span></span>
                 <div>
                     <div style="font-size:14px; font-weight:700; color:#c2410c;">Letter Sounds</div>
                     <div style="font-size:12px; color:#64748b; margin-top:2px;">Hear Fidel sounds pronounced out loud</div>
@@ -1436,7 +1436,7 @@
             </a>
 
             <a href="https://www.youtube.com/results?search_query=amharic+alphabet+song" target="_blank" rel="noopener" style="display:flex; align-items:center; gap:12px; padding:14px 16px; background:#fdf4ff; border:1px solid #e9d5ff; border-radius:12px; text-decoration:none; color:#1e293b; transition:all 0.2s;">
-                <span style="font-size:24px; flex-shrink:0;">🎵</span>
+                <span style="font-size:24px; flex-shrink:0;"><span data-icon="music"></span></span>
                 <div>
                     <div style="font-size:14px; font-weight:700; color:#7e22ce;">Alphabet Songs</div>
                     <div style="font-size:12px; color:#64748b; margin-top:2px;">Use music for extra letter review</div>
@@ -1488,7 +1488,7 @@
 
 <section class="lb-resource-library">
     <div class="lb-resource-library-header">
-        <span>📚</span>
+        <span><span data-icon="books"></span></span>
         <div>
             <h3>Practice Library</h3>
             <p>Videos, sounds, flashcards, and extra review</p>
@@ -1556,7 +1556,7 @@
     <div class="community-shell">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
             <h1 style="font-size:24px; font-weight:800; color:#166534; font-family:'Playfair Display',serif; font-style:italic;">
-                🎉 Today's Classroom
+                <span data-icon="confetti"></span> Today's Classroom
             </h1>
             <button class="btn-secondary" onclick="exitCommunity()">← Home</button>
         </div>
@@ -1566,28 +1566,28 @@
 
         <div id="todayBannersMount" class="banner-row" style="margin-bottom:14px;"></div>
 
-        <div class="community-section-header">📖 Verse of the Day</div>
+        <div class="community-section-header"><span data-icon="book-open"></span> Verse of the Day</div>
         <div id="verseOfDayMount" class="card verse-card" style="margin-bottom:8px;"></div>
 
         <div class="community-section-header">🟩 Daily Wordle</div>
         <div id="wordleStatusMount" class="card wordle-status-card" onclick="openWordleOverlay(true)" style="margin-bottom:8px;"></div>
 
-        <div class="community-section-header">⭐ Student Spotlight</div>
+        <div class="community-section-header"><span data-icon="star"></span> Student Spotlight</div>
         <div id="starBoardMount" style="margin-bottom:8px;"></div>
 
-        <div class="community-section-header">🔥 Team Progress</div>
+        <div class="community-section-header"><span data-icon="fire"></span> Team Progress</div>
         <div id="communityTeamRaceMount" class="card" style="margin-bottom:8px;"></div>
 
-        <div class="community-section-header">🎵 Song of the Week</div>
+        <div class="community-section-header"><span data-icon="music"></span> Song of the Week</div>
         <div id="songOfWeekMount" class="card" style="margin-bottom:8px;"></div>
 
-        <div class="community-section-header">❓ Question of the Day</div>
+        <div class="community-section-header"><span data-icon="question"></span> Question of the Day</div>
         <div id="questionOfDayMount" class="card" style="margin-bottom:8px;"></div>
 
-        <div class="community-section-header">✍️ Featured Writing</div>
+        <div class="community-section-header"><span data-icon="pencil"></span> Featured Writing</div>
         <div id="featuredWritingMount" class="card" style="margin-bottom:8px;"></div>
 
-        <div class="community-section-header">🏆 Recent Achievements</div>
+        <div class="community-section-header"><span data-icon="trophy"></span> Recent Achievements</div>
         <div id="recentAchievementsMount" class="card" style="margin-bottom:8px;"></div>
 
         <div class="community-layout">
@@ -1597,7 +1597,7 @@
             </aside>
 
             <div class="community-main">
-                <div class="community-feed-note">📸 Community Feed</div>
+                <div class="community-feed-note"><span data-icon="camera"></span> Community Feed</div>
                 <div id="communityFeedMount"></div>
             </div>
         </div>
@@ -1615,7 +1615,7 @@
     <div style="max-width:560px; margin:0 auto;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
             <h1 style="font-size:24px; font-weight:800; color:#166534; font-family:'Playfair Display',serif; font-style:italic;">
-                📋 Can-Do Skills
+                <span data-icon="clipboard"></span> Can-Do Skills
             </h1>
             <button class="btn-secondary" onclick="exitCanDo()">← Home</button>
         </div>
