@@ -1,8 +1,9 @@
 // =============================================================================
 // WORD BUILDER — js/wordbuilder.js
 // Self-paced reading path, independent of Fidel Competition's team/level
-// progress but loosely mirrors its 12 levels' letter families. The card
-// itself is always open — each individual LEVEL unlocks on its own once
+// progress but loosely mirrors its 12 levels' letter families, paired up
+// two at a time into 6 Word Builder levels. The card itself is always
+// open — each individual LEVEL unlocks on its own once
 // the student has learned that level's letters, checked primarily
 // against Fidel Practice (available to every student, team or solo)
 // with Competition's streak progress also counting if they have it.
@@ -11,22 +12,20 @@
 //   _supabase, currentUser, currentProfile, showNotificationToast, showScreen
 // =============================================================================
 
-// Mirrors challenge_levels.letter_families exactly (pulled from Supabase,
-// not guessed) — kept as a constant here since Word Builder's own level
-// rows are a separate table and need this mapping to check unlock state.
+// Each Word Builder level pairs TWO Competition levels' families (6
+// letters, 42 characters) rather than one (3 letters, 21 characters) —
+// three letters alone turned out too sparse to write real words with,
+// confirmed while drafting actual Level 1 content. Built from the real
+// challenge_levels.letter_families data, paired up: (1,2) (3,4) (5,6)
+// (7,8) (9,10) (11,12). Level 12 only has one letter (ፐ), so the last
+// pair is 4 letters instead of 6.
 const WORD_BUILDER_LEVEL_LETTERS = {
-    1: ['ሀ', 'ለ', 'ሐ'],
-    2: ['መ', 'ሠ', 'ረ'],
-    3: ['ሰ', 'ሸ', 'ቀ'],
-    4: ['በ', 'ቨ', 'ተ'],
-    5: ['ቸ', 'ኀ', 'ነ'],
-    6: ['ኘ', 'አ', 'ከ'],
-    7: ['ኸ', 'ወ', 'ዐ'],
-    8: ['ዘ', 'ዠ', 'የ'],
-    9: ['ደ', 'ጀ', 'ገ'],
-    10: ['ጠ', 'ጨ', 'ጰ'],
-    11: ['ጸ', 'ፀ', 'ፈ'],
-    12: ['ፐ']
+    1: ['ሀ', 'ለ', 'ሐ', 'መ', 'ሠ', 'ረ'],
+    2: ['ሰ', 'ሸ', 'ቀ', 'በ', 'ቨ', 'ተ'],
+    3: ['ቸ', 'ኀ', 'ነ', 'ኘ', 'አ', 'ከ'],
+    4: ['ኸ', 'ወ', 'ዐ', 'ዘ', 'ዠ', 'የ'],
+    5: ['ደ', 'ጀ', 'ገ', 'ጠ', 'ጨ', 'ጰ'],
+    6: ['ጸ', 'ፀ', 'ፈ', 'ፐ']
 };
 
 let wordBuilderCurrentLevel = null;
