@@ -61,14 +61,40 @@ function hideAllScreens() {
     });
 }
 
+// The hamburger button used to float fixed over every screen, covering
+// content while scrolling and showing up even on focused practice screens
+// that already have their own Back button. Now it's a single shared DOM
+// node that gets physically moved into a small header slot on just the two
+// screens that are real navigation hubs with no Back button of their own —
+// everywhere else it's hidden, since Back already gets you where you need
+// to go.
+const HAMBURGER_HOST_SLOTS = {
+    modeSelectScreen: "modeSelectMenuSlot",
+    challengeDashboardScreen: "challengeDashMenuSlot"
+};
+
+function syncHamburgerHost(screenId) {
+    const hamburger = document.getElementById("hamburgerBtn");
+    if (!hamburger) return;
+
+    const slotId = HAMBURGER_HOST_SLOTS[screenId];
+    if (!slotId) {
+        hamburger.style.display = "none";
+        return;
+    }
+
+    const slot = document.getElementById(slotId);
+    if (slot) slot.appendChild(hamburger);
+    hamburger.style.display = "flex";
+}
+
 function showScreen(screenId, displayMode) {
     hideAllScreens();
 
     const target = document.getElementById(screenId);
     if (target) target.style.display = displayMode || "block";
 
-    const hamburger = document.getElementById("hamburgerBtn");
-    if (hamburger) hamburger.style.display = "flex";
+    syncHamburgerHost(screenId);
 
     // Community's icon only makes sense as a shortcut off the home
     // screen — everywhere else it'd just be a second, confusing way
@@ -79,4 +105,5 @@ function showScreen(screenId, displayMode) {
 
 window.showScreen = showScreen;
 window.hideAllScreens = hideAllScreens;
+window.syncHamburgerHost = syncHamburgerHost;
 window.ALL_SCREENS = ALL_SCREENS;

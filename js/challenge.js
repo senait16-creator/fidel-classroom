@@ -500,6 +500,7 @@ async function exitChallengeBackToDashboard() {
 
     if (challengeDashboard) {
         challengeDashboard.style.display = "block";
+        if (typeof syncHamburgerHost === "function") syncHamburgerHost("challengeDashboardScreen");
         if (typeof renderChallengeDashboard === "function") {
             await renderChallengeDashboard();
         }
@@ -979,6 +980,7 @@ async function exitChallengeFamilyPicker() {
 
     if (challengeDashboard) {
         challengeDashboard.style.display = "block";
+        if (typeof syncHamburgerHost === "function") syncHamburgerHost("challengeDashboardScreen");
         await renderChallengeDashboard();
     } else if (challengeLevels) {
         challengeLevels.style.display = "block";

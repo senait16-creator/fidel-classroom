@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=45">
+    <link rel="stylesheet" href="style.css?v=46">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -38,14 +38,15 @@
             cursor:pointer; align-items:center; justify-content:center;
             font-size:18px; backdrop-filter:blur(8px);"><span data-icon="confetti"></span></button>
 
-<!-- Hamburger — doubles as menu trigger from team hub header too -->
+<!-- Hamburger — a single shared button, physically moved (via
+     syncHamburgerHost() in navigation.js) into whichever screen's own
+     header slot is relevant, instead of floating fixed over every screen.
+     Hidden on screens that don't host it. -->
 
 <button id="hamburgerBtn" onclick="openHamburgerMenu()"
-     style="display:none; position:fixed; top:16px; right:16px; z-index:9980;
-            width:44px; height:44px; border-radius:50%; border:none;
-            background:rgba(255,255,255,0.95); box-shadow:0 2px 12px rgba(0,0,0,0.15);
-            cursor:pointer; flex-direction:column; align-items:center;
-            justify-content:center; gap:5px; backdrop-filter:blur(8px);"><span style="display:block; width:18px; height:2px; background:#166534; border-radius:2px;"></span><span style="display:block; width:18px; height:2px; background:#166534; border-radius:2px;"></span><span style="display:block; width:18px; height:2px; background:#166534; border-radius:2px;"></span></button>
+     style="display:none; align-items:center; gap:6px; border:1px solid rgba(255,255,255,0.3);
+            border-radius:8px; padding:7px 14px; background:rgba(255,255,255,0.18);
+            color:white; font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap;"><span style="font-size:15px; line-height:1;">☰</span> Menu</button>
 
 <!-- ============================================================
      AUTH SCREEN
@@ -458,7 +459,11 @@
     <span class="bg-letter letter-6">ገ</span>
     <span class="bg-letter letter-7">ደ</span>
     <span class="bg-letter letter-8">ወ</span>
-    
+
+    <div class="mode-select-header-row">
+        <div id="modeSelectMenuSlot"></div>
+    </div>
+
 <div class="mode-greeting-sub" id="modeGreetingSub">Welcome Back</div>
 
     <div class="mode-jump-row">
@@ -539,6 +544,7 @@
      style="display:none; min-height:100vh; padding:24px 16px 48px; background:#f5f5f0;">
 
     <div class="challenge-dash-hero">
+        <div id="challengeDashMenuSlot" class="challenge-dash-menu-slot"></div>
         <h1>Fidel Competition</h1>
 
         <div class="challenge-hero-meta-row">
@@ -1618,7 +1624,7 @@
 <!-- END CAN-DO STATEMENTS -->
 
 <script src="js/icons.js?v=1" defer></script>
-<script src="js/navigation.js?v=5" defer></script>
+<script src="js/navigation.js?v=6" defer></script>
 <script src="js/app.js?v=23" defer></script>
 <script src="js/auth.js?v=14" defer></script>
 <script src="js/guide.js?v=10" defer></script>
@@ -1641,7 +1647,7 @@
         <script src="js/starboard.js?v=1" defer></script>
 <script src="js/wordle.js?v=9" defer></script>
 <script src="intro.js?v=1" defer></script>
-<script src="js/challenge.js?v=28" defer></script>
+<script src="js/challenge.js?v=29" defer></script>
 <script src="js/menu.js?v=11" defer></script>
 <script src="js/push.js?v=7" defer></script>
 
