@@ -755,7 +755,12 @@ async function openChallengeFamilyDetail(fidelObj, levelNumber) {
 
     const practiceTitle = document.getElementById("challengePracticeTitle");
     if (practiceTitle) practiceTitle.innerText = `Try writing "${fidelObj.base}" with your finger`;
-    if (typeof initChallengePracticePad === 'function') initChallengePracticePad();
+    // Practice pad is collapsed by default (js/submissions.js's sketchpad
+    // init sizes the canvas from its own rendered rect, so it can't run
+    // while hidden anyway) — collapse it again here in case a previous
+    // family's page left it open, and lazy-init on first expand instead.
+    const practicePadBody = document.getElementById("challengePracticePadBody");
+    if (practicePadBody) practicePadBody.style.display = "none";
 
     document.getElementById("challengeDetailPlayBtn").onclick = () => launchChallengeStreakGame(fidelObj, levelNumber);
 
@@ -797,6 +802,18 @@ function exitChallengeFamilyDetail() {
     document.getElementById("challengeFamilyScreen").style.display = "block";
 }
 
+// Practice pad stays collapsed until tapped — its canvas can't size itself
+// while hidden, so the sketchpad only gets initialized on first expand
+// (initSketchpadWithUndo guards against re-running on later taps).
+function toggleChallengePracticePad() {
+    const body = document.getElementById("challengePracticePadBody");
+    if (!body) return;
+    const isOpen = body.style.display === "block";
+    body.style.display = isOpen ? "none" : "block";
+    if (!isOpen && typeof initChallengePracticePad === "function") initChallengePracticePad();
+}
+window.toggleChallengePracticePad = toggleChallengePracticePad;
+
 // ---------------------------------------------------------------------------
 // Inline flashcards — same deck data as the standalone Flashcard screen
 // (buildFlashcardDeckForFamily), but mounted directly on the family detail
@@ -816,12 +833,7 @@ function renderChallengeInlineFlashcard(fidelObj) {
     renderChallengeFlashFace();
 
     const card = document.getElementById("challengeInlineFlashcard");
-    const prevBtn = document.getElementById("challengeFlashPrevBtn");
-    const nextBtn = document.getElementById("challengeFlashNextBtn");
     if (!card) return;
-
-    if (prevBtn) prevBtn.onclick = (e) => { e.stopPropagation(); challengeFlashStep(-1); };
-    if (nextBtn) nextBtn.onclick = (e) => { e.stopPropagation(); challengeFlashStep(1); };
 
     if (!card._wired) {
         card._wired = true;
@@ -859,8 +871,11 @@ function renderChallengeFlashFace() {
         charEl.innerText = challengeFlashFlipped ? entry.sound : entry.char;
         charEl.classList.toggle("flash-face-sound", challengeFlashFlipped);
     }
-    const count = document.getElementById("challengeFlashCount");
-    if (count) count.innerText = `${challengeFlashIndex + 1} / ${challengeFlashDeck.length}`;
+
+    // "Tap to flip" hint only on the very first card — the dots below
+    // already show position for every card after that.
+    const hint = document.getElementById("challengeFlashHint");
+    if (hint) hint.style.display = challengeFlashIndex === 0 ? "block" : "none";
 
     const dots = document.getElementById("challengeFlashDots");
     if (dots) {

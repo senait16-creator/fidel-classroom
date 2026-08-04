@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=42">
+    <link rel="stylesheet" href="style.css?v=43">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -781,43 +781,42 @@
 
     <div class="row-resource-links">
         <a class="row-resource-link" href="https://amharicteacher.com/hahu" target="_blank" rel="noopener">
-            <span class="rl-icon"><span data-icon="speaker"></span></span> Hear These Sounds <span class="rl-arrow">↗</span>
+            <span class="rl-icon"><span data-icon="speaker"></span></span> Listen <span class="rl-arrow">↗</span>
         </a>
         <button type="button" class="row-resource-link alt" onclick="openLevelResourcesOverlay()">
-            <span class="rl-icon"><span data-icon="books"></span></span> Level Resources <span class="rl-arrow">↗</span>
+            <span class="rl-icon"><span data-icon="books"></span></span> Learn <span class="rl-arrow">↗</span>
         </button>
     </div>
 
     <div id="challengeFamilyDetailGiantRow" class="classroom-row-giant"></div>
-    <div class="challenge-streak-rule-banner">
-        <strong>Get a streak of 20 in a row</strong> to pass this letter's matching game.
-    </div>
 
     <div id="challengeFamilyPracticeBody">
-        <div class="challenge-inline-section-label"><span data-icon="books"></span> Flashcards <span id="challengeFlashCount" class="challenge-inline-section-count"></span></div>
+        <div class="challenge-inline-section-label"><span data-icon="books"></span> Flashcards</div>
         <div class="inline-flashcard-wrap">
             <div class="inline-flashcard" id="challengeInlineFlashcard">
-                <button type="button" class="flashcard-arrow left" id="challengeFlashPrevBtn" aria-label="Previous card">‹</button>
                 <span id="challengeFlashChar"></span>
-                <button type="button" class="flashcard-arrow right" id="challengeFlashNextBtn" aria-label="Next card">›</button>
             </div>
-            <p class="flashcard-hint">Tap the card to flip · swipe to move on, no extra screen</p>
+            <p class="flashcard-hint" id="challengeFlashHint" style="display:none;">Tap the card to flip · swipe to move on</p>
             <div class="flashcard-dots" id="challengeFlashDots"></div>
         </div>
 
         <div class="challenge-lesson-step-list" style="display:flex; flex-direction:column; gap:12px; margin-bottom:16px;">
-            <button id="challengeDetailPlayBtn" class="challenge-step-btn matching-step">
+            <button id="challengeDetailPlayBtn" class="challenge-step-btn matching-step primary-cta">
                 <span class="step-icon-circle"><span data-icon="controller"></span></span>
                 <span class="step-label-stack">
                     <span>Matching Game</span>
-                    <small>Get a streak of 20 to unlock writing</small>
+                    <small>Complete a 20-streak to unlock writing</small>
                 </span>
             </button>
         </div>
 
-        <div class="challenge-inline-section-label"><span data-icon="pencil"></span> Practice Pad</div>
-        <div class="practice-pad-card">
-            <span class="practice-pad-badge">Practice only</span>
+        <div class="challenge-inline-section-label"><span data-icon="pencil"></span> Practice Writing</div>
+        <button type="button" class="practice-pad-toggle" id="challengePracticePadToggle" onclick="toggleChallengePracticePad()">
+            <span><span data-icon="pencil"></span></span>
+            <span class="practice-pad-toggle-label">Try writing it with your finger</span>
+            <span class="practice-pad-toggle-arrow">▾</span>
+        </button>
+        <div class="practice-pad-card" id="challengePracticePadBody" style="display:none;">
             <div class="practice-pad-title" id="challengePracticeTitle">Try writing it with your finger</div>
             <p class="practice-pad-sub">This doesn't get submitted. It's just for warming up before you write on paper.</p>
             <canvas id="challengePracticeCanvas" class="sketch-canvas-element"></canvas>
@@ -826,12 +825,7 @@
             </div>
         </div>
 
-        <div class="challenge-photo-only-note">
-            <span data-icon="idea"></span> Writing submission is <strong>photo-only</strong>: write it on real paper, then upload a
-            photo. No digital drawing is accepted here, since the point is proving you can write it with a pen.
-        </div>
-
-        <div class="challenge-inline-section-label"><span data-icon="pencil"></span> Writing Submission</div>
+        <div class="challenge-inline-section-label"><span data-icon="pencil"></span> Submit Photo</div>
         <div id="challengeWritingLockCard" class="submit-card-locked" style="display:none;">
             <div class="lock-icon"><span data-icon="lock"></span></div>
             <div class="lock-title">Locked</div>
@@ -840,10 +834,14 @@
         <button id="challengeDetailWritingBtn" class="challenge-step-btn writing-step" style="display:none;">
             <span class="step-icon-circle"><span data-icon="pencil"></span></span>
             <span class="step-label-stack">
-                <span>Writing Submission</span>
+                <span>Submit Photo</span>
                 <small id="challengeDetailWritingSub">Submit for captain review</small>
             </span>
         </button>
+        <details class="challenge-why-photo-details">
+            <summary>ⓘ Why a photo?</summary>
+            <p>Write it on real paper, then upload a photo. No digital drawing is accepted here, since the point is proving you can write it with a pen.</p>
+        </details>
     </div>
 
     <!-- Sibling of challengeFamilyPracticeBody (not nested inside it) — the
@@ -1647,7 +1645,7 @@
         <script src="js/starboard.js?v=1" defer></script>
 <script src="js/wordle.js?v=9" defer></script>
 <script src="intro.js?v=1" defer></script>
-<script src="js/challenge.js?v=23" defer></script>
+<script src="js/challenge.js?v=24" defer></script>
 <script src="js/menu.js?v=11" defer></script>
 <script src="js/push.js?v=5" defer></script>
 

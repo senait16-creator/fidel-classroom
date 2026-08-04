@@ -74,7 +74,7 @@
     font-family: 'Lora', 'Playfair Display', serif;
 }
 
-.subtitle, .challenge-streak-rule-banner, p {
+.subtitle, p {
     font-family: 'Inter', 'Ubuntu', sans-serif;
     font-weight: 400;
 }
@@ -1562,6 +1562,14 @@ header {
     font-weight: 500;
 }
 
+/* Family detail page's own row only — taller and more tappable-feeling
+   than the same component used elsewhere (teacher dashboard, embedded
+   practice sheet), which stay their original size. */
+#challengeFamilyDetailGiantRow .giant-char-card {
+    min-height: 78px;
+    padding: 20px 2px;
+}
+
 /* Game workspace */
 
 #gameWorkspace {
@@ -2161,17 +2169,6 @@ header {
 }
 
 /* Challenge family detail */
-
-.challenge-streak-rule-banner {
-    background: #fff7ed;
-    border: 1px solid #fed7aa;
-    border-radius: 12px;
-    padding: 12px 16px;
-    font-size: 13px;
-    color: #9a3412;
-    margin-bottom: 18px;
-    text-align: left;
-}
 
 .challenge-writing-status {
     border-radius: 12px;
@@ -6074,6 +6071,24 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     box-shadow: 0 6px 16px rgba(22, 101, 52, 0.28);
 }
 
+/* The primary CTA on the family detail page — bigger than the other
+   step buttons so it reads as the one obvious next action. */
+.challenge-step-btn.primary-cta {
+    padding: 18px 20px;
+    font-size: 17px;
+    box-shadow: 0 8px 22px rgba(22, 101, 52, 0.34);
+}
+
+.challenge-step-btn.primary-cta .step-icon-circle {
+    width: 48px;
+    height: 48px;
+    font-size: 22px;
+}
+
+.challenge-step-btn.primary-cta .step-label-stack small {
+    font-size: 12px;
+}
+
 .challenge-step-btn.writing-step {
     background: linear-gradient(135deg, #7c3aed, #5b21b6);
     box-shadow: 0 6px 16px rgba(124, 58, 237, 0.28);
@@ -6167,7 +6182,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 
 .inline-flashcard {
     width: 100%;
-    height: 180px;
+    height: 210px;
     border-radius: 18px;
     background: white;
     border: 1px solid var(--border-color);
@@ -6176,7 +6191,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     align-items: center;
     justify-content: center;
     font-family: 'Abyssinica SIL', serif;
-    font-size: 76px;
+    font-size: 95px;
     color: var(--neutral-dark);
     position: relative;
     cursor: pointer;
@@ -6185,31 +6200,10 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 
 .inline-flashcard #challengeFlashChar.flash-face-sound {
     font-family: 'Inter', sans-serif;
-    font-size: 26px;
+    font-size: 28px;
     font-weight: 700;
     color: var(--brand-primary);
 }
-
-.flashcard-arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.9);
-    border: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    color: #475569;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    cursor: pointer;
-}
-
-.flashcard-arrow.left { left: 10px; }
-.flashcard-arrow.right { right: 10px; }
 
 .flashcard-hint {
     text-align: center;
@@ -6249,19 +6243,6 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     margin-bottom: 18px;
 }
 
-.practice-pad-badge {
-    display: inline-block;
-    font-size: 10px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    color: #64748b;
-    background: #e2e8f0;
-    padding: 2px 8px;
-    border-radius: 20px;
-    margin-bottom: 8px;
-}
-
 .practice-pad-title {
     font-size: 13.5px;
     font-weight: 700;
@@ -6275,7 +6256,48 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     margin-bottom: 10px;
 }
 
-.challenge-photo-only-note {
+.practice-pad-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 14px;
+    padding: 13px 15px;
+    margin-bottom: 18px;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--neutral-dark);
+    cursor: pointer;
+    text-align: left;
+}
+
+.practice-pad-toggle-label {
+    flex: 1;
+}
+
+.practice-pad-toggle-arrow {
+    color: #94a3b8;
+}
+
+.challenge-why-photo-details {
+    margin-top: 10px;
+}
+
+.challenge-why-photo-details summary {
+    list-style: none;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    color: #92400e;
+}
+
+.challenge-why-photo-details summary::-webkit-details-marker {
+    display: none;
+}
+
+.challenge-why-photo-details p {
     background: #fffbeb;
     border: 1px dashed #fde68a;
     border-radius: 12px;
@@ -6283,7 +6305,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     font-size: 11.5px;
     color: #92400e;
     line-height: 1.5;
-    margin-bottom: 18px;
+    margin: 8px 0 0;
 }
 
 /* Family detail: locked writing submission card */
