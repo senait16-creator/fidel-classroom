@@ -32,6 +32,7 @@ let wordBuilderCurrentLevel = null;
 let wordBuilderWords = [];
 let wordBuilderReadWordIds = new Set();
 let wordBuilderIndex = 0;
+let wordBuilderCurrentWordMarkedRead = false;
 
 // ---------------------------------------------------------------------------
 // Per-level unlock check
@@ -188,6 +189,8 @@ function renderWordBuilderWordCard() {
     const mount = document.getElementById('wordBuilderLessonMount');
     if (!crumb || !mount) return;
 
+    wordBuilderCurrentWordMarkedRead = false;
+
     const level = wordBuilderCurrentLevel;
     const word = wordBuilderWords[wordBuilderIndex];
     crumb.innerText = `LEVEL ${level.level_number} · ${(level.topic_title || '').toUpperCase()}`;
@@ -196,6 +199,7 @@ function renderWordBuilderWordCard() {
     // splitting the string into an array of characters is enough to get
     // one chip per Fidel character — no combining marks to worry about.
     const letters = Array.from(word.amharic_text.replace(/\s+/g, ''));
+    const progressPct = Math.round((wordBuilderIndex / wordBuilderWords.length) * 100);
 
     mount.innerHTML = `
         <div style="background:white; border:1px solid #e2e8f0; border-radius:18px; padding:26px 20px;
@@ -203,19 +207,56 @@ function renderWordBuilderWordCard() {
             <div style="font-family:'Abyssinica SIL',serif; font-size:42px; color:#1e293b; margin-bottom:10px;">${word.amharic_text}</div>
             ${word.transliteration ? `<div style="font-size:13px; color:#64748b; margin-bottom:4px;">${word.transliteration}</div>` : ''}
             ${word.english_meaning ? `<div style="font-size:13.5px; color:#94a3b8; font-style:italic;">"${word.english_meaning}"</div>` : ''}
-            <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:14px;">
-                ${letters.map(ch => `<span style="font-family:'Abyssinica SIL',serif; font-size:20px; background:#fffbeb; color:#d97706; border-radius:10px; padding:6px 12px;">${ch}</span>`).join('')}
+            <div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; align-items:center; margin-top:14px;">
+                ${letters.map((ch, i) => `${i > 0 ? '<span style="color:#cbd5e1; font-size:16px; font-weight:700;">+</span>' : ''}<span style="font-family:'Abyssinica SIL',serif; font-size:20px; background:#fffbeb; color:#d97706; border-radius:10px; padding:6px 12px; cursor:pointer;" onclick="showWordBuilderLetterInfo('${ch}')">${ch}</span>`).join('')}
             </div>
+            <div style="font-size:10px; color:#cbd5e1; margin-top:8px;">tap a letter to hear how it fits in</div>
         </div>
         ${word.grammar_note ? `
         <div style="background:#eef2ff; border:1px solid #c7d2fe; border-radius:14px; padding:14px 16px; margin-bottom:16px;">
             <div style="font-size:10.5px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#4f46e5; margin-bottom:5px;">Why this word looks this way</div>
             <div style="font-size:13px; color:#3730a3; line-height:1.5;">${word.grammar_note}</div>
         </div>` : ''}
-        <button class="btn-primary" onclick="markWordBuilderWordRead()">I Read It ✓ ${wordBuilderIndex < wordBuilderWords.length - 1 ? 'Next Word →' : 'Finish Level →'}</button>
-        <p style="font-size:11.5px; color:#94a3b8; text-align:center; margin-top:14px;">Word ${wordBuilderIndex + 1} of ${wordBuilderWords.length}</p>
+        <div id="wbActionMount"></div>
+        <div style="height:6px; background:#e2e8f0; border-radius:999px; overflow:hidden; margin-top:16px;">
+            <div style="height:100%; width:${progressPct}%; background:#166534; border-radius:999px;"></div>
+        </div>
+        <p style="font-size:11.5px; color:#94a3b8; text-align:center; margin-top:8px;">${wordBuilderIndex + 1} / ${wordBuilderWords.length}</p>
     `;
+    renderWordBuilderActionButton();
 }
+
+function renderWordBuilderActionButton() {
+    const actionMount = document.getElementById('wbActionMount');
+    if (!actionMount) return;
+    const isLast = wordBuilderIndex === wordBuilderWords.length - 1;
+    actionMount.innerHTML = wordBuilderCurrentWordMarkedRead
+        ? `<button class="btn-primary" onclick="advanceWordBuilderWord()">${isLast ? 'Finish Level →' : 'Next →'}</button>`
+        : `<button class="btn-primary" onclick="markWordBuilderWordRead()">✓ I Read It</button>`;
+}
+
+// Looks up which family/pronunciation a tapped syllable belongs to, reusing
+// the same verified alphabetData/vowel-label tables Fidel Practice uses
+// (js/app.js) rather than a separate, unverified lookup for Word Builder.
+function getWordBuilderLetterInfo(ch) {
+    for (const fam of alphabetData) {
+        const idx = fam.family.indexOf(ch);
+        if (idx !== -1) {
+            const phonetic = (fam.prefix === 'h' || fam.prefix === 'ḥ')
+                ? vowelFrameworkLabels[idx]
+                : `${fam.prefix}${standardVowelSubscripts[idx]}`;
+            return { base: fam.base, phonetic };
+        }
+    }
+    return null;
+}
+
+function showWordBuilderLetterInfo(ch) {
+    const info = getWordBuilderLetterInfo(ch);
+    if (!info) return;
+    showNotificationToast(`${ch} = "${info.phonetic}" · ${info.base} family in Fidel Practice`);
+}
+window.showWordBuilderLetterInfo = showWordBuilderLetterInfo;
 
 async function markWordBuilderWordRead() {
     const word = wordBuilderWords[wordBuilderIndex];
@@ -232,15 +273,79 @@ async function markWordBuilderWordRead() {
     }
 
     wordBuilderReadWordIds.add(word.id);
+    wordBuilderCurrentWordMarkedRead = true;
+    renderWordBuilderActionButton();
+}
+window.markWordBuilderWordRead = markWordBuilderWordRead;
 
+async function advanceWordBuilderWord() {
     if (wordBuilderIndex < wordBuilderWords.length - 1) {
         wordBuilderIndex++;
         renderWordBuilderWordCard();
     } else {
-        await completeWordBuilderLevel();
+        await renderWordBuilderReviewQuiz();
     }
 }
-window.markWordBuilderWordRead = markWordBuilderWordRead;
+window.advanceWordBuilderWord = advanceWordBuilderWord;
+
+// ---------------------------------------------------------------------------
+// Quick recognition check — shown once, after the last word, before the
+// level-complete screen. Skipped for very small levels (not enough words
+// to build believable wrong answers from).
+// ---------------------------------------------------------------------------
+
+function wordBuilderShuffle(arr) {
+    return [...arr].sort(() => Math.random() - 0.5);
+}
+
+async function renderWordBuilderReviewQuiz() {
+    const pool = wordBuilderWords.filter(w => w.english_meaning);
+    if (pool.length < 3) {
+        return completeWordBuilderLevel();
+    }
+
+    const target = pool[Math.floor(Math.random() * pool.length)];
+    const distractors = wordBuilderShuffle(pool.filter(w => w.id !== target.id)).slice(0, 2);
+    const choices = wordBuilderShuffle([target, ...distractors]);
+
+    const crumb = document.getElementById('wordBuilderLessonCrumb');
+    if (crumb) crumb.innerText = 'QUICK CHECK';
+
+    const mount = document.getElementById('wordBuilderLessonMount');
+    if (!mount) return;
+
+    mount.innerHTML = `
+        <div style="text-align:center; padding-top:16px;">
+            <div style="font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#94a3b8; margin-bottom:10px;">Which one says</div>
+            <div style="font-size:20px; font-weight:800; color:#1e293b; margin-bottom:22px;">"${target.english_meaning}"</div>
+            <div id="wbQuizChoices" style="display:flex; flex-direction:column; gap:10px;">
+                ${choices.map(c => `
+                    <button style="font-family:'Abyssinica SIL',serif; font-size:22px; padding:14px; background:white;
+                                   border:1px solid #e2e8f0; border-radius:14px; cursor:pointer; color:#1e293b;"
+                            onclick="answerWordBuilderQuiz(this, '${c.id}', '${target.id}')">${c.amharic_text}</button>
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
+
+function answerWordBuilderQuiz(btnEl, chosenId, correctId) {
+    const buttons = document.querySelectorAll('#wbQuizChoices button');
+    buttons.forEach(btn => btn.setAttribute('disabled', 'true'));
+
+    if (chosenId === correctId) {
+        btnEl.style.borderColor = '#166534';
+        btnEl.style.background = 'rgba(22,101,52,0.08)';
+        if (typeof showGobezToast === 'function') showGobezToast('Nice! ✓');
+    } else {
+        btnEl.style.borderColor = '#dc2626';
+        btnEl.style.background = 'rgba(220,38,38,0.06)';
+        showNotificationToast('Not quite — take another look at the words.');
+    }
+
+    setTimeout(() => completeWordBuilderLevel(), chosenId === correctId ? 500 : 1100);
+}
+window.answerWordBuilderQuiz = answerWordBuilderQuiz;
 
 // ---------------------------------------------------------------------------
 // Level complete
