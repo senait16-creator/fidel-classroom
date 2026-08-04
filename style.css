@@ -3858,6 +3858,7 @@ header {
 .mode-jump-row {
     display: flex;
     gap: 10px;
+    margin-bottom: 18px;
 }
 
 /* Wordle overlay */

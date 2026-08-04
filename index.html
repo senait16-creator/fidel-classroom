@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=28">
+    <link rel="stylesheet" href="style.css?v=29">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -461,6 +461,16 @@
     
 <div class="mode-greeting-sub" id="modeGreetingSub">Welcome Back</div>
 
+    <div class="mode-jump-row">
+        <button class="mode-jump-btn" id="modeInstallBtn" onclick="installFidelApp()">
+            📱 Add to Home Screen
+        </button>
+
+        <button class="mode-jump-btn" id="modeNotifBtn" style="display:none;" onclick="togglePushNotifications()">
+            <span data-icon="bell"></span> Enable Notifications
+        </button>
+    </div>
+
 <div class="cups-grid">
 
         <!-- Fidel Practice -->
@@ -516,16 +526,6 @@
         </div>
 
 
-    </div>
-
-    <div class="mode-jump-row">
-        <button class="mode-jump-btn" id="modeInstallBtn" onclick="installFidelApp()">
-            📱 Add to Home Screen
-        </button>
-
-        <button class="mode-jump-btn" id="modeNotifBtn" style="display:none;" onclick="togglePushNotifications()">
-            <span data-icon="bell"></span> Enable Notifications
-        </button>
     </div>
 
 </div>
