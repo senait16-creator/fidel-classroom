@@ -817,12 +817,6 @@ function exitChallengeFamilyDetail() {
     }
 }
 
-function openChallengeFamilyPickerFromDetail() {
-    if (!activeChallengeLevel) return;
-    openChallengeFamilyPicker(activeChallengeLevel);
-}
-window.openChallengeFamilyPickerFromDetail = openChallengeFamilyPickerFromDetail;
-
 // Practice pad stays collapsed until tapped — its canvas can't size itself
 // while hidden, so the sketchpad only gets initialized on first expand
 // (initSketchpadWithUndo guards against re-running on later taps).
