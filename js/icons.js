@@ -72,7 +72,10 @@ function icon(name, opts) {
     }
     const size = (opts && opts.size) || '1em';
     const cls = (opts && opts.class) ? ` ${opts.class}` : '';
-    return `<svg class="picon${cls}" viewBox="0 0 256 256" width="${size}" height="${size}" fill="currentColor" aria-hidden="true" style="vertical-align:-0.125em;">${inner}</svg>`;
+    // .picon defaults to brand green (style.css) — pass opts.color to
+    // override for a specific instance (inline style beats the class rule).
+    const colorStyle = (opts && opts.color) ? ` color:${opts.color};` : '';
+    return `<svg class="picon${cls}" viewBox="0 0 256 256" width="${size}" height="${size}" fill="currentColor" aria-hidden="true" style="vertical-align:-0.125em;${colorStyle}">${inner}</svg>`;
 }
 window.icon = icon;
 
@@ -82,7 +85,7 @@ window.icon = icon;
 // call icon() directly in their own template strings and don't need this.
 function renderStaticIcons() {
     document.querySelectorAll('[data-icon]').forEach(el => {
-        el.innerHTML = icon(el.dataset.icon, { size: el.dataset.iconSize, class: el.dataset.iconClass });
+        el.innerHTML = icon(el.dataset.icon, { size: el.dataset.iconSize, class: el.dataset.iconClass, color: el.dataset.iconColor });
     });
 }
 window.addEventListener('DOMContentLoaded', renderStaticIcons);

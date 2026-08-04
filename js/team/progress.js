@@ -396,9 +396,9 @@ function renderDetailedRaceStandings(mount, mountId, standings) {
     const getTeamColor = getRaceTeamColor;
     const getTeamInitial = getRaceTeamInitial;
     const medals = [
-        `<span style="color:#eab308;">${icon('medal')}</span>`,
-        `<span style="color:#9ca3af;">${icon('medal')}</span>`,
-        `<span style="color:#b45309;">${icon('medal')}</span>`
+        icon('medal', { color: '#eab308' }),
+        icon('medal', { color: '#9ca3af' }),
+        icon('medal', { color: '#b45309' })
     ];
 
     mount.innerHTML = '';
@@ -478,9 +478,9 @@ function renderDetailedRaceStandings(mount, mountId, standings) {
 
 function renderCompactRaceStandings(mount, standings) {
     const medals = [
-        `<span style="color:#eab308;">${icon('medal')}</span>`,
-        `<span style="color:#9ca3af;">${icon('medal')}</span>`,
-        `<span style="color:#b45309;">${icon('medal')}</span>`
+        icon('medal', { color: '#eab308' }),
+        icon('medal', { color: '#9ca3af' }),
+        icon('medal', { color: '#b45309' })
     ];
 
     const rowsHtml = standings.map((team, idx) => {

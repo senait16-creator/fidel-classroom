@@ -114,13 +114,13 @@ async function renderWordBuilderLevelsList() {
         const locked = !done && !practiceUnlocked;
         const clickable = !locked && hasWords;
 
-        const stateIcon = done ? '✓' : (locked ? icon('lock') : level.level_number);
+        const stateIcon = done ? '✓' : (locked ? icon('lock', { color: '#94a3b8' }) : level.level_number);
         const numBg = done ? 'rgba(22,101,52,0.1)' : (locked ? '#e2e8f0' : '#fffbeb');
         const numColor = done ? '#166534' : (locked ? '#94a3b8' : '#d97706');
 
         let subLabel;
         if (!practiceUnlocked && !done) {
-            subLabel = `${icon('lock')} Learn ${WORD_BUILDER_LEVEL_LETTERS[level.level_number].join(' ')} in Fidel Practice first`;
+            subLabel = `${icon('lock', { color: '#94a3b8' })} Learn ${WORD_BUILDER_LEVEL_LETTERS[level.level_number].join(' ')} in Fidel Practice first`;
         } else if (!hasWords) {
             subLabel = 'Coming soon';
         } else {

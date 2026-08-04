@@ -56,6 +56,7 @@
 .picon {
     display: inline-block;
     flex-shrink: 0;
+    color: var(--brand-primary, #166534);
 }
 
 /* Typography */
@@ -1782,6 +1783,16 @@ header {
     padding: 14px 22px;
     color: #fef9c3;
     box-shadow: 0 4px 24px rgba(202,138,4,0.35);
+}
+
+/* Dark/colored backgrounds where the .picon default green would have poor
+   contrast — icons here follow the container's own text color instead. */
+.toast-popup .picon,
+.captain-zone-badge .picon,
+.cup-card-featured-tag .picon,
+.step-icon-circle .picon,
+.amharic-path-card-icon .picon {
+    color: inherit;
 }
 
 #confettiCanvas {
@@ -5636,6 +5647,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     height: 40px;
     border-radius: 12px;
     background: linear-gradient(135deg, #b45309, #ca8a04);
+    color: white;
     display: flex;
     align-items: center;
     justify-content: center;
