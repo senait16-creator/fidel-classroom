@@ -361,53 +361,78 @@ async function advanceWordBuilderWord() {
         wordBuilderIndex++;
         renderWordBuilderWordCard();
     } else {
-        await renderWordBuilderReviewQuiz();
+        startWordBuilderReviewSequence();
     }
 }
 window.advanceWordBuilderWord = advanceWordBuilderWord;
 
 // ---------------------------------------------------------------------------
-// Quick recognition check — shown once, after the last word, before the
-// level-complete screen. Skipped for very small levels (not enough words
-// to build believable wrong answers from).
+// End-of-level review sequence, shown once after the last word:
+//   Quick Review (one "which word means X" question per word)
+//   -> Read What You Know (full word list, no hints, twice — ordered then
+//      shuffled, for reading speed)
+//   -> Find the Word (same matching mechanic, reversed framing, 2 words)
+//   -> Final Challenge (the word list once more, then level complete)
+// Skipped entirely for very small levels — not enough words to build
+// believable wrong answers from.
 // ---------------------------------------------------------------------------
 
 function wordBuilderShuffle(arr) {
     return [...arr].sort(() => Math.random() - 0.5);
 }
 
-async function renderWordBuilderReviewQuiz() {
+let wordBuilderMatchRest = [];
+let wordBuilderMatchOpts = null;
+let wordBuilderMatchOnDone = null;
+
+function startWordBuilderReviewSequence() {
     const pool = wordBuilderWords.filter(w => w.english_meaning);
     if (pool.length < 3) {
         return completeWordBuilderLevel();
     }
+    renderWordBuilderMatchStage(wordBuilderShuffle(pool), {
+        crumb: 'QUICK REVIEW', title: 'Quick Review', promptLabel: 'Which word means'
+    }, renderWordBuilderReadWhatYouKnow);
+}
+window.startWordBuilderReviewSequence = startWordBuilderReviewSequence;
 
-    const target = pool[Math.floor(Math.random() * pool.length)];
-    const distractors = wordBuilderShuffle(pool.filter(w => w.id !== target.id)).slice(0, 2);
+// A single "pick the matching word" question, reused for both Quick Review
+// (asks about every word once) and Find the Word (asks about a couple).
+function renderWordBuilderMatchStage(queue, opts, onStageDone) {
+    if (queue.length === 0) return onStageDone();
+
+    const target = queue[0];
+    const rest = queue.slice(1);
+    const pool = wordBuilderWords.filter(w => w.english_meaning && w.id !== target.id);
+    const distractors = wordBuilderShuffle(pool).slice(0, 2);
     const choices = wordBuilderShuffle([target, ...distractors]);
 
+    wordBuilderMatchRest = rest;
+    wordBuilderMatchOpts = opts;
+    wordBuilderMatchOnDone = onStageDone;
+
     const crumb = document.getElementById('wordBuilderLessonCrumb');
-    if (crumb) crumb.innerText = 'QUICK CHECK';
+    if (crumb) crumb.innerText = opts.crumb;
 
     const mount = document.getElementById('wordBuilderLessonMount');
     if (!mount) return;
 
     mount.innerHTML = `
         <div style="text-align:center; padding-top:16px;">
-            <div style="font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#94a3b8; margin-bottom:10px;">Which one says</div>
-            <div style="font-size:20px; font-weight:800; color:#1e293b; margin-bottom:22px;">"${target.english_meaning}"</div>
+            <div style="font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#94a3b8; margin-bottom:10px;">${opts.title}</div>
+            <div style="font-size:20px; font-weight:800; color:#1e293b; margin-bottom:22px;">${opts.promptLabel} "${target.english_meaning}"?</div>
             <div id="wbQuizChoices" style="display:flex; flex-direction:column; gap:10px;">
                 ${choices.map(c => `
                     <button style="font-family:'Abyssinica SIL',serif; font-size:22px; padding:14px; background:white;
                                    border:1px solid #e2e8f0; border-radius:14px; cursor:pointer; color:#1e293b;"
-                            onclick="answerWordBuilderQuiz(this, '${c.id}', '${target.id}')">${c.amharic_text}</button>
+                            onclick="answerWordBuilderMatch(this, '${c.id}', '${target.id}')">${c.amharic_text}</button>
                 `).join('')}
             </div>
         </div>
     `;
 }
 
-function answerWordBuilderQuiz(btnEl, chosenId, correctId) {
+function answerWordBuilderMatch(btnEl, chosenId, correctId) {
     const buttons = document.querySelectorAll('#wbQuizChoices button');
     buttons.forEach(btn => btn.setAttribute('disabled', 'true'));
 
@@ -421,9 +446,62 @@ function answerWordBuilderQuiz(btnEl, chosenId, correctId) {
         showNotificationToast('Not quite — take another look at the words.');
     }
 
-    setTimeout(() => completeWordBuilderLevel(), chosenId === correctId ? 500 : 1100);
+    setTimeout(() => {
+        renderWordBuilderMatchStage(wordBuilderMatchRest, wordBuilderMatchOpts, wordBuilderMatchOnDone);
+    }, chosenId === correctId ? 500 : 1100);
 }
-window.answerWordBuilderQuiz = answerWordBuilderQuiz;
+window.answerWordBuilderMatch = answerWordBuilderMatch;
+
+// A passive recap: the word list with no hints, one "Continue" button.
+// Reused for both "Read What You Know" (twice — ordered, then shuffled)
+// and "Final Challenge" (once more, right before level completion).
+function renderWordBuilderRecapScreen(words, title, subtitle, onContinue) {
+    const crumb = document.getElementById('wordBuilderLessonCrumb');
+    if (crumb) crumb.innerText = title.toUpperCase();
+
+    window.wordBuilderRecapOnContinue = onContinue;
+
+    const mount = document.getElementById('wordBuilderLessonMount');
+    if (!mount) return;
+
+    mount.innerHTML = `
+        <div style="text-align:center; padding-top:10px;">
+            <div style="font-size:12.5px; color:#94a3b8; margin-bottom:18px;">${subtitle}</div>
+            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:22px;">
+                ${words.map(w => `
+                    <div style="background:white; border:1px solid #e2e8f0; border-radius:14px; padding:16px;
+                                font-family:'Abyssinica SIL',serif; font-size:26px; color:#1e293b;">${w.amharic_text}</div>
+                `).join('')}
+            </div>
+            <button class="btn-primary" onclick="wordBuilderRecapOnContinue()">Continue →</button>
+        </div>
+    `;
+}
+
+function renderWordBuilderReadWhatYouKnow() {
+    renderWordBuilderRecapScreen(
+        wordBuilderWords, 'Read What You Know', "These are the words you've learned — no hints this time.",
+        () => renderWordBuilderRecapScreen(
+            wordBuilderShuffle(wordBuilderWords), 'Read What You Know', 'Now try them in a different order.',
+            renderWordBuilderFindWordStage
+        )
+    );
+}
+
+function renderWordBuilderFindWordStage() {
+    const pool = wordBuilderWords.filter(w => w.english_meaning);
+    const subset = wordBuilderShuffle(pool).slice(0, Math.min(2, pool.length));
+    renderWordBuilderMatchStage(subset, {
+        crumb: 'FIND THE WORD', title: 'Find the Word', promptLabel: 'Find the word for'
+    }, renderWordBuilderFinalChallenge);
+}
+
+function renderWordBuilderFinalChallenge() {
+    renderWordBuilderRecapScreen(
+        wordBuilderWords, 'Final Challenge', 'Read all of these without any hints.',
+        completeWordBuilderLevel
+    );
+}
 
 // ---------------------------------------------------------------------------
 // Level complete
