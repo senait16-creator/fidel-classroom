@@ -72,13 +72,14 @@ function getRaceTeamInitial(name) {
 // separately and lazily, see fetchTeamStudentDetail below, and only for
 // teams the viewer is allowed to drill into.
 async function computeTeamRaceStandings() {
-    const { data: allRows } = await _supabase
+    // is_test = false excludes practice teams (e.g. Purple Team) the same
+    // way the rest of the app already does — see app.js/songweek.js/
+    // team/map.js for the other places filtering on this same column.
+    const { data: rows } = await _supabase
         .from('public_team_race_summary')
         .select('team_id, team_name, current_level, last_advanced_at, base_letter, member_count, approved_count, practicing_count, needs_writing_count, pending_count, help_count, team_percent')
+        .eq('is_test', false)
         .order('team_name');
-
-    // Practice/test teams (Purple Team) never show up in the Race.
-    const rows = (allRows || []).filter(r => !isExcludedTestTeamName(r.team_name));
 
     if (!rows || rows.length === 0) return [];
 

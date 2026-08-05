@@ -22,16 +22,6 @@ const STREAK_THRESHOLD = 20;
 // `teams` table, not this array. Update teams via Supabase, not here.
 const TEAMS = ["Red Team 🔴", "Blue Team 🔵", "Green Team 🟢", "Yellow Team 🟡", "Purple Team 🟣", "Black Team ⚫", "White Team ⚪ - Test"];
 
-// Practice/test teams to keep out of anything student-facing (Team Race,
-// Competition Calendar) — currently just Purple Team, used for the
-// teacher's own test accounts. Add more names here if other test teams
-// show up later, instead of hardcoding checks at each call site.
-const EXCLUDED_TEST_TEAM_NAMES = ['Purple'];
-function isExcludedTestTeamName(teamName) {
-    if (!teamName) return false;
-    return EXCLUDED_TEST_TEAM_NAMES.some(pattern => teamName.includes(pattern));
-}
-
 // ---------------------------------------------------------------------------
 // Global state — shared across all JS files
 // ---------------------------------------------------------------------------

@@ -159,7 +159,11 @@ async function fetchCompetitionCalendarEvents(year, month) {
 
     const [profilesRes, teamsRes, submittedRes, approvedRes, loggedRes, levelMap] = await Promise.all([
         _supabase.from('profiles').select('id, nickname, team_id'),
-        _supabase.from('teams').select('id, name'),
+        // is_test = false excludes practice teams (e.g. Purple Team) the
+        // same way the rest of the app already does — see app.js/
+        // songweek.js/team/map.js for the other places filtering on this
+        // same column.
+        _supabase.from('teams').select('id, name').eq('is_test', false),
         _supabase.from('writing_submissions').select('id, student_id, base_letter, submitted_at')
             .gte('submitted_at', startIso).lt('submitted_at', endIso),
         _supabase.from('writing_submissions').select('id, student_id, base_letter, reviewed_at, reviewer_note')
@@ -171,17 +175,13 @@ async function fetchCompetitionCalendarEvents(year, month) {
 
     const profilesById = {};
     (profilesRes.data || []).forEach(p => { profilesById[p.id] = p; });
+    // Test teams are already excluded from teamsRes, so a student whose
+    // team_id isn't in here belongs to a test team (or has no team).
     const teamsById = {};
     (teamsRes.data || []).forEach(t => { teamsById[t.id] = t; });
-
-    // Practice/test teams (Purple Team) never show up in the calendar —
-    // neither their own milestones nor individual members' submissions.
-    const excludedTeamIds = new Set(
-        (teamsRes.data || []).filter(t => isExcludedTestTeamName(t.name)).map(t => t.id)
-    );
     const isExcludedStudent = (studentId) => {
         const student = profilesById[studentId];
-        return !!student && excludedTeamIds.has(student.team_id);
+        return !!student?.team_id && !teamsById[student.team_id];
     };
 
     const events = [];
@@ -229,7 +229,7 @@ async function fetchCompetitionCalendarEvents(year, month) {
     // optional DB trigger is enabled (level-ups, captain changes) or a
     // teacher authors one (announcements).
     (loggedRes.data || []).forEach(row => {
-        if (row.team_id && excludedTeamIds.has(row.team_id)) return;
+        if (row.team_id && !teamsById[row.team_id]) return;
         if (row.student_id && isExcludedStudent(row.student_id)) return;
         const team = teamsById[row.team_id];
         const student = row.student_id ? profilesById[row.student_id] : null;
