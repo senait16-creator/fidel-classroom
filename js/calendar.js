@@ -19,8 +19,13 @@
 // collapse into a count header ("3 students began Level 2") in day detail
 // when more than one happens the same day — a single occurrence renders as
 // a plain row instead. `emphasize: true` types are milestones — they never
-// group, get their own gold banner in day detail, a trophy badge on the
-// month grid, and are the only things that show up in Monthly Highlights.
+// group, and get their own gold banner in day detail plus a trophy badge
+// on the month grid. `highlight: true` is a separate, lighter flag: it
+// only controls whether a type shows up in Monthly Highlights, without
+// the banner/trophy treatment — level_passed uses this, since a student
+// finishing a level is worth surfacing in the month's story even though
+// it's common enough that it should still stay grouped/dot-only in the
+// day-by-day view.
 const CALENDAR_EVENT_TYPES = {
     level_started: {
         icon: '✍️', color: '#2563eb', label: 'Started a level', category: 'individual', groupable: true,
@@ -31,7 +36,7 @@ const CALENDAR_EVENT_TYPES = {
         groupLabel: (n, lvl) => `${n} ${n === 1 ? 'student is' : 'students are'} ready for the Level ${lvl} writing test`
     },
     level_passed: {
-        icon: '✅', color: '#166534', label: 'Passed writing test', category: 'individual', groupable: true,
+        icon: '✅', color: '#166534', label: 'Passed writing test', category: 'individual', groupable: true, highlight: true,
         groupLabel: (n, lvl) => `${n} ${n === 1 ? 'student' : 'students'} passed the Level ${lvl} writing test`
     },
     team_level_up:             { icon: '🏆', color: '#ca8a04', label: 'Team leveled up', category: 'team', emphasize: true },
@@ -261,7 +266,7 @@ function renderCalendarHighlights(events) {
     if (!mount) return;
 
     const highlights = events
-        .filter(ev => CALENDAR_EVENT_TYPES[ev.type]?.emphasize)
+        .filter(ev => { const meta = CALENDAR_EVENT_TYPES[ev.type]; return meta?.emphasize || meta?.highlight; })
         .sort((a, b) => a.date.localeCompare(b.date));
 
     if (highlights.length === 0) {
