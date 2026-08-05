@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=49">
+    <link rel="stylesheet" href="style.css?v=50">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -546,7 +546,6 @@
 
     <div class="challenge-dash-hero">
         <div class="challenge-dash-header-actions">
-            <button type="button" class="challenge-dash-calendar-btn" onclick="openCompetitionCalendar()" aria-label="Competition Calendar">📅</button>
             <div id="challengeDashMenuSlot"></div>
         </div>
         <h1>Fidel Competition</h1>
@@ -685,6 +684,15 @@
             <div id="challengeDashRaceMount">
                 <p style="color:#94a3b8;font-size:13px;">Loading race...</p>
             </div>
+        </section>
+
+        <section class="challenge-dash-card timeline-preview-card">
+            <div class="challenge-card-title">🕰️ Competition Timeline</div>
+            <div id="timelinePreviewMiniCalendar" class="timeline-mini-calendar"></div>
+            <div id="timelinePreviewHighlights" class="timeline-preview-highlights">
+                <p style="color:#94a3b8;font-size:13px;">Loading...</p>
+            </div>
+            <button type="button" class="timeline-view-full-btn" onclick="openCompetitionCalendar()">View Full Competition Timeline →</button>
         </section>
 
         <section class="challenge-dash-card">
@@ -1518,7 +1526,7 @@
 <div id="competitionCalendarOverlay" style="display:none; position:fixed; inset:0; background:white; z-index:9994; flex-direction:column; overflow-y:auto;">
     <div style="position:sticky; top:0; background:white; border-bottom:1px solid #e2e8f0; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; z-index:1;">
         <button onclick="closeCompetitionCalendar()" style="background:#f1f5f9; border:none; border-radius:10px; padding:8px 14px; font-size:13px; font-weight:700; color:#475569; cursor:pointer;">← Back</button>
-        <h2 style="font-family:'Lora',serif; font-size:20px; font-weight:700; color:#166534; margin:0;">Calendar</h2>
+        <h2 style="font-family:'Lora',serif; font-size:20px; font-weight:700; color:#166534; margin:0;">Competition Timeline</h2>
         <div style="width:70px;"></div>
     </div>
 
@@ -1528,22 +1536,17 @@
         <button type="button" class="calendar-month-arrow" onclick="navigateCalendarMonth(1)">›</button>
     </div>
 
-    <div id="calendarSummaryBar" class="calendar-summary-bar"></div>
+    <div id="calendarNarrativeSummary" class="calendar-narrative-summary"></div>
 
     <div id="calendarFilterBar" class="calendar-filter-bar"></div>
 
     <div id="calendarGridMount" class="calendar-grid-mount"></div>
 
-    <div class="calendar-legend">
-        <span><span class="calendar-legend-dot" style="background:#2563eb;"></span>Started</span>
-        <span><span class="calendar-legend-dot" style="background:#7c3aed;"></span>Ready</span>
-        <span><span class="calendar-legend-dot" style="background:#166534;"></span>Passed</span>
-        <span>🏆 Milestone</span>
-    </div>
+    <div id="calendarLegendMount" class="calendar-legend"></div>
 
     <div class="calendar-highlights-section">
-        <div class="calendar-highlights-heading">Monthly Highlights</div>
-        <div id="calendarHighlightsMount" class="calendar-highlights-list"></div>
+        <div class="calendar-highlights-heading">Timeline</div>
+        <div id="calendarHighlightsMount" class="calendar-timeline-list"></div>
     </div>
 </div>
 
@@ -1707,8 +1710,8 @@
         <script src="js/starboard.js?v=1" defer></script>
 <script src="js/wordle.js?v=9" defer></script>
 <script src="intro.js?v=1" defer></script>
-<script src="js/challenge.js?v=29" defer></script>
-<script src="js/calendar.js?v=6" defer></script>
+<script src="js/challenge.js?v=30" defer></script>
+<script src="js/calendar.js?v=7" defer></script>
 <script src="js/menu.js?v=11" defer></script>
 <script src="js/push.js?v=7" defer></script>
 

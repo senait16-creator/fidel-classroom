@@ -1,31 +1,30 @@
 // =============================================================================
 // CALENDAR.JS
-// Generic month-grid calendar + event system — not hardcoded to Fidel
-// Competition. Everything below works off a plain CalendarEvent shape:
+// Competition Timeline — a season history of the competition, not a
+// scheduling tool. Built on a generic month-grid + event system that isn't
+// hardcoded to Fidel Competition: everything below works off a plain
+// CalendarEvent shape:
 //   { id, type, date ('YYYY-MM-DD'), title, shortLabel, teamName, teamId,
 //     studentName, levelNumber, notes }
 // and has no idea where that data came from. fetchCompetitionCalendarEvents()
-// is the one Competition-specific adapter, and it's now a thin read of a
-// single table (calendar_events) — every event type, individual or team,
-// is logged there by a DB trigger with its narrative title already
-// composed, so this file never re-derives English sentences from raw
-// progress data. A future calendar elsewhere in the app should add its own
-// fetchXEvents() adapter and reuse the renderer/day-detail/event-detail/
-// highlights functions as-is, instead of building a new calendar from
-// scratch.
+// is the one Competition-specific adapter, and it's a thin read of a single
+// table (calendar_events) — every event's narrative title is composed once,
+// at the source, by a DB trigger, so this file never re-derives English
+// sentences from raw progress data. A future timeline elsewhere in the app
+// should add its own fetchXEvents() adapter and reuse the renderer/
+// day-detail/event-detail/grouped-timeline functions as-is, instead of
+// building a new one from scratch.
 // =============================================================================
 
 // `category` drives the All/Individual/Team filter. `groupable: true` types
 // collapse into a count header ("3 students began Level 2") in day detail
 // when more than one happens the same day — a single occurrence renders as
 // a plain row instead. `emphasize: true` types are milestones — they never
-// group, and get their own gold banner in day detail plus a trophy badge
-// on the month grid. `highlight: true` is a separate, lighter flag: it
-// only controls whether a type shows up in Monthly Highlights, without
-// the banner/trophy treatment — level_passed uses this, since a student
-// finishing a level is worth surfacing in the month's story even though
-// it's common enough that it should still stay grouped/dot-only in the
-// day-by-day view.
+// group, and get their own gold banner wherever they appear (day detail,
+// the main timeline) plus a trophy badge on the month grid. `highlight:
+// true` is a separate, lighter flag: it marks a type as worth surfacing
+// even though it's common enough to stay dot-only on the grid — level_passed
+// uses this, since a student finishing a level is still worth telling.
 const CALENDAR_EVENT_TYPES = {
     level_started: {
         icon: '✍️', color: '#2563eb', label: 'Started a level', category: 'individual', groupable: true,
@@ -44,7 +43,7 @@ const CALENDAR_EVENT_TYPES = {
     all_teams_completed_level: { icon: '🎉', color: '#be185d', label: 'Every team caught up', category: 'team', emphasize: true },
     // Dormant — no write path wired up yet, included so the types exist
     // end-to-end and prove out "add a type without redesigning the
-    // calendar." See the SQL notes for how to wire either one up.
+    // timeline." See the SQL notes for how to wire either one up.
     captain_change:         { icon: '👑', color: '#7e22ce', label: 'New team captain', category: 'team', emphasize: true },
     competition_milestone:  { icon: '🎯', color: '#0891b2', label: 'Competition milestone', category: 'team', emphasize: true }
 };
@@ -57,9 +56,13 @@ const CALENDAR_FILTERS = [
 
 const CALENDAR_WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const CALENDAR_MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const CALENDAR_GENERAL_GROUP_COLOR = '#475569';
 
 // -----------------------------------------------------------------------------
-// Generic month-grid renderer
+// Generic month-grid renderer — dots represent TEAMS with activity that
+// day (one dot per team, not one per event), so the grid answers "which
+// teams were active" at a glance. A milestone day additionally gets a
+// trophy badge + gold background regardless of which team it belongs to.
 // -----------------------------------------------------------------------------
 
 function formatCalendarDateKey(year, month, day) {
@@ -75,12 +78,13 @@ function groupCalendarEventsByDate(events) {
     return map;
 }
 
+function calendarTeamColor(teamName) {
+    return typeof getTeamHex === 'function' ? getTeamHex(teamName) : CALENDAR_GENERAL_GROUP_COLOR;
+}
+
 // mountEl: the grid container. events: CalendarEvent[] for the visible month
 // (already filtered, if a filter is active). onDayClick(dateKey, eventsForThatDay)
-// fires when a day cell is tapped. Cells show at most one dot per event TYPE
-// present (not one per event) so they stay tiny regardless of volume, and a
-// milestone day gets a trophy badge + gold background instead of just
-// another dot.
+// fires when a day cell is tapped.
 function renderCalendarMonthGrid(mountEl, year, month, events, onDayClick) {
     if (!mountEl) return;
 
@@ -104,13 +108,11 @@ function renderCalendarMonthGrid(mountEl, year, month, events, onDayClick) {
         const hasMilestone = dayEvents.some(ev => CALENDAR_EVENT_TYPES[ev.type]?.emphasize);
         const isToday = dateKey === todayKey;
 
-        const typesPresent = [...new Set(
-            dayEvents.filter(ev => !CALENDAR_EVENT_TYPES[ev.type]?.emphasize).map(ev => ev.type)
-        )];
-        const dots = typesPresent.map(type => {
-            const meta = CALENDAR_EVENT_TYPES[type] || {};
-            return `<span class="calendar-day-dot" style="background:${meta.color || '#94a3b8'};" title="${meta.label || type}"></span>`;
-        }).join('');
+        const teamsPresent = [...new Set(dayEvents.filter(ev => ev.teamName).map(ev => ev.teamName))];
+        const hasGeneral = dayEvents.some(ev => !ev.teamName);
+        const dots = teamsPresent.map(teamName =>
+            `<span class="calendar-day-dot" style="background:${calendarTeamColor(teamName)};" title="${teamName}"></span>`
+        ).join('') + (hasGeneral ? `<span class="calendar-day-dot" style="background:${CALENDAR_GENERAL_GROUP_COLOR};" title="Competition-wide"></span>` : '');
         const badge = hasMilestone ? `<span class="calendar-day-trophy">🏆</span>` : '';
 
         html += `
@@ -142,10 +144,88 @@ function filterCalendarEvents(events, filterKey) {
 window.filterCalendarEvents = filterCalendarEvents;
 
 // -----------------------------------------------------------------------------
-// Competition Calendar — the current consumer of the generic renderer above.
-// A future calendar elsewhere in the app adds its own adapter function and
-// calls renderCalendarMonthGrid()/the detail overlays the same way, without
-// touching anything above this line.
+// Shared "grouped by team" renderer — used by both the day-detail popup and
+// the main monthly Timeline, so a date's story and the month's story read
+// the same way. Team-less events (e.g. "Every team caught up") get their
+// own Competition-wide section, shown first.
+// -----------------------------------------------------------------------------
+
+function renderTimelineEventRow(ev) {
+    const meta = CALENDAR_EVENT_TYPES[ev.type] || {};
+    if (meta.emphasize) {
+        return `
+            <button type="button" class="calendar-banner-card" data-event-id="${ev.id}">
+                <span class="calendar-banner-icon">${meta.icon || '🏆'}</span>
+                <span class="calendar-banner-text">${ev.title}</span>
+            </button>
+        `;
+    }
+    return `
+        <button type="button" class="timeline-event-row" data-event-id="${ev.id}">
+            <span class="timeline-event-icon">${meta.icon || '•'}</span>
+            <span class="timeline-event-text">${ev.title}</span>
+        </button>
+    `;
+}
+
+function renderEventsGroupedByTeam(events) {
+    const general = events.filter(ev => !ev.teamName);
+    const byTeam = {};
+    events.filter(ev => ev.teamName).forEach(ev => {
+        if (!byTeam[ev.teamName]) byTeam[ev.teamName] = [];
+        byTeam[ev.teamName].push(ev);
+    });
+
+    // Most recently active team first — reads like "what's happening now,"
+    // ties broken alphabetically for a stable order.
+    const teamNames = Object.keys(byTeam).sort((a, b) => {
+        const latest = (name) => byTeam[name].reduce((max, ev) => (ev.date > max ? ev.date : max), '');
+        const cmp = latest(b).localeCompare(latest(a));
+        return cmp !== 0 ? cmp : a.localeCompare(b);
+    });
+
+    const eventsById = {};
+    events.forEach(ev => { eventsById[ev.id] = ev; });
+
+    let html = '';
+
+    if (general.length > 0) {
+        const sortedGeneral = [...general].sort((a, b) => a.date.localeCompare(b.date));
+        html += `
+            <div class="timeline-team-group">
+                <div class="timeline-team-header"><span class="timeline-team-dot" style="background:${CALENDAR_GENERAL_GROUP_COLOR};"></span> Competition-wide</div>
+                <div class="timeline-team-items">${sortedGeneral.map(renderTimelineEventRow).join('')}</div>
+            </div>
+        `;
+    }
+
+    teamNames.forEach(teamName => {
+        const teamEvents = [...byTeam[teamName]].sort((a, b) => a.date.localeCompare(b.date));
+        html += `
+            <div class="timeline-team-group">
+                <div class="timeline-team-header"><span class="timeline-team-dot" style="background:${calendarTeamColor(teamName)};"></span> ${teamName}</div>
+                <div class="timeline-team-items">${teamEvents.map(renderTimelineEventRow).join('')}</div>
+            </div>
+        `;
+    });
+
+    return { html, eventsById };
+}
+
+function wireTimelineEventClicks(mount, eventsById) {
+    mount.querySelectorAll('[data-event-id]').forEach(el => {
+        el.onclick = (e) => {
+            e.stopPropagation();
+            const ev = eventsById[el.getAttribute('data-event-id')];
+            if (ev) openCalendarEventDetail(ev);
+        };
+    });
+}
+
+// -----------------------------------------------------------------------------
+// Competition Timeline — the current consumer of the generic renderer above.
+// A future timeline elsewhere in the app adds its own adapter function and
+// calls these same pieces, without touching anything above this line.
 // -----------------------------------------------------------------------------
 
 let calendarViewYear = null;
@@ -244,66 +324,77 @@ function renderCalendarFilterBar() {
     });
 }
 
-// Summary + Highlights always reflect the full month regardless of the
-// active filter — the filter narrows what the day grid shows, not the
-// month's headline numbers or story.
-function renderCalendarMonthSummary(events) {
-    const mount = document.getElementById('calendarSummaryBar');
-    if (!mount) return;
-    const started = events.filter(ev => ev.type === 'level_started').length;
-    const passed = events.filter(ev => ev.type === 'level_passed').length;
-    const levelUps = events.filter(ev => ev.type === 'team_level_up').length;
-
-    mount.innerHTML = `
-        <span><strong>${started}</strong> level${started === 1 ? '' : 's'} started</span>
-        <span><strong>${passed}</strong> writing test${passed === 1 ? '' : 's'} passed</span>
-        <span><strong>${levelUps}</strong> team level-up${levelUps === 1 ? '' : 's'}</span>
-    `;
-}
-
-function renderCalendarHighlights(events) {
-    const mount = document.getElementById('calendarHighlightsMount');
+// A one-line headline instead of raw stats: leads with "Team X took the
+// lead" when a first_to_level milestone happened this month (the most
+// recent one, if more than one), otherwise falls back to a simple count of
+// the month's two most common individual milestones. Always reflects the
+// full month regardless of the active filter — the filter narrows what the
+// day grid/timeline show, not the month's headline.
+function renderCalendarNarrativeSummary(events) {
+    const mount = document.getElementById('calendarNarrativeSummary');
     if (!mount) return;
 
-    const highlights = events
-        .filter(ev => { const meta = CALENDAR_EVENT_TYPES[ev.type]; return meta?.emphasize || meta?.highlight; })
-        .sort((a, b) => a.date.localeCompare(b.date));
+    const firstToLevel = events
+        .filter(ev => ev.type === 'first_to_level')
+        .sort((a, b) => b.date.localeCompare(a.date))[0];
 
-    if (highlights.length === 0) {
-        mount.innerHTML = `<p class="calendar-highlights-empty">No major milestones yet this month.</p>`;
+    if (firstToLevel) {
+        mount.innerText = `${firstToLevel.teamName} took the lead.`;
         return;
     }
 
-    const eventsById = {};
-    highlights.forEach(ev => { eventsById[ev.id] = ev; });
+    const started = events.filter(ev => ev.type === 'level_started').length;
+    const passed = events.filter(ev => ev.type === 'level_passed').length;
 
-    mount.innerHTML = highlights.map(ev => {
-        const meta = CALENDAR_EVENT_TYPES[ev.type] || {};
-        const d = new Date(ev.date + 'T00:00:00');
-        const dateLabel = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        return `
-            <button type="button" class="calendar-highlight-item" data-event-id="${ev.id}">
-                <span class="calendar-highlight-date">${dateLabel}</span>
-                <span class="calendar-highlight-icon">${meta.icon || '🏆'}</span>
-                <span class="calendar-highlight-text">${ev.title}</span>
-            </button>
-        `;
-    }).join('');
+    if (started === 0 && passed === 0) {
+        mount.innerText = 'Nothing to show yet this month.';
+        return;
+    }
 
-    mount.querySelectorAll('.calendar-highlight-item').forEach(item => {
-        item.onclick = () => openCalendarEventDetail(eventsById[item.getAttribute('data-event-id')]);
-    });
+    mount.innerText = `${started} student${started === 1 ? '' : 's'} started new level${started === 1 ? '' : 's'} • ${passed} writing test${passed === 1 ? '' : 's'} passed`;
 }
 
-// Re-renders the grid from the already-fetched month cache — used when
-// switching filters so that doesn't need a network round trip. Summary and
-// Highlights always use the unfiltered cache (see note above).
+// Dynamic legend — only lists teams that actually had activity this month
+// (plus a generic milestone key), since dots are team-colored rather than
+// a fixed palette.
+function renderCalendarLegend(events) {
+    const mount = document.getElementById('calendarLegendMount');
+    if (!mount) return;
+
+    const teamNames = [...new Set(events.filter(ev => ev.teamName).map(ev => ev.teamName))].sort();
+    const hasGeneral = events.some(ev => !ev.teamName);
+
+    mount.innerHTML = teamNames.map(name => `
+        <span><span class="calendar-legend-dot" style="background:${calendarTeamColor(name)};"></span>${name}</span>
+    `).join('') + (hasGeneral ? `<span><span class="calendar-legend-dot" style="background:${CALENDAR_GENERAL_GROUP_COLOR};"></span>Competition-wide</span>` : '')
+      + `<span>🏆 Milestone</span>`;
+}
+
+function renderCompetitionTimeline(events) {
+    const mount = document.getElementById('calendarHighlightsMount');
+    if (!mount) return;
+
+    if (events.length === 0) {
+        mount.innerHTML = `<p class="calendar-highlights-empty">Nothing to show yet this month.</p>`;
+        return;
+    }
+
+    const { html, eventsById } = renderEventsGroupedByTeam(events);
+    mount.innerHTML = html;
+    wireTimelineEventClicks(mount, eventsById);
+}
+
+// Re-renders the grid + timeline from the already-fetched month cache —
+// used when switching filters so that doesn't need a network round trip.
+// The narrative summary and legend always use the unfiltered cache (see
+// note above renderCalendarNarrativeSummary).
 function renderCalendarFromCache() {
     const mount = document.getElementById('calendarGridMount');
-    renderCalendarMonthSummary(calendarMonthEventsCache);
-    renderCalendarHighlights(calendarMonthEventsCache);
+    renderCalendarNarrativeSummary(calendarMonthEventsCache);
+    renderCalendarLegend(calendarMonthEventsCache);
     const visible = filterCalendarEvents(calendarMonthEventsCache, calendarActiveFilter);
     renderCalendarMonthGrid(mount, calendarViewYear, calendarViewMonth, visible, openCalendarDay);
+    renderCompetitionTimeline(visible);
 }
 
 async function renderCompetitionCalendarMonth() {
@@ -317,11 +408,45 @@ async function renderCompetitionCalendarMonth() {
 }
 
 // -----------------------------------------------------------------------------
-// Day detail — groups same-type-and-level events into an expandable count
-// header ("3 students began Level 2") instead of a wall of near-identical
-// rows; a single occurrence renders as a plain row instead. Milestone
-// events (team_level_up, first_to_level, ...) never group — they get their
-// own gold banner at the top of the day so they dominate.
+// Dashboard preview — a compact teaser on the Competition Dashboard itself,
+// since a feature hidden behind an icon goes undiscovered. Reuses the same
+// month-grid renderer (shrunk via CSS) and shows the 5 most recent events
+// as a flat list, since a "preview" doesn't need the full team-grouped story.
+// -----------------------------------------------------------------------------
+
+async function renderTimelinePreview() {
+    const miniMount = document.getElementById('timelinePreviewMiniCalendar');
+    const highlightsMount = document.getElementById('timelinePreviewHighlights');
+    if (!miniMount && !highlightsMount) return;
+
+    const now = new Date();
+    const events = await fetchCompetitionCalendarEvents(now.getFullYear(), now.getMonth());
+
+    if (miniMount) {
+        renderCalendarMonthGrid(miniMount, now.getFullYear(), now.getMonth(), events, () => openCompetitionCalendar());
+    }
+
+    if (highlightsMount) {
+        const recent = [...events].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
+        if (recent.length === 0) {
+            highlightsMount.innerHTML = `<p class="timeline-preview-empty">No activity yet this month.</p>`;
+        } else {
+            const eventsById = {};
+            recent.forEach(ev => { eventsById[ev.id] = ev; });
+            highlightsMount.innerHTML = recent.map(ev => {
+                const meta = CALENDAR_EVENT_TYPES[ev.type] || {};
+                return `<button type="button" class="timeline-preview-item" data-event-id="${ev.id}"><span>${meta.icon || '•'}</span> ${ev.title}</button>`;
+            }).join('');
+            wireTimelineEventClicks(highlightsMount, eventsById);
+        }
+    }
+}
+window.renderTimelinePreview = renderTimelinePreview;
+
+// -----------------------------------------------------------------------------
+// Day detail + event detail — day detail reuses the same grouped-by-team
+// renderer as the main timeline, so a single date's story reads the same
+// way as the month's.
 // -----------------------------------------------------------------------------
 
 function openCalendarDay(dateKey, dayEvents) {
@@ -339,79 +464,9 @@ function openCalendarDay(dateKey, dayEvents) {
         return;
     }
 
-    const eventsById = {};
-    dayEvents.forEach(ev => { eventsById[ev.id] = ev; });
-
-    const milestones = dayEvents.filter(ev => CALENDAR_EVENT_TYPES[ev.type]?.emphasize);
-    const groupable = dayEvents.filter(ev => !CALENDAR_EVENT_TYPES[ev.type]?.emphasize);
-
-    let html = milestones.map(ev => {
-        const meta = CALENDAR_EVENT_TYPES[ev.type] || {};
-        return `
-            <button type="button" class="calendar-banner-card" data-event-id="${ev.id}">
-                <span class="calendar-banner-icon">${meta.icon || '🏆'}</span>
-                <span class="calendar-banner-text">${ev.title}</span>
-            </button>
-        `;
-    }).join('');
-
-    // Group by (type, level) so "3 students began Level 2" doesn't get
-    // conflated with a student beginning a different level the same day.
-    const byGroup = {};
-    groupable.forEach(ev => {
-        const key = `${ev.type}::${ev.levelNumber || 'na'}`;
-        if (!byGroup[key]) byGroup[key] = { type: ev.type, levelNumber: ev.levelNumber, items: [] };
-        byGroup[key].items.push(ev);
-    });
-
-    html += Object.values(byGroup).map(({ type, levelNumber, items }) => {
-        const meta = CALENDAR_EVENT_TYPES[type] || {};
-
-        if (items.length === 1) {
-            const ev = items[0];
-            return `
-                <button type="button" class="calendar-group-header" data-event-id="${ev.id}">
-                    <span class="calendar-group-icon" style="background:${meta.color || '#94a3b8'};">${meta.icon || '•'}</span>
-                    <span class="calendar-group-label">${ev.title}</span>
-                </button>
-            `;
-        }
-
-        const label = meta.groupLabel ? meta.groupLabel(items.length, levelNumber) : `${items.length} ${meta.label || type}`;
-        const groupId = `cal-group-${type}-${levelNumber}-${Math.random().toString(36).slice(2, 8)}`;
-        return `
-            <div class="calendar-group">
-                <button type="button" class="calendar-group-header" data-target="${groupId}">
-                    <span class="calendar-group-icon" style="background:${meta.color || '#94a3b8'};">${meta.icon || '•'}</span>
-                    <span class="calendar-group-label">${label}</span>
-                    <span class="calendar-group-arrow">▾</span>
-                </button>
-                <div class="calendar-group-body" id="${groupId}" style="display:none;">
-                    ${items.map(ev => `<button type="button" class="calendar-group-item" data-event-id="${ev.id}">${ev.shortLabel || ev.title}</button>`).join('')}
-                </div>
-            </div>
-        `;
-    }).join('');
-
+    const { html, eventsById } = renderEventsGroupedByTeam(dayEvents);
     list.innerHTML = html;
-
-    list.querySelectorAll('.calendar-group-header[data-target]').forEach(header => {
-        header.onclick = () => {
-            const body = document.getElementById(header.getAttribute('data-target'));
-            if (!body) return;
-            const isOpen = body.style.display === 'block';
-            body.style.display = isOpen ? 'none' : 'block';
-            header.classList.toggle('open', !isOpen);
-        };
-    });
-
-    list.querySelectorAll('[data-event-id]').forEach(el => {
-        el.onclick = (e) => {
-            e.stopPropagation();
-            const ev = eventsById[el.getAttribute('data-event-id')];
-            if (ev) openCalendarEventDetail(ev);
-        };
-    });
+    wireTimelineEventClicks(list, eventsById);
 
     overlay.style.display = 'flex';
 }

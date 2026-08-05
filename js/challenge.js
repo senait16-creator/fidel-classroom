@@ -193,6 +193,7 @@ async function renderChallengeDashboard() {
     await renderTeamUrgencyCard(team);
     await renderChallengeTeamStatus(team);
     await renderChallengeDashboardRace();
+    if (typeof renderTimelinePreview === "function") await renderTimelinePreview();
     wireCurrentLevelResources(levels, team);
 }
 
