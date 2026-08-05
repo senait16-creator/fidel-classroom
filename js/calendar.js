@@ -174,9 +174,20 @@ async function fetchCompetitionCalendarEvents(year, month) {
     const teamsById = {};
     (teamsRes.data || []).forEach(t => { teamsById[t.id] = t; });
 
+    // Practice/test teams (Purple Team) never show up in the calendar —
+    // neither their own milestones nor individual members' submissions.
+    const excludedTeamIds = new Set(
+        (teamsRes.data || []).filter(t => isExcludedTestTeamName(t.name)).map(t => t.id)
+    );
+    const isExcludedStudent = (studentId) => {
+        const student = profilesById[studentId];
+        return !!student && excludedTeamIds.has(student.team_id);
+    };
+
     const events = [];
 
     (submittedRes.data || []).forEach(row => {
+        if (isExcludedStudent(row.student_id)) return;
         const student = profilesById[row.student_id];
         const team = student ? teamsById[student.team_id] : null;
         const name = student?.nickname || 'A student';
@@ -195,6 +206,7 @@ async function fetchCompetitionCalendarEvents(year, month) {
     });
 
     (approvedRes.data || []).forEach(row => {
+        if (isExcludedStudent(row.student_id)) return;
         const student = profilesById[row.student_id];
         const team = student ? teamsById[student.team_id] : null;
         const name = student?.nickname || 'A student';
@@ -217,6 +229,8 @@ async function fetchCompetitionCalendarEvents(year, month) {
     // optional DB trigger is enabled (level-ups, captain changes) or a
     // teacher authors one (announcements).
     (loggedRes.data || []).forEach(row => {
+        if (row.team_id && excludedTeamIds.has(row.team_id)) return;
+        if (row.student_id && isExcludedStudent(row.student_id)) return;
         const team = teamsById[row.team_id];
         const student = row.student_id ? profilesById[row.student_id] : null;
         events.push({
