@@ -353,7 +353,7 @@ function selectAvatar(symbol, element) {
 
 function openProfileEdit() {
     if (!currentUser) return;
-    isEditingProfile = false;
+    isEditingProfile = true;
 
     document.getElementById("studentDashboard").style.display  = "none";
     document.getElementById("teacherOnlyDashboard").style.display = "none";
@@ -380,8 +380,20 @@ async function saveProfileData(event) {
         avatar:   selectedAvatarSymbol
     };
 
-    // Only assign a team at first profile creation, never during edits
-    if (!isEditingProfile) {
+    // Only assign a team at first profile creation, never during edits — a
+    // student changing their nickname or avatar must never touch team_id.
+    // Checked directly against the database (keyed on the stable auth user
+    // id, which never changes even when nickname/avatar do), not just the
+    // isEditingProfile UI flag — that flag being wrong once already wiped a
+    // real student's team assignment via this same upsert, so this is a
+    // second, independent guard against the same class of bug.
+    const { data: existingProfile } = await _supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .maybeSingle();
+
+    if (!existingProfile) {
         const wantsTeam = document.querySelector('input[name="teamChoice"]:checked')?.value !== 'solo';
         payload.team_id = wantsTeam ? await assignNextTeam() : null;
     }
