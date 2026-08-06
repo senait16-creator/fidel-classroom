@@ -135,7 +135,13 @@ async function resolveCaptainStatus(profile) {
 // added was auto-approved in the same migration that created the column,
 // so this only ever blocks brand-new signups.
 function hasAppAccess(profile) {
-    return profile?.access_status === 'approved' || profile?.access_status === 'explore';
+    // Admins always have access, independent of access_status — this used
+    // to only be guaranteed by a separate currentUser.email === ADMIN_EMAIL
+    // check at the initial-login call site, which meant "Check Again" and
+    // the post-signup save (the other two places this gate gets checked)
+    // had no such bypass and could strand an admin account on the pending
+    // screen with no way out.
+    return profile?.is_admin === true || profile?.access_status === 'approved' || profile?.access_status === 'explore';
 }
 window.hasAppAccess = hasAppAccess;
 
