@@ -248,69 +248,35 @@ function computeLevelPacing(dayOfWeek, lessonTime, approved, required) {
 
 // Credits an approved writing submission onto student_family_progress —
 // shared by the teacher's and captain's approve-submission flows so they
-// can't drift apart. Upserts rather than updates: the free-form "pick any
-// letter" submit path in the Team Hub (openTeamHubFinalSubmit) has no
-// gate requiring the streak game be played first, unlike the Practice
-// Sheet flow, so a matching row may not exist yet. A plain UPDATE would
-// then silently match zero rows and the approval would never register
-// anywhere else in the app (roster, Team Race, the student's own view).
+// can't drift apart. Routed through a SECURITY DEFINER RPC
+// (credit_approved_writing_progress) rather than a client-side upsert:
+// Postgres's INSERT ... ON CONFLICT DO UPDATE only treats an existing row
+// as a conflict if it passes the UPDATE policy's USING clause at the
+// arbiter-lookup step — a stricter, differently-evaluated check than the
+// same boolean expression returning true anywhere else. That silently
+// failed for captains specifically (confirmed by direct reproduction),
+// and was the cause of a recurring bug affecting several students (Kash,
+// kindeh, Adam, Toda, Kai) where writing_submissions showed "approved"
+// but writing_passed stayed false everywhere else (roster, Team Race,
+// the student's own view). Running the write inside a SECURITY DEFINER
+// function sidesteps the arbiter check entirely instead of just
+// detecting the failure after the fact.
 async function creditApprovedWritingToProgress(studentId, baseLetter) {
-    const { data: progressRow } = await _supabase
-        .from('student_family_progress')
-        .select('streak_passed')
-        .eq('student_id', studentId)
-        .eq('base_letter', baseLetter)
-        .maybeSingle();
-
-    const payload = {
-        student_id: studentId,
-        base_letter: baseLetter,
-        writing_passed: true
-    };
-    if (progressRow?.streak_passed) payload.completed_at = new Date().toISOString();
-
-    if (!progressRow) {
-        // Brand new row — resolve which level this letter belongs to so
-        // level-scoped queries (roster, Team Race) can still find it.
-        const { data: levelRow } = await _supabase
-            .from('challenge_levels')
-            .select('level_number')
-            .contains('letter_families', [baseLetter])
-            .maybeSingle();
-        if (levelRow?.level_number) payload.level_number = levelRow.level_number;
-    }
-
-    const { error } = await _supabase
-        .from('student_family_progress')
-        .upsert(payload, { onConflict: 'student_id,base_letter' });
+    const { data, error } = await _supabase
+        .rpc('credit_approved_writing_progress', {
+            p_student_id: studentId,
+            p_base_letter: baseLetter
+        });
 
     if (error) {
         console.error("Failed to credit approved writing to progress:", error);
         return error;
     }
 
-    // A successful upsert() call here does NOT guarantee the row was
-    // actually written — this was the missing piece behind a recurring,
-    // silent bug (Kash, kindeh, Adam, Toda): if an RLS UPDATE policy's
-    // USING clause excludes the specific conflicting row, Postgres just
-    // performs 0 rows of the DO UPDATE, no error at all, and Supabase
-    // reports success. The only way to actually know is to read the row
-    // back and check the field really changed.
-    const { data: verifyRow, error: verifyError } = await _supabase
-        .from('student_family_progress')
-        .select('writing_passed')
-        .eq('student_id', studentId)
-        .eq('base_letter', baseLetter)
-        .maybeSingle();
-
-    if (verifyError) {
-        console.error("Failed to verify writing credit:", verifyError);
-        return verifyError;
-    }
-
-    if (!verifyRow?.writing_passed) {
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row?.writing_passed) {
         const silentFailure = new Error(
-            `Upsert reported success but writing_passed is still false for ${baseLetter} — likely an RLS policy silently blocking the update.`
+            `credit_approved_writing_progress ran but writing_passed is still false for ${baseLetter}.`
         );
         console.error(silentFailure.message);
         return silentFailure;
