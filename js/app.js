@@ -439,7 +439,7 @@ function launchDashboard(viewMode) {
 
 if (viewMode === "teacher") {
     showScreen("teacherOnlyDashboard");
-    if (typeof loadTeacherAccessRequests === 'function') loadTeacherAccessRequests('accessRequestsQueueMount');
+    if (typeof switchTeacherTab === 'function') switchTeacherTab('home');
     loadTeacherRosterData();
     teacherRefreshConfigurationDropdowns();
     loadTeacherWritingQueue();

@@ -910,7 +910,6 @@ async function loadTeacherTeamProgress() {
                     <span>Level ${team.current_level} • Streak: ${team.streak_count || 0}</span>
                 </div>
                 <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
-                    <button class="btn-secondary btn-edit-meeting" style="font-size:11px; padding:6px 10px;" title="Edit this team's lesson day/time">${icon('calendar')} Lesson Schedule</button>
                     <button class="btn-secondary btn-recheck" style="font-size:12px; padding:10px 14px; min-height:40px;" title="Recalculate this team's advancement status. Safe to run any time, only advances a team that's actually ready">${icon('refresh')} Recalculate</button>
                     <button class="team-members-toggle" aria-label="Show team members">▼</button>
                 </div>
@@ -921,11 +920,6 @@ async function loadTeacherTeamProgress() {
         row.querySelector('.btn-recheck').onclick = (e) => {
             e.stopPropagation();
             recheckTeamReadiness(team.id);
-        };
-
-        row.querySelector('.btn-edit-meeting').onclick = (e) => {
-            e.stopPropagation();
-            teacherEditTeamMeeting(team.id, team.name);
         };
 
         const toggleBtn = row.querySelector('.team-members-toggle');
@@ -1023,50 +1017,37 @@ function setHealthTile(tileId, value, flagAttention = true) {
     if (flagAttention) tile.classList.toggle('attention', value > 0);
 }
 
-async function renderTeacherHealthAndTasks() {
-    // "Today" is judged in the same timezone the lesson reminders use, so
-    // this tile and the actual reminders never disagree about what's
-    // happening today.
-    const todayWeekday = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', weekday: 'long' }).format(new Date());
+// Bottom-nav badges only ever show counts that require teacher action, and
+// disappear the moment that count hits zero — same "attention" contract as
+// the health tiles, just surfaced on the tab bar instead.
+function setTeacherNavBadge(badgeId, count) {
+    const badge = document.getElementById(badgeId);
+    if (!badge) return;
+    badge.innerText = count;
+    badge.style.display = count > 0 ? 'flex' : 'none';
+}
 
+async function renderTeacherHealthAndTasks() {
     const [
         { data: pendingSubs },
-        { data: levelRequests },
-        { data: lessonsToday },
-        { data: allProfiles },
-        { data: pendingAccess }
+        { data: levelRequests }
     ] = await Promise.all([
         _supabase.from('writing_submissions').select('id, student_id').eq('status', 'pending'),
-        _supabase.from('level_completion_requests').select('id').eq('status', 'pending'),
-        _supabase.from('team_meetings').select('team_id').eq('day_of_week', todayWeekday).not('lesson_time', 'is', null),
-        _supabase.from('profiles').select('id, is_admin'),
-        _supabase.from('profiles').select('id').eq('access_status', 'pending').eq('is_admin', false)
+        _supabase.from('level_completion_requests').select('id').eq('status', 'pending')
     ]);
 
     const pendingWritingCount = (pendingSubs || []).length;
     const pendingWritingStudents = new Set((pendingSubs || []).map(s => s.student_id)).size;
     const levelRequestCount = (levelRequests || []).length;
-    const lessonsTodayCount = (lessonsToday || []).length;
-    const pendingAccessCount = (pendingAccess || []).length;
 
-    setHealthTile('healthLessonsToday', lessonsTodayCount, false);
     setHealthTile('healthPendingReviews', pendingWritingCount);
     setHealthTile('healthLiveTestRequests', levelRequestCount);
-    setHealthTile('healthAccessRequests', pendingAccessCount);
+    setTeacherNavBadge('teacherNavBadgeCompetition', pendingWritingCount + levelRequestCount);
 
     const tasksMount = document.getElementById('teacherTodaysTasksMount');
     if (!tasksMount) return;
 
     tasksMount.innerHTML = `
-        <div class="teacher-task-row">
-            <div class="teacher-task-icon">${icon('key')}</div>
-            <div>
-                <div class="teacher-task-label">Access requests waiting</div>
-                <div class="teacher-task-sub">${pendingAccessCount > 0 ? 'New sign-ups need a decision' : 'None right now'}</div>
-            </div>
-            ${pendingAccessCount > 0 ? `<span class="teacher-task-count">${pendingAccessCount}</span>` : ''}
-            <button class="teacher-task-go" onclick="jumpToTeacherPanel('accessRequestsPanelBody')">View →</button>
-        </div>
         <div class="teacher-task-row">
             <div class="teacher-task-icon">${icon('pencil')}</div>
             <div>
@@ -1074,7 +1055,7 @@ async function renderTeacherHealthAndTasks() {
                 <div class="teacher-task-sub">${pendingWritingStudents > 0 ? `From ${pendingWritingStudents} student${pendingWritingStudents > 1 ? 's' : ''}` : 'All writing reviewed'}</div>
             </div>
             ${pendingWritingCount > 0 ? `<span class="teacher-task-count">${pendingWritingCount}</span>` : ''}
-            <button class="teacher-task-go" onclick="jumpToTeacherPanel('writingQueuePanelBody')">Review →</button>
+            <button class="teacher-task-go" onclick="switchTeacherTab('competition')">Review →</button>
         </div>
         <div class="teacher-task-row">
             <div class="teacher-task-icon">${icon('mic')}</div>
@@ -1083,7 +1064,7 @@ async function renderTeacherHealthAndTasks() {
                 <div class="teacher-task-sub">${levelRequestCount > 0 ? 'Students who cleared all 3 families' : 'None right now'}</div>
             </div>
             ${levelRequestCount > 0 ? `<span class="teacher-task-count">${levelRequestCount}</span>` : ''}
-            <button class="teacher-task-go" onclick="jumpToTeacherPanel('levelCompletionPanelBody')">View →</button>
+            <button class="teacher-task-go" onclick="switchTeacherTab('competition')">View →</button>
         </div>
     `;
 }
@@ -1110,14 +1091,12 @@ async function loadTeacherLeaderboard() {
 
     const [
         { data: raceSummary },
-        { data: meetings },
         { data: members },
         { data: pendingSubs },
         { data: helpFlags },
         advanceProgress
     ] = await Promise.all([
         _supabase.from('public_team_race_summary').select('team_id, team_percent').in('team_id', teamIds),
-        _supabase.from('team_meetings').select('team_id, day_of_week, meeting_time, lesson_time').in('team_id', teamIds),
         _supabase.from('profiles').select('id, team_id, is_captain, nickname').in('team_id', teamIds),
         _supabase.from('writing_submissions').select('student_id, status').eq('status', 'pending'),
         _supabase.from('help_flags').select('student_id').eq('is_resolved', false),
@@ -1126,21 +1105,6 @@ async function loadTeacherLeaderboard() {
 
     const percentByTeam = {};
     (raceSummary || []).forEach(r => { if (!(r.team_id in percentByTeam)) percentByTeam[r.team_id] = Math.round(r.team_percent || 0); });
-
-    const meetingByTeam = {};
-    (meetings || []).forEach(m => { meetingByTeam[m.team_id] = m; });
-
-    // Ordered like a weekly schedule — earliest day+time first, teams with
-    // no lesson set yet fall to the end instead of scattering alphabetically.
-    const WEEKDAY_ORDER = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    const scheduleSortKey = (teamId) => {
-        const meeting = meetingByTeam[teamId];
-        if (!meeting?.lesson_time) return Infinity;
-        const dayIndex = WEEKDAY_ORDER.indexOf(meeting.day_of_week);
-        const [h, m] = meeting.lesson_time.split(':').map(Number);
-        return (dayIndex === -1 ? WEEKDAY_ORDER.length : dayIndex) * 1440 + h * 60 + m;
-    };
-    teams.sort((a, b) => scheduleSortKey(a.id) - scheduleSortKey(b.id));
 
     const teamIdByStudent = {};
     const captainByTeam = {};
@@ -1170,15 +1134,10 @@ async function loadTeacherLeaderboard() {
     mount.innerHTML = teams.map(team => {
         const color = getColor(team.name);
         const percent = percentByTeam[team.id] ?? 0;
-        const meeting = meetingByTeam[team.id];
-        const lessonText = meeting?.lesson_time ? `${meeting.day_of_week} · ${meeting.meeting_time}` : 'No lesson set';
         const pending = pendingReviewsByTeam[team.id] || 0;
         const help = helpByTeam[team.id] || 0;
         const progress = advanceProgress[team.id] || { approved: 0, required: 0 };
         const captainName = captainByTeam[team.id];
-        const pacing = typeof computeLevelPacing === 'function'
-            ? computeLevelPacing(meeting?.day_of_week, meeting?.lesson_time, progress.approved, progress.required)
-            : null;
 
         return `
             <div class="snapshot-card">
@@ -1188,8 +1147,6 @@ async function loadTeacherLeaderboard() {
                     <span class="snapshot-level">Lvl ${team.current_level} · ${percent}%</span>
                 </div>
                 <div class="snapshot-track"><div class="snapshot-fill" style="width:${percent}%; background:${color};"></div></div>
-                <div class="snapshot-lesson">${icon('calendar')} ${lessonText}</div>
-                ${pacing ? `<div class="snapshot-pacing pacing-${pacing.status}">${pacing.label}</div>` : ''}
                 <div class="snapshot-stats">
                     <div class="snapshot-stat-row"><span class="k">Pending reviews</span><span class="v ${pending === 0 ? 'zero' : ''}">${pending}</span></div>
                     <div class="snapshot-stat-row"><span class="k">Help requests</span><span class="v ${help === 0 ? 'zero' : ''}">${help}</span></div>
@@ -1274,18 +1231,35 @@ async function loadTeacherCaptainOverview() {
 // ---------------------------------------------------------------------------
 
 // Collapses/expands a teacher dashboard panel — same idea as the student
-// sidebar's collapsible dropdowns, applied here so the teacher view isn't
-// one long uninterrupted scroll of 5 full panels on a phone.
+// sidebar's collapsible dropdowns, applied here so a tab isn't one long
+// uninterrupted scroll of several full panels on a phone.
 function toggleTeacherPanel(bodyId, headerEl) {
     document.getElementById(bodyId).classList.toggle('collapsed');
     headerEl.querySelector('.teacher-panel-toggle')?.classList.toggle('collapsed');
 }
 
-// Used by the Today's Tasks buttons to force a panel open and scroll to it,
-// even if the teacher had previously collapsed it.
+// Switches the Teacher Hub's active bottom-nav tab (Home / Students /
+// Competition / More). Each tab is a full show/hide swap — only one is on
+// the page at a time — rather than an anchor-scroll over one long page.
+function switchTeacherTab(tabName) {
+    document.querySelectorAll('.teacher-tab-panel').forEach(panel => {
+        panel.classList.toggle('active', panel.dataset.tab === tabName);
+    });
+    document.querySelectorAll('.teacher-nav-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.tab === tabName);
+    });
+    window.scrollTo({ top: 0 });
+}
+
+// Used by the still-live "Needs Attention" roster shortcuts to force a
+// panel open and scroll to it, even if the teacher had previously
+// collapsed it — first switching to whichever tab actually hosts that
+// panel now, since panels no longer all live on one page.
 function jumpToTeacherPanel(bodyId) {
     const body = document.getElementById(bodyId);
     if (!body) return;
+    const tabPanel = body.closest('.teacher-tab-panel');
+    if (tabPanel?.dataset.tab) switchTeacherTab(tabPanel.dataset.tab);
     body.classList.remove('collapsed');
     const header = body.previousElementSibling;
     header?.querySelector('.teacher-panel-toggle')?.classList.remove('collapsed');
@@ -1306,6 +1280,7 @@ window.saveTeacherLessonTime = saveTeacherLessonTime;
 window.teacherAssignStudentToPod = teacherAssignStudentToPod;
 window.toggleTeacherPanel = toggleTeacherPanel;
 window.jumpToTeacherPanel = jumpToTeacherPanel;
+window.switchTeacherTab = switchTeacherTab;
 window.loadTeacherClassroomOverview = loadTeacherClassroomOverview;
 window.recheckTeamReadiness = recheckTeamReadiness;
 

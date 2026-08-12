@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=50">
+    <link rel="stylesheet" href="style.css?v=51">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -173,168 +173,195 @@
 <div id="teacherOnlyDashboard">
     <div class="workspace-title" style="margin-top:20px;">
         <span>Teacher Hub</span>
-        <button class="btn-primary" style="width:auto; padding:8px 16px; font-size:13px;" onclick="switchAdminPanelsFromDashboard('student')">Switch to Student View →</button>
     </div>
 
     <!-- ============================================================
-         CLASSROOM OVERVIEW — answers "what needs my attention right
-         now" before the detailed panels below. All of it reads from
-         the same tables the panels below already use.
+         HOME — "what needs my attention today" + "how is the classroom
+         doing overall." Kept deliberately lean: counts here are
+         shortcuts into Competition, not duplicated functionality.
          ============================================================ -->
-    <div class="teacher-health-grid" id="teacherHealthGrid">
-        <div class="teacher-health-tile teacher-health-tile-tap" id="healthAccessRequests" onclick="jumpToTeacherPanel('accessRequestsPanelBody')">
-            <div class="teacher-health-value">–</div>
-            <div class="teacher-health-label">Access Requests</div>
-        </div>
-        <div class="teacher-health-tile" id="healthLessonsToday">
-            <div class="teacher-health-value">–</div>
-            <div class="teacher-health-label">Lessons Today</div>
-        </div>
-        <div class="teacher-health-tile teacher-health-tile-tap" id="healthPendingReviews" onclick="jumpToTeacherPanel('writingQueuePanelBody')">
-            <div class="teacher-health-value">–</div>
-            <div class="teacher-health-label">Pending Reviews</div>
-        </div>
-        <div class="teacher-health-tile teacher-health-tile-tap" id="healthLiveTestRequests" onclick="jumpToTeacherPanel('levelCompletionPanelBody')">
-            <div class="teacher-health-value">–</div>
-            <div class="teacher-health-label">Live Test Requests</div>
-        </div>
-    </div>
-
-    <div class="teacher-overview-card">
-        <div class="teacher-overview-title"><span data-icon="check-circle"></span> Today's Tasks</div>
-        <div id="teacherTodaysTasksMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
-    </div>
-
-    <div class="teacher-overview-card">
-        <div class="teacher-overview-title"><span data-icon="trophy"></span> Team Snapshot</div>
-        <div id="teacherLeaderboardMount" class="teacher-snapshot-grid"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
-    </div>
-
-    <div class="teacher-overview-card">
-        <div class="teacher-overview-title"><span data-icon="crown"></span> Captain Overview</div>
-        <div id="teacherCaptainOverviewMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
-    </div>
-
-    <div class="teacher-overview-divider">Detailed Panels</div>
-
-<div class="teacher-panel" style="margin-bottom:20px;">
-    <div class="teacher-panel-header" onclick="toggleTeacherPanel('accessRequestsPanelBody', this)">
-        <h2 style="font-size:18px; color:var(--neutral-dark);"><span data-icon="key"></span> Access Requests</h2>
-        <button class="teacher-panel-toggle">▼</button>
-    </div>
-    <div class="teacher-panel-body" id="accessRequestsPanelBody">
-        <p style="font-size:13px; color:#64748b; margin-bottom:12px;">New sign-ups waiting for access. Approve real students into the Fidel Challenge classroom, or grant paid Explore access to anyone else.</p>
-        <div id="accessRequestsQueueMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
-    </div>
-</div>
-
-<div class="teacher-panel" style="margin-bottom:20px;">
-    <div class="teacher-panel-header" onclick="toggleTeacherPanel('rosterPanelBody', this)">
-        <h2 style="font-size:18px; color:var(--neutral-dark);">Classroom Roster</h2>
-        <button class="teacher-panel-toggle">▼</button>
-    </div>
-    <div class="teacher-panel-body" id="rosterPanelBody">
-        <p style="font-size:13px; color:#64748b; margin-bottom:12px;">Where every student and team stands in the Fidel Challenge.</p>
-        <div style="display:flex; justify-content:flex-end; margin-bottom:16px;">
-            <button class="btn-primary" style="width:auto; padding:8px 18px; font-size:13px;" onclick="exportProgressCSV()">⬇️ Export Progress CSV</button>
+    <div class="teacher-tab-panel active" data-tab="home" id="teacherTabHome">
+        <div class="teacher-health-grid" id="teacherHealthGrid">
+            <div class="teacher-health-tile teacher-health-tile-tap" id="healthPendingReviews" onclick="switchTeacherTab('competition')">
+                <div class="teacher-health-value">–</div>
+                <div class="teacher-health-label">Pending Reviews</div>
+            </div>
+            <div class="teacher-health-tile teacher-health-tile-tap" id="healthLiveTestRequests" onclick="switchTeacherTab('competition')">
+                <div class="teacher-health-value">–</div>
+                <div class="teacher-health-label">Live Test Requests</div>
+            </div>
         </div>
 
-        <div class="roster-section-title">🚨 Needs Attention</div>
-        <div id="rosterAttentionMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
+        <div class="teacher-overview-card">
+            <div class="teacher-overview-title"><span data-icon="check-circle"></span> Today's Tasks</div>
+            <div id="teacherTodaysTasksMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
+        </div>
 
-        <div class="roster-section-title"><span data-icon="trophy"></span> In the Fidel Challenge</div>
-        <div id="rosterChallengeMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
-
-        <div class="roster-section-title"><span data-icon="note-pencil"></span> Signed Up, Not Yet Competing</div>
-        <div id="rosterSoloMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
-    </div>
-</div>
-
-<div class="teacher-panel" style="margin-bottom:20px;">
-    <div class="teacher-panel-header" onclick="toggleTeacherPanel('levelCompletionPanelBody', this)">
-        <h2 style="font-size:18px; color:var(--neutral-dark);"><span data-icon="star"></span> Level Completion Requests</h2>
-        <button class="teacher-panel-toggle">▼</button>
-    </div>
-    <div class="teacher-panel-body" id="levelCompletionPanelBody">
-        <p style="font-size:13px; color:#64748b; margin-bottom:12px;">Students who cleared all 3 families and are requesting level advancement.</p>
-        <div id="levelCompletionQueueMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
-    </div>
-</div>
-
-<div class="teacher-panel" style="margin-bottom:20px;">
-    <div class="teacher-panel-header" onclick="toggleTeacherPanel('writingQueuePanelBody', this)">
-        <h2 style="font-size:18px; color:var(--neutral-dark);">Pending Writing Submissions</h2>
-        <button class="teacher-panel-toggle">▼</button>
-    </div>
-    <div class="teacher-panel-body" id="writingQueuePanelBody">
-        <p style="font-size:13px; color:#64748b; margin-bottom:12px;">Review handwriting samples submitted for Fidel Challenge.</p>
-        <div id="teacherWritingQueueMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
-    </div>
-</div>
-
-<div class="teacher-panel" style="margin-bottom:20px;">
-    <div class="teacher-panel-header" onclick="toggleTeacherPanel('teamProgressPanelBody', this)">
-        <h2 style="font-size:18px; color:var(--neutral-dark);">Team Level Progress</h2>
-        <button class="teacher-panel-toggle">▼</button>
-    </div>
-    <div class="teacher-panel-body" id="teamProgressPanelBody">
-        <p style="font-size:13px; color:#64748b; margin-bottom:12px;">See which teams are ready for their live quiz.</p>
-        <div id="teacherTeamProgressMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
-    </div>
-</div>
-
-<div class="teacher-panel" style="margin-bottom:20px;">
-    <div class="teacher-panel-header" onclick="toggleTeacherPanel('manageTeamsPanelBody', this)">
-        <h2 style="font-size:18px; color:var(--neutral-dark);">Manage Student Color Teams</h2>
-        <button class="teacher-panel-toggle collapsed">▼</button>
-    </div>
-    <div class="teacher-panel-body collapsed" id="manageTeamsPanelBody">
-        <p style="font-size:13px; color:#64748b; margin-bottom:12px;">Reassign students to predecided classroom color tracks.</p>
-        <div class="teacher-control-group" style="background:#f8fafc; padding:16px; border-radius:12px; border:1px solid var(--border-color); max-width:500px;">
-            <select id="teacherStudentSelect"><option value="">Select Student...</option></select>
-            <select id="teacherPodSelect"><option value="">Select Color Team...</option></select>
-            <button class="btn-primary" onclick="teacherAssignStudentToPod()">Change Color Team</button>
+        <div class="teacher-overview-card">
+            <div class="teacher-overview-title"><span data-icon="trophy"></span> Team Snapshot</div>
+            <div id="teacherLeaderboardMount" class="teacher-snapshot-grid"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
         </div>
     </div>
-</div>
 
-<div class="teacher-panel" style="margin-bottom:20px;">
-    <div class="teacher-panel-header" onclick="toggleTeacherPanel('captainPanelBody', this)">
-        <h2 style="font-size:18px; color:var(--neutral-dark);"><span data-icon="crown"></span> Assign Team Captain</h2>
-        <button class="teacher-panel-toggle collapsed">▼</button>
-    </div>
-    <div class="teacher-panel-body collapsed" id="captainPanelBody">
-        <p style="font-size:13px; color:#64748b; margin-bottom:12px;">Pick a team, then choose which member is the captain.</p>
-        <div class="teacher-control-group" style="background:#f8fafc; padding:16px; border-radius:12px; border:1px solid var(--border-color); max-width:500px;">
-            <select id="captainTeamSelect"><option value="">Select Team...</option></select>
-            <select id="captainStudentSelect" disabled><option value="">Select Team First...</option></select>
-            <button class="btn-primary" id="setCaptainBtn">Set as Captain</button>
+    <!-- ============================================================
+         STUDENTS — roster, teams, captains, and student/team management.
+         ============================================================ -->
+    <div class="teacher-tab-panel" data-tab="students" id="teacherTabStudents">
+        <div class="teacher-overview-card">
+            <div class="teacher-overview-title"><span data-icon="crown"></span> Captain Overview</div>
+            <div id="teacherCaptainOverviewMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
         </div>
-        <div id="currentCaptainsMount" style="margin-top:14px;"></div>
-    </div>
-</div>
 
-<div class="teacher-panel teacher-panel-danger" style="margin-bottom:20px;">
-    <div class="teacher-panel-header" onclick="toggleTeacherPanel('dangerZonePanelBody', this)">
-        <h2 style="font-size:18px; color:#991b1b;"><span data-icon="warning" data-icon-color="#991b1b"></span> Danger Zone</h2>
-        <button class="teacher-panel-toggle collapsed">▼</button>
-    </div>
-    <div class="teacher-panel-body collapsed" id="dangerZonePanelBody">
-        <p style="font-size:13px; color:#64748b; margin-bottom:12px;">
-            Wipes every student's streaks, writing submissions, help flags, and level-completion
-            requests, resets every team back to Level 1 with 0 streak, and unassigns everyone from
-            teams and captain roles. Use this once, at the very start (e.g. Day One). It cannot be undone.
-        </p>
-        <button class="btn-primary" style="width:auto; padding:10px 20px; font-size:13px; background:#991b1b;"
-                onclick="resetEverythingForDayOne()">
-            <span data-icon="refresh"></span> Reset Everyone (Day One)
-        </button>
-    </div>
-</div>
+        <div class="teacher-panel" style="margin-bottom:20px;">
+            <div class="teacher-panel-header" onclick="toggleTeacherPanel('rosterPanelBody', this)">
+                <h2 style="font-size:18px; color:var(--neutral-dark);">Classroom Roster</h2>
+                <button class="teacher-panel-toggle">▼</button>
+            </div>
+            <div class="teacher-panel-body" id="rosterPanelBody">
+                <p style="font-size:13px; color:#64748b; margin-bottom:12px;">Where every student and team stands in the Fidel Challenge.</p>
+                <div style="display:flex; justify-content:flex-end; margin-bottom:16px;">
+                    <button class="btn-primary" style="width:auto; padding:8px 18px; font-size:13px;" onclick="exportProgressCSV()">⬇️ Export Progress CSV</button>
+                </div>
 
-<!-- logout kept on teacher dashboard only -->
-<div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
+                <div class="roster-section-title">🚨 Needs Attention</div>
+                <div id="rosterAttentionMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
 
+                <div class="roster-section-title"><span data-icon="trophy"></span> In the Fidel Challenge</div>
+                <div id="rosterChallengeMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
+
+                <div class="roster-section-title"><span data-icon="note-pencil"></span> Signed Up, Not Yet Competing</div>
+                <div id="rosterSoloMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
+            </div>
+        </div>
+
+        <div class="teacher-panel" style="margin-bottom:20px;">
+            <div class="teacher-panel-header" onclick="toggleTeacherPanel('manageTeamsPanelBody', this)">
+                <h2 style="font-size:18px; color:var(--neutral-dark);">Manage Student Color Teams</h2>
+                <button class="teacher-panel-toggle collapsed">▼</button>
+            </div>
+            <div class="teacher-panel-body collapsed" id="manageTeamsPanelBody">
+                <p style="font-size:13px; color:#64748b; margin-bottom:12px;">Reassign students to predecided classroom color tracks.</p>
+                <div class="teacher-control-group" style="background:#f8fafc; padding:16px; border-radius:12px; border:1px solid var(--border-color); max-width:500px;">
+                    <select id="teacherStudentSelect"><option value="">Select Student...</option></select>
+                    <select id="teacherPodSelect"><option value="">Select Color Team...</option></select>
+                    <button class="btn-primary" onclick="teacherAssignStudentToPod()">Change Color Team</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="teacher-panel" style="margin-bottom:20px;">
+            <div class="teacher-panel-header" onclick="toggleTeacherPanel('captainPanelBody', this)">
+                <h2 style="font-size:18px; color:var(--neutral-dark);"><span data-icon="crown"></span> Assign Team Captain</h2>
+                <button class="teacher-panel-toggle collapsed">▼</button>
+            </div>
+            <div class="teacher-panel-body collapsed" id="captainPanelBody">
+                <p style="font-size:13px; color:#64748b; margin-bottom:12px;">Pick a team, then choose which member is the captain.</p>
+                <div class="teacher-control-group" style="background:#f8fafc; padding:16px; border-radius:12px; border:1px solid var(--border-color); max-width:500px;">
+                    <select id="captainTeamSelect"><option value="">Select Team...</option></select>
+                    <select id="captainStudentSelect" disabled><option value="">Select Team First...</option></select>
+                    <button class="btn-primary" id="setCaptainBtn">Set as Captain</button>
+                </div>
+                <div id="currentCaptainsMount" style="margin-top:14px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         COMPETITION — writing reviews, level/test approvals, team
+         progress, and the Competition Timeline.
+         ============================================================ -->
+    <div class="teacher-tab-panel" data-tab="competition" id="teacherTabCompetition">
+        <div class="teacher-panel" style="margin-bottom:20px;">
+            <div class="teacher-panel-header" onclick="toggleTeacherPanel('levelCompletionPanelBody', this)">
+                <h2 style="font-size:18px; color:var(--neutral-dark);"><span data-icon="star"></span> Level Completion Requests</h2>
+                <button class="teacher-panel-toggle">▼</button>
+            </div>
+            <div class="teacher-panel-body" id="levelCompletionPanelBody">
+                <p style="font-size:13px; color:#64748b; margin-bottom:12px;">Students who cleared all 3 families and are requesting level advancement.</p>
+                <div id="levelCompletionQueueMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
+            </div>
+        </div>
+
+        <div class="teacher-panel" style="margin-bottom:20px;">
+            <div class="teacher-panel-header" onclick="toggleTeacherPanel('writingQueuePanelBody', this)">
+                <h2 style="font-size:18px; color:var(--neutral-dark);">Pending Writing Submissions</h2>
+                <button class="teacher-panel-toggle">▼</button>
+            </div>
+            <div class="teacher-panel-body" id="writingQueuePanelBody">
+                <p style="font-size:13px; color:#64748b; margin-bottom:12px;">Review handwriting samples submitted for Fidel Challenge.</p>
+                <div id="teacherWritingQueueMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
+            </div>
+        </div>
+
+        <div class="teacher-panel" style="margin-bottom:20px;">
+            <div class="teacher-panel-header" onclick="toggleTeacherPanel('teamProgressPanelBody', this)">
+                <h2 style="font-size:18px; color:var(--neutral-dark);">Team Level Progress</h2>
+                <button class="teacher-panel-toggle">▼</button>
+            </div>
+            <div class="teacher-panel-body" id="teamProgressPanelBody">
+                <p style="font-size:13px; color:#64748b; margin-bottom:12px;">See which teams are ready for their live quiz.</p>
+                <div id="teacherTeamProgressMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
+            </div>
+        </div>
+
+        <div class="teacher-overview-card">
+            <div class="teacher-overview-title"><span data-icon="calendar"></span> Competition Timeline</div>
+            <p style="font-size:13px; color:#64748b; margin-bottom:12px;">Browse the season's milestones — level-ups, live tests passed, and team progress over time.</p>
+            <button class="btn-secondary" style="width:auto; padding:8px 18px; font-size:13px;" onclick="openCompetitionCalendar()">View Full Timeline →</button>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         MORE — secondary/rare administrative actions.
+         ============================================================ -->
+    <div class="teacher-tab-panel" data-tab="more" id="teacherTabMore">
+        <div class="teacher-overview-card">
+            <button class="btn-primary" style="width:auto; padding:8px 16px; font-size:13px;" onclick="switchAdminPanelsFromDashboard('student')">Switch to Student View →</button>
+        </div>
+
+        <div class="teacher-panel teacher-panel-danger" style="margin-bottom:20px;">
+            <div class="teacher-panel-header" onclick="toggleTeacherPanel('dangerZonePanelBody', this)">
+                <h2 style="font-size:18px; color:#991b1b;"><span data-icon="warning" data-icon-color="#991b1b"></span> Danger Zone</h2>
+                <button class="teacher-panel-toggle collapsed">▼</button>
+            </div>
+            <div class="teacher-panel-body collapsed" id="dangerZonePanelBody">
+                <p style="font-size:13px; color:#64748b; margin-bottom:12px;">
+                    Wipes every student's streaks, writing submissions, help flags, and level-completion
+                    requests, resets every team back to Level 1 with 0 streak, and unassigns everyone from
+                    teams and captain roles. Use this once, at the very start (e.g. Day One). It cannot be undone.
+                </p>
+                <button class="btn-primary" style="width:auto; padding:10px 20px; font-size:13px; background:#991b1b;"
+                        onclick="resetEverythingForDayOne()">
+                    <span data-icon="refresh"></span> Reset Everyone (Day One)
+                </button>
+            </div>
+        </div>
+
+        <!-- logout kept on teacher dashboard only -->
+        <div class="bottom-banner"><button class="logout-btn" onclick="logout()">Log Out</button></div>
+    </div>
+
+    <nav class="teacher-bottomnav" id="teacherBottomNav">
+        <div class="teacher-bottomnav-inner">
+            <button class="teacher-nav-tab active" data-tab="home" onclick="switchTeacherTab('home')">
+                <span data-icon="house"></span>
+                <span class="teacher-nav-tab-label">Home</span>
+            </button>
+            <button class="teacher-nav-tab" data-tab="students" onclick="switchTeacherTab('students')">
+                <span data-icon="users"></span>
+                <span class="teacher-nav-tab-label">Students</span>
+            </button>
+            <button class="teacher-nav-tab" data-tab="competition" onclick="switchTeacherTab('competition')">
+                <span data-icon="trophy"></span>
+                <span class="teacher-nav-badge" id="teacherNavBadgeCompetition" style="display:none;">0</span>
+                <span class="teacher-nav-tab-label">Competition</span>
+            </button>
+            <button class="teacher-nav-tab" data-tab="more" onclick="switchTeacherTab('more')">
+                <span data-icon="dots-three"></span>
+                <span class="teacher-nav-tab-label">More</span>
+            </button>
+        </div>
+    </nav>
 </div>
 
 <!-- ============================================================
@@ -1686,15 +1713,15 @@
 </div>
 <!-- END CAN-DO STATEMENTS -->
 
-<script src="js/icons.js?v=1" defer></script>
+<script src="js/icons.js?v=2" defer></script>
 <script src="js/navigation.js?v=6" defer></script>
-<script src="js/app.js?v=25" defer></script>
+<script src="js/app.js?v=26" defer></script>
 <script src="js/auth.js?v=16" defer></script>
 <script src="js/guide.js?v=10" defer></script>
 <script src="js/utils/compress.js?v=9" defer></script>
 <script src="js/game.js?v=10" defer></script>
 <script src="js/submissions.js?v=14" defer></script>
-<script src="js/teacher.js?v=31" defer></script>
+<script src="js/teacher.js?v=32" defer></script>
 <script src="js/reading.js?v=26" defer></script>
 <script src="js/guidedpath.js?v=1" defer></script>
 <script src="js/wordbuilder.js?v=10" defer></script>
