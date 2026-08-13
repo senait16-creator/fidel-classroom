@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=56">
+    <link rel="stylesheet" href="style.css?v=57">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -889,19 +889,31 @@
     <nav class="stushell-bottomnav" id="stushellBottomNav">
         <div class="stushell-bottomnav-inner">
             <button class="stushell-nav-tab active" data-tab="home" onclick="switchStudentShellTab('home')">
-                <span data-icon="house"></span>
+                <span class="stushell-nav-icon-wrap">
+                    <span class="stushell-nav-icon-off" data-icon="house"></span>
+                    <span class="stushell-nav-icon-on" data-icon-duotone="house"></span>
+                </span>
                 <span class="stushell-nav-tab-label">Home</span>
             </button>
             <button class="stushell-nav-tab" data-tab="learn" onclick="switchStudentShellTab('learn')">
-                <span data-icon="book-open"></span>
+                <span class="stushell-nav-icon-wrap">
+                    <span class="stushell-nav-icon-off" data-icon="book-open"></span>
+                    <span class="stushell-nav-icon-on" data-icon-duotone="book-open"></span>
+                </span>
                 <span class="stushell-nav-tab-label">Learn</span>
             </button>
             <button class="stushell-nav-tab" data-tab="competition" onclick="switchStudentShellTab('competition')">
-                <span data-icon="trophy"></span>
+                <span class="stushell-nav-icon-wrap">
+                    <span class="stushell-nav-icon-off" data-icon="trophy"></span>
+                    <span class="stushell-nav-icon-on" data-icon-duotone="trophy"></span>
+                </span>
                 <span class="stushell-nav-tab-label">Competition</span>
             </button>
             <button class="stushell-nav-tab" data-tab="profile" onclick="switchStudentShellTab('profile')">
-                <span data-icon="user"></span>
+                <span class="stushell-nav-icon-wrap">
+                    <span class="stushell-nav-icon-off" data-icon="user"></span>
+                    <span class="stushell-nav-icon-on" data-icon-duotone="user"></span>
+                </span>
                 <span class="stushell-nav-tab-label">Profile</span>
             </button>
         </div>
@@ -1853,7 +1865,7 @@
 </div>
 <!-- END CAN-DO STATEMENTS -->
 
-<script src="js/icons.js?v=2" defer></script>
+<script src="js/icons.js?v=3" defer></script>
 <script src="js/navigation.js?v=8" defer></script>
 <script src="js/app.js?v=27" defer></script>
 <script src="js/auth.js?v=16" defer></script>

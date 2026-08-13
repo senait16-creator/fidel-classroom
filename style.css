@@ -7961,17 +7961,39 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 
 .stushell-bottomnav {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; display: flex; justify-content: center;
-    background: white; border-top: 1px solid var(--border-color); box-shadow: 0 -6px 18px rgba(0,0,0,0.06);
+    background: white; border-top: 1px solid var(--border-color); box-shadow: 0 -10px 30px rgba(0,0,0,0.14);
     padding-bottom: env(safe-area-inset-bottom, 0);
 }
-.stushell-bottomnav-inner { display: flex; width: 100%; max-width: 480px; }
+.stushell-bottomnav-inner { display: flex; width: 100%; max-width: 480px; padding: 6px 8px 0; }
 .stushell-nav-tab {
-    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 9px 4px 8px;
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 4px 10px;
     background: none; border: none; color: #94a3b8; font-family: 'Inter', sans-serif; cursor: pointer;
 }
 .stushell-nav-tab .picon { width: 22px; height: 22px; }
+
+/* Active tab gets a raised, tinted pill behind its icon (the "selected"
+   indicator) plus a swap to the duotone icon — the plain outline icon fades
+   out, the two-tone one fades/scales in. */
+.stushell-nav-icon-wrap {
+    position: relative; width: 44px; height: 30px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+.stushell-nav-icon-off, .stushell-nav-icon-on {
+    position: absolute; display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.stushell-nav-icon-on { opacity: 0; transform: scale(0.7); }
+
 .stushell-nav-tab-label { font-size: 10px; font-weight: 700; }
 .stushell-nav-tab.active { color: var(--brand-primary); }
+.stushell-nav-tab.active .stushell-nav-icon-wrap {
+    background: #eaf7ee;
+    box-shadow: 0 6px 14px rgba(22,101,52,0.22);
+    transform: translateY(-5px);
+}
+.stushell-nav-tab.active .stushell-nav-icon-off { opacity: 0; }
+.stushell-nav-tab.active .stushell-nav-icon-on { opacity: 1; transform: scale(1); }
 
 /* ==========================================================================
    COMMUNITY PAGE LAYOUT — sidebar leaderboard (reuses .leaderboard-row from

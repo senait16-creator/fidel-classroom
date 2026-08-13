@@ -66,6 +66,43 @@ const PHOSPHOR_ICONS = {
     'x-circle': '<path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm37.66,130.34a8,8,0,0,1-11.32,11.32L128,139.31l-26.34,26.35a8,8,0,0,1-11.32-11.32L116.69,128,90.34,101.66a8,8,0,0,1,11.32-11.32L128,116.69l26.34-26.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/>',
 };
 
+// Duotone variants (a light 20%-opacity base shape behind a solid
+// foreground shape) for icons that need a richer "selected" look, e.g. the
+// student bottom nav's active tab. Same source/license as PHOSPHOR_ICONS
+// above, just the duotone weight instead of fill — only the handful of
+// icons that actually use it are included, not the whole set.
+const PHOSPHOR_ICONS_DUOTONE = {
+    'house': {
+        bg: 'M216,120v96H152V152H104v64H40V120a8,8,0,0,1,2.34-5.66l80-80a8,8,0,0,1,11.32,0l80,80A8,8,0,0,1,216,120Z',
+        fg: 'M219.31,108.68l-80-80a16,16,0,0,0-22.62,0l-80,80A15.87,15.87,0,0,0,32,120v96a8,8,0,0,0,8,8h64a8,8,0,0,0,8-8V160h32v56a8,8,0,0,0,8,8h64a8,8,0,0,0,8-8V120A15.87,15.87,0,0,0,219.31,108.68ZM208,208H160V152a8,8,0,0,0-8-8H104a8,8,0,0,0-8,8v56H48V120l80-80,80,80Z',
+    },
+    'book-open': {
+        bg: 'M232,56V200H160a32,32,0,0,0-32,32,32,32,0,0,0-32-32H24V56H96a32,32,0,0,1,32,32,32,32,0,0,1,32-32Z',
+        fg: 'M232,48H160a40,40,0,0,0-32,16A40,40,0,0,0,96,48H24a8,8,0,0,0-8,8V200a8,8,0,0,0,8,8H96a24,24,0,0,1,24,24,8,8,0,0,0,16,0,24,24,0,0,1,24-24h72a8,8,0,0,0,8-8V56A8,8,0,0,0,232,48ZM96,192H32V64H96a24,24,0,0,1,24,24V200A39.81,39.81,0,0,0,96,192Zm128,0H160a39.81,39.81,0,0,0-24,8V88a24,24,0,0,1,24-24h64Z',
+    },
+    'trophy': {
+        bg: 'M200,48v63.1c0,39.7-31.75,72.6-71.45,72.9A72,72,0,0,1,56,112V48Z',
+        fg: 'M232,64H208V48a8,8,0,0,0-8-8H56a8,8,0,0,0-8,8V64H24A16,16,0,0,0,8,80V96a40,40,0,0,0,40,40h3.65A80.13,80.13,0,0,0,120,191.61V216H96a8,8,0,0,0,0,16h64a8,8,0,0,0,0-16H136V191.58c31.94-3.23,58.44-25.64,68.08-55.58H208a40,40,0,0,0,40-40V80A16,16,0,0,0,232,64ZM48,120A24,24,0,0,1,24,96V80H48v32q0,4,.39,8Zm144-8.9c0,35.52-29,64.64-64,64.9a64,64,0,0,1-64-64V56H192ZM232,96a24,24,0,0,1-24,24h-.5a81.81,81.81,0,0,0,.5-8.9V80h24Z',
+    },
+    'user': {
+        bg: 'M192,96a64,64,0,1,1-64-64A64,64,0,0,1,192,96Z',
+        fg: 'M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z',
+    },
+};
+
+function iconDuotone(name, opts) {
+    const data = PHOSPHOR_ICONS_DUOTONE[name];
+    if (!data) {
+        console.warn(`iconDuotone(): unknown duotone icon name "${name}"`);
+        return icon(name, opts);
+    }
+    const size = (opts && opts.size) || '1em';
+    const cls = (opts && opts.class) ? ` ${opts.class}` : '';
+    const colorStyle = (opts && opts.color) ? ` color:${opts.color};` : '';
+    return `<svg class="picon${cls}" viewBox="0 0 256 256" width="${size}" height="${size}" fill="currentColor" aria-hidden="true" style="vertical-align:-0.125em;${colorStyle}"><path d="${data.bg}" opacity="0.28"/><path d="${data.fg}"/></svg>`;
+}
+window.iconDuotone = iconDuotone;
+
 function icon(name, opts) {
     const inner = PHOSPHOR_ICONS[name];
     if (!inner) {
@@ -88,6 +125,9 @@ window.icon = icon;
 function renderStaticIcons() {
     document.querySelectorAll('[data-icon]').forEach(el => {
         el.innerHTML = icon(el.dataset.icon, { size: el.dataset.iconSize, class: el.dataset.iconClass, color: el.dataset.iconColor });
+    });
+    document.querySelectorAll('[data-icon-duotone]').forEach(el => {
+        el.innerHTML = iconDuotone(el.dataset.iconDuotone, { size: el.dataset.iconSize, class: el.dataset.iconClass, color: el.dataset.iconColor });
     });
 }
 window.addEventListener('DOMContentLoaded', renderStaticIcons);
