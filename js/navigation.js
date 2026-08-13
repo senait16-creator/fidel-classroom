@@ -96,12 +96,6 @@ function showScreen(screenId, displayMode) {
     if (target) target.style.display = displayMode || "block";
 
     syncHamburgerHost(screenId);
-
-    // Community's icon only makes sense as a shortcut off the home
-    // screen — everywhere else it'd just be a second, confusing way
-    // back into a screen the hamburger menu already reaches.
-    const communityIcon = document.getElementById("communityIconBtn");
-    if (communityIcon) communityIcon.style.display = (screenId === "studentShellScreen") ? "flex" : "none";
 }
 
 window.showScreen = showScreen;
