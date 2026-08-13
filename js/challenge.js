@@ -157,36 +157,29 @@ async function renderChallengeDashboard() {
         await loadStudentMeetingDisplay();
     }
 
-    // ── Captain Dashboard — one consolidated leadership zone ─────
-    const captainZone = document.getElementById("captainZone");
-    if (captainZone) {
-        if (currentProfile?.is_captain) {
-            captainZone.style.display = "block";
-            const zoneSub = document.getElementById("captainZoneSub");
-            if (zoneSub) zoneSub.innerText = `Your leadership tools for ${team.name}`;
+    // ── Captain team card + Team Hub — prominent team summary and one
+    //    entry point into the leadership tools, replacing the old
+    //    always-open Captain Dashboard. ─────
+    if (typeof renderCaptainTeamCard === "function") await renderCaptainTeamCard();
 
-            // Pending Writing Reviews — collapsed behind the CTA button,
-            // loadCaptainWritingQueue() also fills in the count pill.
-            const reviewMount = document.getElementById("captainWritingQueueMount");
-            const reviewToggleBtn = document.getElementById("captainReviewToggleBtn");
-            if (reviewToggleBtn && reviewMount) {
-                reviewToggleBtn.onclick = () => {
-                    const isOpen = reviewMount.style.display === "block";
-                    reviewMount.style.display = isOpen ? "none" : "block";
-                    reviewToggleBtn.innerText = isOpen ? "📝 Review Writing" : "📝 Hide Review Queue";
-                };
-            }
-            if (typeof loadCaptainWritingQueue === "function") await loadCaptainWritingQueue();
-            if (typeof loadCaptainRecentlyApproved === "function") await loadCaptainRecentlyApproved();
-            if (typeof loadCaptainTeamProgress === "function") await loadCaptainTeamProgress();
-            if (typeof loadHelpFlags === "function") await loadHelpFlags('helpFlagsMount');
-            if (typeof loadDailyTeamChallenge === "function") await loadDailyTeamChallenge();
-            if (typeof loadWeeklyMeeting === "function") await loadWeeklyMeeting();
-            if (typeof renderStarPicker === "function") await renderStarPicker("starPickerMount");
-            if (typeof loadCaptainStats === "function") await loadCaptainStats();
-        } else {
-            captainZone.style.display = "none";
-        }
+    // Pending Writing Reviews — collapsed behind the CTA button,
+    // loadCaptainWritingQueue() also fills in the count pill.
+    const reviewMount = document.getElementById("captainWritingQueueMount");
+    const reviewToggleBtn = document.getElementById("captainReviewToggleBtn");
+    if (reviewToggleBtn && reviewMount) {
+        reviewToggleBtn.onclick = () => {
+            const isOpen = reviewMount.style.display === "block";
+            reviewMount.style.display = isOpen ? "none" : "block";
+            reviewToggleBtn.innerText = isOpen ? "📝 Review Writing" : "📝 Hide Review Queue";
+        };
+    }
+
+    if (currentProfile?.is_captain) {
+        if (typeof loadCaptainWritingQueue === "function") await loadCaptainWritingQueue();
+        if (typeof loadCaptainRecentlyApproved === "function") await loadCaptainRecentlyApproved();
+        if (typeof loadCaptainTeamProgress === "function") await loadCaptainTeamProgress();
+        if (typeof loadHelpFlags === "function") await loadHelpFlags('helpFlagsMount');
+        if (typeof renderStarPicker === "function") await renderStarPicker("starPickerMount");
     }
 
     // ── Captains lead, they don't need their own "Current Level" practice

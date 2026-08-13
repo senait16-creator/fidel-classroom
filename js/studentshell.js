@@ -199,10 +199,19 @@ async function renderStudentShellProfile() {
     const team = await (typeof getTeamBoardInfo === 'function' ? getTeamBoardInfo() : Promise.resolve(null));
     if (teamEl) teamEl.innerText = currentProfile?.team_id ? team.name : 'Practicing Solo';
 
+    const badgeEl = document.getElementById('stushellCaptainBadge');
+    const badgeTeamEl = document.getElementById('stushellCaptainBadgeTeam');
+    if (badgeEl) {
+        if (currentProfile?.is_captain && currentProfile?.team_id) {
+            if (badgeTeamEl) badgeTeamEl.innerText = team.name;
+            badgeEl.style.display = 'inline-flex';
+        } else {
+            badgeEl.style.display = 'none';
+        }
+    }
+
     const levelValEl = document.getElementById('stushellStatLevel');
-    const streakValEl = document.getElementById('stushellStatStreak');
     if (levelValEl) levelValEl.innerText = currentProfile?.team_id ? (team.current_level || 1) : '–';
-    if (streakValEl) streakValEl.innerText = currentProfile?.team_id ? (team.streak_count || 0) : '–';
 
     if (typeof updatePushMenuButton === 'function') updatePushMenuButton();
 

@@ -428,6 +428,119 @@ function updateCaptainPendingBadge(count) {
     }
 }
 
+// ---------------------------------------------------------------------------
+// Captain team card (Competition tab) + Team Hub overlay open/close.
+// The card is a summary + entry point; Team Hub itself is built from the
+// existing captain functions below (loadCaptainWritingQueue, loadHelpFlags,
+// loadCaptainTeamProgress, renderStarPicker) — this just decides what goes
+// in the card and whether the "needs attention" chip shows.
+// ---------------------------------------------------------------------------
+
+async function renderCaptainTeamCard() {
+    const card = document.getElementById('captainTeamCard');
+    if (!card) return;
+
+    if (!currentProfile?.is_captain || !currentProfile?.team_id) {
+        card.style.display = 'none';
+        return;
+    }
+    card.style.display = 'block';
+
+    const { data: team } = await _supabase
+        .from('teams').select('name, current_level').eq('id', currentProfile.team_id).maybeSingle();
+    if (!team) return;
+
+    const teamHex = typeof getTeamHex === 'function' ? getTeamHex(team.name) : '#166534';
+    const dot  = document.getElementById('captainTeamDot');
+    const meta = document.getElementById('captainTeamMetaLine');
+    if (dot) dot.style.background = teamHex;
+    if (meta) meta.innerText = `${team.name} • Level ${team.current_level}`;
+
+    const { data: members } = await _supabase
+        .from('profiles').select('id, nickname, avatar, is_captain')
+        .eq('team_id', currentProfile.team_id)
+        .order('is_captain', { ascending: false })
+        .order('nickname');
+
+    const avatarsEl = document.getElementById('captainTeamAvatars');
+    if (avatarsEl) {
+        const shown = (members || []).slice(0, 5);
+        const extra = (members || []).length - shown.length;
+        avatarsEl.innerHTML = shown.map(m => `<span class="captain-team-avatar">${m.avatar || '🦁'}</span>`).join('')
+            + (extra > 0 ? `<span class="captain-team-avatar-more">+${extra}</span>` : '');
+    }
+
+    const teammates    = (members || []).filter(m => !m.is_captain);
+    const currentLevel = team.current_level || 1;
+
+    const { data: level } = await _supabase
+        .from('challenge_levels').select('letter_families').eq('level_number', currentLevel).maybeSingle();
+    const families = level?.letter_families || [];
+
+    const clearedEl = document.getElementById('captainTeamClearedLine');
+    if (clearedEl) clearedEl.innerText = '';
+
+    let pendingWriting = 0, openHelp = 0;
+
+    if (teammates.length > 0) {
+        const memberIds = teammates.map(m => m.id);
+
+        if (families.length > 0 && clearedEl) {
+            const { data: progressRows } = await _supabase
+                .from('student_family_progress')
+                .select('student_id, base_letter, streak_passed, writing_passed')
+                .in('student_id', memberIds)
+                .eq('level_number', currentLevel);
+
+            const clearedCount = teammates.filter(m => families.every(fam => {
+                const row = (progressRows || []).find(r => r.student_id === m.id && r.base_letter === fam);
+                return row?.streak_passed && row?.writing_passed;
+            })).length;
+
+            clearedEl.innerText = `${clearedCount} of ${teammates.length} teammate${teammates.length === 1 ? '' : 's'} cleared Level ${currentLevel}`;
+        }
+
+        const [{ count: pw }, { count: oh }] = await Promise.all([
+            _supabase.from('writing_submissions').select('id', { count: 'exact', head: true })
+                .in('student_id', memberIds).eq('status', 'pending'),
+            _supabase.from('help_flags').select('id', { count: 'exact', head: true })
+                .in('student_id', memberIds).eq('is_resolved', false)
+        ]);
+        pendingWriting = pw || 0;
+        openHelp = oh || 0;
+    }
+
+    const chip = document.getElementById('captainAttnChip');
+    if (chip) {
+        if (pendingWriting === 0 && openHelp === 0) {
+            chip.style.display = 'none';
+        } else {
+            const parts = [];
+            if (pendingWriting > 0) parts.push(`${pendingWriting} writing review${pendingWriting === 1 ? '' : 's'}`);
+            if (openHelp > 0) parts.push(`${openHelp} help request${openHelp === 1 ? '' : 's'}`);
+            chip.innerText = `${parts.join(' · ')} waiting`;
+            chip.style.display = 'inline-flex';
+        }
+    }
+
+    const subtitle = document.getElementById('captainHubSubtitle');
+    if (subtitle) subtitle.innerText = `${team.name} · ${currentProfile.nickname || 'Captain'}, captain`;
+}
+window.renderCaptainTeamCard = renderCaptainTeamCard;
+
+function openCaptainTeamHub() {
+    const overlay = document.getElementById('captainTeamHubOverlay');
+    if (overlay) overlay.style.display = 'block';
+    window.scrollTo({ top: 0 });
+}
+window.openCaptainTeamHub = openCaptainTeamHub;
+
+function closeCaptainTeamHub() {
+    const overlay = document.getElementById('captainTeamHubOverlay');
+    if (overlay) overlay.style.display = 'none';
+}
+window.closeCaptainTeamHub = closeCaptainTeamHub;
+
 async function loadCaptainWritingQueue() {
     const mount = document.getElementById('captainWritingQueueMount');
     if (!mount) return;

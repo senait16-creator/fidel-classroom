@@ -861,32 +861,52 @@ async function loadHelpFlags(mountId) {
         return;
     }
 
+    // Pulled so opening a request shows real context (their progress on
+    // that exact family) instead of just the bare flag.
+    const { data: progressRows } = await _supabase
+        .from('student_family_progress')
+        .select('student_id, base_letter, level_number, streak_passed, best_streak, writing_passed')
+        .in('student_id', memberIds);
+
     mount.innerHTML = "";
 
     flags.forEach(flag => {
         const member = (members || []).find(m => m.id === flag.student_id);
+        const progress = (progressRows || []).find(r =>
+            r.student_id === flag.student_id && r.base_letter === flag.base_letter && r.level_number === flag.level_number);
+
+        const streakText = progress?.streak_passed
+            ? `${icon('fire')} Streak passed`
+            : `${icon('fire')} Streak: ${progress?.best_streak || 0}/20`;
+        const writingText = progress?.writing_passed ? '✓ Writing approved' : 'Writing not submitted yet';
+        const flaggedAgo = typeof formatTimeAgo === 'function' ? formatTimeAgo(flag.created_at) : '';
+
         const card = document.createElement('div');
-        card.style.cssText = `
-            display:flex; justify-content:space-between; align-items:center;
-            padding:10px 12px; background:#fffbeb; border:1px solid #fde68a;
-            border-radius:10px; margin-bottom:8px; font-size:13px;
-        `;
+        card.className = 'help-flag-row';
         card.innerHTML = `
-            <span>
-                ${member?.avatar || '🦁'}
-                <strong>${member?.nickname || 'Student'}</strong>
-                needs help with
-                <strong style="font-family:'Abyssinica SIL',serif; font-size:18px; margin:0 4px;">
-                    ${flag.base_letter}
-                </strong>
-            </span>
-            <button onclick="resolveHelpFlag('${flag.id}', '${mountId}')"
-                    style="background:#166534; color:white; border:none; border-radius:8px;
-                           padding:5px 12px; font-size:12px; font-weight:700; cursor:pointer;
-                           flex-shrink:0; margin-left:8px;">
-                Resolved ✓
+            <button type="button" class="help-flag-summary">
+                <span>
+                    ${member?.avatar || '🦁'} <strong>${member?.nickname || 'Student'}</strong>
+                    needs help with <span class="help-flag-letter">${flag.base_letter}</span>
+                </span>
+                <span class="help-flag-arrow">▾</span>
             </button>
+            <div class="help-flag-detail">
+                <div class="help-flag-detail-stat">${streakText}</div>
+                <div class="help-flag-detail-stat">${writingText}</div>
+                <div class="help-flag-detail-time">Flagged ${flaggedAgo}</div>
+                <button type="button" class="help-flag-resolve-btn"
+                        onclick="resolveHelpFlag('${flag.id}', '${mountId}')">Mark Resolved ✓</button>
+            </div>
         `;
+
+        const summaryBtn = card.querySelector('.help-flag-summary');
+        const arrow = card.querySelector('.help-flag-arrow');
+        summaryBtn.onclick = () => {
+            const isOpen = card.classList.toggle('open');
+            arrow.innerText = isOpen ? '▴' : '▾';
+        };
+
         mount.appendChild(card);
     });
 }

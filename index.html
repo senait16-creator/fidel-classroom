@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=57">
+    <link rel="stylesheet" href="style.css?v=58">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -670,83 +670,20 @@
     <div class="stushell-tab-panel" data-tab="competition">
 
     <!-- ============================================================
-         CAPTAIN DASHBOARD — captains only. Leadership tools live here,
-         within the Competition tab, replacing the normal team-status
-         content for them (captains are still learners too, so nothing
-         about Learn/Home changes for them).
+         CAPTAIN TEAM CARD — captains only. A prominent team summary
+         plus one obvious entry point into Team Hub, replacing the old
+         always-open seven-card Captain Dashboard (captains are still
+         learners too, so nothing about Learn/Home changes for them).
          ============================================================ -->
-    <div id="captainZone" class="captain-zone" style="display:none;">
-        <div class="captain-zone-header">
-            <div class="captain-zone-badge"><span data-icon="shield"></span></div>
-            <div>
-                <div class="captain-zone-title">Captain Dashboard</div>
-                <div class="captain-zone-sub" id="captainZoneSub">Your leadership tools</div>
-            </div>
+    <div id="captainTeamCard" class="captain-team-card" style="display:none;">
+        <div class="captain-team-top">
+            <span class="captain-team-dot" id="captainTeamDot"></span>
+            <span id="captainTeamMetaLine">Loading...</span>
         </div>
-
-        <section class="captain-card">
-            <div class="captain-card-title">
-                <span class="captain-card-title-left"><span data-icon="pencil"></span> Pending Writing Reviews</span>
-                <span class="count-pill" id="captainPendingCount" style="display:none;"></span>
-            </div>
-            <button class="pending-review-cta" id="captainReviewToggleBtn"><span data-icon="note-pencil"></span> Review Writing</button>
-            <div id="captainWritingQueueMount" style="display:none; margin-top:12px;">
-                <p style="color:#94a3b8; font-size:13px;">Loading submissions...</p>
-            </div>
-            <div id="captainRecentlyApprovedMount" style="margin-top:12px;"></div>
-        </section>
-
-        <section class="captain-card">
-            <div class="captain-card-title">
-                <span class="captain-card-title-left">🏁 Team Progress</span>
-            </div>
-            <div id="captainTeamProgressMount">
-                <p style="color:#94a3b8; font-size:13px;">Loading...</p>
-            </div>
-        </section>
-
-        <section class="captain-card">
-            <div class="captain-card-title">
-                <span class="captain-card-title-left"><span data-icon="heart"></span> Students Who Need Help</span>
-            </div>
-            <div id="helpFlagsMount"></div>
-        </section>
-
-        <section class="captain-card">
-            <div class="captain-card-title">
-                <span class="captain-card-title-left"><span data-icon="megaphone"></span> Daily Team Challenge</span>
-            </div>
-            <div id="dailyChallengeMount">
-                <p style="color:#94a3b8; font-size:13px;">Loading...</p>
-            </div>
-        </section>
-
-        <section class="captain-card">
-            <div class="captain-card-title">
-                <span class="captain-card-title-left"><span data-icon="calendar"></span> Team Lesson Schedule</span>
-            </div>
-            <div id="teamMeetingMount">
-                <p style="color:#94a3b8; font-size:13px;">Loading...</p>
-            </div>
-        </section>
-
-        <section class="captain-card">
-            <div class="captain-card-title">
-                <span class="captain-card-title-left"><span data-icon="star"></span> Star of the Week</span>
-            </div>
-            <div id="starPickerMount">
-                <p style="color:#94a3b8; font-size:13px;">Loading...</p>
-            </div>
-        </section>
-
-        <section class="captain-card">
-            <div class="captain-card-title">
-                <span class="captain-card-title-left">📊 Captain Stats</span>
-            </div>
-            <div id="captainStatsMount" class="stats-grid">
-                <p style="color:#94a3b8; font-size:13px;">Loading...</p>
-            </div>
-        </section>
+        <div class="captain-team-avatars" id="captainTeamAvatars"></div>
+        <div class="captain-team-cleared-line" id="captainTeamClearedLine"></div>
+        <div class="captain-attn-chip" id="captainAttnChip" style="display:none;"></div>
+        <button type="button" class="captain-hub-btn" onclick="openCaptainTeamHub()">Open Team Hub →</button>
     </div>
 
     <div class="challenge-dash-grid">
@@ -841,12 +778,14 @@
             <div>
                 <div class="stushell-profile-name" id="stushellProfileName" onclick="openProfileEdit()">Student <span data-icon="pencil"></span></div>
                 <div class="stushell-profile-team" id="stushellProfileTeam">Practicing Solo</div>
+                <div class="stushell-captain-badge" id="stushellCaptainBadge" style="display:none;">
+                    <span data-icon="crown"></span> Captain · <span id="stushellCaptainBadgeTeam"></span>
+                </div>
             </div>
         </div>
 
         <div class="stushell-stats-row" id="stushellStatsRow">
             <div class="stushell-stat-tile"><div class="stushell-stat-value" id="stushellStatLevel">–</div><div class="stushell-stat-label">Level</div></div>
-            <div class="stushell-stat-tile"><div class="stushell-stat-value" id="stushellStatStreak">–</div><div class="stushell-stat-label">Team Streak</div></div>
             <div class="stushell-stat-tile"><div class="stushell-stat-value" id="stushellStatCanDo">–</div><div class="stushell-stat-label">Can-Do Skills</div></div>
         </div>
 
@@ -918,6 +857,65 @@
             </button>
         </div>
     </nav>
+</div>
+
+<!-- ============================================================
+     CAPTAIN TEAM HUB — opens from the Team Card's "Open Team Hub"
+     button on the Competition tab. Every card in here is an existing
+     captain function (writing review queue, help flags, per-member
+     progress, Star of the Week), just grouped by what needs action
+     first instead of stacked in one long always-open dashboard.
+     ============================================================ -->
+<div id="captainTeamHubOverlay" style="display:none; position:fixed; inset:0; z-index:9994; background:#f5f5f0; overflow-y:auto;">
+    <div class="captain-hub-header">
+        <button type="button" class="captain-hub-back" onclick="closeCaptainTeamHub()">
+            <span data-icon="arrow-left"></span> Team Hub
+        </button>
+        <div class="captain-hub-subtitle" id="captainHubSubtitle"></div>
+    </div>
+
+    <div class="captain-hub-body">
+        <p class="captain-hub-section-label">Needs Your Attention</p>
+
+        <section class="captain-card">
+            <div class="captain-card-title">
+                <span class="captain-card-title-left"><span data-icon="pencil"></span> Pending Writing Reviews</span>
+                <span class="count-pill" id="captainPendingCount" style="display:none;"></span>
+            </div>
+            <button class="pending-review-cta" id="captainReviewToggleBtn"><span data-icon="note-pencil"></span> Review Writing</button>
+            <div id="captainWritingQueueMount" style="display:none; margin-top:12px;">
+                <p style="color:#94a3b8; font-size:13px;">Loading submissions...</p>
+            </div>
+            <div id="captainRecentlyApprovedMount" style="margin-top:12px;"></div>
+        </section>
+
+        <section class="captain-card">
+            <div class="captain-card-title">
+                <span class="captain-card-title-left"><span data-icon="heart"></span> Students Who Need Help</span>
+            </div>
+            <div id="helpFlagsMount"></div>
+        </section>
+
+        <p class="captain-hub-section-label">Team Members &amp; Progress</p>
+
+        <section class="captain-card">
+            <div class="captain-card-title">
+                <span class="captain-card-title-left">🏁 Team Progress</span>
+            </div>
+            <div id="captainTeamProgressMount">
+                <p style="color:#94a3b8; font-size:13px;">Loading...</p>
+            </div>
+        </section>
+
+        <section class="captain-card">
+            <div class="captain-card-title">
+                <span class="captain-card-title-left"><span data-icon="star"></span> Star of the Week</span>
+            </div>
+            <div id="starPickerMount">
+                <p style="color:#94a3b8; font-size:13px;">Loading...</p>
+            </div>
+        </section>
+    </div>
 </div>
 
 <!-- ============================================================
@@ -1865,7 +1863,7 @@
 </div>
 <!-- END CAN-DO STATEMENTS -->
 
-<script src="js/icons.js?v=3" defer></script>
+<script src="js/icons.js?v=4" defer></script>
 <script src="js/navigation.js?v=8" defer></script>
 <script src="js/app.js?v=27" defer></script>
 <script src="js/auth.js?v=16" defer></script>
@@ -1878,10 +1876,10 @@
 <script src="js/guidedpath.js?v=1" defer></script>
 <script src="js/wordbuilder.js?v=10" defer></script>
     <script src="js/letterboard.js?v=15" defer></script>
-<script src="js/team/progress.js?v=24" defer></script>
+<script src="js/team/progress.js?v=25" defer></script>
 <script src="js/team/levels.js?v=14" defer></script>
 <script src="js/team/map.js?v=9" defer></script>
-<script src="js/team/hub.js?v=22" defer></script>
+<script src="js/team/hub.js?v=23" defer></script>
     <script src="js/community.js?v=8" defer></script>
     <script src="js/dailyfeed.js?v=1" defer></script>
     <script src="js/songweek.js?v=1" defer></script>
@@ -1889,11 +1887,11 @@
         <script src="js/starboard.js?v=1" defer></script>
 <script src="js/wordle.js?v=9" defer></script>
 <script src="intro.js?v=1" defer></script>
-<script src="js/challenge.js?v=31" defer></script>
+<script src="js/challenge.js?v=32" defer></script>
 <script src="js/calendar.js?v=7" defer></script>
 <script src="js/menu.js?v=11" defer></script>
 <script src="js/push.js?v=8" defer></script>
-<script src="js/studentshell.js?v=1" defer></script>
+<script src="js/studentshell.js?v=2" defer></script>
 
 <script>
     if ('serviceWorker' in navigator) {

@@ -6370,6 +6370,155 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     box-shadow: 0 8px 18px rgba(22, 101, 52, 0.25);
 }
 
+/* Captain team card — Competition tab, captains only */
+
+.captain-team-card {
+    border-radius: 22px;
+    padding: 20px 18px;
+    margin-bottom: 16px;
+    color: white;
+    /* Base tone; getTeamHex() tints .captain-team-dot per-team, but the
+       card itself stays on the app's own leadership gradient so it reads
+       as "captain chrome" regardless of team color. */
+    background: linear-gradient(135deg, #14532d, #166534 60%, #15803d);
+    box-shadow: 0 14px 30px rgba(20,83,45,0.22);
+}
+
+.captain-team-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    opacity: 0.92;
+    margin-bottom: 12px;
+}
+
+.captain-team-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.7); flex-shrink: 0; }
+
+.captain-team-avatars { display: flex; align-items: center; margin-bottom: 10px; min-height: 30px; }
+
+.captain-team-avatar,
+.captain-team-avatar-more {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid #166534;
+    margin-left: -8px;
+    font-size: 14px;
+    background: rgba(255,255,255,0.18);
+}
+.captain-team-avatar:first-child { margin-left: 0; }
+.captain-team-avatar-more { font-size: 10.5px; font-weight: 800; background: rgba(255,255,255,0.28); }
+
+.captain-team-cleared-line { font-size: 12.5px; font-weight: 600; opacity: 0.92; margin-bottom: 12px; }
+
+.captain-attn-chip {
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.16);
+    border: 1px solid rgba(255,255,255,0.32);
+    border-radius: 999px;
+    padding: 5px 12px;
+    font-size: 11.5px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.captain-hub-btn {
+    width: 100%;
+    border: none;
+    border-radius: 13px;
+    padding: 12px;
+    background: white;
+    color: #14532d;
+    font-size: 13.5px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+/* Captain Team Hub overlay */
+
+.captain-hub-header {
+    position: sticky;
+    top: 0;
+    background: #f5f5f0;
+    padding: 16px 16px 10px;
+    border-bottom: 1px solid var(--border-color);
+    z-index: 1;
+}
+
+.captain-hub-back {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 15px;
+    font-weight: 800;
+    color: #1e293b;
+    cursor: pointer;
+    font-family: 'Lora', Georgia, serif;
+}
+.captain-hub-back .picon { width: 16px; height: 16px; color: #166534; }
+
+.captain-hub-subtitle { font-size: 12px; font-weight: 600; color: #64748b; margin-top: 2px; }
+
+.captain-hub-body { max-width: 640px; margin: 0 auto; padding: 16px 16px 40px; }
+
+.captain-hub-section-label {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+    margin: 22px 2px 8px;
+}
+.captain-hub-section-label:first-child { margin-top: 2px; }
+
+/* Help flag rows — tap to open before "Mark Resolved" is offered */
+
+.help-flag-row {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    overflow: hidden;
+}
+
+.help-flag-summary {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: #1e293b;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.help-flag-letter { font-family: 'Abyssinica SIL', serif; font-size: 17px; margin: 0 2px; }
+.help-flag-arrow { color: #b45309; font-size: 12px; flex-shrink: 0; }
+
+.help-flag-detail {
+    display: none;
+    padding: 0 12px 12px;
+}
+.help-flag-row.open .help-flag-detail { display: block; }
+
+.help-flag-detail-stat { font-size: 12px; color: #92400e; margin-bottom: 4px; }
+.help-flag-detail-time { font-size: 11px; color: #b45309; opacity: 0.8; margin-bottom: 10px; }
+
+.help-flag-resolve-btn {
+    background: #166534; color: white; border: none; border-radius: 8px;
+    padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer;
+}
+
 .captain-progress-summary {
     display: flex;
     justify-content: space-between;
@@ -7911,7 +8060,15 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 .stushell-profile-team { font-size: 12px; font-weight: 700; color: var(--brand-primary); margin-top: 2px; }
 
-.stushell-stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 14px; }
+.stushell-captain-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 12px; font-weight: 800; color: #92400e;
+    background: #fffbeb; border: 1px solid #fbbf24;
+    padding: 3px 10px; border-radius: 999px; margin-top: 6px;
+}
+.stushell-captain-badge .picon { width: 12px; height: 12px; color: #b45309; }
+
+.stushell-stats-row { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; margin-bottom: 14px; }
 .stushell-stat-tile {
     background: white; border: 1px solid var(--border-color); border-radius: 14px; padding: 12px 6px;
     text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,0.03);
