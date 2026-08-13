@@ -5977,6 +5977,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 .challenge-hero-meta-row {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     font-size: 13px;
     font-weight: 700;
@@ -6011,6 +6012,11 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     font-size: 11.5px;
     font-weight: 700;
     opacity: .8;
+    text-align: center;
+}
+
+#challengeDashMapMount {
+    text-align: center;
 }
 
 .challenge-dash-hero h1 {
