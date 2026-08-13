@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=59">
+    <link rel="stylesheet" href="style.css?v=60">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -612,24 +612,19 @@
             <div class="stushell-section-sub">Everything for building your Amharic skills</div>
         </div>
 
-        <div class="stushell-featured-cup" onclick="enterModeIfUnlocked('practice', openLetterBoard)">
-            <svg width="52" height="60" viewBox="0 0 56 64" fill="none">
-                <rect x="6" y="22" width="32" height="30" rx="7" fill="rgba(255,255,255,0.18)" stroke="#ffffff" stroke-width="1.5"/>
-                <path d="M38 28 Q47 28 47 35 Q47 42 38 42" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
-                <rect x="12" y="52" width="18" height="4" rx="2" fill="#ffffff" opacity="0.25"/>
-                <path d="M16 17 Q16 13 19 15 Q22 17 19 20" fill="none" stroke="#ffffff" stroke-width="1.1" stroke-linecap="round"/>
-                <path d="M23 15 Q23 11 26 13 Q29 15 26 18" fill="none" stroke="#ffffff" stroke-width="1.1" stroke-linecap="round"/>
-                <text x="22" y="42" text-anchor="middle" font-size="10" font-weight="700" fill="#ffffff" font-family="serif" font-style="italic">ፊደል</text>
-            </svg>
-            <div>
-                <div class="stushell-featured-label">Your main path</div>
-                <div class="cup-card-label" style="color:white;">Fidel Practice</div>
-                <div class="stushell-featured-desc">Flashcards &rarr; matching &rarr; writing, level by level. This is the path Competition tracks.</div>
-            </div>
-        </div>
-
-        <div class="stushell-supporting-label">More Ways to Learn</div>
+        <div class="stushell-supporting-label">Your Learning Path</div>
         <div class="cups-grid">
+            <div class="cup-card cup-card-outline-green" data-mode="practice" onclick="enterModeIfUnlocked('practice', openLetterBoard)">
+                <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
+                    <rect x="6" y="22" width="32" height="30" rx="7" fill="#dcfce7" stroke="#166534" stroke-width="1.5"/>
+                    <path d="M38 28 Q47 28 47 35 Q47 42 38 42" fill="none" stroke="#166534" stroke-width="1.5" stroke-linecap="round"/>
+                    <rect x="12" y="52" width="18" height="4" rx="2" fill="#166534" opacity="0.25"/>
+                    <path d="M16 17 Q16 13 19 15 Q22 17 19 20" fill="none" stroke="#166534" stroke-width="1.1" stroke-linecap="round"/>
+                    <path d="M23 15 Q23 11 26 13 Q29 15 26 18" fill="none" stroke="#166534" stroke-width="1.1" stroke-linecap="round"/>
+                    <text x="22" y="42" text-anchor="middle" font-size="11" font-weight="700" fill="#166534" font-family="serif" font-style="italic">ፊደል</text>
+                </svg>
+                <div class="cup-card-label">Fidel Practice</div>
+            </div>
             <div class="cup-card cup-card-outline-indigo" data-mode="wordBuilder" onclick="enterWordBuilder()">
                 <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
                     <rect x="6" y="22" width="32" height="30" rx="7" fill="#ede9fe" stroke="#4f46e5" stroke-width="1.5"/>
