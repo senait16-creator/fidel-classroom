@@ -8008,6 +8008,24 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     padding: 10px 2px;
 }
 
+.stushell-captain-writing-note {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #64748b;
+    padding: 10px 12px;
+    border-radius: 12px;
+    margin-top: 2px;
+}
+.stushell-captain-writing-note.has-pending {
+    color: #92400e;
+    background: #fffbeb;
+    border: 1px solid #fbbf24;
+    cursor: pointer;
+}
+
 /* Learn */
 
 .stushell-section-header { position: relative; margin-bottom: 16px; }

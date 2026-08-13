@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=58">
+    <link rel="stylesheet" href="style.css?v=59">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -599,6 +599,8 @@
         <!-- All 3 families cleared → primary call-to-action. Hidden by
              renderLevelCompletionBanner() until the student clears their level. -->
         <div id="levelCompletionMount" style="display:none;"></div>
+
+        <div class="stushell-captain-writing-note" id="stushellCaptainWritingNote" style="display:none;" onclick="openTeamHubFromHome()"></div>
 
         <div class="stushell-home-note" id="stushellHomeNoteMount" style="display:none;"></div>
     </div>
@@ -1891,7 +1893,7 @@
 <script src="js/calendar.js?v=7" defer></script>
 <script src="js/menu.js?v=11" defer></script>
 <script src="js/push.js?v=8" defer></script>
-<script src="js/studentshell.js?v=2" defer></script>
+<script src="js/studentshell.js?v=3" defer></script>
 
 <script>
     if ('serviceWorker' in navigator) {

@@ -69,9 +69,51 @@ async function enterStudentShellHomeTab() {
 
     if (typeof renderChallengeDashboardMap === 'function') await renderChallengeDashboardMap(levels, team);
     if (typeof renderLevelCompletionBanner === 'function') await renderLevelCompletionBanner('levelCompletionMount');
+    if (typeof renderCaptainHomeWritingStatus === 'function') await renderCaptainHomeWritingStatus();
     if (typeof renderStudentShellHomeNote === 'function') await renderStudentShellHomeNote();
 }
 window.enterStudentShellHomeTab = enterStudentShellHomeTab;
+
+// ---------------------------------------------------------------------------
+// Captain-only Home note — whether they have writing to approve right now,
+// tappable straight into Team Hub's review queue. Everything else on Home
+// stays identical to the normal student experience.
+// ---------------------------------------------------------------------------
+
+async function renderCaptainHomeWritingStatus() {
+    const note = document.getElementById('stushellCaptainWritingNote');
+    if (!note) return;
+
+    if (!currentProfile?.is_captain || !currentProfile?.team_id) {
+        note.style.display = 'none';
+        return;
+    }
+
+    const { data: members } = await _supabase
+        .from('profiles').select('id').eq('team_id', currentProfile.team_id).neq('id', currentUser.id);
+    const memberIds = (members || []).map(m => m.id);
+
+    let pendingCount = 0;
+    if (memberIds.length > 0) {
+        const { count } = await _supabase
+            .from('writing_submissions').select('id', { count: 'exact', head: true })
+            .in('student_id', memberIds).eq('status', 'pending');
+        pendingCount = count || 0;
+    }
+
+    note.classList.toggle('has-pending', pendingCount > 0);
+    note.innerHTML = pendingCount > 0
+        ? `${icon('pencil')} ${pendingCount} writing review${pendingCount === 1 ? '' : 's'} waiting →`
+        : `✅ No writing reviews waiting`;
+    note.style.display = 'flex';
+}
+window.renderCaptainHomeWritingStatus = renderCaptainHomeWritingStatus;
+
+async function openTeamHubFromHome() {
+    if (typeof chooseModeChallenge === 'function') await chooseModeChallenge();
+    if (typeof openCaptainTeamHub === 'function') openCaptainTeamHub();
+}
+window.openTeamHubFromHome = openTeamHubFromHome;
 
 async function enterStudentShellCompetitionTab() {
     showScreen('studentShellScreen', 'block');
