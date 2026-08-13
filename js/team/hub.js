@@ -954,9 +954,11 @@ async function loadDailyTeamChallenge() {
         bodyHtml = current
             ? `Practice today's lesson together: <strong>${current.title}</strong>. Read it aloud, review the vocabulary, and try today's conversation prompt.`
             : `Review your most recent lesson together: read it aloud and practice the vocabulary as a team.`;
+        // Plain text for the native share sheet / clipboard — icon() returns
+        // SVG markup, which would paste as raw code instead of a symbol.
         shareText = current
-            ? `${icon('book-open')} Lesson Challenge: Practice "${current.title}" together. Read it aloud, review the vocabulary, and try today's conversation prompt!`
-            : `${icon('book-open')} Lesson Challenge: Review your most recent lesson together. Read it aloud and practice the vocabulary as a team!`;
+            ? `📖 Lesson Challenge: Practice "${current.title}" together. Read it aloud, review the vocabulary, and try today's conversation prompt!`
+            : `📖 Lesson Challenge: Review your most recent lesson together. Read it aloud and practice the vocabulary as a team!`;
     }
 
     mount.innerHTML = `
