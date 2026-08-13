@@ -679,36 +679,17 @@ async function renderLevelCompletionBanner(mountId) {
         return;
     }
 
+    if (status.existingRequest?.status === 'approved') {
+        // Approved and waiting on teammates to catch up — nothing left for
+        // this student to do, so nothing to show here until the team advances.
+        mount.innerHTML = "";
+        mount.style.display = "none";
+        return;
+    }
+
     mount.style.display = "block";
 
-    if (status.existingRequest?.status === 'approved') {
-        // Approval doesn't mean the whole team has advanced yet — point the
-        // student at encouraging teammates instead of implying they're done.
-        mount.innerHTML = `
-            <div style="background:#f0fdf4; border:2px solid #166534; border-radius:16px;
-                        padding:20px; text-align:center; margin-bottom:16px;">
-                <div style="font-size:36px; margin-bottom:8px;">${icon('confetti')}</div>
-                <p style="font-size:16px; font-weight:800; color:#166534; margin-bottom:4px;">
-                    Your teacher approved your level!
-                </p>
-                <p style="font-size:13px; color:#15803d; margin-bottom:16px;">
-                    Encourage your teammates so your team can begin Level ${status.level + 1} together.
-                </p>
-                <button id="levelApprovalEncourageBtn" class="btn-primary"
-                        style="max-width:280px; margin:0 auto; display:block;">
-                    ${icon('megaphone')} Encourage Your Team
-                </button>
-            </div>`;
-
-        const encourageBtn = document.getElementById('levelApprovalEncourageBtn');
-        if (encourageBtn) {
-            encourageBtn.onclick = () => {
-                if (typeof shareTeamChallenge === 'function') {
-                    shareTeamChallenge(`${icon('confetti')} I just got Level ${status.level} approved! Let's finish up so our team can move to Level ${status.level + 1} together 💪`);
-                }
-            };
-        }
-    } else if (status.existingRequest?.status === 'pending') {
+    if (status.existingRequest?.status === 'pending') {
         mount.innerHTML = `
             <div style="background:#fffbeb; border:2px solid #ca8a04; border-radius:16px;
                         padding:20px; text-align:center; margin-bottom:16px;">
