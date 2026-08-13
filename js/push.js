@@ -133,8 +133,23 @@ async function updatePushMenuButton() {
     const row = document.getElementById('pushNotifRow');
     const label = document.getElementById('pushNotifLabel');
     const jumpBtn = document.getElementById('modeNotifBtn');
+    const shellLabel = document.getElementById('stushellNotifLabel');
 
     const state = getPushPermissionState();
+
+    if (shellLabel) {
+        if (!isPushSupported()) {
+            shellLabel.innerText = 'Not supported';
+        } else if (state === 'needs-install') {
+            shellLabel.innerText = 'Needs install';
+        } else if (state === 'denied') {
+            shellLabel.innerText = 'Blocked';
+        } else {
+            const registration = await navigator.serviceWorker.getRegistration();
+            const subscription = registration ? await registration.pushManager.getSubscription() : null;
+            shellLabel.innerText = subscription ? 'On →' : 'Off →';
+        }
+    }
 
     // The mode-select button mirrors modeInstallBtn's behavior: prominent
     // until the student's enabled notifications, then it disappears. It

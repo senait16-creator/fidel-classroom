@@ -29,8 +29,8 @@ const ALL_SCREENS = [
     "modeSelectScreen",
     "studentDashboard",
     "teacherOnlyDashboard",
+    "studentShellScreen",
     "captainDashboardScreen",
-    "challengeDashboardScreen",
     "challengeLevelsScreen",
     "challengeFamilyScreen",
     "challengeFamilyDetailScreen",
@@ -63,15 +63,16 @@ function hideAllScreens() {
 
 // The hamburger button used to float fixed over every screen, covering
 // content while scrolling and showing up even on focused practice screens
-// that already have their own Back button. Now it's a single shared DOM
-// node that gets physically moved into a small header slot on just the two
-// screens that are real navigation hubs with no Back button of their own —
-// everywhere else it's hidden, since Back already gets you where you need
-// to go.
-const HAMBURGER_HOST_SLOTS = {
-    modeSelectScreen: "modeSelectMenuSlot",
-    challengeDashboardScreen: "challengeDashMenuSlot"
-};
+// that already have their own Back button. It was later moved into a
+// small header slot on just the two screens that were real navigation
+// hubs with no Back button of their own (mode select, the challenge
+// dashboard) — both retired now that studentShellScreen's bottom nav is
+// the home base, and its Profile tab carries everything the hamburger's
+// Account/Support rows used to (Notifications, Switch Mode, Add to Home
+// Screen, Contact Teacher, Log Out). No screen hosts it anymore, so it
+// stays hidden everywhere; left in place (not deleted) rather than ripped
+// out in case a host is needed again.
+const HAMBURGER_HOST_SLOTS = {};
 
 function syncHamburgerHost(screenId) {
     const hamburger = document.getElementById("hamburgerBtn");
@@ -100,7 +101,7 @@ function showScreen(screenId, displayMode) {
     // screen — everywhere else it'd just be a second, confusing way
     // back into a screen the hamburger menu already reaches.
     const communityIcon = document.getElementById("communityIconBtn");
-    if (communityIcon) communityIcon.style.display = (screenId === "modeSelectScreen") ? "flex" : "none";
+    if (communityIcon) communityIcon.style.display = (screenId === "studentShellScreen") ? "flex" : "none";
 }
 
 window.showScreen = showScreen;

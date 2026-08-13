@@ -39,13 +39,22 @@ function getProgramWeekNumber() {
 }
 
 // -----------------------------------------------------------------------------
-// Mode select — home screen after login, shown every time
+// Home — landing point after login, and where every "back to home"/"exit"
+// flow across the app returns to. Name kept as enterModeSelect() since it's
+// called from many existing files (guide.js, auth.js, reading.js,
+// community.js, candostatement.js, letterboard.js, team/hub.js) — renaming
+// it would mean touching every one of those call sites for no functional
+// gain. It now opens the student shell's Home tab instead of the old
+// separate Mode Select screen.
 // -----------------------------------------------------------------------------
 
 function enterModeSelect() {
-    showScreen("modeSelectScreen", "flex");
-
-    if (typeof applyModeLockStyling === 'function') applyModeLockStyling();
+    if (typeof enterStudentShellHomeTab === 'function') {
+        enterStudentShellHomeTab();
+    } else {
+        // Defensive fallback in case studentshell.js hasn't loaded yet.
+        showScreen("studentShellScreen");
+    }
 
     localStorage.setItem('fidel_has_visited', '1');
 }
@@ -64,8 +73,13 @@ async function chooseModeChallenge() {
         return;
     }
 
-    showScreen("challengeDashboardScreen");
-    await renderChallengeDashboard();
+    if (typeof enterStudentShellCompetitionTab === "function") {
+        await enterStudentShellCompetitionTab();
+    } else {
+        // Defensive fallback in case studentshell.js hasn't loaded yet.
+        showScreen("studentShellScreen");
+        await renderChallengeDashboard();
+    }
 }
 
 async function renderChallengeDashboard() {
@@ -493,21 +507,12 @@ async function renderChallengeDashboardRace() {
 
 async function exitChallengeBackToDashboard() {
     const challengeLevels = document.getElementById("challengeLevelsScreen");
-    const challengeDashboard = document.getElementById("challengeDashboardScreen");
     const teamHub = document.getElementById("teamHubScreen");
 
     if (challengeLevels) challengeLevels.style.display = "none";
     if (teamHub) teamHub.style.display = "none";
 
-    if (challengeDashboard) {
-        challengeDashboard.style.display = "block";
-        if (typeof syncHamburgerHost === "function") syncHamburgerHost("challengeDashboardScreen");
-        if (typeof renderChallengeDashboard === "function") {
-            await renderChallengeDashboard();
-        }
-    } else if (typeof chooseModeChallenge === "function") {
-        await chooseModeChallenge();
-    }
+    if (typeof chooseModeChallenge === "function") await chooseModeChallenge();
 }
 
 // -----------------------------------------------------------------------------
@@ -577,12 +582,12 @@ async function renderChallengeLevelsView() {
 async function openChallengeFamilyPicker(level) {
     activeChallengeLevel = level;
 
-    const challengeDashboard = document.getElementById("challengeDashboardScreen");
+    const studentShell = document.getElementById("studentShellScreen");
     const challengeLevels = document.getElementById("challengeLevelsScreen");
     const challengeFamily = document.getElementById("challengeFamilyScreen");
     const challengeFamilyDetail = document.getElementById("challengeFamilyDetailScreen");
 
-    if (challengeDashboard) challengeDashboard.style.display = "none";
+    if (studentShell) studentShell.style.display = "none";
     if (challengeLevels) challengeLevels.style.display = "none";
     if (challengeFamilyDetail) challengeFamilyDetail.style.display = "none";
     if (challengeFamily) challengeFamily.style.display = "block";
@@ -747,7 +752,7 @@ async function openChallengeFamilyDetail(fidelObj, levelNumber, returnTo = 'pick
     activeChallengeFamilyLevel = levelNumber;
     challengeFamilyDetailReturnTo = returnTo;
     document.getElementById("challengeFamilyScreen").style.display = "none";
-    document.getElementById("challengeDashboardScreen").style.display = "none";
+    document.getElementById("studentShellScreen").style.display = "none";
     document.getElementById("challengeFamilyDetailScreen").style.display = "block";
     document.getElementById("challengeFamilyDetailTitle").innerText = `Family: "${fidelObj.base}"`;
     renderChallengeFamilyDetailGiantRow(fidelObj);
@@ -974,15 +979,12 @@ function launchChallengeStreakGame(fidelObj, levelNumber) {
 
 async function exitChallengeFamilyPicker() {
     const challengeFamily = document.getElementById("challengeFamilyScreen");
-    const challengeDashboard = document.getElementById("challengeDashboardScreen");
     const challengeLevels = document.getElementById("challengeLevelsScreen");
 
     if (challengeFamily) challengeFamily.style.display = "none";
 
-    if (challengeDashboard) {
-        challengeDashboard.style.display = "block";
-        if (typeof syncHamburgerHost === "function") syncHamburgerHost("challengeDashboardScreen");
-        await renderChallengeDashboard();
+    if (typeof chooseModeChallenge === "function") {
+        await chooseModeChallenge();
     } else if (challengeLevels) {
         challengeLevels.style.display = "block";
         renderChallengeLevelsView();

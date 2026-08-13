@@ -7792,6 +7792,156 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 
 /* ==========================================================================
+   STUDENT SHELL — persistent Home / Learn / Competition / Profile bottom
+   nav that replaced Mode Select as the student landing experience.
+   ========================================================================== */
+
+#studentShellScreen {
+    padding-bottom: 96px;
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+@media (max-width: 640px) {
+    #studentShellScreen { padding-bottom: 88px; }
+}
+
+.stushell-tab-panel { display: none; padding-top: 18px; }
+.stushell-tab-panel.active { display: block; }
+
+.stushell-greeting {
+    font-family: 'Lora', 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 21px;
+    color: var(--neutral-dark);
+    margin: 4px 0 14px;
+}
+
+.stushell-home-note {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #64748b;
+    padding: 10px 2px;
+}
+
+/* Learn */
+
+.stushell-section-header { position: relative; margin-bottom: 16px; }
+.stushell-section-title { font-family: 'Lora', 'Playfair Display', serif; font-weight: 700; font-size: 22px; color: var(--neutral-dark); }
+.stushell-section-sub { font-size: 12.5px; color: #64748b; margin-top: 3px; }
+.stushell-bg-letter {
+    position: absolute; top: -14px; right: -6px; font-size: 78px; color: var(--brand-primary);
+    opacity: 0.07; z-index: 0; line-height: 1; pointer-events: none;
+}
+
+.stushell-featured-cup {
+    position: relative; z-index: 1; display: flex; align-items: center; gap: 14px;
+    background: linear-gradient(135deg, #166534, #15803d); color: white; border-radius: 20px;
+    padding: 16px; margin-bottom: 20px; cursor: pointer;
+    box-shadow: 0 10px 24px rgba(22,101,52,0.22);
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+.stushell-featured-cup:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(22,101,52,0.3); }
+.stushell-featured-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; opacity: 0.75; }
+.stushell-featured-desc { font-size: 11.5px; opacity: 0.85; line-height: 1.4; margin-top: 4px; }
+
+.stushell-supporting-label {
+    font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;
+    color: #94a3b8; margin: 4px 0 10px 2px; position: relative; z-index: 1;
+}
+
+.stushell-quicklinks-row { display: flex; gap: 9px; margin-bottom: 4px; position: relative; z-index: 1; }
+.stushell-quicklink {
+    flex: 1; display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.95);
+    border: 1px solid rgba(0,0,0,0.06); border-radius: 12px; padding: 10px 11px; cursor: pointer;
+    font-family: inherit; box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+}
+.stushell-quicklink-icon {
+    width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 13px;
+}
+.stushell-quicklink-label { font-size: 11.5px; font-weight: 700; color: var(--neutral-dark); }
+.stushell-quicklink-arrow { margin-left: auto; color: #94a3b8; font-size: 12px; }
+
+/* Profile */
+
+.stushell-profile-header { display: flex; align-items: center; gap: 13px; margin: 4px 0 18px; }
+.stushell-profile-avatar {
+    width: 58px; height: 58px; border-radius: 50%; background: white; border: 2px solid var(--border-color);
+    display: flex; align-items: center; justify-content: center; font-size: 30px; flex-shrink: 0; cursor: pointer;
+}
+.stushell-profile-name {
+    font-family: 'Lora', 'Playfair Display', serif; font-weight: 700; font-size: 19px; color: var(--neutral-dark);
+    cursor: pointer;
+}
+.stushell-profile-team { font-size: 12px; font-weight: 700; color: var(--brand-primary); margin-top: 2px; }
+
+.stushell-stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 14px; }
+.stushell-stat-tile {
+    background: white; border: 1px solid var(--border-color); border-radius: 14px; padding: 12px 6px;
+    text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,0.03);
+}
+.stushell-stat-value { font-size: 19px; font-weight: 900; color: var(--brand-primary); }
+.stushell-stat-label { font-size: 9px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-top: 2px; letter-spacing: 0.02em; }
+
+.stushell-card {
+    background: white; border: 1px solid var(--border-color); border-radius: 16px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.04); padding: 15px; margin-bottom: 12px;
+}
+.stushell-card-title {
+    font-size: 13px; font-weight: 800; color: var(--neutral-dark); display: flex; align-items: center;
+    justify-content: space-between; margin-bottom: 11px;
+}
+.stushell-card-link { background: none; border: none; font-size: 11.5px; font-weight: 700; color: var(--brand-primary); cursor: pointer; font-family: inherit; }
+
+.stushell-skill-progress { font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 10px; }
+.stushell-skill-chip { display: flex; align-items: center; gap: 8px; font-size: 12.5px; padding: 6px 0; color: var(--neutral-dark); }
+.stushell-skill-chip .sc-mark {
+    width: 17px; height: 17px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; flex-shrink: 0;
+}
+.stushell-skill-chip.done .sc-mark { background: var(--brand-primary); color: white; }
+.stushell-skill-chip.todo .sc-mark { background: #f1efe6; border: 1.5px solid var(--border-color); }
+.stushell-skill-chip.todo { color: #64748b; }
+
+.stushell-achieve-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; font-size: 12.5px; color: var(--neutral-dark); }
+.stushell-achieve-row .ai {
+    width: 26px; height: 26px; border-radius: 50%; background: #eaf7ee; display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0; font-size: 13px;
+}
+.stushell-achieve-time { margin-left: auto; font-size: 10.5px; color: #94a3b8; }
+
+.stushell-settings-row {
+    display: flex; align-items: center; gap: 12px; padding: 13px 2px; font-size: 13px; font-weight: 700;
+    color: var(--neutral-dark); border-bottom: 1px solid #f1efe6; width: 100%; background: none; border-left: none;
+    border-right: none; border-top: none; text-align: left; cursor: pointer; font-family: inherit; text-decoration: none;
+}
+.stushell-settings-row:last-child { border-bottom: none; }
+.stushell-settings-row svg { width: 16px; height: 16px; color: var(--brand-primary); flex-shrink: 0; }
+.stushell-settings-arrow { margin-left: auto; color: #94a3b8; font-size: 12px; }
+.stushell-logout-row { color: #b91c1c; }
+.stushell-logout-row svg { color: #b91c1c; }
+
+/* Bottom nav */
+
+.stushell-bottomnav {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; display: flex; justify-content: center;
+    background: white; border-top: 1px solid var(--border-color); box-shadow: 0 -6px 18px rgba(0,0,0,0.06);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.stushell-bottomnav-inner { display: flex; width: 100%; max-width: 480px; }
+.stushell-nav-tab {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 9px 4px 8px;
+    background: none; border: none; color: #94a3b8; font-family: 'Inter', sans-serif; cursor: pointer;
+}
+.stushell-nav-tab .picon { width: 22px; height: 22px; }
+.stushell-nav-tab-label { font-size: 10px; font-weight: 700; }
+.stushell-nav-tab.active { color: var(--brand-primary); }
+
+/* ==========================================================================
    COMMUNITY PAGE LAYOUT — sidebar leaderboard (reuses .leaderboard-row from
    the Practice-mode leaderboard) + main column for the sharing feed.
    Side-by-side on wider screens; stacks on phones, where the sidebar would

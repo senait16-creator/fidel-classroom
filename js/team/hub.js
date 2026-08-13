@@ -615,9 +615,11 @@ async function captainApproveSubmission(submissionId, studentId, baseLetter) {
     await loadCaptainTeamProgress();
     if (typeof loadCaptainRecentlyApproved === 'function') await loadCaptainRecentlyApproved();
 
-    // Refresh the Competition page team status if it's the visible screen
-    const dash = document.getElementById('challengeDashboardScreen');
-    if (dash && dash.style.display !== 'none' && typeof renderChallengeDashboard === 'function') {
+    // Refresh the Competition tab's team status if it's the visible tab
+    const shell = document.getElementById('studentShellScreen');
+    const competitionTab = document.querySelector('.stushell-tab-panel[data-tab="competition"]');
+    if (shell && shell.style.display !== 'none' && competitionTab?.classList.contains('active')
+        && typeof renderChallengeDashboard === 'function') {
         await renderChallengeDashboard();
     }
 

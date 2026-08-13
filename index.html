@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=51">
+    <link rel="stylesheet" href="style.css?v=52">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -566,47 +566,117 @@
 
 
 <!-- ============================================================
-     CHALLENGE DASHBOARD
+     STUDENT SHELL — the persistent, app-style home for every student
+     after login: Home / Learn / Competition / Profile behind one bottom
+     nav, replacing the old Mode Select → separate full-screen destination
+     pattern. Fidel Practice, Word Builder, and Amharic Path stay their
+     own full-screen experiences (linked to from Learn) — only the
+     landing/orientation layer changes here. The Challenge Dashboard's
+     content (hero, Captain Dashboard, Team Race, Timeline, Level
+     Resources) is relocated into the Home/Competition tabs below with
+     every id unchanged, so all of challenge.js keeps working as-is.
      ============================================================ -->
-<div id="challengeDashboardScreen"
-     style="display:none; min-height:100vh; padding:24px 16px 48px; background:#f5f5f0;">
+<div id="studentShellScreen" style="display:none; min-height:100vh; padding:0 16px 16px; background:#f5f5f0;">
 
-    <div class="challenge-dash-hero">
-        <div class="challenge-dash-header-actions">
-            <div id="challengeDashMenuSlot"></div>
-        </div>
-        <h1>Fidel Competition</h1>
+    <div class="stushell-tab-panel active" data-tab="home">
+        <p class="stushell-greeting" id="stushellGreeting">Selam 👋</p>
 
-        <div class="challenge-hero-meta-row">
-            <span class="challenge-hero-team-dot" id="challengeHeroTeamDot"></span>
-            <span id="challengeHeroMetaLine">Loading...</span>
-        </div>
-
-        <div class="pe-progress-track"><div class="pe-progress-fill" id="peProgressFill" style="width:0%;"></div></div>
-        <div class="pe-progress-caption" id="peProgressLabel">– / – Levels</div>
-
-        <!-- The dashboard's one action, folded into the same card as the
-             hero instead of a second card below — the first thing a
-             student sees is exactly what to do next. Hidden for captains
-             (they get the Captain Dashboard below instead) via the same
-             id this section used before the merge. -->
-        <div id="challengeCurrentLevelCard">
-            <div id="challengeDashMapMount">
-                <p style="color:rgba(255,255,255,.6); font-size:13px;">Loading current level...</p>
+        <div class="challenge-dash-hero">
+            <div class="challenge-hero-meta-row">
+                <span class="challenge-hero-team-dot" id="challengeHeroTeamDot"></span>
+                <span id="challengeHeroMetaLine">Loading...</span>
             </div>
+
+            <div class="pe-progress-track"><div class="pe-progress-fill" id="peProgressFill" style="width:0%;"></div></div>
+            <div class="pe-progress-caption" id="peProgressLabel">– / – Levels</div>
+
+            <!-- Hidden for captains (they get the Captain Dashboard in
+                 Competition instead) via the same id this section always used. -->
+            <div id="challengeCurrentLevelCard">
+                <div id="challengeDashMapMount">
+                    <p style="color:rgba(255,255,255,.6); font-size:13px;">Loading current level...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- All 3 families cleared → primary call-to-action. Hidden by
+             renderLevelCompletionBanner() until the student clears their level. -->
+        <div id="levelCompletionMount" style="display:none;"></div>
+
+        <div class="stushell-home-note" id="stushellHomeNoteMount" style="display:none;"></div>
+    </div>
+
+    <div class="stushell-tab-panel" data-tab="learn">
+        <div class="stushell-section-header">
+            <span class="bg-letter stushell-bg-letter">ፊደል</span>
+            <div class="stushell-section-title">Learn</div>
+            <div class="stushell-section-sub">Everything for building your Amharic skills</div>
+        </div>
+
+        <div class="stushell-featured-cup" onclick="enterModeIfUnlocked('practice', openLetterBoard)">
+            <svg width="52" height="60" viewBox="0 0 56 64" fill="none">
+                <rect x="6" y="22" width="32" height="30" rx="7" fill="rgba(255,255,255,0.18)" stroke="#ffffff" stroke-width="1.5"/>
+                <path d="M38 28 Q47 28 47 35 Q47 42 38 42" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+                <rect x="12" y="52" width="18" height="4" rx="2" fill="#ffffff" opacity="0.25"/>
+                <path d="M16 17 Q16 13 19 15 Q22 17 19 20" fill="none" stroke="#ffffff" stroke-width="1.1" stroke-linecap="round"/>
+                <path d="M23 15 Q23 11 26 13 Q29 15 26 18" fill="none" stroke="#ffffff" stroke-width="1.1" stroke-linecap="round"/>
+                <text x="22" y="42" text-anchor="middle" font-size="10" font-weight="700" fill="#ffffff" font-family="serif" font-style="italic">ፊደል</text>
+            </svg>
+            <div>
+                <div class="stushell-featured-label">Your main path</div>
+                <div class="cup-card-label" style="color:white;">Fidel Practice</div>
+                <div class="stushell-featured-desc">Flashcards &rarr; matching &rarr; writing, level by level. This is the path Competition tracks.</div>
+            </div>
+        </div>
+
+        <div class="stushell-supporting-label">More Ways to Learn</div>
+        <div class="cups-grid">
+            <div class="cup-card cup-card-outline-indigo" data-mode="wordBuilder" onclick="enterWordBuilder()">
+                <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
+                    <rect x="6" y="22" width="32" height="30" rx="7" fill="#ede9fe" stroke="#4f46e5" stroke-width="1.5"/>
+                    <path d="M38 28 Q47 28 47 35 Q47 42 38 42" fill="none" stroke="#4f46e5" stroke-width="1.5" stroke-linecap="round"/>
+                    <rect x="12" y="52" width="18" height="4" rx="2" fill="#4f46e5" opacity="0.25"/>
+                    <path d="M16 17 Q16 13 19 15 Q22 17 19 20" fill="none" stroke="#4f46e5" stroke-width="1.1" stroke-linecap="round"/>
+                    <path d="M23 15 Q23 11 26 13 Q29 15 26 18" fill="none" stroke="#4f46e5" stroke-width="1.1" stroke-linecap="round"/>
+                    <text x="22" y="42" text-anchor="middle" font-size="10" font-weight="700" fill="#4f46e5" font-family="sans-serif">ቃላት</text>
+                </svg>
+                <div class="cup-card-label">Word Builder</div>
+            </div>
+            <div class="cup-card cup-card-outline-blue" onclick="enterModeIfUnlocked('amharicPath', enterAmharicPath)">
+                <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
+                    <rect x="6" y="22" width="32" height="30" rx="7" fill="#e0e7ff" stroke="#4338ca" stroke-width="1.5"/>
+                    <path d="M38 28 Q47 28 47 35 Q47 42 38 42" fill="none" stroke="#4338ca" stroke-width="1.5" stroke-linecap="round"/>
+                    <rect x="12" y="52" width="18" height="4" rx="2" fill="#4338ca" opacity="0.25"/>
+                    <path d="M16 17 Q16 13 19 15 Q22 17 19 20" fill="none" stroke="#4338ca" stroke-width="1.1" stroke-linecap="round"/>
+                    <path d="M23 15 Q23 11 26 13 Q29 15 26 18" fill="none" stroke="#4338ca" stroke-width="1.1" stroke-linecap="round"/>
+                    <text x="22" y="42" text-anchor="middle" font-size="9" font-weight="700" fill="#4338ca" font-family="sans-serif">ጉዞዬ</text>
+                </svg>
+                <div class="cup-card-label">Amharic Path</div>
+            </div>
+        </div>
+
+        <div class="stushell-supporting-label">Quick Links</div>
+        <div class="stushell-quicklinks-row">
+            <button type="button" class="stushell-quicklink" onclick="window.open('https://amharicteacher.com/hahu','_blank')">
+                <span class="stushell-quicklink-icon" style="background:#fff7ed; color:#c2410c;"><span data-icon="speaker"></span></span>
+                <span class="stushell-quicklink-label">Sounds</span>
+                <span class="stushell-quicklink-arrow">→</span>
+            </button>
+            <button type="button" class="stushell-quicklink" onclick="openWritingQuickLink()">
+                <span class="stushell-quicklink-icon" style="background:#fce7f3; color:#be185d;"><span data-icon="pencil"></span></span>
+                <span class="stushell-quicklink-label">Writing</span>
+                <span class="stushell-quicklink-arrow">→</span>
+            </button>
         </div>
     </div>
 
-    <!-- All 3 families cleared → this becomes the primary call-to-action,
-         above everything else including the Captain Dashboard. Hidden by
-         renderLevelCompletionBanner() until the student actually clears
-         their level. -->
-    <div id="levelCompletionMount" style="display:none;"></div>
+    <div class="stushell-tab-panel" data-tab="competition">
 
     <!-- ============================================================
          CAPTAIN DASHBOARD — captains only. Leadership tools live here,
-         above the normal challenge content, which continues unchanged
-         below for everyone (captains are still learners too).
+         within the Competition tab, replacing the normal team-status
+         content for them (captains are still learners too, so nothing
+         about Learn/Home changes for them).
          ============================================================ -->
     <div id="captainZone" class="captain-zone" style="display:none;">
         <div class="captain-zone-header">
@@ -766,6 +836,79 @@
         </section>
 
     </div>
+    </div>
+
+    <div class="stushell-tab-panel" data-tab="profile">
+        <div class="stushell-profile-header">
+            <div class="stushell-profile-avatar" id="stushellProfileAvatar" onclick="openProfileEdit()">🦁</div>
+            <div>
+                <div class="stushell-profile-name" id="stushellProfileName" onclick="openProfileEdit()">Student <span data-icon="pencil"></span></div>
+                <div class="stushell-profile-team" id="stushellProfileTeam">Practicing Solo</div>
+            </div>
+        </div>
+
+        <div class="stushell-stats-row" id="stushellStatsRow">
+            <div class="stushell-stat-tile"><div class="stushell-stat-value" id="stushellStatLevel">–</div><div class="stushell-stat-label">Level</div></div>
+            <div class="stushell-stat-tile"><div class="stushell-stat-value" id="stushellStatStreak">–</div><div class="stushell-stat-label">Team Streak</div></div>
+            <div class="stushell-stat-tile"><div class="stushell-stat-value" id="stushellStatCanDo">–</div><div class="stushell-stat-label">Can-Do Skills</div></div>
+        </div>
+
+        <div class="stushell-card">
+            <div class="stushell-card-title">
+                <span>Can-Do Skills</span>
+                <button type="button" class="stushell-card-link" onclick="chooseModeCanDo()">View All →</button>
+            </div>
+            <div id="stushellCanDoPreview"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
+        </div>
+
+        <div class="stushell-card">
+            <div class="stushell-card-title"><span>Achievements</span></div>
+            <div id="stushellAchievementsMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
+        </div>
+
+        <div class="stushell-card">
+            <button type="button" class="stushell-settings-row" id="stushellNotifRow" onclick="togglePushNotifications()">
+                <span data-icon="bell"></span>
+                <span>Notifications</span>
+                <span class="stushell-settings-arrow" id="stushellNotifLabel">→</span>
+            </button>
+            <button type="button" class="stushell-settings-row" onclick="installFidelApp()">
+                <span>📱</span>
+                <span>Add to Home Screen</span>
+                <span class="stushell-settings-arrow">→</span>
+            </button>
+            <a class="stushell-settings-row" href="mailto:senaitrichmond16@gmail.com?subject=Fidel Classroom Question">
+                <span data-icon="mail"></span>
+                <span>Contact Teacher</span>
+                <span class="stushell-settings-arrow">→</span>
+            </a>
+            <button type="button" class="stushell-settings-row stushell-logout-row" onclick="logout()">
+                <span data-icon="x-circle"></span>
+                <span>Log Out</span>
+            </button>
+        </div>
+    </div>
+
+    <nav class="stushell-bottomnav" id="stushellBottomNav">
+        <div class="stushell-bottomnav-inner">
+            <button class="stushell-nav-tab active" data-tab="home" onclick="switchStudentShellTab('home')">
+                <span data-icon="house"></span>
+                <span class="stushell-nav-tab-label">Home</span>
+            </button>
+            <button class="stushell-nav-tab" data-tab="learn" onclick="switchStudentShellTab('learn')">
+                <span data-icon="book-open"></span>
+                <span class="stushell-nav-tab-label">Learn</span>
+            </button>
+            <button class="stushell-nav-tab" data-tab="competition" onclick="switchStudentShellTab('competition')">
+                <span data-icon="trophy"></span>
+                <span class="stushell-nav-tab-label">Competition</span>
+            </button>
+            <button class="stushell-nav-tab" data-tab="profile" onclick="switchStudentShellTab('profile')">
+                <span data-icon="user"></span>
+                <span class="stushell-nav-tab-label">Profile</span>
+            </button>
+        </div>
+    </nav>
 </div>
 
 <!-- ============================================================
@@ -1714,8 +1857,8 @@
 <!-- END CAN-DO STATEMENTS -->
 
 <script src="js/icons.js?v=2" defer></script>
-<script src="js/navigation.js?v=6" defer></script>
-<script src="js/app.js?v=26" defer></script>
+<script src="js/navigation.js?v=7" defer></script>
+<script src="js/app.js?v=27" defer></script>
 <script src="js/auth.js?v=16" defer></script>
 <script src="js/guide.js?v=10" defer></script>
 <script src="js/utils/compress.js?v=9" defer></script>
@@ -1729,7 +1872,7 @@
 <script src="js/team/progress.js?v=24" defer></script>
 <script src="js/team/levels.js?v=14" defer></script>
 <script src="js/team/map.js?v=9" defer></script>
-<script src="js/team/hub.js?v=21" defer></script>
+<script src="js/team/hub.js?v=22" defer></script>
     <script src="js/community.js?v=8" defer></script>
     <script src="js/dailyfeed.js?v=1" defer></script>
     <script src="js/songweek.js?v=1" defer></script>
@@ -1737,10 +1880,11 @@
         <script src="js/starboard.js?v=1" defer></script>
 <script src="js/wordle.js?v=9" defer></script>
 <script src="intro.js?v=1" defer></script>
-<script src="js/challenge.js?v=30" defer></script>
+<script src="js/challenge.js?v=31" defer></script>
 <script src="js/calendar.js?v=7" defer></script>
 <script src="js/menu.js?v=11" defer></script>
-<script src="js/push.js?v=7" defer></script>
+<script src="js/push.js?v=8" defer></script>
+<script src="js/studentshell.js?v=1" defer></script>
 
 <script>
     if ('serviceWorker' in navigator) {

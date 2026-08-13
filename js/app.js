@@ -449,18 +449,9 @@ if (viewMode === "teacher") {
     loadCurrentCaptains();
     if (typeof loadTeacherClassroomOverview === 'function') loadTeacherClassroomOverview();
     } else {
-        showScreen("studentDashboard");
-        fetchUserProgress();
-        renderLiveLeaderboard();
-        fetchDisappearingImageCanvasBoard();
-        loadTeamDashboard(currentUser);
-        buildMatrixInterfaceGrid();
-        renderStudentTeamProgress();
-
-        const captainBtn = document.getElementById("captainDashboardEntryBtn");
-        if (captainBtn) {
-            captainBtn.style.display = currentProfile?.is_captain ? "block" : "none";
-        }
+        // "Practice Mode" (studentDashboard) is retired — the student shell's
+        // Home tab is the one landing point now, same as enterModeSelect().
+        if (typeof enterModeSelect === 'function') enterModeSelect();
     }
 }
 
