@@ -5,7 +5,7 @@
 // Loads after app.js. Relies on globals:
 //   _supabase, currentUser, currentProfile, STREAK_THRESHOLD,
 //   showNotificationToast, showGobezToast, executeVictoryConfettiCelebration,
-//   getTeamHex, checkAndUpdateTeamLevelCompletion
+//   getTeamHex
 // =============================================================================
 
 // ---------------------------------------------------------------------------
@@ -164,12 +164,12 @@ async function saveStreakProgress(baseLetter, levelNumber, bestStreak, passed) {
     if (error) console.error("Failed to save streak progress:", error);
 }
 
-// How close each team is to auto-advancing — the real "ready" signal in
-// the individual-live-test flow (see advance_team_level_if_ready). Teams
-// never sit in a "ready but not yet advanced" limbo state anymore, since
-// advancement is automatic the instant the last required member's test is
-// approved — so this reports a live progress fraction (e.g. 3/5 approved)
-// rather than a boolean. Replaces the old team_level_status.live_quiz_passed
+// How close each team is to its next observational milestone — the real
+// "ready" signal in the individual-live-test flow (see
+// advance_student_level_if_ready). The milestone recomputes automatically
+// the instant the last required member's test is approved — so this
+// reports a live progress fraction (e.g. 3/5 approved) rather than a
+// boolean. Replaces the old team_level_status.live_quiz_passed
 // signal, which nothing has written to since that redesign and which would
 // therefore always read as "not ready" no matter a team's real state.
 // Batched across all requested teams — safe to call with many team ids
@@ -1008,10 +1008,9 @@ async function approveTeacherLevelCompletion(requestId, studentId, levelNumber, 
 
     if (error) return showNotificationToast("Failed: " + error.message);
 
-    // Trigger the team level advancement check
-    if (typeof checkAndUpdateTeamLevelCompletion === "function") {
-        await checkAndUpdateTeamLevelCompletion(studentId);
-    }
+    // Individual advancement + the team's observational milestone both
+    // happen automatically server-side (see advance_student_level_trigger)
+    // the instant this status flips to 'approved' — nothing to trigger here.
 
     showGobezToast(`Level completion approved! ${icon("star")}`);
     await loadTeacherLevelCompletionQueue(mountId);

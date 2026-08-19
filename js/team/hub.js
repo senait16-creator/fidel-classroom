@@ -715,14 +715,6 @@ async function captainApproveSubmission(submissionId, studentId, baseLetter) {
         sendPushNotification({ type: 'writing_approved', student_id: studentId, base_letter: baseLetter });
     }
 
-    // Re-check right here — this used to only get checked when a student
-    // separately remembered to submit a level-completion request afterward,
-    // so a team could have every family approved and still never show as
-    // "ready" for the teacher if that extra step got missed.
-    if (typeof checkAndUpdateTeamLevelCompletion === "function") {
-        await checkAndUpdateTeamLevelCompletion(studentId);
-    }
-
     showGobezToast('Submission approved! ✓');
     await loadCaptainWritingQueue();
     await loadCaptainTeamProgress();
@@ -734,10 +726,6 @@ async function captainApproveSubmission(submissionId, studentId, baseLetter) {
     if (shell && shell.style.display !== 'none' && competitionTab?.classList.contains('active')
         && typeof renderChallengeDashboard === 'function') {
         await renderChallengeDashboard();
-    }
-
-    if (typeof checkAndUpdateTeamLevelCompletion === 'function') {
-        await checkAndUpdateTeamLevelCompletion(studentId);
     }
 }
 

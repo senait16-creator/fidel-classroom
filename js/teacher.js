@@ -96,7 +96,7 @@ window.approveAccessRequest = approveAccessRequest;
 // deliberately says "Ready for live test" rather than "Level cleared" —
 // clearing practice isn't the same as being done with the level, and
 // "cleared" reads like it is.
-function computeStudentChallengeStatus(team, familiesForLevel, studentRows, hasPendingWriting, hasHelpFlag, hasApprovedLevelCompletion) {
+function computeStudentChallengeStatus(familiesForLevel, studentRows, hasPendingWriting, hasHelpFlag, hasApprovedLevelCompletion) {
     const rowFor = (base) => studentRows.find(r => r.base_letter === base);
 
     if (hasApprovedLevelCompletion) return { key: 'test_passed', label: '✓ Passed, waiting on team', family: null };
@@ -144,7 +144,7 @@ async function loadTeacherRosterData() {
         { data: userProgress },
         { data: approvedLevelCompletions }
     ] = await Promise.all([
-        _supabase.from('profiles').select('id, nickname, avatar, email, team_id, is_captain, is_admin, access_status'),
+        _supabase.from('profiles').select('id, nickname, avatar, email, team_id, is_captain, is_admin, access_status, current_level'),
         _supabase.from('teams').select('id, name, current_level'),
         (typeof fetchChallengeLevels === 'function' ? fetchChallengeLevels() : Promise.resolve([])),
         _supabase.from('student_family_progress').select('student_id, base_letter, level_number, streak_passed, writing_passed, best_streak'),
@@ -202,13 +202,13 @@ async function loadTeacherRosterData() {
             statusByStudent[s.id] = { key: 'captain', label: 'Captain', family: null };
             return;
         }
-        const team = teamsById[s.team_id];
-        const level = levelsByNumber[team.current_level || 1];
+        const myLevel = s.current_level || 1;
+        const level = levelsByNumber[myLevel];
         const families = level?.letter_families || [];
-        const rowsForLevel = (progressByStudent[s.id] || []).filter(r => r.level_number === (team.current_level || 1));
-        const hasApprovedLevelCompletion = (approvedLevelsByStudent[s.id] || new Set()).has(team.current_level || 1);
+        const rowsForLevel = (progressByStudent[s.id] || []).filter(r => r.level_number === myLevel);
+        const hasApprovedLevelCompletion = (approvedLevelsByStudent[s.id] || new Set()).has(myLevel);
         statusByStudent[s.id] = computeStudentChallengeStatus(
-            team, families, rowsForLevel,
+            families, rowsForLevel,
             pendingWritingStudentIds.has(s.id), helpFlagStudentIds.has(s.id),
             hasApprovedLevelCompletion
         );
@@ -260,7 +260,7 @@ async function loadTeacherRosterData() {
                             <div class="roster-student-avatar">${s.avatar || '🦁'}</div>
                             <div>
                                 <div class="roster-student-name">${s.nickname}${s.is_captain ? ' <span class="roster-captain-badge">👑</span>' : ''}</div>
-                                <div class="roster-student-meta">Level ${team?.current_level || 1}${status.family ? ` · ${status.family} family` : ''}</div>
+                                <div class="roster-student-meta">Level ${s.current_level || 1}${status.family ? ` · ${status.family} family` : ''}</div>
                             </div>
                             <span class="roster-status-pill roster-status-${status.key.replace(/_/g, '-')}">${status.label}</span>
                             <button class="roster-student-menu-btn" onclick="toggleRosterActions('${s.id}')" aria-label="Actions">⋯</button>
@@ -328,14 +328,6 @@ async function removeStudentFromTeam(studentId, nickname) {
 
     showNotificationToast("Removing from team...");
 
-    // Grab the team BEFORE clearing it — removing a student lowers the
-    // team's required-member count, which can make it newly qualify for
-    // advancement even with no new approvals, but nothing else re-checks
-    // that automatically. Re-run the check right after so a team doesn't
-    // sit unlocked-but-not-advanced until someone manually hits Recalculate.
-    const { data: student } = await _supabase.from('profiles').select('team_id').eq('id', studentId).maybeSingle();
-    const previousTeamId = student?.team_id || null;
-
     const { error } = await _supabase
         .from('profiles')
         .update({ team_id: null })
@@ -347,12 +339,6 @@ async function removeStudentFromTeam(studentId, nickname) {
     }
 
     showNotificationToast(`${nickname} is now Practicing Solo.`);
-
-    if (previousTeamId) {
-        const { data: members } = await _supabase.from('profiles').select('id, is_captain').eq('team_id', previousTeamId);
-        const nonCaptain = (members || []).find(m => !m.is_captain);
-        if (nonCaptain) await checkAndUpdateTeamLevelCompletion(nonCaptain.id);
-    }
 
     await loadTeacherRosterData();
     await teacherRefreshConfigurationDropdowns();
@@ -716,7 +702,6 @@ async function approveWritingSubmission(submissionId, studentId, baseLetter) {
         showNotificationToast("Submission approved! ✓");
     }
     await loadTeacherWritingQueue();
-    await checkAndUpdateTeamLevelCompletion(studentId);
     if (typeof loadTeacherClassroomOverview === 'function') await loadTeacherClassroomOverview();
 
     if (typeof sendPushNotification === 'function') {
@@ -752,64 +737,8 @@ async function rejectWritingSubmission(submissionId, note, studentId, baseLetter
 }
 
 // ---------------------------------------------------------------------------
-// Team level progress + advancement
+// Team level progress
 // ---------------------------------------------------------------------------
-
-// After any approval, check whether the approved student's whole team has
-// now cleared every family in their current level — if so, flag the team
-// as ready for the live quiz on the teacher dashboard.
-//
-// TEMPORARY DIAGNOSTIC LOGGING — remove once the White Team issue is
-// confirmed fixed. Wrapped in try/catch so a thrown error (e.g. from
-// letter_families coming back as something unexpected) surfaces in the
-// console instead of silently dying as an unhandled promise rejection.
-// Each student now takes their own individual live test rather than the
-// whole team sharing one — so "the team is ready" means every required
-// (non-captain) member has an approved level_completion_requests row for
-// the team's current level, and the moment that's true the team should
-// advance immediately with no separate teacher click. That whole
-// check-then-advance sequence has to be atomic (two approvals for the same
-// team's last two members could otherwise race and double-advance it), so
-// it lives in a single Postgres function — see
-// scratchpad/auto_advance_team_level.sql. This just calls it and refreshes
-// the teacher UI if it actually advanced.
-async function checkAndUpdateTeamLevelCompletion(studentId) {
-    try {
-        const { data: student, error: studentError } = await _supabase.from('profiles').select('team_id').eq('id', studentId).maybeSingle();
-        if (studentError) { console.error('Failed to look up student for team completion check:', studentError); return; }
-        if (!student?.team_id) return;
-
-        const { data: advanced, error } = await _supabase.rpc('advance_team_level_if_ready', { p_team_id: student.team_id });
-        if (error) { console.error('advance_team_level_if_ready failed:', error); return; }
-
-        if (advanced) {
-            await loadTeacherTeamProgress();
-            if (typeof loadTeacherClassroomOverview === 'function') await loadTeacherClassroomOverview();
-            if (typeof sendPushNotification === 'function') {
-                sendPushNotification({ type: 'team_advanced', team_id: student.team_id });
-            }
-        }
-    } catch (err) {
-        console.error('[checkAndUpdateTeamLevelCompletion] THREW AN EXCEPTION:', err);
-    }
-}
-
-// Manually re-runs the check above for a team, without needing a brand new
-// approval action to trigger it. Useful when a team's progress already
-// satisfied the "all cleared" condition before this check last ran (e.g.
-// the underlying approvals happened before this function — or a fix to
-// it — was deployed), since the check only ever runs reactively.
-async function recheckTeamReadiness(teamId) {
-    showNotificationToast("Rechecking team readiness...");
-    const { data: members } = await _supabase.from('profiles').select('id, is_captain').eq('team_id', teamId);
-    const nonCaptain = (members || []).find(m => !m.is_captain);
-    if (!nonCaptain) return showNotificationToast("No competing students on this team.");
-
-    await checkAndUpdateTeamLevelCompletion(nonCaptain.id);
-    showNotificationToast("Recheck complete. See console for details.");
-    if (typeof loadTeacherClassroomOverview === 'function') await loadTeacherClassroomOverview();
-}
-
 // Team Lesson Schedule is teacher-owned — captains/students only see it,
 // they can't edit it (see lesson_schedule_setup.sql for the RLS change).
 // Uses a real day-select + time-picker overlay (teacherLessonTimeOverlay
@@ -897,10 +826,12 @@ async function loadTeacherTeamProgress() {
 
     mount.innerHTML = "";
     teams.forEach(team => {
-        // Advancement is automatic now (see advance_team_level_if_ready) —
-        // the moment every teammate's individual live test is approved,
-        // the team advances in the same transaction, so there's no more
-        // "ready but not yet advanced" state to show here.
+        // team.current_level is now a purely observational milestone — the
+        // min current_level across the team's required (non-captain)
+        // members — recomputed automatically whenever a student's
+        // individual level advances (see advance_student_level_if_ready).
+        // Nothing here gates anyone's progress, so there's no "ready but
+        // not yet advanced" state or manual recheck needed anymore.
         const row = document.createElement('div');
         row.className = `teacher-team-row-wrapper`;
         row.innerHTML = `
@@ -910,17 +841,11 @@ async function loadTeacherTeamProgress() {
                     <span>Level ${team.current_level} • Streak: ${team.streak_count || 0}</span>
                 </div>
                 <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
-                    <button class="btn-secondary btn-recheck" style="font-size:12px; padding:10px 14px; min-height:40px;" title="Recalculate this team's advancement status. Safe to run any time, only advances a team that's actually ready">${icon('refresh')} Recalculate</button>
                     <button class="team-members-toggle" aria-label="Show team members">▼</button>
                 </div>
             </div>
             <div class="team-members-list" id="teamMembers-${team.id}"></div>
         `;
-
-        row.querySelector('.btn-recheck').onclick = (e) => {
-            e.stopPropagation();
-            recheckTeamReadiness(team.id);
-        };
 
         const toggleBtn = row.querySelector('.team-members-toggle');
         const membersList = row.querySelector(`#teamMembers-${team.id}`);
@@ -930,7 +855,7 @@ async function loadTeacherTeamProgress() {
             membersList.classList.toggle('open');
             if (membersList.classList.contains('open') && !membersList.dataset.loaded) {
                 membersList.dataset.loaded = "true";
-                loadTeamMembersForRoster(team.id, team.current_level, membersList);
+                loadTeamMembersForRoster(team.id, membersList);
             }
         };
 
@@ -938,15 +863,16 @@ async function loadTeacherTeamProgress() {
     });
 }
 
-// Fetches and renders one team's members + their individual progress for
-// the team's current level (how many of that level's families they've
-// fully cleared) — shown when the teacher expands a team row.
-async function loadTeamMembersForRoster(teamId, currentLevel, mountEl) {
+// Fetches and renders one team's members + their individual progress —
+// shown when the teacher expands a team row. Each member is scored against
+// their OWN current_level rather than the team's, since level progression
+// is now individual; members can legitimately be on different levels.
+async function loadTeamMembersForRoster(teamId, mountEl) {
     mountEl.innerHTML = `<p style="color:#94a3b8; font-size:12px; padding:8px 0;">Loading members...</p>`;
 
     const { data: members } = await _supabase
         .from('profiles')
-        .select('id, nickname, avatar, is_captain')
+        .select('id, nickname, avatar, is_captain, current_level')
         .eq('team_id', teamId)
         .order('nickname');
 
@@ -955,19 +881,19 @@ async function loadTeamMembersForRoster(teamId, currentLevel, mountEl) {
         return;
     }
 
-    const { data: level } = await _supabase
-        .from('challenge_levels')
-        .select('letter_families')
-        .eq('level_number', currentLevel)
-        .maybeSingle();
+    const distinctLevels = [...new Set(members.filter(m => !m.is_captain).map(m => m.current_level || 1))];
 
-    const familyCount = (level?.letter_families || []).length;
+    const [{ data: levelRows }, { data: progressRows }] = await Promise.all([
+        distinctLevels.length > 0
+            ? _supabase.from('challenge_levels').select('level_number, letter_families').in('level_number', distinctLevels)
+            : Promise.resolve({ data: [] }),
+        _supabase.from('student_family_progress')
+            .select('student_id, base_letter, level_number, streak_passed, writing_passed')
+            .in('student_id', members.map(m => m.id))
+    ]);
 
-    const { data: progressRows } = await _supabase
-        .from('student_family_progress')
-        .select('student_id, base_letter, streak_passed, writing_passed')
-        .in('student_id', members.map(m => m.id))
-        .eq('level_number', currentLevel);
+    const familiesByLevel = {};
+    (levelRows || []).forEach(l => { familiesByLevel[l.level_number] = l.letter_families || []; });
 
     mountEl.innerHTML = "";
     members.forEach(member => {
@@ -980,14 +906,16 @@ async function loadTeamMembersForRoster(teamId, currentLevel, mountEl) {
                 <span class="team-member-progress" style="color:#b45309;">${icon('crown')} Captain, exempt</span>
             `;
         } else {
-            const clearedCount = (level?.letter_families || []).filter(letter => {
-                const row = (progressRows || []).find(r => r.student_id === member.id && r.base_letter === letter);
+            const memberLevel = member.current_level || 1;
+            const families = familiesByLevel[memberLevel] || [];
+            const clearedCount = families.filter(letter => {
+                const row = (progressRows || []).find(r => r.student_id === member.id && r.level_number === memberLevel && r.base_letter === letter);
                 return row?.streak_passed && row?.writing_passed;
             }).length;
 
             memberRow.innerHTML = `
                 <span>${member.avatar || '🦁'} ${member.nickname}</span>
-                <span class="team-member-progress">${clearedCount} / ${familyCount} families cleared</span>
+                <span class="team-member-progress">Level ${memberLevel} · ${clearedCount} / ${families.length} families cleared</span>
             `;
         }
 
@@ -1090,21 +1018,32 @@ async function loadTeacherLeaderboard() {
     teams.forEach(t => { currentLevelByTeam[t.id] = t.current_level; });
 
     const [
-        { data: raceSummary },
         { data: members },
         { data: pendingSubs },
         { data: helpFlags },
         advanceProgress
     ] = await Promise.all([
-        _supabase.from('public_team_race_summary').select('team_id, team_percent').in('team_id', teamIds),
-        _supabase.from('profiles').select('id, team_id, is_captain, nickname').in('team_id', teamIds),
+        _supabase.from('profiles').select('id, team_id, is_captain, nickname, current_level').in('team_id', teamIds),
         _supabase.from('writing_submissions').select('student_id, status').eq('status', 'pending'),
         _supabase.from('help_flags').select('student_id').eq('is_resolved', false),
         fetchTeamAdvanceProgress(teamIds, currentLevelByTeam)
     ]);
 
-    const percentByTeam = {};
-    (raceSummary || []).forEach(r => { if (!(r.team_id in percentByTeam)) percentByTeam[r.team_id] = Math.round(r.team_percent || 0); });
+    // Team average is computed here from each member's own current_level
+    // rather than read from public_team_race_summary — that view compared
+    // progress only against the team's frozen current_level, so it has no
+    // way to represent a student who's individually raced ahead.
+    const nonCaptainLevelsByTeam = {};
+    (members || []).forEach(m => {
+        if (m.is_captain) return;
+        if (!nonCaptainLevelsByTeam[m.team_id]) nonCaptainLevelsByTeam[m.team_id] = [];
+        nonCaptainLevelsByTeam[m.team_id].push(m.current_level || 1);
+    });
+    const avgLevelByTeam = {};
+    Object.keys(nonCaptainLevelsByTeam).forEach(teamId => {
+        const levels = nonCaptainLevelsByTeam[teamId];
+        avgLevelByTeam[teamId] = levels.reduce((sum, l) => sum + l, 0) / levels.length;
+    });
 
     const teamIdByStudent = {};
     const captainByTeam = {};
@@ -1133,7 +1072,7 @@ async function loadTeacherLeaderboard() {
 
     mount.innerHTML = teams.map(team => {
         const color = getColor(team.name);
-        const percent = percentByTeam[team.id] ?? 0;
+        const avgLevel = avgLevelByTeam[team.id] ?? (team.current_level || 1);
         const pending = pendingReviewsByTeam[team.id] || 0;
         const help = helpByTeam[team.id] || 0;
         const progress = advanceProgress[team.id] || { approved: 0, required: 0 };
@@ -1144,9 +1083,8 @@ async function loadTeacherLeaderboard() {
                 <div class="snapshot-head">
                     <span class="snapshot-dot" style="background:${color};"></span>
                     <span class="snapshot-name">${team.name}</span>
-                    <span class="snapshot-level">Lvl ${team.current_level} · ${percent}%</span>
+                    <span class="snapshot-level">Lvl ${team.current_level} · Avg ${avgLevel.toFixed(2)}</span>
                 </div>
-                <div class="snapshot-track"><div class="snapshot-fill" style="width:${percent}%; background:${color};"></div></div>
                 <div class="snapshot-stats">
                     <div class="snapshot-stat-row"><span class="k">Pending reviews</span><span class="v ${pending === 0 ? 'zero' : ''}">${pending}</span></div>
                     <div class="snapshot-stat-row"><span class="k">Help requests</span><span class="v ${help === 0 ? 'zero' : ''}">${help}</span></div>
@@ -1282,7 +1220,6 @@ window.toggleTeacherPanel = toggleTeacherPanel;
 window.jumpToTeacherPanel = jumpToTeacherPanel;
 window.switchTeacherTab = switchTeacherTab;
 window.loadTeacherClassroomOverview = loadTeacherClassroomOverview;
-window.recheckTeamReadiness = recheckTeamReadiness;
 
 // ---------------------------------------------------------------------------
 // Export progress CSV (teacher dashboard button)
