@@ -121,7 +121,7 @@ async function renderChallengeDashboard() {
             computeTeamRaceStandings().then(standings => {
                 const rankIdx = standings.findIndex(s => s.id === currentProfile.team_id);
                 if (rankIdx !== -1) {
-                    teamStatEl.innerText = `${standings[rankIdx].overallPct}% (${ordinals[rankIdx] || `${rankIdx + 1}th`})`;
+                    teamStatEl.innerText = `${ordinals[rankIdx] || `${rankIdx + 1}th`} · Level ${standings[rankIdx].level}`;
                 }
             });
         }

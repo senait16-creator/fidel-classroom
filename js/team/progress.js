@@ -64,65 +64,66 @@ function getRaceTeamInitial(name) {
 
 // Shared standings computation — both the detailed Challenge-dashboard race
 // and the lighter Community leaderboard are built from this same array, so
-// the two views can never disagree about a team's rank or percentage.
+// the two views can never disagree about a team's rank.
 //
-// Reads ONLY the aggregate public_team_race_summary view (team/family
-// counts, no student identities) — safe for any student to read for every
-// team. Individual student-by-student detail (Layer 3) is fetched
-// separately and lazily, see fetchTeamStudentDetail below, and only for
-// teams the viewer is allowed to drill into.
+// Computed directly from teams.current_level (the shared "floor" every
+// required member has reached — see advance_student_level_if_ready) and
+// each member's own profiles.current_level, rather than the old
+// public_team_race_summary view: that view only ever compared a member's
+// progress against the team's frozen current_level, so it had no way to
+// represent a student who's individually raced ahead of their team.
 async function computeTeamRaceStandings() {
-    // is_test = false excludes practice teams (e.g. Purple Team) the same
-    // way the rest of the app already does — see app.js/songweek.js/
-    // team/map.js for the other places filtering on this same column.
-    const { data: rows } = await _supabase
-        .from('public_team_race_summary')
-        .select('team_id, team_name, current_level, last_advanced_at, base_letter, member_count, approved_count, practicing_count, needs_writing_count, pending_count, help_count, team_percent')
+    // is_test = false / is_active = true excludes practice teams (e.g.
+    // Purple Team) the same way the rest of the app already does — see
+    // app.js/songweek.js/team/map.js for the other places filtering on
+    // this same column.
+    const { data: teams } = await _supabase
+        .from('teams')
+        .select('id, name, current_level, last_advanced_at')
         .eq('is_test', false)
-        .order('team_name');
+        .eq('is_active', true);
 
-    if (!rows || rows.length === 0) return [];
+    if (!teams || teams.length === 0) return [];
 
-    const teamIds = [...new Set(rows.map(r => r.team_id))];
+    const teamIds = teams.map(t => t.id);
     const currentLevelByTeam = {};
-    rows.forEach(r => { currentLevelByTeam[r.team_id] = r.current_level; });
-    const advanceProgress = await fetchTeamAdvanceProgress(teamIds, currentLevelByTeam);
+    teams.forEach(t => { currentLevelByTeam[t.id] = t.current_level; });
 
-    const byTeam = {};
-    rows.forEach(r => {
-        if (!byTeam[r.team_id]) {
-            const progress = advanceProgress[r.team_id] || { approved: 0, required: 0 };
-            byTeam[r.team_id] = {
-                id: r.team_id,
-                name: r.team_name,
-                level: r.current_level,
-                last_advanced_at: r.last_advanced_at,
-                memberCount: r.member_count,
-                overallPct: Math.round(r.team_percent || 0),
-                families: [],
-                familySummaries: [],
-                advanceApproved: progress.approved,
-                advanceRequired: progress.required
-            };
-        }
-        byTeam[r.team_id].families.push(r.base_letter);
-        byTeam[r.team_id].familySummaries.push({
-            family: r.base_letter,
-            approved: r.approved_count,
-            pending: r.pending_count,
-            practicing: r.practicing_count + r.needs_writing_count,
-            notStarted: r.member_count - r.approved_count - r.pending_count - r.practicing_count - r.needs_writing_count,
-            memberCount: r.member_count,
-            helpCount: r.help_count
-        });
+    const [{ data: members }, advanceProgress] = await Promise.all([
+        _supabase.from('profiles').select('id, team_id, current_level').in('team_id', teamIds).eq('is_captain', false),
+        fetchTeamAdvanceProgress(teamIds, currentLevelByTeam)
+    ]);
+
+    const membersByTeam = {};
+    (members || []).forEach(m => {
+        if (!membersByTeam[m.team_id]) membersByTeam[m.team_id] = [];
+        membersByTeam[m.team_id].push(m);
     });
 
-    const standings = Object.values(byTeam);
-    // Level always wins first — a team that just advanced and reset to 0%
-    // on the new level's families is still ahead of any team still on a
-    // lower level, no matter that team's percent. Percent only breaks
-    // ties between teams on the same level.
-    standings.sort((a, b) => (b.level - a.level) || (b.overallPct - a.overallPct));
+    const standings = teams.map(t => {
+        const teamMembers = membersByTeam[t.id] || [];
+        const levels = teamMembers.map(m => m.current_level || 1);
+        const avgLevel = levels.length > 0 ? levels.reduce((sum, l) => sum + l, 0) / levels.length : (t.current_level || 1);
+        const progress = advanceProgress[t.id] || { approved: 0, required: 0 };
+        return {
+            id: t.id,
+            name: t.name,
+            level: t.current_level || 1,
+            avgLevel,
+            memberLevels: levels,
+            last_advanced_at: t.last_advanced_at,
+            memberCount: teamMembers.length,
+            advanceApproved: progress.approved,
+            advanceRequired: progress.required
+        };
+    });
+
+    // Floor first (the shared milestone every required member has
+    // actually reached), average as a tiebreak (individual progress helps
+    // break ties without letting one fast member alone outrank a team
+    // that's more evenly moving forward together), and team name as a
+    // stable, non-competitive tiebreaker for anything still tied.
+    standings.sort((a, b) => (b.level - a.level) || (b.avgLevel - a.avgLevel) || a.name.localeCompare(b.name));
     return standings;
 }
 
@@ -290,23 +291,31 @@ async function creditApprovedWritingToProgress(studentId, baseLetter) {
 // canExpandRaceTeam), and only once per team per page load (cached by
 // toggleRaceTeamDetail).
 //
+// Each member is scored against THEIR OWN current_level now, not one
+// shared level/family list — different members can legitimately be on
+// different levels, so no single (level, families) pair for the whole
+// team is safe to fetch with anymore.
+//
 // Captains are excluded entirely — they don't grind the matching/writing
 // game themselves (they review teammates' work instead), so they're not
 // part of the race and shouldn't appear in the per-student breakdown.
-async function fetchTeamStudentDetail(teamId, level, families) {
+async function fetchTeamStudentDetail(teamId) {
     const { data: members } = await _supabase
         .from('profiles')
-        .select('id, nickname, avatar')
+        .select('id, nickname, avatar, current_level')
         .eq('team_id', teamId)
         .eq('is_captain', false);
 
     const memberIds = (members || []).map(m => m.id);
     if (memberIds.length === 0) return [];
 
-    const [{ data: prog }, { data: subs }, { data: flags }] = await Promise.all([
+    const levelNumbers = [...new Set(members.map(m => m.current_level || 1))];
+
+    const [{ data: levels }, { data: prog }, { data: subs }, { data: flags }] = await Promise.all([
+        _supabase.from('challenge_levels').select('level_number, letter_families').in('level_number', levelNumbers),
         _supabase.from('student_family_progress')
-            .select('student_id, base_letter, streak_passed, writing_passed, best_streak')
-            .eq('level_number', level).in('student_id', memberIds),
+            .select('student_id, base_letter, level_number, streak_passed, writing_passed, best_streak')
+            .in('student_id', memberIds).in('level_number', levelNumbers),
         // No level_number filter here — writing_submissions doesn't have
         // that column, and base_letter alone is enough since each letter
         // belongs to exactly one challenge level.
@@ -317,13 +326,15 @@ async function fetchTeamStudentDetail(teamId, level, families) {
     ]);
 
     return (members || []).map(m => {
+        const myLevel = m.current_level || 1;
+        const families = (levels || []).find(l => l.level_number === myLevel)?.letter_families || [];
         const statuses = families.map(fam => {
-            const row = (prog || []).find(p => p.student_id === m.id && p.base_letter === fam);
+            const row = (prog || []).find(p => p.student_id === m.id && p.base_letter === fam && p.level_number === myLevel);
             const hasPending = (subs || []).some(s => s.student_id === m.id && s.base_letter === fam);
             const hasHelp = (flags || []).some(f => f.student_id === m.id && f.base_letter === fam);
             return { family: fam, status: computeRaceFamilyStatus(row, hasPending, hasHelp) };
         });
-        return { ...m, statuses };
+        return { ...m, level: myLevel, statuses };
     });
 }
 
@@ -389,21 +400,18 @@ function renderDetailedRaceStandings(mount, mountId, standings) {
             ? `<div class="race-medal">${medals[idx]}</div>`
             : `<div class="race-medal race-num">${idx + 1}</div>`;
 
-        const familyLinesHtml = team.familySummaries.map(fs => {
-            const parts = [`${fs.approved}/${fs.memberCount} approved`];
-            if (fs.pending > 0) parts.push(`${fs.pending} pending`);
-            if (fs.practicing > 0) parts.push(`${fs.practicing} practicing`);
-            const fullyDone = fs.approved === fs.memberCount;
-            return `
-                <div class="race-family-line ${fullyDone ? 'race-family-line-done' : ''}">
-                    <span class="race-family-letter">${fs.family}</span>
-                    <span class="race-family-detail">${parts.join(' · ')}</span>
-                </div>`;
-        }).join('');
+        // Non-identifying spread indicator — one dot per member, lit up
+        // gold if that member has moved past the team's floor. No names or
+        // counts beyond what's already visible in "N members", so it's
+        // safe to show for every team, not just the ones canExpandRaceTeam
+        // allows drilling into.
+        const spreadDotsHtml = team.memberLevels.map(lvl =>
+            `<span class="race-spread-dot${lvl > team.level ? ' above-floor' : ''}"></span>`
+        ).join('');
 
         // Only your own team (or a teacher/admin) can drill into
-        // individual students — everyone else stops at the aggregate
-        // family lines above. See canExpandRaceTeam.
+        // individual students by name — everyone else stops at the
+        // aggregate stats and spread dots above. See canExpandRaceTeam.
         const expandable = canExpandRaceTeam(team.id);
         const headerAttrs = expandable
             ? `class="race-row-header race-row-expandable" onclick="toggleRaceTeamDetail('${mountId}', '${team.id}', '${rowId}')"`
@@ -421,16 +429,13 @@ function renderDetailedRaceStandings(mount, mountId, standings) {
                             ${team.name}
                             ${isYou ? '<span class="race-you-tag">You</span>' : ''}
                         </div>
-                        <div class="race-team-count">${team.overallPct}%</div>
+                        <div class="race-team-count">Level ${team.level}</div>
                     </div>
-                    <div class="race-bar-track">
-                        <div class="race-bar-fill" style="width:${team.overallPct}%;background:${color};"></div>
-                    </div>
-                    <div class="race-team-sub">Level ${team.level} · ${team.memberCount} active student${team.memberCount === 1 ? '' : 's'}${team.advanceApproved > 0 && team.advanceApproved < team.advanceRequired ? ` · 🎤 ${team.advanceApproved}/${team.advanceRequired} live tests approved` : ''}</div>
+                    <div class="race-team-sub">Team avg ${team.avgLevel.toFixed(2)} · ${team.memberCount} member${team.memberCount === 1 ? '' : 's'}${team.advanceApproved > 0 && team.advanceApproved < team.advanceRequired ? ` · 🎤 ${team.advanceApproved}/${team.advanceRequired} live tests approved` : ''}</div>
+                    <div class="race-spread-dots">${spreadDotsHtml}</div>
                 </div>
                 ${expandable ? '<div class="race-expand-arrow">▾</div>' : ''}
             </div>
-            <div class="race-family-lines">${familyLinesHtml}</div>
             ${expandable ? `<div class="race-team-detail" id="${rowId}" style="display:none;"></div>` : ''}
         `;
 
@@ -472,7 +477,7 @@ function renderTop3RaceStandings(mount, mountId, standings) {
                 ${rankHtml}
                 <div class="race-team-dot" style="background:${color};">${getRaceTeamInitial(team.name)}</div>
                 <div class="race-top3-name">${team.name}${isYou ? ' <span class="race-you-tag">You</span>' : ''}</div>
-                <div class="race-top3-pct">${team.overallPct}%</div>
+                <div class="race-top3-pct">Level ${team.level}</div>
             </div>`;
     };
 
@@ -511,6 +516,10 @@ function renderCompactRaceStandings(mount, standings) {
             ? `<div class="community-race-medal">${medals[idx]}</div>`
             : `<div class="community-race-medal community-race-num">${idx + 1}</div>`;
 
+        const spreadDotsHtml = team.memberLevels.map(lvl =>
+            `<span class="race-spread-dot${lvl > team.level ? ' above-floor' : ''}"></span>`
+        ).join('');
+
         return `
             <div class="community-race-row${isYou ? ' community-race-you' : ''}">
                 ${rankHtml}
@@ -518,10 +527,10 @@ function renderCompactRaceStandings(mount, standings) {
                 <div class="community-race-info">
                     <div class="community-race-name-row">
                         <span class="community-race-name">${team.name}${isYou ? ' <span class="race-you-tag">You</span>' : ''}</span>
-                        <span class="community-race-pct">${team.overallPct}%</span>
+                        <span class="community-race-pct">Level ${team.level}</span>
                     </div>
-                    <div class="race-bar-track"><div class="race-bar-fill" style="width:${team.overallPct}%;background:${color};"></div></div>
-                    <div class="community-race-sub">Level ${team.level}${team.advanceApproved > 0 && team.advanceApproved < team.advanceRequired ? ` <span class="community-race-ready-tag">🎤 ${team.advanceApproved}/${team.advanceRequired} live tests approved</span>` : ''}</div>
+                    <div class="community-race-sub">Team avg ${team.avgLevel.toFixed(2)} · ${team.memberCount} member${team.memberCount === 1 ? '' : 's'}${team.advanceApproved > 0 && team.advanceApproved < team.advanceRequired ? ` <span class="community-race-ready-tag">🎤 ${team.advanceApproved}/${team.advanceRequired} live tests approved</span>` : ''}</div>
+                    <div class="race-spread-dots">${spreadDotsHtml}</div>
                 </div>
             </div>`;
     }).join('');
@@ -562,15 +571,11 @@ async function toggleRaceTeamDetail(mountId, teamId, rowId) {
         return;
     }
 
-    const standings = _raceStandingsCache[mountId] || [];
-    const team = standings.find(t => t.id === teamId);
-    if (!team) return;
-
     // Cache per team so re-toggling the same row doesn't re-fetch.
     if (!_raceDetailCache[teamId]) {
         el.innerHTML = `<p style="color:#94a3b8; font-size:12px; padding:6px 0;">Loading...</p>`;
         el.style.display = 'block';
-        _raceDetailCache[teamId] = await fetchTeamStudentDetail(teamId, team.level, team.families);
+        _raceDetailCache[teamId] = await fetchTeamStudentDetail(teamId);
     }
     const members = _raceDetailCache[teamId];
 
@@ -580,7 +585,12 @@ async function toggleRaceTeamDetail(mountId, teamId, rowId) {
         return;
     }
 
-    el.innerHTML = members.map(m => {
+    // Furthest-behind first, same ordering principle as the captain's own
+    // Team Hub member list — whoever needs the most encouragement surfaces
+    // first here too.
+    const sortedMembers = [...members].sort((a, b) => (a.level - b.level) || a.nickname.localeCompare(b.nickname));
+
+    el.innerHTML = sortedMembers.map(m => {
         const line = m.statuses.map(s => {
             const label = RACE_STATUS_LABEL[s.status.key];
             const streakSuffix = s.status.key === 'practicing' && s.status.streak > 0 ? ` ${s.status.streak}/${STREAK_THRESHOLD}` : '';
@@ -592,6 +602,7 @@ async function toggleRaceTeamDetail(mountId, teamId, rowId) {
             <div class="race-student-row">
                 <span class="race-student-avatar">${m.avatar || '🦁'}</span>
                 <span class="race-student-name">${m.nickname}</span>
+                <span class="race-student-level-badge">Lvl ${m.level}</span>
                 <span class="race-student-line">${line}</span>
             </div>`;
     }).join('');

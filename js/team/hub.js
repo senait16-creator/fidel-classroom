@@ -771,36 +771,42 @@ async function loadCaptainTeamProgress() {
         .from('teams').select('current_level').eq('id', currentProfile.team_id).maybeSingle();
 
     const { data: members } = await _supabase
-        .from('profiles').select('id, nickname, avatar, is_captain')
-        .eq('team_id', currentProfile.team_id).order('nickname');
+        .from('profiles').select('id, nickname, avatar, is_captain, current_level')
+        .eq('team_id', currentProfile.team_id);
 
     if (!members || members.length === 0) {
         mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No teammates yet.</p>`;
         return;
     }
 
-    const currentLevel = team?.current_level || 1;
-    const { data: level } = await _supabase
-        .from('challenge_levels').select('letter_families')
-        .eq('level_number', currentLevel).maybeSingle();
-
-    const families    = level?.letter_families || [];
+    // Each member is scored against THEIR OWN current_level now, not one
+    // shared team level — different members can legitimately be on
+    // different levels. teamFloor (the team's own observational level) is
+    // only used to flag who's below it, not to pick which families to show.
+    const teamFloor   = team?.current_level || 1;
     const memberIds   = members.map(m => m.id);
+    const levelNumbers = [...new Set(members.filter(m => !m.is_captain).map(m => m.current_level || 1))];
 
-    const { data: progressRows } = await _supabase
-        .from('student_family_progress')
-        .select('student_id, base_letter, streak_passed, writing_passed, best_streak')
-        .in('student_id', memberIds)
-        .eq('level_number', currentLevel);
+    const [{ data: levels }, { data: progressRows }, { data: submissions }] = await Promise.all([
+        _supabase.from('challenge_levels').select('level_number, letter_families').in('level_number', levelNumbers),
+        _supabase.from('student_family_progress')
+            .select('student_id, base_letter, level_number, streak_passed, writing_passed, best_streak')
+            .in('student_id', memberIds).in('level_number', levelNumbers),
+        _supabase.from('writing_submissions')
+            .select('student_id, base_letter, image_url, status, submitted_at')
+            .in('student_id', memberIds)
+            .order('submitted_at', { ascending: false })
+    ]);
 
-    const { data: submissions } = await _supabase
-        .from('writing_submissions')
-        .select('student_id, base_letter, image_url, status, submitted_at')
-        .in('student_id', memberIds)
-        .order('submitted_at', { ascending: false });
+    // Furthest-behind first, so whoever needs encouragement most surfaces
+    // right away — the captain's own row stays pinned first regardless.
+    const sortedMembers = [...members].sort((a, b) => {
+        if (a.is_captain !== b.is_captain) return a.is_captain ? -1 : 1;
+        return (a.current_level || 1) - (b.current_level || 1) || a.nickname.localeCompare(b.nickname);
+    });
 
     mount.innerHTML = '';
-    members.forEach(member => {
+    sortedMembers.forEach(member => {
         const row = document.createElement('div');
         row.className = 'captain-member-card';
 
@@ -814,13 +820,17 @@ async function loadCaptainTeamProgress() {
             return;
         }
 
+        const myLevel = member.current_level || 1;
+        const families = (levels || []).find(l => l.level_number === myLevel)?.letter_families || [];
+        const isBehind = myLevel < teamFloor;
+
         const clearedCount = families.filter(letter => {
-            const r = (progressRows || []).find(pr => pr.student_id === member.id && pr.base_letter === letter);
+            const r = (progressRows || []).find(pr => pr.student_id === member.id && pr.base_letter === letter && pr.level_number === myLevel);
             return r?.streak_passed && r?.writing_passed;
         }).length;
 
         const familyDetails = families.map(letter => {
-            const progress  = (progressRows || []).find(r => r.student_id === member.id && r.base_letter === letter);
+            const progress  = (progressRows || []).find(r => r.student_id === member.id && r.base_letter === letter && r.level_number === myLevel);
             const latestSub = (submissions || []).find(s => s.student_id === member.id && s.base_letter === letter);
             const streak    = progress?.best_streak || 0;
 
@@ -851,7 +861,8 @@ async function loadCaptainTeamProgress() {
                  onclick="this.parentElement.querySelector('.captain-member-details').classList.toggle('open');
                           this.querySelector('.captain-member-toggle').classList.toggle('collapsed');">
                 <span>${member.avatar || '🦁'} ${member.nickname}</span>
-                <span style="display:flex; align-items:center; gap:8px;">
+                <span style="display:flex; align-items:center; gap:6px;">
+                    <span class="captain-member-level-badge${isBehind ? ' behind' : ''}">Level ${myLevel}</span>
                     <span class="team-member-progress">${clearedCount} / ${families.length} cleared</span>
                     <span class="captain-member-toggle collapsed">▼</span>
                 </span>

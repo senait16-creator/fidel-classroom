@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=60">
+    <link rel="stylesheet" href="style.css?v=61">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -708,7 +708,11 @@
         </section>
 
         <section class="challenge-dash-card">
-            <div class="challenge-card-title">🏁 Team Race</div>
+            <div class="challenge-card-title">
+                🏁 Team Race
+                <button type="button" class="race-info-btn" onclick="this.parentElement.nextElementSibling.classList.toggle('open')" aria-label="How team ranking works">ⓘ</button>
+            </div>
+            <p class="race-explainer-text">Teams move up when every member reaches the next level. Individual progress helps break ties.</p>
             <div id="challengeDashRaceMount">
                 <p style="color:#94a3b8;font-size:13px;">Loading race...</p>
             </div>
@@ -1808,7 +1812,11 @@
         <div class="community-section-header"><span data-icon="star"></span> Student Spotlight</div>
         <div id="starBoardMount" style="margin-bottom:8px;"></div>
 
-        <div class="community-section-header"><span data-icon="fire"></span> Team Progress</div>
+        <div class="community-section-header">
+            <span data-icon="fire"></span> Team Progress
+            <button type="button" class="race-info-btn" onclick="this.parentElement.nextElementSibling.classList.toggle('open')" aria-label="How team ranking works">ⓘ</button>
+        </div>
+        <p class="race-explainer-text" style="margin:-4px 0 8px;">Teams move up when every member reaches the next level. Individual progress helps break ties.</p>
         <div id="communityTeamRaceMount" class="card" style="margin-bottom:8px;"></div>
 
         <div class="community-section-header"><span data-icon="music"></span> Song of the Week</div>
@@ -1873,10 +1881,10 @@
 <script src="js/guidedpath.js?v=1" defer></script>
 <script src="js/wordbuilder.js?v=10" defer></script>
     <script src="js/letterboard.js?v=15" defer></script>
-<script src="js/team/progress.js?v=28" defer></script>
+<script src="js/team/progress.js?v=29" defer></script>
 <script src="js/team/levels.js?v=14" defer></script>
 <script src="js/team/map.js?v=9" defer></script>
-<script src="js/team/hub.js?v=24" defer></script>
+<script src="js/team/hub.js?v=25" defer></script>
     <script src="js/community.js?v=8" defer></script>
     <script src="js/dailyfeed.js?v=1" defer></script>
     <script src="js/songweek.js?v=1" defer></script>
@@ -1884,7 +1892,7 @@
         <script src="js/starboard.js?v=1" defer></script>
 <script src="js/wordle.js?v=9" defer></script>
 <script src="intro.js?v=1" defer></script>
-<script src="js/challenge.js?v=33" defer></script>
+<script src="js/challenge.js?v=34" defer></script>
 <script src="js/calendar.js?v=7" defer></script>
 <script src="js/menu.js?v=11" defer></script>
 <script src="js/push.js?v=8" defer></script>
