@@ -623,18 +623,12 @@ function buildLiveTestSchedulingLink() {
 async function checkLevelCompletionStatus() {
     if (!currentProfile?.team_id || currentProfile?.is_captain) return null;
 
-    const { data: team } = await _supabase
-        .from('teams')
-        .select('current_level')
-        .eq('id', currentProfile.team_id)
-        .maybeSingle();
-
-    if (!team) return null;
+    const myLevel = await getMyCurrentLevel();
 
     const { data: level } = await _supabase
         .from('challenge_levels')
         .select('letter_families')
-        .eq('level_number', team.current_level)
+        .eq('level_number', myLevel)
         .maybeSingle();
 
     if (!level?.letter_families?.length) return null;
@@ -643,26 +637,26 @@ async function checkLevelCompletionStatus() {
         .from('student_family_progress')
         .select('base_letter, streak_passed, writing_passed')
         .eq('student_id', currentUser.id)
-        .eq('level_number', team.current_level);
+        .eq('level_number', myLevel);
 
     const allCleared = level.letter_families.every(letter => {
         const row = (progressRows || []).find(r => r.base_letter === letter);
         return row?.streak_passed && row?.writing_passed;
     });
 
-    if (!allCleared) return { allCleared: false, level: team.current_level };
+    if (!allCleared) return { allCleared: false, level: myLevel };
 
     // Check for existing completion request
     const { data: existing } = await _supabase
         .from('level_completion_requests')
         .select('status, submitted_at')
         .eq('student_id', currentUser.id)
-        .eq('level_number', team.current_level)
+        .eq('level_number', myLevel)
         .maybeSingle();
 
     return {
         allCleared: true,
-        level: team.current_level,
+        level: myLevel,
         existingRequest: existing || null
     };
 }

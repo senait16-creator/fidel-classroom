@@ -83,33 +83,20 @@ async function chooseModeChallenge() {
 }
 
 async function renderChallengeDashboard() {
-    const [team, levels] = await Promise.all([
+    const [team, levels, myLevel] = await Promise.all([
         getTeamBoardInfo(),
-        fetchChallengeLevels()
+        fetchChallengeLevels(),
+        getMyCurrentLevel()
     ]);
 
     const teamHex = getTeamHex(team.name);
 
-    // ── Hero meta row — colored dot + "Team • Level N • Week N" as one
-    //    line, so the title above it stays a single line instead of
-    //    fighting a second and third line of detail for space. ──
-    const heroTeamDot = document.getElementById("challengeHeroTeamDot");
-    const heroMetaLine = document.getElementById("challengeHeroMetaLine");
-    if (heroTeamDot) heroTeamDot.style.background = teamHex;
-    if (heroMetaLine) {
-        const week = typeof getProgramWeekNumber === "function" ? getProgramWeekNumber() : null;
-        heroMetaLine.innerText = `${team.name} • Level ${team.current_level}${week ? ` • Week ${week}` : ''}`;
-    }
-
-    // ── Progress to ፐ — shared hero, so this renders once and shows
-    //    up automatically on both the student and captain dashboard. ──
-    const totalLevels = levels.length > 0 ? Math.max(...levels.map(l => l.level_number)) : 12;
-    const currentLevelNum = team.current_level || 1;
-    const pePercent = Math.min(100, Math.max(0, Math.round(((currentLevelNum - 1) / totalLevels) * 100)));
-    const peLabel = document.getElementById("peProgressLabel");
-    const peFill = document.getElementById("peProgressFill");
-    if (peLabel) peLabel.innerText = `${currentLevelNum} / ${totalLevels} Levels`;
-    if (peFill) peFill.style.width = `${pePercent}%`;
+    // Note: the hero (team dot, meta line, progress bar) lives on the Home
+    // tab and is rendered once by enterStudentShellHomeTab() — this
+    // Competition-tab render used to redundantly re-render it too (both
+    // pulled from team.current_level so they never disagreed), but now
+    // that the hero shows the student's own individual progress, only
+    // Home should own it.
 
     // ── Your Team — collapsed to one row (dot, name, rank/percent),
     //    tap to expand the full status panel below. Team is information
@@ -182,33 +169,24 @@ async function renderChallengeDashboard() {
         if (typeof renderStarPicker === "function") await renderStarPicker("starPickerMount");
     }
 
-    // ── Captains lead, they don't need their own "Current Level" practice
-    //    card taking up the top of this page — the Captain Dashboard above
-    //    covers what they need here. Team Race and Start Here stay visible
-    //    for everyone. ──
-    const currentLevelCard = document.getElementById("challengeCurrentLevelCard");
-    if (currentLevelCard) currentLevelCard.style.display = currentProfile?.is_captain ? "none" : "";
+    // Note: the "Continue Level" card (challengeCurrentLevelCard) and the
+    // level-completion approval banner both live on the Home tab and are
+    // fully owned by enterStudentShellHomeTab() — this used to redundantly
+    // re-render them here too on every Competition-tab visit.
 
-    // ── Level-completion approval banner (students only, relocated
-    //    from team hub) — the function self-gates on is_captain/team_id ──
-    if (typeof renderLevelCompletionBanner === "function") {
-        await renderLevelCompletionBanner('levelCompletionMount');
-    }
-
-    // ── Render all dashboard sections ────────────────────────
-    await renderChallengeDashboardMap(levels, team);
+    // ── Render Competition-tab sections ────────────────────────
     await renderTeamUrgencyCard(team);
     await renderChallengeTeamStatus(team);
     await renderChallengeDashboardRace();
     if (typeof renderTimelinePreview === "function") await renderTimelinePreview();
-    wireCurrentLevelResources(levels, team);
+    wireCurrentLevelResources(levels, myLevel);
 }
 
 // The resource videos/links themselves are the same regardless of level
 // (general Fidel alphabet resources), so this just labels the card with
 // the student's actual current level and points Practice at it.
-function wireCurrentLevelResources(levels, team) {
-    const currentLevel = levels.find(l => l.level_number === (team.current_level || 1)) || levels[0];
+function wireCurrentLevelResources(levels, myLevel) {
+    const currentLevel = levels.find(l => l.level_number === (myLevel || 1)) || levels[0];
 
     const title = document.getElementById("currentLevelResourcesTitle");
     if (title && currentLevel) title.innerText = `📚 Level ${currentLevel.level_number} Resources`;
@@ -426,11 +404,11 @@ function teamHexForStatus(teamName) {
 // levels" browse list — the Continue button already tells you what's
 // next, and the Team Race / Level Resources cards below cover everything
 // else this page used to spread across three sections.
-async function renderChallengeDashboardMap(levels, team) {
+async function renderChallengeDashboardMap(levels, myLevel) {
     const mount = document.getElementById("challengeDashMapMount");
     if (!mount) return;
 
-    const currentLevelNumber = team.current_level || 1;
+    const currentLevelNumber = myLevel || 1;
     const currentLevel = levels.find(l => l.level_number === currentLevelNumber) || levels[0];
 
     if (!currentLevel) {
@@ -533,6 +511,23 @@ async function getTeamBoardInfo() {
     if (error || !team) return { name: "No Team Yet", current_level: 1, streak_count: 0 };
     return { name: team.name || "Your Team", current_level: team.current_level || 1, streak_count: team.streak_count || 0 };
 }
+
+// Individual progression: each student's own unlocked level, independent
+// of their team (teams.current_level is now purely observational — see
+// getTeamBoardInfo(), still used for team name/social display). Fetched
+// fresh every time, same as getTeamBoardInfo(), since a teacher approval
+// can advance it mid-session and currentProfile is only refreshed at
+// login — reading a cached value here would go stale.
+async function getMyCurrentLevel() {
+    if (!currentUser?.id) return 1;
+    const { data } = await _supabase
+        .from('profiles')
+        .select('current_level')
+        .eq('id', currentUser.id)
+        .maybeSingle();
+    return data?.current_level || 1;
+}
+window.getMyCurrentLevel = getMyCurrentLevel;
 
 function renderChallengeBoardHeader(team, totalLevels) {
     document.getElementById("challengeBoardTeamName").innerText = team.name;

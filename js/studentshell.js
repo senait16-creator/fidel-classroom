@@ -42,32 +42,35 @@ async function enterStudentShellHomeTab() {
 
     if (typeof applyModeLockStyling === 'function') applyModeLockStyling();
 
-    const [team, levels] = await Promise.all([
+    const [team, levels, myLevel] = await Promise.all([
         typeof getTeamBoardInfo === 'function' ? getTeamBoardInfo() : { name: 'No Team Yet', current_level: 1 },
-        typeof fetchChallengeLevels === 'function' ? fetchChallengeLevels() : []
+        typeof fetchChallengeLevels === 'function' ? fetchChallengeLevels() : [],
+        typeof getMyCurrentLevel === 'function' ? getMyCurrentLevel() : 1
     ]);
 
+    // Team name/color stay for identity — "who I belong to" — but the
+    // level shown is the student's own, not the team's. Team progress
+    // (which may now differ per member) lives on Competition instead.
     const teamHex = typeof getTeamHex === 'function' ? getTeamHex(team.name) : '#166534';
     const heroTeamDot = document.getElementById('challengeHeroTeamDot');
     const heroMetaLine = document.getElementById('challengeHeroMetaLine');
     if (heroTeamDot) heroTeamDot.style.background = teamHex;
     if (heroMetaLine) {
         const week = typeof getProgramWeekNumber === 'function' ? getProgramWeekNumber() : null;
-        heroMetaLine.innerText = `${team.name} • Level ${team.current_level}${week ? ` • Week ${week}` : ''}`;
+        heroMetaLine.innerText = `${team.name} • My Level ${myLevel}${week ? ` • Week ${week}` : ''}`;
     }
 
     const totalLevels = levels.length > 0 ? Math.max(...levels.map(l => l.level_number)) : 12;
-    const currentLevelNum = team.current_level || 1;
-    const pePercent = Math.min(100, Math.max(0, Math.round(((currentLevelNum - 1) / totalLevels) * 100)));
+    const pePercent = Math.min(100, Math.max(0, Math.round(((myLevel - 1) / totalLevels) * 100)));
     const peLabel = document.getElementById('peProgressLabel');
     const peFill = document.getElementById('peProgressFill');
-    if (peLabel) peLabel.innerText = `${currentLevelNum} / ${totalLevels} Levels`;
+    if (peLabel) peLabel.innerText = `${myLevel} / ${totalLevels} Levels`;
     if (peFill) peFill.style.width = `${pePercent}%`;
 
     const currentLevelCard = document.getElementById('challengeCurrentLevelCard');
     if (currentLevelCard) currentLevelCard.style.display = currentProfile?.is_captain ? 'none' : '';
 
-    if (typeof renderChallengeDashboardMap === 'function') await renderChallengeDashboardMap(levels, team);
+    if (typeof renderChallengeDashboardMap === 'function') await renderChallengeDashboardMap(levels, myLevel);
     if (typeof renderLevelCompletionBanner === 'function') await renderLevelCompletionBanner('levelCompletionMount');
     if (typeof renderCaptainHomeWritingStatus === 'function') await renderCaptainHomeWritingStatus();
     if (typeof renderStudentShellHomeNote === 'function') await renderStudentShellHomeNote();
@@ -187,8 +190,8 @@ async function fetchStudentShellMilestones(limit) {
 
 // ---------------------------------------------------------------------------
 // Writing quick link — opens the writing submission screen for whichever
-// family in the student's team's current level still needs writing
-// approved, since openWritingSubmitScreen() needs a specific family.
+// family in the student's own current level still needs writing approved,
+// since openWritingSubmitScreen() needs a specific family.
 // ---------------------------------------------------------------------------
 
 async function openWritingQuickLink() {
@@ -197,8 +200,7 @@ async function openWritingQuickLink() {
         return;
     }
 
-    const team = await getTeamBoardInfo();
-    const currentLevel = team.current_level || 1;
+    const currentLevel = await getMyCurrentLevel();
 
     const { data: level } = await _supabase
         .from('challenge_levels')
@@ -252,8 +254,11 @@ async function renderStudentShellProfile() {
         }
     }
 
+    // Individual progress exists independent of team assignment now, so
+    // this always shows a real value rather than "–" for teamless students.
+    const myLevel = await (typeof getMyCurrentLevel === 'function' ? getMyCurrentLevel() : Promise.resolve(1));
     const levelValEl = document.getElementById('stushellStatLevel');
-    if (levelValEl) levelValEl.innerText = currentProfile?.team_id ? (team.current_level || 1) : '–';
+    if (levelValEl) levelValEl.innerText = myLevel;
 
     if (typeof updatePushMenuButton === 'function') updatePushMenuButton();
 

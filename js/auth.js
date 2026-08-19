@@ -150,7 +150,7 @@ async function proceedFlowMap(user) {
 
     const { data: profile, error: profileError } = await _supabase
         .from('profiles')
-        .select('id, email, nickname, avatar, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode, access_status')
+        .select('id, email, nickname, avatar, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode, access_status, current_level')
         .eq('id', user.id)
         .maybeSingle();
 
@@ -236,7 +236,7 @@ async function recheckAccessStatus() {
 
     const { data: profile } = await _supabase
         .from('profiles')
-        .select('id, email, nickname, avatar, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode, access_status')
+        .select('id, email, nickname, avatar, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode, access_status, current_level')
         .eq('id', currentUser.id)
         .maybeSingle();
 
@@ -418,7 +418,7 @@ async function saveProfileData(event) {
     // Refresh local cache
     const { data: refreshedProfile } = await _supabase
         .from('profiles')
-        .select('id, email, nickname, avatar, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode, access_status')
+        .select('id, email, nickname, avatar, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode, access_status, current_level')
         .eq('id', user.id)
         .maybeSingle();
     currentProfile = await resolveCaptainStatus(refreshedProfile || currentProfile);
