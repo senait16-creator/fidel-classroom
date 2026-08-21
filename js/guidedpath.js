@@ -80,7 +80,7 @@ async function renderGuidedPathList() {
         `;
         card.onclick = isReady
             ? () => openGuidedPathChapter(ch.level_number)
-            : () => showNotificationToast("This chapter's content is still being built — check back soon!");
+            : () => showNotificationToast("This chapter's content is still being built. Check back soon!");
         container.appendChild(card);
     });
 }

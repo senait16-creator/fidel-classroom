@@ -474,7 +474,7 @@ function wbStepSpellHtml(word) {
         ${allPlaced ? (isCorrect
             ? `<p style="text-align:center; color:#166534; font-weight:700; font-size:13px; margin-top:12px;">✓ That's it!</p>
                <button class="btn-primary" style="width:100%; margin-top:6px;" onclick="advanceWordBuilderStep()">Continue</button>`
-            : `<p style="text-align:center; color:#dc2626; font-weight:700; font-size:13px; margin-top:12px;">Not quite — tap a tile to take it back.</p>`)
+            : `<p style="text-align:center; color:#dc2626; font-weight:700; font-size:13px; margin-top:12px;">Not quite. Tap a tile to take it back.</p>`)
         : ''}
     `;
 }
@@ -690,7 +690,7 @@ function answerWordBuilderMatch(btnEl, chosenId, correctId) {
     } else {
         btnEl.style.borderColor = '#dc2626';
         btnEl.style.background = 'rgba(220,38,38,0.06)';
-        showNotificationToast('Not quite — take another look at the words.');
+        showNotificationToast('Not quite. Take another look at the words.');
     }
 
     setTimeout(() => {
@@ -727,7 +727,7 @@ function renderWordBuilderRecapScreen(words, title, subtitle, onContinue) {
 
 function renderWordBuilderReadWhatYouKnow() {
     renderWordBuilderRecapScreen(
-        wordBuilderWords, 'Read What You Know', "These are the words you've learned — no hints this time.",
+        wordBuilderWords, 'Read What You Know', "These are the words you've learned. No hints this time.",
         () => renderWordBuilderRecapScreen(
             wordBuilderShuffle(wordBuilderWords), 'Read What You Know', 'Now try them in a different order.',
             renderWordBuilderFindWordStage

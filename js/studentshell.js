@@ -295,7 +295,7 @@ async function renderStudentShellAchievements() {
     const events = await fetchStudentShellMilestones(4);
 
     if (events.length === 0) {
-        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Nothing yet — keep practicing!</p>`;
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Nothing yet. Keep practicing!</p>`;
         return;
     }
 
