@@ -165,7 +165,6 @@ async function renderChallengeDashboard() {
         if (typeof loadCaptainWritingQueue === "function") await loadCaptainWritingQueue();
         if (typeof loadCaptainRecentlyApproved === "function") await loadCaptainRecentlyApproved();
         if (typeof loadCaptainTeamProgress === "function") await loadCaptainTeamProgress();
-        if (typeof loadHelpFlags === "function") await loadHelpFlags('helpFlagsMount');
         if (typeof renderStarPicker === "function") await renderStarPicker("starPickerMount");
     }
 

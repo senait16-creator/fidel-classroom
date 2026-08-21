@@ -182,14 +182,6 @@ function renderCurrentLevelSection(mount, level, progressByLetter, currentLevel)
                         </div>
                     </div>
                 </div>
-                ${!isCleared && !currentProfile?.is_captain ? `
-                    <button onclick="event.stopPropagation(); flagNeedHelp('${baseLetter}', ${currentLevel})"
-                            style="background:white; border:1px solid #e2e8f0; border-radius:8px;
-                                   padding:5px 10px; font-size:11px; font-weight:700; color:#64748b;
-                                   cursor:pointer; flex-shrink:0;" title="Ask captain for help">
-                        🙋 Help
-                    </button>
-                ` : ''}
             </div>
             ${!progress.streak_passed && !isCleared ? `
                 <div style="height:5px; background:#e2e8f0; border-radius:4px; overflow:hidden;">

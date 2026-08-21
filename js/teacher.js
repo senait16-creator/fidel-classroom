@@ -96,7 +96,7 @@ window.approveAccessRequest = approveAccessRequest;
 // deliberately says "Ready for live test" rather than "Level cleared" —
 // clearing practice isn't the same as being done with the level, and
 // "cleared" reads like it is.
-function computeStudentChallengeStatus(familiesForLevel, studentRows, hasPendingWriting, hasHelpFlag, hasApprovedLevelCompletion) {
+function computeStudentChallengeStatus(familiesForLevel, studentRows, hasPendingWriting, hasApprovedLevelCompletion) {
     const rowFor = (base) => studentRows.find(r => r.base_letter === base);
 
     if (hasApprovedLevelCompletion) return { key: 'test_passed', label: '✓ Passed, waiting on team', family: null };
@@ -107,7 +107,6 @@ function computeStudentChallengeStatus(familiesForLevel, studentRows, hasPending
     });
     if (allCleared) return { key: 'cleared', label: 'Ready for live test', family: null };
 
-    if (hasHelpFlag) return { key: 'help', label: 'Asked for help', family: null };
     if (hasPendingWriting) return { key: 'pending', label: 'Pending review', family: null };
 
     const activeFamily = familiesForLevel.find(f => {
@@ -140,7 +139,6 @@ async function loadTeacherRosterData() {
         levels,
         { data: progressRows },
         { data: pendingSubs },
-        { data: helpFlags },
         { data: userProgress },
         { data: approvedLevelCompletions }
     ] = await Promise.all([
@@ -149,7 +147,6 @@ async function loadTeacherRosterData() {
         (typeof fetchChallengeLevels === 'function' ? fetchChallengeLevels() : Promise.resolve([])),
         _supabase.from('student_family_progress').select('student_id, base_letter, level_number, streak_passed, writing_passed, best_streak'),
         _supabase.from('writing_submissions').select('student_id').eq('status', 'pending'),
-        _supabase.from('help_flags').select('student_id').eq('is_resolved', false),
         _supabase.from('user_progress').select('user_id, mastered_letters'),
         _supabase.from('level_completion_requests').select('student_id, level_number').eq('status', 'approved')
     ]);
@@ -175,7 +172,6 @@ async function loadTeacherRosterData() {
     });
 
     const pendingWritingStudentIds = new Set((pendingSubs || []).map(r => r.student_id));
-    const helpFlagStudentIds = new Set((helpFlags || []).map(r => r.student_id));
 
     // Keyed by student_id -> Set of level_numbers they have an approved
     // level_completion_requests row for. A student can have old approvals
@@ -209,33 +205,26 @@ async function loadTeacherRosterData() {
         const hasApprovedLevelCompletion = (approvedLevelsByStudent[s.id] || new Set()).has(myLevel);
         statusByStudent[s.id] = computeStudentChallengeStatus(
             families, rowsForLevel,
-            pendingWritingStudentIds.has(s.id), helpFlagStudentIds.has(s.id),
+            pendingWritingStudentIds.has(s.id),
             hasApprovedLevelCompletion
         );
     });
 
     // ── Needs Attention ──────────────────────────────────────────────
-    const attentionList = challengeStudents
-        .filter(s => statusByStudent[s.id].key === 'help' || statusByStudent[s.id].key === 'pending')
-        .sort((a, b) => (statusByStudent[a.id].key === 'help' ? 0 : 1) - (statusByStudent[b.id].key === 'help' ? 0 : 1));
+    const attentionList = challengeStudents.filter(s => statusByStudent[s.id].key === 'pending');
 
     if (attentionMount) {
         attentionMount.innerHTML = attentionList.length === 0
             ? `<div class="roster-attention-empty">${icon('confetti')} Nothing needs attention right now.</div>`
             : `<div class="roster-attention-card">${attentionList.map(s => {
-                const status = statusByStudent[s.id];
-                const reason = status.key === 'help'
-                    ? `🙋 Asked for help${status.family ? ` on ${status.family} family` : ''}`
-                    : `✍️ Writing pending review`;
-                const goPanel = status.key === 'help' ? 'teamProgressPanelBody' : 'writingQueuePanelBody';
                 return `
                     <div class="roster-attention-row">
                         <div class="roster-attention-avatar">${s.avatar || '🦁'}</div>
                         <div>
                             <div class="roster-attention-name">${s.nickname}</div>
-                            <div class="roster-attention-reason">${reason}</div>
+                            <div class="roster-attention-reason">✍️ Writing pending review</div>
                         </div>
-                        <button class="roster-attention-go" onclick="jumpToTeacherPanel('${goPanel}')">${status.key === 'help' ? 'View' : 'Review'} →</button>
+                        <button class="roster-attention-go" onclick="jumpToTeacherPanel('writingQueuePanelBody')">Review →</button>
                     </div>`;
             }).join('')}</div>`;
     }
@@ -434,7 +423,6 @@ async function teacherForgetStudent(studentId, nickname) {
         _supabase.from('student_family_progress').delete().eq('student_id', studentId),
         _supabase.from('writing_submissions').delete().eq('student_id', studentId),
         _supabase.from('can_do_progress').delete().eq('student_id', studentId),
-        _supabase.from('help_flags').delete().eq('student_id', studentId),
         _supabase.from('level_completion_requests').delete().eq('student_id', studentId),
         _supabase.from('team_practice_posts').delete().eq('uploader_id', studentId)
     ]);
@@ -1020,12 +1008,10 @@ async function loadTeacherLeaderboard() {
     const [
         { data: members },
         { data: pendingSubs },
-        { data: helpFlags },
         advanceProgress
     ] = await Promise.all([
         _supabase.from('profiles').select('id, team_id, is_captain, nickname, current_level').in('team_id', teamIds),
         _supabase.from('writing_submissions').select('student_id, status').eq('status', 'pending'),
-        _supabase.from('help_flags').select('student_id').eq('is_resolved', false),
         fetchTeamAdvanceProgress(teamIds, currentLevelByTeam)
     ]);
 
@@ -1058,12 +1044,6 @@ async function loadTeacherLeaderboard() {
         if (tid) pendingReviewsByTeam[tid] = (pendingReviewsByTeam[tid] || 0) + 1;
     });
 
-    const helpByTeam = {};
-    (helpFlags || []).forEach(f => {
-        const tid = teamIdByStudent[f.student_id];
-        if (tid) helpByTeam[tid] = (helpByTeam[tid] || 0) + 1;
-    });
-
     const teamColorMap = { Red: '#ef4444', Blue: '#1d4ed8', Green: '#166534', Yellow: '#a16207', Purple: '#7c3aed', Black: '#111827', White: '#64748b' };
     const getColor = (name) => {
         for (const [key, hex] of Object.entries(teamColorMap)) if (name?.includes(key)) return hex;
@@ -1074,7 +1054,6 @@ async function loadTeacherLeaderboard() {
         const color = getColor(team.name);
         const avgLevel = avgLevelByTeam[team.id] ?? (team.current_level || 1);
         const pending = pendingReviewsByTeam[team.id] || 0;
-        const help = helpByTeam[team.id] || 0;
         const progress = advanceProgress[team.id] || { approved: 0, required: 0 };
         const captainName = captainByTeam[team.id];
 
@@ -1087,7 +1066,6 @@ async function loadTeacherLeaderboard() {
                 </div>
                 <div class="snapshot-stats">
                     <div class="snapshot-stat-row"><span class="k">Pending reviews</span><span class="v ${pending === 0 ? 'zero' : ''}">${pending}</span></div>
-                    <div class="snapshot-stat-row"><span class="k">Help requests</span><span class="v ${help === 0 ? 'zero' : ''}">${help}</span></div>
                     <div class="snapshot-stat-row"><span class="k">Ready to advance</span><span class="v ${progress.approved === 0 ? 'zero' : ''}">${progress.approved} / ${progress.required}</span></div>
                 </div>
                 <div class="snapshot-foot">${captainName ? `👑 Captain: ${captainName}` : 'No captain assigned'}</div>
@@ -1113,7 +1091,6 @@ async function loadTeacherCaptainOverview() {
 
     const teamIds = [...new Set(captains.map(c => c.team_id).filter(Boolean))];
     const pendingByTeam = {};
-    const helpByTeam = {};
 
     if (teamIds.length > 0) {
         const { data: teamMembers } = await _supabase
@@ -1122,44 +1099,30 @@ async function loadTeacherCaptainOverview() {
             .in('team_id', teamIds);
 
         const memberIds = (teamMembers || []).map(m => m.id);
-        const [{ data: pendingSubs }, { data: helpFlags }] = memberIds.length > 0
-            ? await Promise.all([
-                _supabase.from('writing_submissions').select('student_id').in('student_id', memberIds).eq('status', 'pending'),
-                _supabase.from('help_flags').select('student_id').in('student_id', memberIds).eq('is_resolved', false)
-            ])
-            : [{ data: [] }, { data: [] }];
+        const { data: pendingSubs } = memberIds.length > 0
+            ? await _supabase.from('writing_submissions').select('student_id').in('student_id', memberIds).eq('status', 'pending')
+            : { data: [] };
 
         (pendingSubs || []).forEach(sub => {
             const member = (teamMembers || []).find(m => m.id === sub.student_id);
             if (!member) return;
             pendingByTeam[member.team_id] = (pendingByTeam[member.team_id] || 0) + 1;
         });
-
-        (helpFlags || []).forEach(flag => {
-            const member = (teamMembers || []).find(m => m.id === flag.student_id);
-            if (!member) return;
-            helpByTeam[member.team_id] = (helpByTeam[member.team_id] || 0) + 1;
-        });
     }
 
     mount.innerHTML = captains.map(cap => {
         const pending = pendingByTeam[cap.team_id] || 0;
-        const help = helpByTeam[cap.team_id] || 0;
-        const backlog = pending + help;
-        const health = backlog === 0
+        const health = pending === 0
             ? 'Team health: on track'
-            : `Team health: ${[
-                pending > 0 ? `${pending} review${pending > 1 ? 's' : ''}` : null,
-                help > 0 ? `${help} help flag${help > 1 ? 's' : ''}` : null
-            ].filter(Boolean).join(', ')}, consider a nudge`;
+            : `Team health: ${pending} review${pending > 1 ? 's' : ''}, consider a nudge`;
         return `
-            <div class="teacher-captain-row ${backlog > 0 ? 'needs-nudge' : ''}">
+            <div class="teacher-captain-row ${pending > 0 ? 'needs-nudge' : ''}">
                 <div class="teacher-captain-avatar">${cap.avatar || '👑'}</div>
                 <div>
                     <div class="teacher-captain-name">${cap.nickname || 'Captain'}: ${cap.teams?.name || 'No team'}</div>
                     <div class="teacher-captain-meta">${health}</div>
                 </div>
-                <div class="teacher-captain-pending ${backlog === 0 ? 'caught-up' : ''}">${backlog === 0 ? 'Caught up ✓' : `${backlog} waiting on them`}</div>
+                <div class="teacher-captain-pending ${pending === 0 ? 'caught-up' : ''}">${pending === 0 ? 'Caught up ✓' : `${pending} waiting on them`}</div>
             </div>`;
     }).join('');
 }
@@ -1274,7 +1237,6 @@ async function resetEverythingForDayOne() {
     const deleteResults = await Promise.all([
         _supabase.from('student_family_progress').delete().not('student_id', 'is', null),
         _supabase.from('writing_submissions').delete().not('student_id', 'is', null),
-        _supabase.from('help_flags').delete().not('student_id', 'is', null),
         _supabase.from('level_completion_requests').delete().not('student_id', 'is', null),
         _supabase.from('team_level_status').delete().not('team_id', 'is', null),
     ]);

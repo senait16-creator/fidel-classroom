@@ -125,11 +125,6 @@ async function renderTeamHub() {
     // ── Practice feed ────────────────────────────────────────
     await loadTeamPracticeFeed();
 
-    // ── Help flags (captain only) ────────────────────────────
-    if (isCaptain && typeof loadHelpFlags === 'function') {
-        await loadHelpFlags('helpFlagsMount');
-    }
-
     // ── Captain inbox badge ──────────────────────────────────
     await checkCaptainInboxBadge();
 }
@@ -431,7 +426,7 @@ function updateCaptainPendingBadge(count) {
 // ---------------------------------------------------------------------------
 // Captain team card (Competition tab) + Team Hub overlay open/close.
 // The card is a summary + entry point; Team Hub itself is built from the
-// existing captain functions below (loadCaptainWritingQueue, loadHelpFlags,
+// existing captain functions below (loadCaptainWritingQueue,
 // loadCaptainTeamProgress, renderStarPicker) — this just decides what goes
 // in the card and whether the "needs attention" chip shows.
 // ---------------------------------------------------------------------------
@@ -480,7 +475,7 @@ async function renderCaptainTeamCard() {
     const clearedEl = document.getElementById('captainTeamClearedLine');
     if (clearedEl) clearedEl.innerText = '';
 
-    let pendingWriting = 0, openHelp = 0;
+    let pendingWriting = 0;
 
     if (teammates.length > 0) {
         const memberIds = teammates.map(m => m.id);
@@ -500,25 +495,17 @@ async function renderCaptainTeamCard() {
             clearedEl.innerText = `${clearedCount} of ${teammates.length} teammate${teammates.length === 1 ? '' : 's'} cleared Level ${currentLevel}`;
         }
 
-        const [{ count: pw }, { count: oh }] = await Promise.all([
-            _supabase.from('writing_submissions').select('id', { count: 'exact', head: true })
-                .in('student_id', memberIds).eq('status', 'pending'),
-            _supabase.from('help_flags').select('id', { count: 'exact', head: true })
-                .in('student_id', memberIds).eq('is_resolved', false)
-        ]);
+        const { count: pw } = await _supabase.from('writing_submissions').select('id', { count: 'exact', head: true })
+            .in('student_id', memberIds).eq('status', 'pending');
         pendingWriting = pw || 0;
-        openHelp = oh || 0;
     }
 
     const chip = document.getElementById('captainAttnChip');
     if (chip) {
-        if (pendingWriting === 0 && openHelp === 0) {
+        if (pendingWriting === 0) {
             chip.style.display = 'none';
         } else {
-            const parts = [];
-            if (pendingWriting > 0) parts.push(`${pendingWriting} writing review${pendingWriting === 1 ? '' : 's'}`);
-            if (openHelp > 0) parts.push(`${openHelp} help request${openHelp === 1 ? '' : 's'}`);
-            chip.innerText = `${parts.join(' · ')} waiting`;
+            chip.innerText = `${pendingWriting} writing review${pendingWriting === 1 ? '' : 's'} waiting`;
             chip.style.display = 'inline-flex';
         }
     }
@@ -870,25 +857,13 @@ async function loadCaptainStats() {
     if (!mount) return;
     if (!currentProfile?.team_id) return;
 
-    const [{ data: team }, { count: approvedCount }, { data: members }] = await Promise.all([
+    const [{ data: team }, { count: approvedCount }] = await Promise.all([
         _supabase.from('teams').select('current_level').eq('id', currentProfile.team_id).maybeSingle(),
         _supabase.from('writing_submissions')
             .select('id', { count: 'exact', head: true })
             .eq('reviewed_by', currentUser.id)
-            .eq('status', 'approved'),
-        _supabase.from('profiles').select('id').eq('team_id', currentProfile.team_id)
+            .eq('status', 'approved')
     ]);
-
-    const memberIds = (members || []).map(m => m.id);
-    let studentsHelped = 0;
-    if (memberIds.length > 0) {
-        const { data: resolvedFlags } = await _supabase
-            .from('help_flags')
-            .select('student_id')
-            .in('student_id', memberIds)
-            .eq('is_resolved', true);
-        studentsHelped = new Set((resolvedFlags || []).map(f => f.student_id)).size;
-    }
 
     const levelsDone = Math.max(0, (team?.current_level || 1) - 1);
 
@@ -900,10 +875,6 @@ async function loadCaptainStats() {
         <div class="stat-tile">
             <div class="stat-value">${levelsDone}</div>
             <div class="stat-label">TEAM LEVELS DONE</div>
-        </div>
-        <div class="stat-tile" style="grid-column: 1 / -1;">
-            <div class="stat-value">${studentsHelped}</div>
-            <div class="stat-label">STUDENTS HELPED</div>
         </div>
     `;
 }

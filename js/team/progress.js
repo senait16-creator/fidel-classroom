@@ -1,6 +1,6 @@
 // =============================================================================
 // JS/TEAM/PROGRESS.JS
-// Team race visualization, level completion requests, and help flags.
+// Team race visualization and level completion requests.
 //
 // Loads after app.js. Relies on globals:
 //   _supabase, currentUser, currentProfile, STREAK_THRESHOLD,
@@ -16,11 +16,9 @@
 // team-row summary counts and the student detail view are built from, so
 // the two views can never disagree about where someone actually stands.
 //   not_started -> practicing -> needs_writing -> pending -> approved
-// "help" is an overlay (a student mid-practice can still have flagged for
-// help), not a separate point tier, so it doesn't affect the progress math.
 const RACE_STATUS_POINTS = { not_started: 0, practicing: 1, needs_writing: 2, pending: 3, approved: 4 };
 
-function computeRaceFamilyStatus(row, hasPendingSubmission, hasHelpFlag) {
+function computeRaceFamilyStatus(row, hasPendingSubmission) {
     let key;
     if (row?.streak_passed && row?.writing_passed) key = 'approved';
     else if (hasPendingSubmission) key = 'pending';
@@ -28,7 +26,7 @@ function computeRaceFamilyStatus(row, hasPendingSubmission, hasHelpFlag) {
     else if ((row?.best_streak || 0) > 0) key = 'practicing';
     else key = 'not_started';
 
-    return { key, points: RACE_STATUS_POINTS[key], needsHelp: !!hasHelpFlag, streak: row?.best_streak || 0 };
+    return { key, points: RACE_STATUS_POINTS[key], streak: row?.best_streak || 0 };
 }
 
 const RACE_STATUS_LABEL = {
@@ -311,7 +309,7 @@ async function fetchTeamStudentDetail(teamId) {
 
     const levelNumbers = [...new Set(members.map(m => m.current_level || 1))];
 
-    const [{ data: levels }, { data: prog }, { data: subs }, { data: flags }] = await Promise.all([
+    const [{ data: levels }, { data: prog }, { data: subs }] = await Promise.all([
         _supabase.from('challenge_levels').select('level_number, letter_families').in('level_number', levelNumbers),
         _supabase.from('student_family_progress')
             .select('student_id, base_letter, level_number, streak_passed, writing_passed, best_streak')
@@ -320,9 +318,7 @@ async function fetchTeamStudentDetail(teamId) {
         // that column, and base_letter alone is enough since each letter
         // belongs to exactly one challenge level.
         _supabase.from('writing_submissions')
-            .select('student_id, base_letter').eq('status', 'pending').in('student_id', memberIds),
-        _supabase.from('help_flags')
-            .select('student_id, base_letter').eq('is_resolved', false).in('student_id', memberIds)
+            .select('student_id, base_letter').eq('status', 'pending').in('student_id', memberIds)
     ]);
 
     return (members || []).map(m => {
@@ -331,8 +327,7 @@ async function fetchTeamStudentDetail(teamId) {
         const statuses = families.map(fam => {
             const row = (prog || []).find(p => p.student_id === m.id && p.base_letter === fam && p.level_number === myLevel);
             const hasPending = (subs || []).some(s => s.student_id === m.id && s.base_letter === fam);
-            const hasHelp = (flags || []).some(f => f.student_id === m.id && f.base_letter === fam);
-            return { family: fam, status: computeRaceFamilyStatus(row, hasPending, hasHelp) };
+            return { family: fam, status: computeRaceFamilyStatus(row, hasPending) };
         });
         return { ...m, level: myLevel, statuses };
     });
@@ -594,8 +589,7 @@ async function toggleRaceTeamDetail(mountId, teamId, rowId) {
         const line = m.statuses.map(s => {
             const label = RACE_STATUS_LABEL[s.status.key];
             const streakSuffix = s.status.key === 'practicing' && s.status.streak > 0 ? ` ${s.status.streak}/${STREAK_THRESHOLD}` : '';
-            const helpPrefix = s.status.needsHelp ? '🆘 ' : '';
-            return `<span class="race-student-family race-student-${s.status.needsHelp ? 'help' : s.status.key}">${s.family} ${helpPrefix}${label}${streakSuffix}</span>`;
+            return `<span class="race-student-family race-student-${s.status.key}">${s.family} ${label}${streakSuffix}</span>`;
         }).join(' ');
 
         return `
@@ -611,7 +605,7 @@ async function toggleRaceTeamDetail(mountId, teamId, rowId) {
 }
 
 // Keyed by team_id — cleared each page load (module-level), so a stale
-// approval/help-flag from a previous visit never lingers into a new one.
+// approval from a previous visit never lingers into a new one.
 const _raceDetailCache = {};
 
 // ---------------------------------------------------------------------------
@@ -796,141 +790,6 @@ async function submitLevelCompletion(levelNumber) {
 }
 
 // ---------------------------------------------------------------------------
-// Help flags — student signals they need help with a specific letter
-// ---------------------------------------------------------------------------
-
-async function flagNeedHelp(baseLetter, levelNumber) {
-    if (!currentProfile?.team_id) {
-        return showNotificationToast("You need to be on a team to send a help flag.");
-    }
-
-    const { error } = await _supabase
-        .from('help_flags')
-        .insert({
-            student_id: currentUser.id,
-            team_id: currentProfile.team_id,
-            base_letter: baseLetter,
-            level_number: levelNumber
-        });
-
-    if (error) {
-        // Duplicate insert (already flagged) — just confirm
-        if (error.code === '23505') {
-            return showNotificationToast("Help request already sent for this letter.");
-        }
-        console.error("Failed to flag help:", error);
-        return showNotificationToast("Couldn't send flag: " + error.message);
-    }
-
-    showNotificationToast(`Help request sent to your captain for "${baseLetter}" 🙋`);
-
-    if (typeof sendPushNotification === 'function') {
-        sendPushNotification({
-            type: 'help_requested',
-            team_id: currentProfile.team_id,
-            base_letter: baseLetter
-        });
-    }
-}
-
-async function loadHelpFlags(mountId) {
-    const mount = document.getElementById(mountId);
-    if (!mount) return;
-
-    if (!currentProfile?.is_captain || !currentProfile?.team_id) {
-        mount.innerHTML = "";
-        return;
-    }
-
-    const { data: members } = await _supabase
-        .from('profiles')
-        .select('id, nickname, avatar')
-        .eq('team_id', currentProfile.team_id);
-
-    const memberIds = (members || []).map(m => m.id);
-    if (memberIds.length === 0) {
-        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No teammates yet.</p>`;
-        return;
-    }
-
-    const { data: flags } = await _supabase
-        .from('help_flags')
-        .select('id, base_letter, level_number, created_at, student_id')
-        .in('student_id', memberIds)
-        .eq('is_resolved', false)
-        .order('created_at', { ascending: true });
-
-    if (!flags || flags.length === 0) {
-        mount.innerHTML = `
-            <div style="text-align:center; padding:16px 4px; color:#94a3b8;">
-                <div style="font-size:24px; margin-bottom:6px;">${icon('applause')}</div>
-                <p style="font-size:13px; margin:0;">No help requests right now.</p>
-            </div>`;
-        return;
-    }
-
-    // Pulled so opening a request shows real context (their progress on
-    // that exact family) instead of just the bare flag.
-    const { data: progressRows } = await _supabase
-        .from('student_family_progress')
-        .select('student_id, base_letter, level_number, streak_passed, best_streak, writing_passed')
-        .in('student_id', memberIds);
-
-    mount.innerHTML = "";
-
-    flags.forEach(flag => {
-        const member = (members || []).find(m => m.id === flag.student_id);
-        const progress = (progressRows || []).find(r =>
-            r.student_id === flag.student_id && r.base_letter === flag.base_letter && r.level_number === flag.level_number);
-
-        const streakText = progress?.streak_passed
-            ? `${icon('fire')} Streak passed`
-            : `${icon('fire')} Streak: ${progress?.best_streak || 0}/20`;
-        const writingText = progress?.writing_passed ? '✓ Writing approved' : 'Writing not submitted yet';
-        const flaggedAgo = typeof formatTimeAgo === 'function' ? formatTimeAgo(flag.created_at) : '';
-
-        const card = document.createElement('div');
-        card.className = 'help-flag-row';
-        card.innerHTML = `
-            <button type="button" class="help-flag-summary">
-                <span>
-                    ${member?.avatar || '🦁'} <strong>${member?.nickname || 'Student'}</strong>
-                    needs help with <span class="help-flag-letter">${flag.base_letter}</span>
-                </span>
-                <span class="help-flag-arrow">▾</span>
-            </button>
-            <div class="help-flag-detail">
-                <div class="help-flag-detail-stat">${streakText}</div>
-                <div class="help-flag-detail-stat">${writingText}</div>
-                <div class="help-flag-detail-time">Flagged ${flaggedAgo}</div>
-                <button type="button" class="help-flag-resolve-btn"
-                        onclick="resolveHelpFlag('${flag.id}', '${mountId}')">Mark Resolved ✓</button>
-            </div>
-        `;
-
-        const summaryBtn = card.querySelector('.help-flag-summary');
-        const arrow = card.querySelector('.help-flag-arrow');
-        summaryBtn.onclick = () => {
-            const isOpen = card.classList.toggle('open');
-            arrow.innerText = isOpen ? '▴' : '▾';
-        };
-
-        mount.appendChild(card);
-    });
-}
-
-async function resolveHelpFlag(flagId, mountId) {
-    const { error } = await _supabase
-        .from('help_flags')
-        .update({ is_resolved: true })
-        .eq('id', flagId);
-
-    if (error) return showNotificationToast("Couldn't resolve: " + error.message);
-    showNotificationToast("Help flag resolved ✓");
-    await loadHelpFlags(mountId);
-}
-
-// ---------------------------------------------------------------------------
 // Teacher: level completion approval queue
 // Called from teacher.js / teacher dashboard
 // ---------------------------------------------------------------------------
@@ -1046,9 +905,6 @@ window.renderCommunityTeamLeaderboard = (mountId) => renderTeamRaceView(mountId,
 window.toggleRaceTeamDetail = toggleRaceTeamDetail;
 window.renderLevelCompletionBanner = renderLevelCompletionBanner;
 window.submitLevelCompletion = submitLevelCompletion;
-window.flagNeedHelp = flagNeedHelp;
-window.loadHelpFlags = loadHelpFlags;
-window.resolveHelpFlag = resolveHelpFlag;
 window.loadTeacherLevelCompletionQueue = loadTeacherLevelCompletionQueue;
 window.approveTeacherLevelCompletion = approveTeacherLevelCompletion;
 window.rejectTeacherLevelCompletion = rejectTeacherLevelCompletion;
