@@ -8026,15 +8026,15 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 
 .stushell-home-avatar {
-    width: 64px;
-    height: 64px;
+    width: 84px;
+    height: 84px;
     border-radius: 50%;
     background: #ffffff;
     border: 2px solid var(--border-color);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 32px;
+    font-size: 42px;
     flex-shrink: 0;
     cursor: pointer;
 }
@@ -8042,7 +8042,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 .stushell-greeting {
     font-family: 'Abyssinica SIL', serif;
     font-weight: 900;
-    -webkit-text-stroke: 0.4px currentColor;
+    -webkit-text-stroke: 0.8px currentColor;
     font-size: 30px;
     color: var(--brand-primary);
     margin: 22px 0 14px;
