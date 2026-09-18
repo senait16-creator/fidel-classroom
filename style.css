@@ -8006,10 +8006,6 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     margin: 0 auto;
 }
 
-#studentShellScreen .challenge-dash-hero {
-    margin-top: 48px;
-}
-
 @media (max-width: 640px) {
     #studentShellScreen { padding-bottom: 88px; }
 }
@@ -8022,7 +8018,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     background: linear-gradient(135deg, #14532d, #166534, #ca8a04);
     border-radius: 20px;
     padding: 18px 18px 22px;
-    margin: 18px 0;
+    margin: 18px 0 8px;
 }
 
 .stushell-home-topbar {
