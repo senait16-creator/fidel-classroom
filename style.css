@@ -8046,6 +8046,13 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 .stushell-tab-panel.active { display: block; }
 .stushell-tab-panel[data-tab="home"] { padding-top: 32px; }
 
+.stushell-home-banner {
+    background: linear-gradient(135deg, #14532d, #166534, #ca8a04);
+    border-radius: 20px;
+    padding: 18px 18px 22px;
+    margin: 18px 0;
+}
+
 .stushell-home-topbar {
     display: flex;
     align-items: center;
@@ -8060,7 +8067,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     object-fit: cover;
     flex-shrink: 0;
     cursor: pointer;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.25);
 }
 
 .stushell-greeting {
@@ -8068,9 +8075,9 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     font-weight: 900;
     -webkit-text-stroke: 0.8px currentColor;
     font-size: 30px;
-    color: var(--brand-primary);
+    color: #ffffff;
     text-align: center;
-    margin: 22px 0 14px;
+    margin: 18px 0 0;
 }
 
 .stushell-community-btn {
