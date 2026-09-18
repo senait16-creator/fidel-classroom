@@ -57,16 +57,16 @@ async function enterStudentShellHomeTab() {
     const heroTeamDot = document.getElementById('challengeHeroTeamDot');
     const heroMetaLine = document.getElementById('challengeHeroMetaLine');
     if (heroTeamDot) heroTeamDot.style.background = teamHex;
-    if (heroMetaLine) {
-        const week = typeof getProgramWeekNumber === 'function' ? getProgramWeekNumber() : null;
-        heroMetaLine.innerText = `${team.name}${week ? ` • Week ${week}` : ''}`;
-    }
+    if (heroMetaLine) heroMetaLine.innerText = team.name;
 
     const totalLevels = levels.length > 0 ? Math.max(...levels.map(l => l.level_number)) : 12;
     const pePercent = Math.min(100, Math.max(0, Math.round(((myLevel - 1) / totalLevels) * 100)));
     const peLabel = document.getElementById('peProgressLabel');
     const peFill = document.getElementById('peProgressFill');
-    if (peLabel) peLabel.innerText = `${myLevel} / ${totalLevels} Levels`;
+    if (peLabel) {
+        const week = typeof getProgramWeekNumber === 'function' ? getProgramWeekNumber() : null;
+        peLabel.innerText = `${myLevel} / ${totalLevels} Levels${week ? ` • Week ${week}` : ''}`;
+    }
     if (peFill) peFill.style.width = `${pePercent}%`;
 
     const currentLevelCard = document.getElementById('challengeCurrentLevelCard');
