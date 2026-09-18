@@ -38,7 +38,7 @@ async function enterStudentShellHomeTab() {
     switchStudentShellTab('home');
 
     const greeting = document.getElementById('stushellGreeting');
-    if (greeting) greeting.innerText = currentProfile?.nickname ? `Selam, ${currentProfile.nickname}` : 'Selam';
+    if (greeting) greeting.innerText = currentProfile?.nickname ? `Selam, ${currentProfile.nickname} 👋` : 'Selam 👋';
 
     if (typeof applyModeLockStyling === 'function') applyModeLockStyling();
 
