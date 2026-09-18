@@ -197,21 +197,18 @@ async function proceedFlowMap(user) {
             return;
         }
 
-        // Show character guide if available, otherwise go straight to mode select
-        if (typeof showCharacterGuide === 'function') {
+        // Land on the Launcher (prototype: shown on every fresh entry, no
+        // persistence yet) instead of going straight to Home.
+        if (typeof enterLauncher === 'function') {
+            enterLauncher();
+        } else if (typeof showCharacterGuide === 'function') {
             showCharacterGuide();
         } else {
-            const SHOW_INTRO = false;
-
-if (SHOW_INTRO) {
-    showIntroMascot();
-} else {
-    enterModeSelect();
-}
-            setTimeout(() => {
-                if (typeof maybeShowWordleOnLogin === 'function') maybeShowWordleOnLogin();
-            }, 600);
+            enterModeSelect();
         }
+        setTimeout(() => {
+            if (typeof maybeShowWordleOnLogin === 'function') maybeShowWordleOnLogin();
+        }, 600);
 
     } else {
         // New user — needs to set up their profile
@@ -301,7 +298,9 @@ async function recheckAccessStatus() {
         return;
     }
 
-    if (typeof showCharacterGuide === 'function') {
+    if (typeof enterLauncher === 'function') {
+        enterLauncher();
+    } else if (typeof showCharacterGuide === 'function') {
         showCharacterGuide();
     } else {
         enterModeSelect();
