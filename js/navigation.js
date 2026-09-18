@@ -26,6 +26,7 @@
 // =============================================================================
 
 const ALL_SCREENS = [
+    "launcherScreen",
     "modeSelectScreen",
     "studentDashboard",
     "teacherOnlyDashboard",

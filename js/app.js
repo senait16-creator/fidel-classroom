@@ -532,20 +532,21 @@ function enterModeIfUnlocked(modeKey, enterFn) {
 // even if LOCKED_MODES changes without a page reload.
 function applyModeLockStyling() {
     Object.keys(LOCKED_MODES).forEach(key => {
-        const card = document.querySelector(`.cup-card[data-mode="${key}"]`);
-        if (!card) return;
-        card.classList.toggle('cup-card-locked', LOCKED_MODES[key]);
-        let overlay = card.querySelector('.cup-card-lock-badge');
-        if (LOCKED_MODES[key]) {
-            if (!overlay) {
-                overlay = document.createElement('div');
-                overlay.className = 'cup-card-lock-badge';
-                overlay.innerText = '🔒 Coming Soon';
-                card.appendChild(overlay);
+        const cards = document.querySelectorAll(`.cup-card[data-mode="${key}"]`);
+        cards.forEach(card => {
+            card.classList.toggle('cup-card-locked', LOCKED_MODES[key]);
+            let overlay = card.querySelector('.cup-card-lock-badge');
+            if (LOCKED_MODES[key]) {
+                if (!overlay) {
+                    overlay = document.createElement('div');
+                    overlay.className = 'cup-card-lock-badge';
+                    overlay.innerText = '🔒 Coming Soon';
+                    card.appendChild(overlay);
+                }
+            } else if (overlay) {
+                overlay.remove();
             }
-        } else if (overlay) {
-            overlay.remove();
-        }
+        });
     });
 }
 window.LOCKED_MODES = LOCKED_MODES;
