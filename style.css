@@ -7979,6 +7979,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 
 .stushell-tab-panel { display: none; padding-top: 18px; }
 .stushell-tab-panel.active { display: block; }
+.stushell-tab-panel[data-tab="home"] { padding-top: 32px; }
 
 .stushell-greeting-row {
     display: flex;
