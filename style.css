@@ -8049,8 +8049,18 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 .stushell-home-topbar {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
     gap: 12px;
+}
+
+.stushell-home-appicon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    object-fit: cover;
+    flex-shrink: 0;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
 }
 
 .stushell-greeting {
