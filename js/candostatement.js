@@ -104,12 +104,16 @@ async function loadCanDoProgressMapWithAutoCheck() {
         if (statement.verification !== 'auto') continue;
         if (progressMap[statement.key]) continue; // already self_assessed or verified
         if (statement.autoCheck(autoCheckContext)) {
-            await _supabase.from('can_do_progress').upsert({
+            const { error } = await _supabase.from('can_do_progress').upsert({
                 student_id: currentUser.id,
                 statement_key: statement.key,
                 status: 'self_assessed',
                 self_assessed_at: new Date().toISOString()
             }, { onConflict: 'student_id,statement_key' });
+            if (error) {
+                console.error('Failed to auto-save can-do progress:', error);
+                continue; // don't mark it done locally if it didn't actually save
+            }
             progressMap[statement.key] = 'self_assessed';
         }
     }
