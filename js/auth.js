@@ -150,7 +150,7 @@ async function proceedFlowMap(user) {
 
     const { data: profile, error: profileError } = await _supabase
         .from('profiles')
-        .select('id, email, nickname, avatar, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode, access_status, current_level')
+        .select('id, email, nickname, avatar, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode, access_status, current_level, learner_track')
         .eq('id', user.id)
         .maybeSingle();
 
@@ -190,6 +190,13 @@ async function proceedFlowMap(user) {
         const modeGreetSub = document.getElementById('modeGreetingSub');
         if (modeGreetSub) modeGreetSub.innerText = `Welcome back, ${profile.nickname}`;
 
+        // First login (or any profile that hasn't picked one yet) goes to
+        // the one-time track-select gate instead of straight to Home.
+        if (!currentProfile?.learner_track) {
+            enterLearningTrackSelect();
+            return;
+        }
+
         // Show character guide if available, otherwise go straight to mode select
         if (typeof showCharacterGuide === 'function') {
             showCharacterGuide();
@@ -227,6 +234,46 @@ function showAccessPendingScreen() {
     document.getElementById("accessPendingScreen").style.display = "flex";
 }
 
+// ---------------------------------------------------------------------------
+// Learning track select — one-time gate shown after login instead of Home
+// for any profile that hasn't picked a track yet (profiles.learner_track is
+// null). Once a choice is saved, the student never sees this again.
+// ---------------------------------------------------------------------------
+
+function enterLearningTrackSelect() {
+    if (typeof hideAllScreens === 'function') hideAllScreens();
+    document.getElementById("authScreen").style.display = "none";
+    document.getElementById("profileSetupScreen").style.display = "none";
+    document.getElementById("accessPendingScreen").style.display = "none";
+    document.getElementById("learningTrackSelectScreen").style.display = "block";
+}
+window.enterLearningTrackSelect = enterLearningTrackSelect;
+
+async function chooseLearningTrack(track) {
+    if (!currentUser) return;
+
+    const { error } = await _supabase
+        .from('profiles')
+        .update({ learner_track: track })
+        .eq('id', currentUser.id);
+
+    if (error) {
+        console.error('Failed to save learner track:', error);
+        showNotificationToast("Couldn't save your choice, please try again.");
+        return;
+    }
+
+    currentProfile.learner_track = track;
+    document.getElementById("learningTrackSelectScreen").style.display = "none";
+
+    if (typeof showCharacterGuide === 'function') {
+        showCharacterGuide();
+    } else if (typeof enterModeSelect === 'function') {
+        enterModeSelect();
+    }
+}
+window.chooseLearningTrack = chooseLearningTrack;
+
 // Re-fetches the profile without a full log-out/log-in, so a student can
 // just tap "Check Again" right after their teacher approves them.
 async function recheckAccessStatus() {
@@ -236,7 +283,7 @@ async function recheckAccessStatus() {
 
     const { data: profile } = await _supabase
         .from('profiles')
-        .select('id, email, nickname, avatar, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode, access_status, current_level')
+        .select('id, email, nickname, avatar, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode, access_status, current_level, learner_track')
         .eq('id', currentUser.id)
         .maybeSingle();
 
@@ -248,6 +295,11 @@ async function recheckAccessStatus() {
 
     document.getElementById("accessPendingScreen").style.display = "none";
     await applyProfileToHeader(currentProfile);
+
+    if (!currentProfile?.learner_track) {
+        enterLearningTrackSelect();
+        return;
+    }
 
     if (typeof showCharacterGuide === 'function') {
         showCharacterGuide();

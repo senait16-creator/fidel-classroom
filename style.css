@@ -2340,6 +2340,34 @@ header {
     cursor: pointer;
 }
 
+/* Learning track select — one-time welcome/route-selection screen */
+
+.track-select-panel {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 22px 20px;
+    margin-bottom: 14px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.16);
+    transition: transform 0.12s ease;
+}
+
+.track-select-panel:active { transform: scale(0.98); }
+
+.track-select-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: #14532d;
+    margin-bottom: 6px;
+    font-family: 'Inter', sans-serif;
+}
+
+.track-select-sub {
+    font-size: 13.5px;
+    color: #475569;
+    line-height: 1.45;
+}
+
 /* Teacher submission cards */
 
 .teacher-submission-card {

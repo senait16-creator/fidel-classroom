@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=65">
+    <link rel="stylesheet" href="style.css?v=66">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -105,6 +105,37 @@
     </p>
     <button class="btn-primary" onclick="recheckAccessStatus()"><span data-icon="refresh"></span> Check Again</button>
     <button class="btn-secondary" style="margin-top:10px;" onclick="logout()">Log Out</button>
+</div>
+
+<!-- ============================================================
+     LEARNING TRACK SELECT — one-time gate shown after login (in
+     place of going straight to Home) for any profile that hasn't
+     picked a track yet. Once tapped, the choice is saved to
+     profiles.learner_track and this screen is never shown again.
+     ============================================================ -->
+
+<div id="learningTrackSelectScreen" style="display:none; min-height:100vh; background:linear-gradient(160deg,#14532d,#166534); padding:56px 20px 40px;">
+    <div style="max-width:420px; margin:0 auto;">
+        <h1 style="color:#ffffff; font-size:23px; font-weight:800; text-align:center; margin-bottom:8px; font-family:'Inter', sans-serif;">Welcome to Fidel Classroom</h1>
+        <p style="color:rgba(255,255,255,0.8); font-size:14px; text-align:center; margin-bottom:28px;">How would you like to get started?</p>
+
+        <div class="track-select-panel" onclick="chooseLearningTrack('independent')">
+            <div class="track-select-title">Independent Learner</div>
+            <div class="track-select-sub">I want a structured path I can follow at my own pace.</div>
+        </div>
+        <div class="track-select-panel" onclick="chooseLearningTrack('competition')">
+            <div class="track-select-title">Fidel Competition</div>
+            <div class="track-select-sub">I want to learn with a team, accountability, and competition.</div>
+        </div>
+        <div class="track-select-panel" onclick="chooseLearningTrack('goal_based')">
+            <div class="track-select-title">Goal-Based Learner</div>
+            <div class="track-select-sub">I already know some Amharic and want to focus on specific skills.</div>
+        </div>
+        <div class="track-select-panel" onclick="chooseLearningTrack('explore')">
+            <div class="track-select-title">Explore My Level</div>
+            <div class="track-select-sub">I'm not sure where to start. Help me find my path.</div>
+        </div>
+    </div>
 </div>
 
 <!-- ============================================================
@@ -1860,7 +1891,7 @@
 <script src="js/icons.js?v=4" defer></script>
 <script src="js/navigation.js?v=8" defer></script>
 <script src="js/app.js?v=27" defer></script>
-<script src="js/auth.js?v=17" defer></script>
+<script src="js/auth.js?v=18" defer></script>
 <script src="js/guide.js?v=10" defer></script>
 <script src="js/utils/compress.js?v=9" defer></script>
 <script src="js/game.js?v=10" defer></script>
