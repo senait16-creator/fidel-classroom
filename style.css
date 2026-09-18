@@ -8072,6 +8072,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     font-weight: 700;
     font-size: 30px;
     color: var(--brand-primary);
+    opacity: 0.8;
     margin: 22px 0 14px;
 }
 
