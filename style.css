@@ -8069,7 +8069,8 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 
 .stushell-greeting {
     font-family: 'Abyssinica SIL', serif;
-    font-weight: 700;
+    font-weight: 900;
+    -webkit-text-stroke: 0.4px currentColor;
     font-size: 30px;
     color: var(--brand-primary);
     opacity: 0.8;
