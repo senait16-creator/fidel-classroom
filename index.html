@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=76">
+    <link rel="stylesheet" href="style.css?v=77">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -568,19 +568,22 @@
 <div id="studentShellScreen" style="display:none; min-height:100vh; padding:0 16px 16px; background:#f5f5f0;">
 
     <div class="stushell-tab-panel active" data-tab="home">
-        <div class="stushell-home-topbar">
-            <!-- App icon — the full Fidel Classroom icon artwork, not a
-                 cropped avatar. Tapping it goes to Profile, same as the
-                 avatar slot it replaces. -->
-            <img src="IMG_2514.png" alt="Fidel Classroom" class="stushell-home-appicon" onclick="switchStudentShellTab('profile')">
-            <!-- Community — small icon on the home tab only, replacing its old
-                 full cup card. Same screen, same features, just de-emphasized so
-                 Word Builder can take its spot in the grid. Lives in the normal
-                 document flow here (not position:fixed) so it can't float over
-                 the greeting above it. -->
-            <button id="communityIconBtn" class="stushell-community-btn" onclick="chooseModeCommunity()"><span data-icon="confetti"></span></button>
+        <!-- Top banner — green/gold gradient strip holding the app icon,
+             the community icon, and the Selam greeting together as one
+             unit, instead of sitting loose on the page background. -->
+        <div class="stushell-home-banner">
+            <div class="stushell-home-topbar">
+                <!-- App icon — the full Fidel Classroom icon artwork, not a
+                     cropped avatar. Tapping it goes to Profile, same as the
+                     avatar slot it replaces. -->
+                <img src="IMG_2514.png" alt="Fidel Classroom" class="stushell-home-appicon" onclick="switchStudentShellTab('profile')">
+                <!-- Community — small icon on the home tab only, replacing its old
+                     full cup card. Same screen, same features, just de-emphasized so
+                     Word Builder can take its spot in the grid. -->
+                <button id="communityIconBtn" class="stushell-community-btn" onclick="chooseModeCommunity()"><span data-icon="confetti"></span></button>
+            </div>
+            <p class="stushell-greeting" id="stushellGreeting">Selam</p>
         </div>
-        <p class="stushell-greeting" id="stushellGreeting">Selam</p>
 
         <div class="challenge-dash-hero">
             <div class="challenge-hero-meta-row">
