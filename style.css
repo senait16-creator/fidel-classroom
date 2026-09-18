@@ -5604,7 +5604,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     background: linear-gradient(135deg, #166534 0%, #166534cc 60%, #16653499 100%);
     color: white;
     border-radius: 16px;
-    padding: 24px 20px;
+    padding: 32px 20px;
     margin-bottom: 18px;
     display: flex;
     flex-direction: column;
