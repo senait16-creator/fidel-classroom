@@ -40,9 +40,6 @@ async function enterStudentShellHomeTab() {
     const greeting = document.getElementById('stushellGreeting');
     if (greeting) greeting.innerText = currentProfile?.nickname ? `Selam, ${currentProfile.nickname}` : 'Selam';
 
-    const homeAvatar = document.getElementById('stushellHomeAvatar');
-    if (homeAvatar) homeAvatar.innerText = currentProfile?.avatar || '🦁';
-
     if (typeof applyModeLockStyling === 'function') applyModeLockStyling();
 
     const [team, levels, myLevel] = await Promise.all([

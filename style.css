@@ -8021,22 +8021,8 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 .stushell-home-topbar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: 12px;
-}
-
-.stushell-home-avatar {
-    width: 84px;
-    height: 84px;
-    border-radius: 50%;
-    background: #ffffff;
-    border: 2px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 42px;
-    flex-shrink: 0;
-    cursor: pointer;
 }
 
 .stushell-greeting {
