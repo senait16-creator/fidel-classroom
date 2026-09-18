@@ -5603,7 +5603,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
        just the default green. */
     background: linear-gradient(135deg, #166534 0%, #166534cc 60%, #16653499 100%);
     color: white;
-    border-radius: 24px;
+    border-radius: 16px;
     padding: 24px 20px;
     margin-bottom: 18px;
     display: flex;
@@ -8068,10 +8068,10 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 
 .stushell-greeting {
-    font-family: 'Lora', 'Playfair Display', serif;
+    font-family: 'Abyssinica SIL', serif;
     font-weight: 700;
-    font-size: 21px;
-    color: var(--neutral-dark);
+    font-size: 30px;
+    color: var(--brand-primary);
     margin: 22px 0 14px;
 }
 
