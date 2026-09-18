@@ -430,9 +430,17 @@ async function renderChallengeDashboardMap(levels, myLevel) {
         });
     }
 
+    const tilesHtml = families.map(fam =>
+        `<div class="challenge-continue-tile${fam === targetFamily ? ' active' : ''}">${fam}</div>`
+    ).join('');
+    const btnLabel = targetFamily
+        ? `Practice ${targetFamily} family`
+        : `Review Level ${currentLevel.level_number}`;
+
     mount.innerHTML = `
-        <button class="challenge-continue-btn" id="challengeGoalBtn">Continue Level ${currentLevel.level_number} →</button>
-        <p class="challenge-continue-next">Next: ${families.join(' ')}</p>
+        <p class="challenge-continue-label">Continue Level ${currentLevel.level_number}</p>
+        <div class="challenge-continue-tiles">${tilesHtml}</div>
+        <button class="challenge-continue-btn" id="challengeGoalBtn">${btnLabel}</button>
     `;
 
     const goalBtn = document.getElementById("challengeGoalBtn");
