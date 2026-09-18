@@ -57,7 +57,7 @@ async function enterStudentShellHomeTab() {
     if (heroTeamDot) heroTeamDot.style.background = teamHex;
     if (heroMetaLine) {
         const week = typeof getProgramWeekNumber === 'function' ? getProgramWeekNumber() : null;
-        heroMetaLine.innerText = `${team.name} • My Level ${myLevel}${week ? ` • Week ${week}` : ''}`;
+        heroMetaLine.innerText = `${team.name}${week ? ` • Week ${week}` : ''}`;
     }
 
     const totalLevels = levels.length > 0 ? Math.max(...levels.map(l => l.level_number)) : 12;
