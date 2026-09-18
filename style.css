@@ -5570,7 +5570,10 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 
 .challenge-dash-hero {
     position: relative;
-    background: linear-gradient(135deg,#14532d,#166534,#ca8a04);
+    /* Fallback before JS sets the team-colored gradient inline (see
+       enterStudentShellHomeTab in studentshell.js) — same three-stop shape,
+       just the default green. */
+    background: linear-gradient(135deg, #166534 0%, #166534cc 60%, #16653499 100%);
     color: white;
     border-radius: 24px;
     padding: 24px 20px;
@@ -6078,6 +6081,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     border-radius: 50%;
     flex-shrink: 0;
     background: rgba(255,255,255,.5);
+    border: 1.5px solid rgba(255,255,255,.85);
 }
 
 .pe-progress-track {

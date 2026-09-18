@@ -52,6 +52,8 @@ async function enterStudentShellHomeTab() {
     // level shown is the student's own, not the team's. Team progress
     // (which may now differ per member) lives on Competition instead.
     const teamHex = typeof getTeamHex === 'function' ? getTeamHex(team.name) : '#166534';
+    const heroCard = document.querySelector('.challenge-dash-hero');
+    if (heroCard) heroCard.style.background = `linear-gradient(135deg, ${teamHex} 0%, ${teamHex}cc 60%, ${teamHex}99 100%)`;
     const heroTeamDot = document.getElementById('challengeHeroTeamDot');
     const heroMetaLine = document.getElementById('challengeHeroMetaLine');
     if (heroTeamDot) heroTeamDot.style.background = teamHex;
