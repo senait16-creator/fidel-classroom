@@ -8045,7 +8045,6 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     -webkit-text-stroke: 0.4px currentColor;
     font-size: 30px;
     color: var(--brand-primary);
-    opacity: 0.8;
     margin: 22px 0 14px;
 }
 
