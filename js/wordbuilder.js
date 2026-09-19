@@ -99,70 +99,136 @@ function enterWordBuilder() {
 window.enterWordBuilder = enterWordBuilder;
 
 // ---------------------------------------------------------------------------
-// Word Builder Home — contextual home mirroring Competition's Home and
-// Fidel Practice Home (hero + Continue card), scoped to
-// word_builder_level_progress/getWordBuilderUnlockedLevels instead of
-// team-gated levels or raw letter mastery.
+// Word Builder Home — leads with the actual learning content (current
+// level's words, a Continue button, the practice-flow preview) instead of
+// progression/gating rules. The Fidel-practice prerequisite, when it
+// blocks the *next* level, is a small note at the bottom, not the
+// centerpiece — the student can still see and continue whatever they've
+// already unlocked.
 // ---------------------------------------------------------------------------
+
+// Decorative preview of the per-word practice sequence (WORD_BUILDER_STEPS)
+// — not independently jumpable (that would bypass the word-by-word flow
+// that already resumes correctly on its own), so every chip just opens
+// Continue Learning, same as the main button.
+const WORD_BUILDER_STEP_PREVIEW = [
+    { icon: '🧩', label: 'Build' },
+    { icon: '🖼', label: 'Meaning' },
+    { icon: '💬', label: 'Sentence' },
+    { icon: '🃏', label: 'Cards' },
+    { icon: '✍🏾', label: 'Spell' },
+    { icon: '🎯', label: 'Match' },
+];
 
 async function enterWordBuilderHome() {
     showScreen('wordBuilderHomeScreen', 'block');
     if (typeof applyModeLockStyling === 'function') applyModeLockStyling();
 
-    const [{ data: levels }, { data: wordRows }, { data: levelProgress }, unlockedLevels] = await Promise.all([
+    const mount = document.getElementById('wordBuilderHomeMount');
+    if (!mount) return;
+
+    const [{ data: levels }, { data: wordRows }, { data: levelProgress }, { data: wordProgress }, unlockedLevels] = await Promise.all([
         _supabase.from('word_builder_levels').select('level_number, topic_title').order('level_number'),
-        _supabase.from('word_builder_words').select('id, level_number'),
+        _supabase.from('word_builder_words').select('id, level_number, item_order, amharic_text, english_meaning').order('item_order'),
         _supabase.from('word_builder_level_progress').select('level_number').eq('student_id', currentUser.id),
+        _supabase.from('word_builder_progress').select('word_id').eq('student_id', currentUser.id),
         getWordBuilderUnlockedLevels()
     ]);
 
     const allLevels = levels || [];
     const totalLevels = allLevels.length || Object.keys(WORD_BUILDER_LEVEL_LETTERS).length;
     const completedLevels = new Set((levelProgress || []).map(r => r.level_number));
+    const readWordIds = new Set((wordProgress || []).map(r => r.word_id));
 
-    const wordCountByLevel = {};
-    (wordRows || []).forEach(w => { wordCountByLevel[w.level_number] = (wordCountByLevel[w.level_number] || 0) + 1; });
-
-    const percent = totalLevels > 0 ? Math.min(100, Math.round((completedLevels.size / totalLevels) * 100)) : 0;
-    const fill = document.getElementById('wordBuilderHomeProgressFill');
-    const label = document.getElementById('wordBuilderHomeProgressLabel');
-    if (fill) fill.style.width = `${percent}%`;
-    if (label) label.innerText = `${completedLevels.size} / ${totalLevels} Levels`;
-
-    const mount = document.getElementById('wordBuilderHomeContinueMount');
-    if (!mount) return;
+    const wordsByLevel = {};
+    (wordRows || []).forEach(w => { (wordsByLevel[w.level_number] ||= []).push(w); });
 
     // First level that's unlocked, has real words, and isn't done yet.
     const targetLevel = allLevels.find(l =>
         !completedLevels.has(l.level_number) &&
         unlockedLevels.has(l.level_number) &&
-        (wordCountByLevel[l.level_number] || 0) > 0
+        (wordsByLevel[l.level_number] || []).length > 0
     );
 
     if (!targetLevel) {
         const allDone = allLevels.length > 0 && allLevels.every(l => completedLevels.has(l.level_number));
         mount.innerHTML = allDone
             ? `
-                <p class="challenge-continue-label">All Levels Complete</p>
-                <button class="challenge-continue-btn" onclick="enterWordBuilder()">Review Word Builder →</button>
+                <div class="wb-home-continue-card">
+                    <div class="wb-home-continue-title">All Levels Complete 🎉</div>
+                    <div class="wb-home-continue-sub">You've finished every Word Builder level. Go back through any of them any time.</div>
+                    <button class="wb-home-continue-btn" onclick="enterWordBuilder()">Review Word Builder →</button>
+                </div>
               `
             : `
-                <p class="challenge-continue-label">Word Builder Locked</p>
-                <p style="font-size:13px; color:#64748b; margin:0 0 12px;">Practice more letters in Fidel Practice to unlock your next level.</p>
-                <button class="challenge-continue-btn" onclick="enterModeIfUnlocked('practice', enterPracticeHome)">Go to Fidel Practice</button>
+                <div class="wb-home-continue-card">
+                    <div class="wb-home-continue-title">Word Builder Locked</div>
+                    <div class="wb-home-continue-sub">Practice more letters in Fidel Practice to unlock your first level.</div>
+                    <button class="wb-home-continue-btn" onclick="enterModeIfUnlocked('practice', enterPracticeHome)">Go to Fidel Practice</button>
+                </div>
               `;
         return;
     }
 
-    const letters = WORD_BUILDER_LEVEL_LETTERS[targetLevel.level_number] || [];
-    const tilesHtml = letters.map((ch, i) =>
-        `<div class="challenge-continue-tile${i === 0 ? ' active' : ''}">${ch}</div>`
-    ).join('');
+    const levelWords = wordsByLevel[targetLevel.level_number] || [];
+    const readCount = levelWords.filter(w => readWordIds.has(w.id)).length;
+    const previewWords = levelWords.slice(0, 4);
+    const levelsDoneCount = completedLevels.size;
+
+    const wordRowsHtml = previewWords.map(w => `
+        <div class="wb-home-word-row">
+            <span class="wb-home-word-amharic">${w.amharic_text}</span>
+            <span class="wb-home-word-meaning">${w.english_meaning || ''}</span>
+        </div>
+    `).join('');
+
+    const practiceChipsHtml = WORD_BUILDER_STEP_PREVIEW.map(step => `
+        <div class="wb-home-practice-chip" onclick="openWordBuilderLevel(${targetLevel.level_number})">
+            <span class="wb-home-practice-icon">${step.icon}</span>
+            <span class="wb-home-practice-label">${step.label}</span>
+        </div>
+    `).join('');
+
+    // Only surface the next-level lock as a small note if it's genuinely
+    // the very next thing blocking them — not a wall of gating rules.
+    const nextLockedLevel = allLevels.find(l => l.level_number > targetLevel.level_number && !unlockedLevels.has(l.level_number));
+    const lockedNoteHtml = nextLockedLevel
+        ? `
+            <div class="wb-home-locked-note" onclick="enterModeIfUnlocked('practice', enterPracticeHome)">
+                <span>🔒 Level ${nextLockedLevel.level_number} unlocks after more Fidel practice</span>
+                <span>→</span>
+            </div>
+          `
+        : '';
+
+    const miniProgressPercent = totalLevels > 0 ? Math.min(100, Math.round((levelsDoneCount / totalLevels) * 100)) : 0;
 
     mount.innerHTML = `
-        <p class="challenge-continue-label">Continue Level ${targetLevel.level_number}${targetLevel.topic_title ? ` · ${targetLevel.topic_title}` : ''}</p>
-        <div class="challenge-continue-tiles">${tilesHtml}</div>
-        <button class="challenge-continue-btn" onclick="openWordBuilderLevel(${targetLevel.level_number})">Continue Level ${targetLevel.level_number}</button>
+        <div class="wb-home-continue-card">
+            <div class="wb-home-continue-title">Level ${targetLevel.level_number}${targetLevel.topic_title ? ` · ${targetLevel.topic_title}` : ''}</div>
+            <div class="wb-home-continue-sub">New words to learn using letters you already know.</div>
+            <div class="wb-home-continue-track"><div class="wb-home-continue-fill" style="width:${levelWords.length ? Math.round((readCount / levelWords.length) * 100) : 0}%;"></div></div>
+            <div class="wb-home-continue-caption">${readCount} / ${levelWords.length} words</div>
+            <button class="wb-home-continue-btn" onclick="openWordBuilderLevel(${targetLevel.level_number})">Continue Learning →</button>
+        </div>
+
+        <div class="wb-home-section-label">Your Words</div>
+        <div class="wb-home-words-card">
+            ${wordRowsHtml}
+        </div>
+        <div class="wb-home-view-all-link" onclick="openWordBuilderLevel(${targetLevel.level_number})">View all ${levelWords.length} words →</div>
+
+        <div class="wb-home-section-label" style="margin-top:18px;">Practice</div>
+        <div class="wb-home-practice-grid">
+            ${practiceChipsHtml}
+        </div>
+
+        <div class="wb-home-progress-mini">
+            <span>Level ${targetLevel.level_number} of ${totalLevels}</span>
+            <div class="wb-home-progress-mini-track"><div class="wb-home-progress-mini-fill" style="width:${miniProgressPercent}%;"></div></div>
+        </div>
+
+        ${lockedNoteHtml}
     `;
 }
 window.enterWordBuilderHome = enterWordBuilderHome;

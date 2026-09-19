@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=81">
+    <link rel="stylesheet" href="style.css?v=82">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -1888,10 +1888,12 @@
 
 </div>
 <!-- ============================================================
-     WORD BUILDER HOME — contextual home for Word Builder, mirroring
-     Competition's Home and Fidel Practice Home (hero + Continue card),
-     scoped to word_builder_level_progress/getWordBuilderUnlockedLevels
-     instead of team levels or letter mastery directly.
+     WORD BUILDER HOME — contextual home for Word Builder. Leads with the
+     actual learning content (current level's words, Continue button,
+     practice flow preview) instead of progression/gating rules — the
+     unlock-prerequisite note is secondary, at the bottom, not the
+     centerpiece. Single dynamic mount; see renderWordBuilderHome() in
+     js/wordbuilder.js for the markup per state.
      ============================================================ -->
 <div id="wordBuilderHomeScreen" style="display:none; min-height:100vh; padding:0 16px calc(180px + env(safe-area-inset-bottom, 0px)); background:#f5f5f0;">
     <div style="max-width:480px; margin:0 auto; padding-top:32px;">
@@ -1900,46 +1902,9 @@
             <button class="btn-secondary" onclick="enterModeSelect()">← Home</button>
         </div>
 
-        <div class="challenge-dash-hero" style="background:linear-gradient(135deg,#312e81,#4f46e5,#818cf8);">
-            <div class="challenge-hero-meta-row">
-                <span class="challenge-hero-team-dot" style="background:rgba(255,255,255,.5);"></span>
-                <span>Building Vocabulary</span>
-            </div>
-            <div class="pe-progress-track"><div class="pe-progress-fill" id="wordBuilderHomeProgressFill" style="width:0%;"></div></div>
-            <div class="pe-progress-caption" id="wordBuilderHomeProgressLabel">– / – Levels</div>
+        <div id="wordBuilderHomeMount">
+            <p style="color:#94a3b8; font-size:13px;">Loading...</p>
         </div>
-
-        <div class="challenge-continue-card">
-            <div id="wordBuilderHomeContinueMount">
-                <p style="color:#94a3b8; font-size:13px;">Loading...</p>
-            </div>
-        </div>
-
-        <!-- Prototype: persistent area switcher, same four modes as the
-             Launcher/Home cup grid, so switching doesn't require going
-             back through Home first. -->
-        <div class="mode-switcher-strip">
-            <button type="button" class="mode-switcher-btn" data-mode="practice" onclick="enterModeIfUnlocked('practice', enterPracticeHome)" style="color:#166534;">
-                <span class="mode-switcher-icon">ፊደል</span>
-                <span class="mode-switcher-label">Practice</span>
-            </button>
-            <button type="button" class="mode-switcher-btn" onclick="enterStudentShellHomeTab()" style="color:#b45309;">
-                <span class="mode-switcher-icon">ውድድር</span>
-                <span class="mode-switcher-label">Competition</span>
-            </button>
-            <button type="button" class="mode-switcher-btn active" style="color:#4f46e5;">
-                <span class="mode-switcher-icon">ቃላት</span>
-                <span class="mode-switcher-label">Word Builder</span>
-            </button>
-            <button type="button" class="mode-switcher-btn" data-mode="amharicPath" onclick="enterModeIfUnlocked('amharicPath', enterAmharicPath)" style="color:#4338ca;">
-                <span class="mode-switcher-icon">ጉዞዬ</span>
-                <span class="mode-switcher-label">Amharic Path</span>
-            </button>
-        </div>
-
-        <button type="button" class="btn-secondary" style="width:100%; margin-top:6px;" onclick="enterWordBuilder()">
-            <span data-icon="book-open"></span> Browse All Levels →
-        </button>
     </div>
 </div>
 
@@ -2087,7 +2052,7 @@
 <script src="js/teacher.js?v=33" defer></script>
 <script src="js/reading.js?v=27" defer></script>
 <script src="js/guidedpath.js?v=1" defer></script>
-<script src="js/wordbuilder.js?v=12" defer></script>
+<script src="js/wordbuilder.js?v=13" defer></script>
     <script src="js/letterboard.js?v=17" defer></script>
 <script src="js/team/progress.js?v=30" defer></script>
 <script src="js/team/levels.js?v=14" defer></script>

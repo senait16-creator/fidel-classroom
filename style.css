@@ -8052,6 +8052,185 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     line-height: 1.15;
 }
 
+/* Word Builder Home — leads with the current level's words and a Continue
+   button, not the progression/gating rules. Everything below is scoped
+   under #wordBuilderHomeMount. */
+
+.wb-home-continue-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 18px;
+    margin-bottom: 18px;
+}
+
+.wb-home-continue-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.wb-home-continue-sub {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 12px;
+    line-height: 1.4;
+}
+
+.wb-home-continue-track {
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 6px;
+}
+
+.wb-home-continue-fill {
+    height: 100%;
+    background: #4f46e5;
+    border-radius: 4px;
+}
+
+.wb-home-continue-caption {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #94a3b8;
+    margin-bottom: 14px;
+}
+
+.wb-home-continue-btn {
+    width: 100%;
+    border: none;
+    border-radius: 10px;
+    padding: 13px;
+    background: #4f46e5;
+    color: white;
+    font-size: 14.5px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.wb-home-section-label {
+    font-size: 10.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #94a3b8;
+    margin: 0 0 8px 2px;
+}
+
+.wb-home-words-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 6px 16px;
+    margin-bottom: 18px;
+}
+
+.wb-home-word-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.wb-home-word-row:last-of-type {
+    border-bottom: none;
+}
+
+.wb-home-word-amharic {
+    font-family: 'Abyssinica SIL', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.wb-home-word-meaning {
+    font-size: 12.5px;
+    color: #64748b;
+    text-align: right;
+}
+
+.wb-home-view-all-link {
+    display: block;
+    text-align: center;
+    padding: 10px 0 6px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #4f46e5;
+    cursor: pointer;
+}
+
+.wb-home-practice-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.wb-home-practice-chip {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 10px 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+}
+
+.wb-home-practice-icon { font-size: 17px; }
+
+.wb-home-practice-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #475569;
+}
+
+.wb-home-progress-mini {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #94a3b8;
+    margin-bottom: 14px;
+}
+
+.wb-home-progress-mini-track {
+    flex: 1;
+    height: 4px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.wb-home-progress-mini-fill {
+    height: 100%;
+    background: #c7d2fe;
+    border-radius: 3px;
+}
+
+.wb-home-locked-note {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: #fffbeb;
+    border: 1px dashed #fbbf24;
+    border-radius: 12px;
+    padding: 11px 14px;
+    font-size: 12.5px;
+    color: #92400e;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 8px;
+}
+
 /* Launcher — the pre-Home splash showing all four area cups. Flies
    out from the app icon's corner (top-left) on entry. */
 .launcher-screen {
