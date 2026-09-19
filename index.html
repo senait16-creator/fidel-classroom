@@ -600,7 +600,7 @@
         <img src="IMG_2514.png" alt="Fidel Classroom" class="launcher-appicon">
         <p class="launcher-greeting" id="launcherGreeting">Selam 👋</p>
         <div class="cups-grid">
-            <div class="cup-card cup-card-outline-green" data-mode="practice" onclick="enterModeIfUnlocked('practice', openLetterBoard)">
+            <div class="cup-card cup-card-outline-green" data-mode="practice" onclick="enterModeIfUnlocked('practice', enterPracticeHome)">
                 <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
                     <rect x="6" y="22" width="32" height="30" rx="7" fill="#dcfce7" stroke="#166534" stroke-width="1.5"/>
                     <path d="M38 28 Q47 28 47 35 Q47 42 38 42" fill="none" stroke="#166534" stroke-width="1.5" stroke-linecap="round"/>
@@ -708,7 +708,7 @@
 
         <div class="stushell-supporting-label">Your Learning Path</div>
         <div class="cups-grid">
-            <div class="cup-card cup-card-outline-green" data-mode="practice" onclick="enterModeIfUnlocked('practice', openLetterBoard)">
+            <div class="cup-card cup-card-outline-green" data-mode="practice" onclick="enterModeIfUnlocked('practice', enterPracticeHome)">
                 <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
                     <rect x="6" y="22" width="32" height="30" rx="7" fill="#dcfce7" stroke="#166534" stroke-width="1.5"/>
                     <path d="M38 28 Q47 28 47 35 Q47 42 38 42" fill="none" stroke="#166534" stroke-width="1.5" stroke-linecap="round"/>
@@ -1362,11 +1362,11 @@
          Launcher/Home cup grid, so switching doesn't require going
          back through Home first. -->
     <div class="mode-switcher-strip" style="margin-top:18px;">
-        <button type="button" class="mode-switcher-btn" data-mode="practice" onclick="enterModeIfUnlocked('practice', openLetterBoard)" style="color:#166534;">
+        <button type="button" class="mode-switcher-btn" data-mode="practice" onclick="enterModeIfUnlocked('practice', enterPracticeHome)" style="color:#166534;">
             <span class="mode-switcher-icon">ፊደል</span>
             <span class="mode-switcher-label">Practice</span>
         </button>
-        <button type="button" class="mode-switcher-btn" onclick="chooseModeChallenge()" style="color:#b45309;">
+        <button type="button" class="mode-switcher-btn" onclick="enterStudentShellHomeTab()" style="color:#b45309;">
             <span class="mode-switcher-icon">ውድድር</span>
             <span class="mode-switcher-label">Competition</span>
         </button>
@@ -1743,6 +1743,64 @@
 </div>
 
 <!-- ============================================================
+     FIDEL PRACTICE HOME — a self-paced contextual home for solo letter
+     practice, mirroring Competition's Home (hero + Continue card)
+     but scoped to user_progress.mastered_letters instead of team
+     levels. "Continue" opens that specific family via the existing
+     openFamilyFromBoard(); "Browse Full Library" opens the full
+     letterBoardScreen unfiltered.
+     ============================================================ -->
+<div id="practiceHomeScreen" style="display:none; min-height:100vh; padding:0 16px calc(180px + env(safe-area-inset-bottom, 0px)); background:#f5f5f0;">
+    <div style="max-width:480px; margin:0 auto; padding-top:32px;">
+        <div class="workspace-title">
+            <span><span data-icon="pencil"></span> Fidel Practice</span>
+            <button class="btn-secondary" onclick="enterModeSelect()">← Home</button>
+        </div>
+
+        <div class="challenge-dash-hero" style="background:linear-gradient(135deg,#14532d,#166534,#22c55e);">
+            <div class="challenge-hero-meta-row">
+                <span class="challenge-hero-team-dot" style="background:rgba(255,255,255,.5);"></span>
+                <span>Practicing Solo</span>
+            </div>
+            <div class="pe-progress-track"><div class="pe-progress-fill" id="practiceProgressFill" style="width:0%;"></div></div>
+            <div class="pe-progress-caption" id="practiceProgressLabel">– / – Letters</div>
+        </div>
+
+        <div class="challenge-continue-card">
+            <div id="practiceContinueMount">
+                <p style="color:#94a3b8; font-size:13px;">Loading...</p>
+            </div>
+        </div>
+
+        <!-- Prototype: persistent area switcher, same four modes as the
+             Launcher/Home cup grid, so switching doesn't require going
+             back through Home first. -->
+        <div class="mode-switcher-strip">
+            <button type="button" class="mode-switcher-btn active" style="color:#166534;">
+                <span class="mode-switcher-icon">ፊደል</span>
+                <span class="mode-switcher-label">Practice</span>
+            </button>
+            <button type="button" class="mode-switcher-btn" onclick="enterStudentShellHomeTab()" style="color:#b45309;">
+                <span class="mode-switcher-icon">ውድድር</span>
+                <span class="mode-switcher-label">Competition</span>
+            </button>
+            <button type="button" class="mode-switcher-btn" data-mode="wordBuilder" onclick="enterWordBuilder()" style="color:#4f46e5;">
+                <span class="mode-switcher-icon">ቃላት</span>
+                <span class="mode-switcher-label">Word Builder</span>
+            </button>
+            <button type="button" class="mode-switcher-btn" data-mode="amharicPath" onclick="enterModeIfUnlocked('amharicPath', enterAmharicPath)" style="color:#4338ca;">
+                <span class="mode-switcher-icon">ጉዞዬ</span>
+                <span class="mode-switcher-label">Amharic Path</span>
+            </button>
+        </div>
+
+        <button type="button" class="btn-secondary" style="width:100%; margin-top:6px;" onclick="openLetterBoard()">
+            <span data-icon="book-open"></span> Browse Full Library →
+        </button>
+    </div>
+</div>
+
+<!-- ============================================================
      CHALLENGE MAP OVERLAY
      ============================================================ -->
 
@@ -1874,11 +1932,11 @@
              Launcher/Home cup grid, so switching doesn't require going
              back through Home first. -->
         <div class="mode-switcher-strip">
-            <button type="button" class="mode-switcher-btn" data-mode="practice" onclick="enterModeIfUnlocked('practice', openLetterBoard)" style="color:#166534;">
+            <button type="button" class="mode-switcher-btn" data-mode="practice" onclick="enterModeIfUnlocked('practice', enterPracticeHome)" style="color:#166534;">
                 <span class="mode-switcher-icon">ፊደል</span>
                 <span class="mode-switcher-label">Practice</span>
             </button>
-            <button type="button" class="mode-switcher-btn" onclick="chooseModeChallenge()" style="color:#b45309;">
+            <button type="button" class="mode-switcher-btn" onclick="enterStudentShellHomeTab()" style="color:#b45309;">
                 <span class="mode-switcher-icon">ውድድር</span>
                 <span class="mode-switcher-label">Competition</span>
             </button>
@@ -1988,7 +2046,7 @@
 <!-- END CAN-DO STATEMENTS -->
 
 <script src="js/icons.js?v=4" defer></script>
-<script src="js/navigation.js?v=9" defer></script>
+<script src="js/navigation.js?v=10" defer></script>
 <script src="js/app.js?v=28" defer></script>
 <script src="js/auth.js?v=19" defer></script>
 <script src="js/guide.js?v=10" defer></script>
@@ -1999,7 +2057,7 @@
 <script src="js/reading.js?v=26" defer></script>
 <script src="js/guidedpath.js?v=1" defer></script>
 <script src="js/wordbuilder.js?v=10" defer></script>
-    <script src="js/letterboard.js?v=15" defer></script>
+    <script src="js/letterboard.js?v=16" defer></script>
 <script src="js/team/progress.js?v=30" defer></script>
 <script src="js/team/levels.js?v=14" defer></script>
 <script src="js/team/map.js?v=9" defer></script>
