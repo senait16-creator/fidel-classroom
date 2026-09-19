@@ -1,6 +1,6 @@
 // =============================================================================
 // letterboard.js — Full Letter Board (free exploration, no levels)
-// All 34 Amharic families in traditional Ge'ez order, grouped in rows of 3 —
+// All 33 Amharic families in traditional Ge'ez order, grouped in rows of 3 —
 // one row per Fidel Competition level, so a student practicing solo sees the
 // exact same level boundaries a Competition team would. Every 2 rows (6
 // letters) lines up with one Word Builder level, so a link to that level
@@ -8,19 +8,21 @@
 // Load order: after app.js, before challenge.js
 // =============================================================================
 
+// ቨ removed (matches the earlier challenge_levels shift) -- everything from
+// the old Level 5 onward moves back one slot, and the old 1-letter Level 12
+// is gone entirely: 33 letters = a clean 11 levels of 3, no leftover.
 const FIDEL_BOARD_LEVELS = [
     { level: 1,  families: [{ base: 'ሀ', sound: 'ha' },  { base: 'ለ', sound: 'le' },   { base: 'ሐ', sound: 'ḥa' }] },
     { level: 2,  families: [{ base: 'መ', sound: 'me' },  { base: 'ሠ', sound: 'śe' },   { base: 'ረ', sound: 're' }] },
     { level: 3,  families: [{ base: 'ሰ', sound: 'se' },  { base: 'ሸ', sound: 'she' },  { base: 'ቀ', sound: 'qe' }] },
-    { level: 4,  families: [{ base: 'በ', sound: 'be' },  { base: 'ቨ', sound: 've' },   { base: 'ተ', sound: 'te' }] },
-    { level: 5,  families: [{ base: 'ቸ', sound: 'che' }, { base: 'ኀ', sound: 'ḫa' },   { base: 'ነ', sound: 'ne' }] },
-    { level: 6,  families: [{ base: 'ኘ', sound: 'ñe' },  { base: 'አ', sound: 'a' },    { base: 'ከ', sound: 'ke' }] },
-    { level: 7,  families: [{ base: 'ኸ', sound: 'ḵe' },  { base: 'ወ', sound: 'we' },   { base: 'ዐ', sound: 'ʿa' }] },
-    { level: 8,  families: [{ base: 'ዘ', sound: 'ze' },  { base: 'ዠ', sound: 'zhe' },  { base: 'የ', sound: 'ye' }] },
-    { level: 9,  families: [{ base: 'ደ', sound: 'de' },  { base: 'ጀ', sound: 'je' },   { base: 'ገ', sound: 'ge' }] },
-    { level: 10, families: [{ base: 'ጠ', sound: 'ṭe' },  { base: 'ጨ', sound: 'č̣e' },  { base: 'ጰ', sound: 'p̣e' }] },
-    { level: 11, families: [{ base: 'ጸ', sound: 'ṣe' },  { base: 'ፀ', sound: 'ṣ́e' },  { base: 'ፈ', sound: 'fe' }] },
-    { level: 12, families: [{ base: 'ፐ', sound: 'pe' }] },
+    { level: 4,  families: [{ base: 'በ', sound: 'be' },  { base: 'ተ', sound: 'te' },   { base: 'ቸ', sound: 'che' }] },
+    { level: 5,  families: [{ base: 'ኀ', sound: 'ḫa' },  { base: 'ነ', sound: 'ne' },   { base: 'ኘ', sound: 'ñe' }] },
+    { level: 6,  families: [{ base: 'አ', sound: 'a' },   { base: 'ከ', sound: 'ke' },   { base: 'ኸ', sound: 'ḵe' }] },
+    { level: 7,  families: [{ base: 'ወ', sound: 'we' },  { base: 'ዐ', sound: 'ʿa' },   { base: 'ዘ', sound: 'ze' }] },
+    { level: 8,  families: [{ base: 'ዠ', sound: 'zhe' }, { base: 'የ', sound: 'ye' },   { base: 'ደ', sound: 'de' }] },
+    { level: 9,  families: [{ base: 'ጀ', sound: 'je' },  { base: 'ገ', sound: 'ge' },   { base: 'ጠ', sound: 'ṭe' }] },
+    { level: 10, families: [{ base: 'ጨ', sound: 'č̣e' }, { base: 'ጰ', sound: 'p̣e' },  { base: 'ጸ', sound: 'ṣe' }] },
+    { level: 11, families: [{ base: 'ፀ', sound: 'ṣ́e' }, { base: 'ፈ', sound: 'fe' },  { base: 'ፐ', sound: 'pe' }] },
 ];
 
 // ቐ isn't part of the Competition/Word Builder level system (34 families,
@@ -277,8 +279,10 @@ function renderLetterBoard(query) {
         // Every 2 rows = 6 letters = one Word Builder level's worth of
         // Fidel, so a solo practicer can jump straight there once they've
         // covered them — mirrors how Competition levels pair up already.
-        if (row.level % 2 === 0 && !query) {
-            const wbLevel = row.level / 2;
+        // Level 11 is the odd one out (33 letters doesn't split into pairs
+        // evenly) and pairs alone with Word Builder's last level, 6.
+        if ((row.level % 2 === 0 || row.level === 11) && !query) {
+            const wbLevel = row.level === 11 ? 6 : row.level / 2;
             const link = document.createElement('div');
             link.className = 'lb-wordbuilder-link';
             link.innerHTML = `${icon('book-open')} Word Builder ${wbLevel} <span class="lb-wordbuilder-link-arrow">→</span>`;

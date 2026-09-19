@@ -16,16 +16,17 @@
 // letters, 42 characters) rather than one (3 letters, 21 characters) —
 // three letters alone turned out too sparse to write real words with,
 // confirmed while drafting actual Level 1 content. Built from the real
-// challenge_levels.letter_families data, paired up: (1,2) (3,4) (5,6)
-// (7,8) (9,10) (11,12). Level 12 only has one letter (ፐ), so the last
-// pair is 4 letters instead of 6.
+// challenge_levels.letter_families data (11 levels after ቨ was dropped),
+// paired up: (1,2) (3,4) (5,6) (7,8) (9,10) (11). Level 11 has no partner
+// (33 letters doesn't split into pairs evenly), so the last "pair" is just
+// its own 3 letters instead of 6.
 const WORD_BUILDER_LEVEL_LETTERS = {
     1: ['ሀ', 'ለ', 'ሐ', 'መ', 'ሠ', 'ረ'],
-    2: ['ሰ', 'ሸ', 'ቀ', 'በ', 'ቨ', 'ተ'],
-    3: ['ቸ', 'ኀ', 'ነ', 'ኘ', 'አ', 'ከ'],
-    4: ['ኸ', 'ወ', 'ዐ', 'ዘ', 'ዠ', 'የ'],
-    5: ['ደ', 'ጀ', 'ገ', 'ጠ', 'ጨ', 'ጰ'],
-    6: ['ጸ', 'ፀ', 'ፈ', 'ፐ']
+    2: ['ሰ', 'ሸ', 'ቀ', 'በ', 'ተ', 'ቸ'],
+    3: ['ኀ', 'ነ', 'ኘ', 'አ', 'ከ', 'ኸ'],
+    4: ['ወ', 'ዐ', 'ዘ', 'ዠ', 'የ', 'ደ'],
+    5: ['ጀ', 'ገ', 'ጠ', 'ጨ', 'ጰ', 'ጸ'],
+    6: ['ፀ', 'ፈ', 'ፐ']
 };
 
 let wordBuilderCurrentLevel = null;

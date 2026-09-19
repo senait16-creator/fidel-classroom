@@ -85,7 +85,7 @@ async function enterStudentShellHomeTab() {
     if (heroTeamDot) heroTeamDot.style.background = teamHex;
     if (heroMetaLine) heroMetaLine.innerText = team.name;
 
-    const totalLevels = levels.length > 0 ? Math.max(...levels.map(l => l.level_number)) : 12;
+    const totalLevels = levels.length > 0 ? Math.max(...levels.map(l => l.level_number)) : 11;
     const pePercent = Math.min(100, Math.max(0, Math.round(((myLevel - 1) / totalLevels) * 100)));
     const peLabel = document.getElementById('peProgressLabel');
     const peFill = document.getElementById('peProgressFill');
