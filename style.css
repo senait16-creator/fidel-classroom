@@ -8259,6 +8259,22 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     margin-bottom: 8px;
 }
 
+.wb-home-upnext-note {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    border-radius: 12px;
+    padding: 11px 14px;
+    font-size: 12.5px;
+    color: #3730a3;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 8px;
+}
+
 /* Launcher — the pre-Home splash showing all four area cups. Flies
    out from the app icon's corner (top-left) on entry. */
 .launcher-screen {
