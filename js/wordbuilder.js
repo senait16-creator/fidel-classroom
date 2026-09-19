@@ -98,6 +98,75 @@ function enterWordBuilder() {
 window.enterWordBuilder = enterWordBuilder;
 
 // ---------------------------------------------------------------------------
+// Word Builder Home — contextual home mirroring Competition's Home and
+// Fidel Practice Home (hero + Continue card), scoped to
+// word_builder_level_progress/getWordBuilderUnlockedLevels instead of
+// team-gated levels or raw letter mastery.
+// ---------------------------------------------------------------------------
+
+async function enterWordBuilderHome() {
+    showScreen('wordBuilderHomeScreen', 'block');
+    if (typeof applyModeLockStyling === 'function') applyModeLockStyling();
+
+    const [{ data: levels }, { data: wordRows }, { data: levelProgress }, unlockedLevels] = await Promise.all([
+        _supabase.from('word_builder_levels').select('level_number, topic_title').order('level_number'),
+        _supabase.from('word_builder_words').select('id, level_number'),
+        _supabase.from('word_builder_level_progress').select('level_number').eq('student_id', currentUser.id),
+        getWordBuilderUnlockedLevels()
+    ]);
+
+    const allLevels = levels || [];
+    const totalLevels = allLevels.length || Object.keys(WORD_BUILDER_LEVEL_LETTERS).length;
+    const completedLevels = new Set((levelProgress || []).map(r => r.level_number));
+
+    const wordCountByLevel = {};
+    (wordRows || []).forEach(w => { wordCountByLevel[w.level_number] = (wordCountByLevel[w.level_number] || 0) + 1; });
+
+    const percent = totalLevels > 0 ? Math.min(100, Math.round((completedLevels.size / totalLevels) * 100)) : 0;
+    const fill = document.getElementById('wordBuilderHomeProgressFill');
+    const label = document.getElementById('wordBuilderHomeProgressLabel');
+    if (fill) fill.style.width = `${percent}%`;
+    if (label) label.innerText = `${completedLevels.size} / ${totalLevels} Levels`;
+
+    const mount = document.getElementById('wordBuilderHomeContinueMount');
+    if (!mount) return;
+
+    // First level that's unlocked, has real words, and isn't done yet.
+    const targetLevel = allLevels.find(l =>
+        !completedLevels.has(l.level_number) &&
+        unlockedLevels.has(l.level_number) &&
+        (wordCountByLevel[l.level_number] || 0) > 0
+    );
+
+    if (!targetLevel) {
+        const allDone = allLevels.length > 0 && allLevels.every(l => completedLevels.has(l.level_number));
+        mount.innerHTML = allDone
+            ? `
+                <p class="challenge-continue-label">All Levels Complete</p>
+                <button class="challenge-continue-btn" onclick="enterWordBuilder()">Review Word Builder →</button>
+              `
+            : `
+                <p class="challenge-continue-label">Word Builder Locked</p>
+                <p style="font-size:13px; color:#64748b; margin:0 0 12px;">Practice more letters in Fidel Practice to unlock your next level.</p>
+                <button class="challenge-continue-btn" onclick="enterModeIfUnlocked('practice', enterPracticeHome)">Go to Fidel Practice</button>
+              `;
+        return;
+    }
+
+    const letters = WORD_BUILDER_LEVEL_LETTERS[targetLevel.level_number] || [];
+    const tilesHtml = letters.map((ch, i) =>
+        `<div class="challenge-continue-tile${i === 0 ? ' active' : ''}">${ch}</div>`
+    ).join('');
+
+    mount.innerHTML = `
+        <p class="challenge-continue-label">Continue Level ${targetLevel.level_number}${targetLevel.topic_title ? ` · ${targetLevel.topic_title}` : ''}</p>
+        <div class="challenge-continue-tiles">${tilesHtml}</div>
+        <button class="challenge-continue-btn" onclick="openWordBuilderLevel(${targetLevel.level_number})">Continue Level ${targetLevel.level_number}</button>
+    `;
+}
+window.enterWordBuilderHome = enterWordBuilderHome;
+
+// ---------------------------------------------------------------------------
 // Level list
 // ---------------------------------------------------------------------------
 
