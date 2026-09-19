@@ -143,12 +143,24 @@ async function enterWordBuilderHome() {
     const wordsByLevel = {};
     (wordRows || []).forEach(w => { (wordsByLevel[w.level_number] ||= []).push(w); });
 
-    // First level that's unlocked, has real words, and isn't done yet.
-    const targetLevel = allLevels.find(l =>
-        !completedLevels.has(l.level_number) &&
-        unlockedLevels.has(l.level_number) &&
-        (wordsByLevel[l.level_number] || []).length > 0
-    );
+    // Sequential but open: every level with words is browsable/jumpable
+    // regardless of Fidel letter mastery (unlockedLevels only softens
+    // sub-labels now, never blocks). "Current Level" — what Continue
+    // Learning resumes — prefers wherever the student left off (the
+    // highest-numbered level with any unfinished progress), since they're
+    // free to jump ahead; falls back to the first level with words that
+    // isn't complete for a student who hasn't started anything yet.
+    let targetLevel = null;
+    for (const l of allLevels) {
+        const words = wordsByLevel[l.level_number] || [];
+        if (words.length === 0 || completedLevels.has(l.level_number)) continue;
+        if (words.some(w => readWordIds.has(w.id))) targetLevel = l;
+    }
+    if (!targetLevel) {
+        targetLevel = allLevels.find(l =>
+            !completedLevels.has(l.level_number) && (wordsByLevel[l.level_number] || []).length > 0
+        );
+    }
 
     if (!targetLevel) {
         const allDone = allLevels.length > 0 && allLevels.every(l => completedLevels.has(l.level_number));
@@ -162,9 +174,8 @@ async function enterWordBuilderHome() {
               `
             : `
                 <div class="wb-home-continue-card">
-                    <div class="wb-home-continue-title">Word Builder Locked</div>
-                    <div class="wb-home-continue-sub">Practice more letters in Fidel Practice to unlock your first level.</div>
-                    <button class="wb-home-continue-btn" onclick="enterModeIfUnlocked('practice', enterPracticeHome)">Go to Fidel Practice</button>
+                    <div class="wb-home-continue-title">Word Builder</div>
+                    <div class="wb-home-continue-sub">No levels have content yet — check back soon.</div>
                 </div>
               `;
         return;
@@ -189,13 +200,13 @@ async function enterWordBuilderHome() {
         </div>
     `).join('');
 
-    // Only surface the next-level lock as a small note if it's genuinely
-    // the very next thing blocking them — not a wall of gating rules.
-    const nextLockedLevel = allLevels.find(l => l.level_number > targetLevel.level_number && !unlockedLevels.has(l.level_number));
-    const lockedNoteHtml = nextLockedLevel
+    // "Up Next" — an invitation forward, not a lock. Always the very next
+    // level with words, whether or not its letters are Fidel-known yet.
+    const nextLevel = allLevels.find(l => l.level_number > targetLevel.level_number && (wordsByLevel[l.level_number] || []).length > 0);
+    const upNextHtml = nextLevel
         ? `
-            <div class="wb-home-locked-note" onclick="enterModeIfUnlocked('practice', enterPracticeHome)">
-                <span>🔒 Level ${nextLockedLevel.level_number} unlocks after more Fidel practice</span>
+            <div class="wb-home-upnext-note" onclick="openWordBuilderLevel(${nextLevel.level_number})">
+                <span>Up Next — Level ${nextLevel.level_number}${nextLevel.topic_title ? ` · ${nextLevel.topic_title}` : ''}</span>
                 <span>→</span>
             </div>
           `
@@ -217,6 +228,7 @@ async function enterWordBuilderHome() {
             ${wordRowsHtml}
         </div>
         <div class="wb-home-view-all-link" onclick="openWordBuilderLevel(${targetLevel.level_number})">View all ${levelWords.length} words →</div>
+        <div class="wb-home-view-all-link" onclick="enterWordBuilder()">Browse all levels →</div>
 
         <div class="wb-home-section-label" style="margin-top:18px;">Practice</div>
         <div class="wb-home-practice-grid">
@@ -228,7 +240,7 @@ async function enterWordBuilderHome() {
             <div class="wb-home-progress-mini-track"><div class="wb-home-progress-mini-fill" style="width:${miniProgressPercent}%;"></div></div>
         </div>
 
-        ${lockedNoteHtml}
+        ${upNextHtml}
     `;
 }
 window.enterWordBuilderHome = enterWordBuilderHome;
@@ -259,22 +271,24 @@ async function renderWordBuilderLevelsList() {
 
     const completedLevels = new Set((levelProgress || []).map(r => r.level_number));
 
+    // Sequential but open: every level with real words is browsable and
+    // jumpable regardless of Fidel letter mastery. unlockedLevels now only
+    // softens the sub-label (a nudge, not a wall) -- it never blocks a tap.
     mount.innerHTML = levels.map(level => {
         const done = completedLevels.has(level.level_number);
         const hasWords = (wordCountByLevel[level.level_number] || 0) > 0;
-        const practiceUnlocked = unlockedLevels.has(level.level_number);
-        const locked = !done && !practiceUnlocked;
-        const clickable = !locked && hasWords;
+        const practiceRecommended = !unlockedLevels.has(level.level_number);
+        const clickable = hasWords;
 
-        const stateIcon = done ? '✓' : (locked ? icon('lock', { color: '#94a3b8' }) : level.level_number);
-        const numBg = done ? 'rgba(22,101,52,0.1)' : (locked ? '#e2e8f0' : '#fffbeb');
-        const numColor = done ? '#166534' : (locked ? '#94a3b8' : '#d97706');
+        const stateIcon = done ? '✓' : level.level_number;
+        const numBg = done ? 'rgba(22,101,52,0.1)' : '#fffbeb';
+        const numColor = done ? '#166534' : '#d97706';
 
         let subLabel;
-        if (!practiceUnlocked && !done) {
-            subLabel = `${icon('lock', { color: '#94a3b8' })} ${WORD_BUILDER_LEVEL_LETTERS[level.level_number].join(' ')}`;
-        } else if (!hasWords) {
+        if (!hasWords) {
             subLabel = 'Coming soon';
+        } else if (practiceRecommended && !done) {
+            subLabel = `${wordCountByLevel[level.level_number]} words · new letters, Fidel Practice helps`;
         } else {
             subLabel = `${wordCountByLevel[level.level_number]} words`;
         }
@@ -964,15 +978,14 @@ async function completeWordBuilderLevel() {
 
     if (error) console.error('Failed to save level completion:', error);
 
-    // Finishing a level doesn't automatically mean the NEXT level's
-    // letters have been learned yet — that's tracked separately via
-    // Fidel Practice/Competition — so check before offering to continue
-    // straight into it.
+    // Levels are sequential but open — always offer to continue into the
+    // next one. Fidel unlock status is a soft note, not a gate.
     const [{ data: nextLevel }, unlockedLevels] = await Promise.all([
         _supabase.from('word_builder_levels').select('level_number, topic_title').eq('level_number', level.level_number + 1).maybeSingle(),
         getWordBuilderUnlockedLevels()
     ]);
-    const nextLevelReady = nextLevel && unlockedLevels.has(nextLevel.level_number);
+    const nextLevelReady = !!nextLevel;
+    const nextLevelNewLetters = nextLevel && !unlockedLevels.has(nextLevel.level_number);
 
     const crumb = document.getElementById('wordBuilderLessonCrumb');
     if (crumb) crumb.innerText = '';
@@ -1000,8 +1013,8 @@ async function completeWordBuilderLevel() {
             ${nextLevelReady
                 ? `<button class="btn-primary" onclick="openWordBuilderLevel(${nextLevel.level_number})">Continue to Level ${nextLevel.level_number} →</button>`
                 : `<button class="btn-primary" onclick="showScreen('wordBuilderLevelsScreen'); renderWordBuilderLevelsList();">Back to Levels</button>`}
-            ${(nextLevel && !nextLevelReady)
-                ? `<p style="font-size:11.5px; color:#94a3b8; margin-top:12px;">Level ${nextLevel.level_number} unlocks once you've learned ${WORD_BUILDER_LEVEL_LETTERS[nextLevel.level_number].join(' ')} in Fidel Practice.</p>`
+            ${nextLevelNewLetters
+                ? `<p style="font-size:11.5px; color:#94a3b8; margin-top:12px;">Level ${nextLevel.level_number} uses some new letters (${WORD_BUILDER_LEVEL_LETTERS[nextLevel.level_number].join(' ')}) — Fidel Practice can help, but you can dive in now too.</p>`
                 : ''}
             <a href="javascript:void(0)" onclick="if (typeof enterAmharicPath === 'function') enterAmharicPath();"
                style="display:block; margin-top:16px; font-size:12.5px; font-weight:700; color:#4338ca; text-decoration:none;">
