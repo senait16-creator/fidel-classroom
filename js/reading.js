@@ -91,6 +91,9 @@ function enterAmharicPath() {
     if (!currentProfile) return;
 
     showScreen("amharicPathTrackScreen");
+    // "Continue Chapter" card only ever reflects Original Path progress —
+    // Guided Path is still shell-stage with nothing real to show yet.
+    renderAmharicPathChapterCard('amharicPathTrackChapterMount', 'amharicPathTrackScreen');
 }
 
 function enterOriginalAmharicPath() {
@@ -348,8 +351,11 @@ function escapeHtml(str) {
 // dashboard used for its own chapter card.
 // -----------------------------------------------------------------------------
 
-async function renderAmharicPathChapterCard() {
-    const mount = document.getElementById('amharicPathChapterMount');
+// mountId/returnScreen let this same card be reused on the Amharic Path
+// Home (track-select) screen, not just Original Path's own home — the
+// "continue"/"see all" actions need to know which screen to come back to.
+async function renderAmharicPathChapterCard(mountId = 'amharicPathChapterMount', returnScreen = 'amharicPathHomeScreen') {
+    const mount = document.getElementById(mountId);
     if (!mount) return;
     mount.innerHTML = `<p style="color:#94a3b8;">Loading...</p>`;
 
@@ -380,18 +386,18 @@ async function renderAmharicPathChapterCard() {
     `;
 
     mount.querySelector('.amharic-path-continue-btn').onclick = () => {
-        continueChapterFromHome(level.level_number);
+        continueChapterFromHome(level.level_number, returnScreen);
     };
-    mount.querySelector('.study-together-all-chapters-link').onclick = openAllChaptersFromHome;
+    mount.querySelector('.study-together-all-chapters-link').onclick = () => openAllChaptersFromHome(returnScreen);
 }
 
-function continueChapterFromHome(levelNumber) {
-    readingLevelDetailReturnScreen = "amharicPathHomeScreen";
+function continueChapterFromHome(levelNumber, returnScreen = 'amharicPathHomeScreen') {
+    readingLevelDetailReturnScreen = returnScreen;
     enterChapter(levelNumber);
 }
 
-function openAllChaptersFromHome() {
-    chapterListReturnScreen = "amharicPathHomeScreen";
+function openAllChaptersFromHome(returnScreen = 'amharicPathHomeScreen') {
+    chapterListReturnScreen = returnScreen;
     showScreen("readingLevelsScreen");
     renderReadingLevelsList();
 }

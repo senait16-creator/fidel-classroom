@@ -1358,6 +1358,11 @@
         <span><span data-icon="book"></span> Amharic Path</span>
         <button class="btn-secondary" onclick="exitAmharicPath()">← Back</button>
     </div>
+
+    <!-- Continue card — Original Path progress only; Guided Path is still
+         shell-stage with no real progress to show yet. -->
+    <div id="amharicPathTrackChapterMount" class="chapter-list-card"><p style="color:#94a3b8;">Loading...</p></div>
+
     <!-- Prototype: persistent area switcher, same four modes as the
          Launcher/Home cup grid, so switching doesn't require going
          back through Home first. -->
@@ -1379,7 +1384,8 @@
             <span class="mode-switcher-label">Amharic Path</span>
         </button>
     </div>
-    <div class="amharic-path-grid" style="margin-top:18px;">
+    <div class="stushell-supporting-label" style="margin-top:18px;">Or Choose a Track</div>
+    <div class="amharic-path-grid">
         <button type="button" class="amharic-path-card guided-path" onclick="enterGuidedPath()">
             <span class="amharic-path-card-icon"><span data-icon="book-open"></span></span>
             <span class="amharic-path-card-title">Continue My Words</span>
@@ -2110,7 +2116,7 @@
 <script src="js/game.js?v=10" defer></script>
 <script src="js/submissions.js?v=14" defer></script>
 <script src="js/teacher.js?v=33" defer></script>
-<script src="js/reading.js?v=26" defer></script>
+<script src="js/reading.js?v=27" defer></script>
 <script src="js/guidedpath.js?v=1" defer></script>
 <script src="js/wordbuilder.js?v=11" defer></script>
     <script src="js/letterboard.js?v=16" defer></script>
