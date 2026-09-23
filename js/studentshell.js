@@ -37,7 +37,7 @@ window.switchStudentShellTab = switchStudentShellTab;
 // ---------------------------------------------------------------------------
 
 async function enterStudentShellHomeTab() {
-    showScreen('studentShellScreen', 'block');
+    showScreen('studentShellScreen', '');
     switchStudentShellTab('home');
 
     const greeting = document.getElementById('stushellGreeting');
@@ -331,7 +331,7 @@ async function openTeamHubFromHome() {
 window.openTeamHubFromHome = openTeamHubFromHome;
 
 async function enterStudentShellCompetitionTab() {
-    showScreen('studentShellScreen', 'block');
+    showScreen('studentShellScreen', '');
     switchStudentShellTab('competition');
     if (typeof renderChallengeDashboard === 'function') await renderChallengeDashboard();
 }

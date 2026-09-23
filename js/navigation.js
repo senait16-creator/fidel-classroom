@@ -96,7 +96,17 @@ function showScreen(screenId, displayMode) {
     hideAllScreens();
 
     const target = document.getElementById(screenId);
-    if (target) target.style.display = displayMode || "block";
+    if (target) {
+        // An empty string means "let the stylesheet decide" -- used by
+        // studentShellScreen, whose desktop sidebar layout comes from a
+        // @media (min-width:900px) display:flex rule that an inline style
+        // would otherwise always beat, regardless of specificity.
+        if (displayMode === "") {
+            target.style.removeProperty("display");
+        } else {
+            target.style.display = displayMode || "block";
+        }
+    }
 
     syncHamburgerHost(screenId);
 }
