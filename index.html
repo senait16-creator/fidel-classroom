@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=84">
+    <link rel="stylesheet" href="style.css?v=86">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -576,7 +576,7 @@
             <span class="app-sidebar-logo">ፊ</span>
             <span class="app-sidebar-name">Fidel Classroom</span>
         </div>
-        <button type="button" class="app-sidebar-upload" onclick="openWritingQuickLink()">
+        <button type="button" class="app-sidebar-upload" onclick="openUploadSheet()">
             <span data-icon="plus"></span> Upload
         </button>
         <nav class="app-sidebar-nav" aria-label="Main">
@@ -585,7 +585,7 @@
             <button type="button" class="app-sidebar-link" onclick="enterWordBuilderHome()"><span>ቃ</span> Word Builder</button>
             <button type="button" class="app-sidebar-link" onclick="enterModeIfUnlocked('amharicPath', enterAmharicPath)"><span>ጉ</span> Amharic Path</button>
             <div class="app-sidebar-divider"></div>
-            <button type="button" class="app-sidebar-link" data-tab="competition" onclick="switchStudentShellTab('competition')"><span data-icon="trophy"></span> Team</button>
+            <button type="button" class="app-sidebar-link" data-tab="competition" onclick="chooseModeChallenge()"><span data-icon="trophy"></span> Team</button>
             <button type="button" class="app-sidebar-link" onclick="chooseModeCommunity()"><span data-icon="confetti"></span> Community</button>
             <button type="button" class="app-sidebar-link" data-tab="profile" onclick="switchStudentShellTab('profile')"><span data-icon="user"></span> Profile</button>
         </nav>
@@ -610,21 +610,38 @@
             <p class="stushell-greeting" id="stushellGreeting">Selam 👋</p>
         </div>
 
-        <div class="challenge-dash-hero">
-            <div class="challenge-hero-meta-row">
-                <span class="challenge-hero-team-dot" id="challengeHeroTeamDot"></span>
-                <span id="challengeHeroMetaLine">Loading...</span>
+        <div class="stushell-home-note" id="stushellHomeNoteMount" style="display:none;"></div>
+
+        <div class="nextsteps-header">
+            <h2>Your next steps</h2>
+            <span class="nextsteps-subhead">Pick any one</span>
+        </div>
+        <div class="nextsteps-grid">
+            <!-- Fidel card reuses the existing Continue-Level renderer
+                 (renderChallengeDashboardMap → #challengeDashMapMount) --
+                 same data, just relocated into the next-steps grid. -->
+            <div class="nextstep-card nextstep-fidel" id="challengeCurrentLevelCard">
+                <div class="nextstep-eyebrow-row">
+                    <span class="nextstep-eyebrow nextstep-eyebrow-fidel">Fidel</span>
+                    <span class="nextstep-recommended" id="nextstepRecommendedBadge" style="display:none;">Recommended</span>
+                </div>
+                <div id="challengeDashMapMount">
+                    <p style="color:#94a3b8; font-size:13px;">Loading current level...</p>
+                </div>
             </div>
 
-            <div class="pe-progress-track"><div class="pe-progress-fill" id="peProgressFill" style="width:0%;"></div></div>
-            <div class="pe-progress-caption" id="peProgressLabel">– / – Levels</div>
-        </div>
+            <div class="nextstep-card nextstep-wordbuilder" id="nextstepWordBuilderCard">
+                <span class="nextstep-eyebrow nextstep-eyebrow-wb">Word Builder</span>
+                <div id="nextstepWordBuilderMount">
+                    <p style="color:#94a3b8; font-size:13px;">Loading...</p>
+                </div>
+            </div>
 
-        <!-- Hidden for captains (they get the Captain Dashboard in
-             Competition instead) via the same id this section always used. -->
-        <div id="challengeCurrentLevelCard" class="challenge-continue-card">
-            <div id="challengeDashMapMount">
-                <p style="color:#94a3b8; font-size:13px;">Loading current level...</p>
+            <div class="nextstep-card nextstep-amharicpath" id="nextstepAmharicPathCard">
+                <span class="nextstep-eyebrow nextstep-eyebrow-ap">Amharic Path</span>
+                <div id="nextstepAmharicPathMount">
+                    <p style="color:#94a3b8; font-size:13px;">Loading...</p>
+                </div>
             </div>
         </div>
 
@@ -632,60 +649,60 @@
              renderLevelCompletionBanner() until the student clears their level. -->
         <div id="levelCompletionMount" style="display:none;"></div>
 
-        <div class="stushell-captain-writing-note" id="stushellCaptainWritingNote" style="display:none;" onclick="openTeamHubFromHome()"></div>
+        <div class="nextsteps-time-row">
+            <span>Short on time?</span>
+            <button type="button" class="nextsteps-time-pill" id="nextstepsReviewBtn">5-minute review</button>
+            <button type="button" class="nextsteps-time-pill" id="nextstepsFullLessonBtn">Full lesson</button>
+        </div>
 
-        <div class="stushell-home-note" id="stushellHomeNoteMount" style="display:none;"></div>
+        <!-- Team teaser — full team dashboard (race, schedule, Star Board,
+             captain tools) lives in the Team tab; this is just enough to
+             orient + a way in. Captains additionally see a pending-writing
+             badge here instead of a standalone Home note. -->
+        <div class="team-teaser-card" id="teamTeaserCard" onclick="chooseModeChallenge()">
+            <div class="team-teaser-top">
+                <span class="team-teaser-eyebrow">Your team</span>
+                <span class="team-teaser-badge" id="teamTeaserWritingBadge" style="display:none;" onclick="event.stopPropagation(); openTeamHubFromHome();"></span>
+            </div>
+            <div class="team-teaser-name" id="teamTeaserName">Loading...</div>
+            <div class="team-teaser-sub" id="teamTeaserSub"></div>
+            <span class="team-teaser-link">Open team →</span>
+        </div>
 
-        <div class="stushell-supporting-label">Your Learning Path</div>
-        <div class="cups-grid">
-            <div class="cup-card cup-card-outline-green" data-mode="practice" onclick="enterModeIfUnlocked('practice', enterPracticeHome)">
-                <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
-                    <rect x="6" y="22" width="32" height="30" rx="7" fill="#dcfce7" stroke="#166534" stroke-width="1.5"/>
-                    <path d="M38 28 Q47 28 47 35 Q47 42 38 42" fill="none" stroke="#166534" stroke-width="1.5" stroke-linecap="round"/>
-                    <rect x="12" y="52" width="18" height="4" rx="2" fill="#166534" opacity="0.25"/>
-                    <path d="M16 17 Q16 13 19 15 Q22 17 19 20" fill="none" stroke="#166534" stroke-width="1.1" stroke-linecap="round"/>
-                    <path d="M23 15 Q23 11 26 13 Q29 15 26 18" fill="none" stroke="#166534" stroke-width="1.1" stroke-linecap="round"/>
-                    <text x="22" y="42" text-anchor="middle" font-size="11" font-weight="700" fill="#166534" font-family="serif" font-style="italic">ፊደል</text>
-                </svg>
-                <div class="cup-card-label">Fidel Practice</div>
+        <div class="curriculum-header"><h2>My curriculum</h2></div>
+
+        <div class="curriculum-section">
+            <div class="curriculum-section-top">
+                <span class="curriculum-section-title curriculum-title-fidel">Fidel Mastery</span>
+                <a href="javascript:void(0)" onclick="enterModeIfUnlocked('practice', enterPracticeHome)">All 11 →</a>
             </div>
-            <div class="cup-card cup-card-featured" onclick="chooseModeChallenge()">
-                <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
-                    <rect x="6" y="22" width="32" height="30" rx="7" fill="#fef3c7" stroke="#b45309" stroke-width="1.5"/>
-                    <path d="M38 28 Q47 28 47 35 Q47 42 38 42" fill="none" stroke="#b45309" stroke-width="1.5" stroke-linecap="round"/>
-                    <rect x="12" y="52" width="18" height="4" rx="2" fill="#b45309" opacity="0.25"/>
-                    <path d="M16 17 Q16 13 19 15 Q22 17 19 20" fill="none" stroke="#b45309" stroke-width="1.1" stroke-linecap="round"/>
-                    <path d="M23 15 Q23 11 26 13 Q29 15 26 18" fill="none" stroke="#b45309" stroke-width="1.1" stroke-linecap="round"/>
-                    <text x="22" y="42" text-anchor="middle" font-size="9" font-weight="700" fill="#b45309" font-family="sans-serif">ውድድር</text>
-                </svg>
-                <div class="cup-card-label">Fidel Competition</div>
+            <div class="curriculum-row" id="curriculumFidelRow"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
+        </div>
+
+        <div class="curriculum-section">
+            <div class="curriculum-section-top">
+                <span class="curriculum-section-title curriculum-title-wb">Word Builder</span>
+                <a href="javascript:void(0)" onclick="enterWordBuilderHome()">All levels →</a>
             </div>
-            <div class="cup-card cup-card-outline-indigo" data-mode="wordBuilder" onclick="enterWordBuilderHome()">
-                <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
-                    <rect x="6" y="22" width="32" height="30" rx="7" fill="#ede9fe" stroke="#4f46e5" stroke-width="1.5"/>
-                    <path d="M38 28 Q47 28 47 35 Q47 42 38 42" fill="none" stroke="#4f46e5" stroke-width="1.5" stroke-linecap="round"/>
-                    <rect x="12" y="52" width="18" height="4" rx="2" fill="#4f46e5" opacity="0.25"/>
-                    <path d="M16 17 Q16 13 19 15 Q22 17 19 20" fill="none" stroke="#4f46e5" stroke-width="1.1" stroke-linecap="round"/>
-                    <path d="M23 15 Q23 11 26 13 Q29 15 26 18" fill="none" stroke="#4f46e5" stroke-width="1.1" stroke-linecap="round"/>
-                    <text x="22" y="42" text-anchor="middle" font-size="10" font-weight="700" fill="#4f46e5" font-family="sans-serif">ቃላት</text>
-                </svg>
-                <div class="cup-card-label">Word Builder</div>
+            <div class="curriculum-row" id="curriculumWordBuilderRow"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
+        </div>
+
+        <div class="curriculum-section">
+            <div class="curriculum-section-top">
+                <span class="curriculum-section-title curriculum-title-ap" id="curriculumAmharicPathTitle">Amharic Path</span>
+                <a href="javascript:void(0)" onclick="enterModeIfUnlocked('amharicPath', enterAmharicPath)">All chapters →</a>
             </div>
-            <div class="cup-card cup-card-outline-blue" onclick="enterModeIfUnlocked('amharicPath', enterAmharicPath)">
-                <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
-                    <rect x="6" y="22" width="32" height="30" rx="7" fill="#e0e7ff" stroke="#4338ca" stroke-width="1.5"/>
-                    <path d="M38 28 Q47 28 47 35 Q47 42 38 42" fill="none" stroke="#4338ca" stroke-width="1.5" stroke-linecap="round"/>
-                    <rect x="12" y="52" width="18" height="4" rx="2" fill="#4338ca" opacity="0.25"/>
-                    <path d="M16 17 Q16 13 19 15 Q22 17 19 20" fill="none" stroke="#4338ca" stroke-width="1.1" stroke-linecap="round"/>
-                    <path d="M23 15 Q23 11 26 13 Q29 15 26 18" fill="none" stroke="#4338ca" stroke-width="1.1" stroke-linecap="round"/>
-                    <text x="22" y="42" text-anchor="middle" font-size="9" font-weight="700" fill="#4338ca" font-family="sans-serif">ጉዞዬ</text>
-                </svg>
-                <div class="cup-card-label">Amharic Path</div>
-            </div>
+            <div class="curriculum-list" id="curriculumAmharicPathList"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
         </div>
     </div>
 
     <div class="stushell-tab-panel" data-tab="competition">
+
+    <!-- Team is reached from Home's team teaser card / the computer
+         sidebar, not a persistent bottom-nav tab, so it needs its own way
+         back on phones. Hidden at 900px+, where the sidebar's Home link
+         already does this. -->
+    <a href="javascript:void(0)" class="team-tab-back-link" onclick="enterStudentShellHomeTab()">← Back to Home</a>
 
     <!-- ============================================================
          CAPTAIN TEAM CARD — captains only. A prominent team summary
@@ -806,9 +823,9 @@
             </div>
         </div>
 
-        <div class="stushell-stats-row" id="stushellStatsRow">
-            <div class="stushell-stat-tile"><div class="stushell-stat-value" id="stushellStatLevel">–</div><div class="stushell-stat-label">Level</div></div>
-            <div class="stushell-stat-tile"><div class="stushell-stat-value" id="stushellStatCanDo">–</div><div class="stushell-stat-label">Can-Do Skills</div></div>
+        <div class="stushell-card">
+            <div class="stushell-card-title"><span>How far you've come</span></div>
+            <div id="profileProgressBars"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
         </div>
 
         <div class="stushell-card">
@@ -857,12 +874,8 @@
                 </span>
                 <span class="stushell-nav-tab-label">Home</span>
             </button>
-            <button class="stushell-nav-tab" data-tab="competition" onclick="switchStudentShellTab('competition')">
-                <span class="stushell-nav-icon-wrap">
-                    <span class="stushell-nav-icon-off" data-icon="trophy"></span>
-                    <span class="stushell-nav-icon-on" data-icon-duotone="trophy"></span>
-                </span>
-                <span class="stushell-nav-tab-label">Competition</span>
+            <button class="stushell-nav-upload-btn" aria-label="Upload a photo" onclick="openUploadSheet()">
+                <span data-icon="plus"></span>
             </button>
             <button class="stushell-nav-tab" data-tab="profile" onclick="switchStudentShellTab('profile')">
                 <span class="stushell-nav-icon-wrap">
@@ -873,6 +886,39 @@
             </button>
         </div>
     </nav>
+</div>
+
+<!-- ============================================================
+     + UPLOAD SHEET — two choices: submit handwriting (preset to the
+     next family that still needs it) or post a photo to the team feed.
+     Reached from the phone bottom nav's raised + button and the
+     computer sidebar's Upload button.
+     ============================================================ -->
+<div id="uploadSheetScreen" style="display:none; position:fixed; inset:0; z-index:9995;">
+    <div class="upload-sheet-backdrop" onclick="closeUploadSheet()"></div>
+    <div role="dialog" aria-label="Upload" class="upload-sheet-dialog">
+        <div class="upload-sheet-grabber"></div>
+        <h2 class="upload-sheet-title">What are you sharing?</h2>
+
+        <button type="button" class="upload-sheet-option upload-sheet-option-primary" onclick="closeUploadSheet(); openWritingQuickLink();">
+            <span class="upload-sheet-icon upload-sheet-icon-primary" data-icon="pencil"></span>
+            <span class="upload-sheet-option-text">
+                <span class="upload-sheet-option-title">Submit handwriting</span>
+                <span class="upload-sheet-option-sub" id="uploadSheetHandwritingSub">Ready for your next family</span>
+            </span>
+        </button>
+
+        <button type="button" class="upload-sheet-option" id="uploadSheetTeamFeedRow" onclick="document.getElementById('uploadSheetFileInput').click();">
+            <span class="upload-sheet-icon upload-sheet-icon-secondary" data-icon="camera"></span>
+            <span class="upload-sheet-option-text">
+                <span class="upload-sheet-option-title">Post to team feed</span>
+                <span class="upload-sheet-option-sub">Share a photo with your team</span>
+            </span>
+        </button>
+        <input type="file" accept="image/*" id="uploadSheetFileInput" style="display:none;" onchange="handleUploadSheetFileChosen(this)">
+
+        <button type="button" class="upload-sheet-cancel" onclick="closeUploadSheet()">Cancel</button>
+    </div>
 </div>
 
 <!-- ============================================================
@@ -2026,7 +2072,7 @@
 <script src="js/guide.js?v=10" defer></script>
 <script src="js/utils/compress.js?v=9" defer></script>
 <script src="js/game.js?v=10" defer></script>
-<script src="js/submissions.js?v=14" defer></script>
+<script src="js/submissions.js?v=15" defer></script>
 <script src="js/teacher.js?v=33" defer></script>
 <script src="js/reading.js?v=28" defer></script>
 <script src="js/guidedpath.js?v=1" defer></script>
@@ -2047,7 +2093,7 @@
 <script src="js/calendar.js?v=7" defer></script>
 <script src="js/menu.js?v=11" defer></script>
 <script src="js/push.js?v=8" defer></script>
-<script src="js/studentshell.js?v=14" defer></script>
+<script src="js/studentshell.js?v=16" defer></script>
 
 <script>
     if ('serviceWorker' in navigator) {
