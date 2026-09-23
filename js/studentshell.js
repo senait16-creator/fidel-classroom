@@ -20,6 +20,9 @@ function switchStudentShellTab(tabName) {
     document.querySelectorAll('.stushell-nav-tab').forEach(tab => {
         tab.classList.toggle('active', tab.dataset.tab === tabName);
     });
+    document.querySelectorAll('.app-sidebar-link[data-tab]').forEach(link => {
+        link.classList.toggle('active', link.dataset.tab === tabName);
+    });
     window.scrollTo({ top: 0 });
 
     if (tabName === 'profile' && typeof renderStudentShellProfile === 'function') {
@@ -27,32 +30,6 @@ function switchStudentShellTab(tabName) {
     }
 }
 window.switchStudentShellTab = switchStudentShellTab;
-
-// ---------------------------------------------------------------------------
-// Launcher — the pre-Home splash shown once per app entry (see auth.js).
-// Not one of the regular "back to home" destinations: routine in-app
-// navigation still goes straight to enterStudentShellHomeTab()/
-// enterModeSelect() as before, unaffected by this screen existing.
-// ---------------------------------------------------------------------------
-
-function enterLauncher() {
-    const greet = document.getElementById('launcherGreeting');
-    if (greet) greet.innerText = currentProfile?.nickname ? `Selam, ${currentProfile.nickname} 👋` : 'Selam 👋';
-
-    if (typeof applyModeLockStyling === 'function') applyModeLockStyling();
-
-    showScreen('launcherScreen', 'flex');
-
-    const el = document.getElementById('launcherScreen');
-    if (el) {
-        el.classList.remove('launcher-visible');
-        void el.offsetWidth; // force reflow so the transition re-triggers reliably
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => el.classList.add('launcher-visible'));
-        });
-    }
-}
-window.enterLauncher = enterLauncher;
 
 // ---------------------------------------------------------------------------
 // Entry points — called instead of directly showing screens, so the shell

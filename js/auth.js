@@ -190,10 +190,8 @@ async function proceedFlowMap(user) {
         const modeGreetSub = document.getElementById('modeGreetingSub');
         if (modeGreetSub) modeGreetSub.innerText = `Welcome back, ${profile.nickname}`;
 
-        // Land on the Launcher (prototype: shown on every fresh entry, no
-        // persistence yet) instead of going straight to Home.
-        if (typeof enterLauncher === 'function') {
-            enterLauncher();
+        if (typeof enterStudentShellHomeTab === 'function') {
+            enterStudentShellHomeTab();
         } else if (typeof showCharacterGuide === 'function') {
             showCharacterGuide();
         } else {
@@ -246,8 +244,8 @@ async function recheckAccessStatus() {
     document.getElementById("accessPendingScreen").style.display = "none";
     await applyProfileToHeader(currentProfile);
 
-    if (typeof enterLauncher === 'function') {
-        enterLauncher();
+    if (typeof enterStudentShellHomeTab === 'function') {
+        enterStudentShellHomeTab();
     } else if (typeof showCharacterGuide === 'function') {
         showCharacterGuide();
     } else {
