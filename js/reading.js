@@ -182,7 +182,7 @@ async function fetchReadingLevels() {
 
     const { data, error } = await _supabase
         .from('reading_levels')
-        .select('level_number, title, can_do_category, intro_summary, intro_highlights')
+        .select('level_number, title, can_do_category, intro_summary, intro_highlights, admin_only')
         .order('level_number', { ascending: true });
 
     if (error) {
@@ -191,7 +191,9 @@ async function fetchReadingLevels() {
         return [];
     }
 
-    readingLevelsCache = data || [];
+    // admin_only chapters (curriculum pilots not yet QA'd/approved for
+    // students) are only visible on the account building them.
+    readingLevelsCache = (data || []).filter(l => !l.admin_only || currentProfile?.is_admin);
     return readingLevelsCache;
 }
 
@@ -678,9 +680,12 @@ async function openCurrentLesson() {
     document.getElementById("readingLevelDetailTitle").innerText =
         `${activeReadingLevel.title} · Lesson ${activeLessonIndex + 1} of ${activeLessons.length}: ${lesson.title}`;
 
+    const studyLink = document.getElementById("lessonStudyMoreLink");
+
     if (lesson.is_challenge) {
         document.getElementById("lessonNormalView").style.display = "none";
         document.getElementById("lessonChallengeView").style.display = "block";
+        if (studyLink) studyLink.style.display = "none";
         renderCheckpointSection(activeReadingLevel.level_number);
         return;
     }
@@ -689,6 +694,7 @@ async function openCurrentLesson() {
     document.getElementById("lessonNormalView").style.display = "block";
     document.getElementById("lessonStepProgress").innerText = "Loading...";
     document.getElementById("lessonStepMount").innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
+    if (studyLink) studyLink.style.display = "inline";
 
     const prevLink = document.getElementById("lessonPrevLessonLink");
     if (prevLink) prevLink.style.display = activeLessonIndex > 0 ? "inline" : "none";
@@ -786,6 +792,7 @@ async function fetchLessonSections(levelNumber, lessonOrder) {
         .select('id, section_order, section_type, icon, heading, body_html, rows, notice, resource_url, resource_label')
         .eq('level_number', levelNumber)
         .eq('lesson_order', lessonOrder)
+        .eq('is_study_layer', false)
         .order('section_order', { ascending: true });
 
     if (error) {
@@ -801,6 +808,7 @@ async function fetchLessonQuiz(levelNumber, lessonOrder) {
         .select('id, prompt, answer')
         .eq('level_number', levelNumber)
         .eq('lesson_order', lessonOrder)
+        .eq('is_study_layer', false)
         .order('block_order', { ascending: true });
 
     if (error) {
@@ -809,6 +817,92 @@ async function fetchLessonQuiz(levelNumber, lessonOrder) {
     }
     return data || [];
 }
+
+// ---------------------------------------------------------------------------
+// Study More / Practice More — the optional deeper layer for the current
+// lesson (larger example banks, transformation drills, extra independent
+// practice, reference material). Reuses the exact same tables and the exact
+// same generic renderers as the main lesson (renderSectionStep,
+// renderQuizStep's tap-to-reveal quiz card), just filtered to
+// is_study_layer = true, so there's no new UI vocabulary to learn.
+// ---------------------------------------------------------------------------
+
+async function fetchStudySections(levelNumber, lessonOrder) {
+    const { data, error } = await _supabase
+        .from('lesson_sections')
+        .select('id, section_order, section_type, icon, heading, body_html, rows, notice, resource_url, resource_label')
+        .eq('level_number', levelNumber)
+        .eq('lesson_order', lessonOrder)
+        .eq('is_study_layer', true)
+        .order('section_order', { ascending: true });
+
+    if (error) {
+        console.error("Failed to load study sections:", error);
+        return [];
+    }
+    return data || [];
+}
+
+async function fetchStudyQuiz(levelNumber, lessonOrder) {
+    const { data, error } = await _supabase
+        .from('lesson_quiz_blocks')
+        .select('id, prompt, answer')
+        .eq('level_number', levelNumber)
+        .eq('lesson_order', lessonOrder)
+        .eq('is_study_layer', true)
+        .order('block_order', { ascending: true });
+
+    if (error) {
+        console.error("Failed to load study quiz:", error);
+        return [];
+    }
+    return data || [];
+}
+
+async function enterLessonStudyMore() {
+    const lesson = activeLessons[activeLessonIndex];
+    if (!lesson) return;
+
+    document.getElementById('lessonNormalView').style.display = 'none';
+    document.getElementById('lessonChallengeView').style.display = 'none';
+    document.getElementById('readingLevelDetailScreen').style.display = 'none';
+    document.getElementById('lessonStudyScreen').style.display = 'block';
+
+    const mount = document.getElementById('lessonStudyMount');
+    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
+
+    const [sections, quiz] = await Promise.all([
+        fetchStudySections(activeReadingLevel.level_number, lesson.lesson_order),
+        fetchStudyQuiz(activeReadingLevel.level_number, lesson.lesson_order),
+    ]);
+
+    if (!sections.length && !quiz.length) {
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Nothing added for this lesson yet — check back soon.</p>`;
+        return;
+    }
+
+    // Reuse renderSectionStep/renderQuizStep verbatim (one child mount per
+    // card) rather than duplicating their markup here.
+    mount.innerHTML = '';
+    sections.forEach(section => {
+        const card = document.createElement('div');
+        mount.appendChild(card);
+        renderSectionStep(card, section);
+    });
+    if (quiz.length) {
+        const quizMount = document.createElement('div');
+        mount.appendChild(quizMount);
+        renderQuizStep(quizMount, quiz);
+    }
+}
+window.enterLessonStudyMore = enterLessonStudyMore;
+
+function exitLessonStudyMore() {
+    document.getElementById('lessonStudyScreen').style.display = 'none';
+    document.getElementById('readingLevelDetailScreen').style.display = 'block';
+    document.getElementById('lessonNormalView').style.display = 'block';
+}
+window.exitLessonStudyMore = exitLessonStudyMore;
 
 const SECTION_TYPE_LABELS = {
     teach: 'Learn',

@@ -1496,6 +1496,7 @@
         <div class="lesson-step-header-row">
             <a href="javascript:void(0)" id="lessonPrevLessonLink" class="lesson-prev-lesson-link" onclick="goToPrevLesson()" style="display:none;">← Previous Lesson</a>
             <a href="javascript:void(0)" class="lesson-prev-lesson-link" onclick="openLessonPicker()">☰ All Lessons</a>
+            <a href="javascript:void(0)" id="lessonStudyMoreLink" class="lesson-prev-lesson-link" onclick="enterLessonStudyMore()" style="display:none;">📖 Study More</a>
             <div id="lessonStepProgress" class="lesson-step-progress"></div>
         </div>
         <div id="lessonStepMount" class="chapter-tab-panel"></div>
@@ -1505,6 +1506,21 @@
     <div id="lessonChallengeView" style="display:none;">
         <div id="chapterCheckpointMount" class="chapter-tab-panel"></div>
     </div>
+</div>
+
+<!-- Study More / Practice More — optional deeper layer for the current
+     lesson: larger example banks, transformation drills, extra practice,
+     and reference material beyond the guided lesson. Pulled from the same
+     lesson_sections/lesson_quiz_blocks tables as the main lesson, just
+     filtered to is_study_layer = true, and rendered with the same generic
+     section/quiz components. -->
+<div id="lessonStudyScreen" style="display:none; max-width:600px; margin:40px auto; padding:0 16px;">
+    <div class="workspace-title">
+        <span>📖 Study More</span>
+        <button class="btn-secondary" onclick="exitLessonStudyMore()">← Back to Lesson</button>
+    </div>
+    <p class="subtitle" style="text-align:left; margin-bottom:14px;">Extra examples, practice, and reference material for this lesson. Optional — take as much or as little as you want.</p>
+    <div id="lessonStudyMount"></div>
 </div>
 
 <!-- My Amharic Path — Study Together dashboard. Same chapters as
@@ -2081,7 +2097,7 @@
 <script src="js/game.js?v=10" defer></script>
 <script src="js/submissions.js?v=14" defer></script>
 <script src="js/teacher.js?v=33" defer></script>
-<script src="js/reading.js?v=27" defer></script>
+<script src="js/reading.js?v=28" defer></script>
 <script src="js/guidedpath.js?v=1" defer></script>
 <script src="js/wordbuilder.js?v=14" defer></script>
     <script src="js/letterboard.js?v=17" defer></script>
