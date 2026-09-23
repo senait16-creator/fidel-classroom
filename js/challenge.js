@@ -53,7 +53,7 @@ function enterModeSelect() {
         enterStudentShellHomeTab();
     } else {
         // Defensive fallback in case studentshell.js hasn't loaded yet.
-        showScreen("studentShellScreen");
+        showScreen("studentShellScreen", "");
     }
 
     localStorage.setItem('fidel_has_visited', '1');
@@ -77,7 +77,7 @@ async function chooseModeChallenge() {
         await enterStudentShellCompetitionTab();
     } else {
         // Defensive fallback in case studentshell.js hasn't loaded yet.
-        showScreen("studentShellScreen");
+        showScreen("studentShellScreen", "");
         await renderChallengeDashboard();
     }
 }
