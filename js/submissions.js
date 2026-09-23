@@ -365,6 +365,50 @@ async function uploadSketchpadDrawingCanvasData() {
 }
 
 // ---------------------------------------------------------------------------
+// Post a photo (file picker or drag-drop) straight to the team feed — the
+// "Post to team feed" choice on the + Upload sheet. Same storage bucket/
+// post shape as uploadSketchpadDrawingCanvasData() above, just starting
+// from a File instead of canvas pixels.
+// ---------------------------------------------------------------------------
+
+async function postPhotoToTeamFeed(file) {
+    if (!file) return;
+    if (!file.type?.startsWith('image/')) return showNotificationToast("Please choose an image file.");
+    if (file.size > 25 * 1024 * 1024) return showNotificationToast("Photo is too large. Please use one under 25MB.");
+
+    showNotificationToast("Sharing to team feed...");
+
+    try {
+        const compressed = typeof compressImage === 'function' ? await compressImage(file) : file;
+        const filename = `share_${currentUser.id}_${Date.now()}.jpg`;
+
+        const { error: uploadErr } = await _supabase.storage
+            .from('team_practice_posts')
+            .upload(filename, compressed, { contentType: 'image/jpeg', upsert: false });
+        if (uploadErr) throw uploadErr;
+
+        const { data: urlData } = _supabase.storage.from('team_practice_posts').getPublicUrl(filename);
+
+        const { error: postErr } = await _supabase.from('team_practice_posts').insert({
+            uploader_id: currentUser.id,
+            team_id:     currentProfile?.team_id || null,
+            image_url:   urlData.publicUrl,
+            base_letter: null,
+            post_type:   'share',
+            created_at:  new Date().toISOString()
+        });
+        if (postErr) throw postErr;
+
+        showNotificationToast('Shared to your team feed! ✓');
+        if (typeof loadTeamPracticeFeed === 'function') loadTeamPracticeFeed();
+    } catch (err) {
+        console.error('Team feed share failed:', err);
+        showNotificationToast('Share failed. Try again.');
+    }
+}
+window.postPhotoToTeamFeed = postPhotoToTeamFeed;
+
+// ---------------------------------------------------------------------------
 // Writing submission — photo upload path
 // ---------------------------------------------------------------------------
 
