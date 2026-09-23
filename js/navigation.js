@@ -26,7 +26,6 @@
 // =============================================================================
 
 const ALL_SCREENS = [
-    "launcherScreen",
     "practiceHomeScreen",
     "wordBuilderHomeScreen",
     "modeSelectScreen",

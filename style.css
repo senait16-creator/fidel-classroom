@@ -8275,57 +8275,6 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     margin-bottom: 8px;
 }
 
-/* Launcher — the pre-Home splash showing all four area cups. Flies
-   out from the app icon's corner (top-left) on entry. */
-.launcher-screen {
-    position: fixed;
-    inset: 0;
-    z-index: 500;
-    overflow-y: auto;
-    background: #f5f5f0;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding: 40px 16px calc(40px + env(safe-area-inset-bottom, 0px));
-    opacity: 0;
-    transform: scale(0.05);
-    transform-origin: 44px 44px;
-    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
-}
-
-.launcher-screen.launcher-visible {
-    opacity: 1;
-    transform: scale(1);
-}
-
-.launcher-banner {
-    width: 100%;
-    max-width: 420px;
-    background: linear-gradient(135deg, #14532d, #166534, #ca8a04);
-    border-radius: 24px;
-    padding: 30px 20px 28px;
-}
-
-.launcher-appicon {
-    display: block;
-    width: 76px;
-    height: 76px;
-    border-radius: 20px;
-    object-fit: cover;
-    margin: 0 auto 16px;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
-}
-
-.launcher-greeting {
-    font-family: 'Abyssinica SIL', serif;
-    font-weight: 900;
-    -webkit-text-stroke: 0.8px currentColor;
-    font-size: 26px;
-    color: #ffffff;
-    text-align: center;
-    margin: 0 0 22px;
-}
-
 .stushell-tab-panel { display: none; padding-top: 18px; }
 .stushell-tab-panel.active { display: block; }
 .stushell-tab-panel[data-tab="home"] { padding-top: 32px; }
@@ -8542,6 +8491,67 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 .stushell-nav-tab.active .stushell-nav-icon-off { opacity: 0; }
 .stushell-nav-tab.active .stushell-nav-icon-on { opacity: 1; transform: scale(1); }
+
+/* Computer sidebar — replaces the bottom nav at 900px+. Below that,
+   .app-sidebar stays display:none and .stushell-content is a plain
+   passthrough wrapper, so nothing changes for phone/tablet widths.
+   Placed after .stushell-bottomnav/.stushell-nav-tab in source order so
+   its min-width:900px override actually wins the cascade over their
+   unconditional rules at the same specificity. */
+.app-sidebar { display: none; }
+
+@media (min-width: 900px) {
+    #studentShellScreen {
+        display: flex;
+        align-items: flex-start;
+        gap: 32px;
+        max-width: 1100px;
+        padding-bottom: 48px;
+    }
+    .app-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: 232px;
+        flex-shrink: 0;
+        position: sticky;
+        top: 24px;
+        padding-top: 24px;
+    }
+    .app-sidebar-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 4px;
+    }
+    .app-sidebar-logo {
+        width: 34px; height: 34px; border-radius: 10px;
+        background: var(--brand-primary, #166534);
+        color: #f5f5f0;
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Abyssinica SIL', serif;
+        font-weight: 700; font-size: 17px;
+    }
+    .app-sidebar-name { font-weight: 700; font-size: 17px; color: #1c1b17; }
+    .app-sidebar-upload {
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        background: #b45309; color: #ffffff; font-weight: 700; font-size: 14px;
+        border: none; border-radius: 12px; padding: 12px; cursor: pointer;
+    }
+    .app-sidebar-nav { display: flex; flex-direction: column; gap: 2px; }
+    .app-sidebar-link {
+        display: flex; align-items: center; gap: 12px;
+        padding: 10px 12px; border-radius: 10px;
+        border: none; background: none; text-align: left;
+        color: #1c1b17; font-size: 14px; font-weight: 600; cursor: pointer;
+    }
+    .app-sidebar-link:hover { background: #ece9df; }
+    .app-sidebar-link.active { background: #e3efe6; color: var(--brand-primary, #166534); }
+    .app-sidebar-link span:first-child { font-family: 'Abyssinica SIL', serif; width: 18px; text-align: center; }
+    .app-sidebar-divider { height: 1px; background: #e2ded1; margin: 8px 4px; }
+    .stushell-content { flex: 1; min-width: 0; padding-top: 24px; }
+    .stushell-bottomnav { display: none; }
+}
 
 /* ==========================================================================
    COMMUNITY PAGE LAYOUT — sidebar leaderboard (reuses .leaderboard-row from

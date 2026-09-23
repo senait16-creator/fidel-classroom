@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=83">
+    <link rel="stylesheet" href="style.css?v=84">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -585,71 +585,6 @@
 <!-- END MODE SELECT -->
 
 <!-- ============================================================
-     LAUNCHER — shown once per app entry (right after login), before
-     the student shell. A tall version of the Home banner that leads
-     with the four area cups as the first real choice, instead of
-     landing straight on the Competition-flavored Home. Flies out from
-     the app icon's corner. Tapping a cup routes to that area's normal
-     destination unchanged; the shell's own screens keep their own
-     cup row so switching areas doesn't require coming back here.
-     Prototype scope: no persistence/daily-reset yet — shows on every
-     fresh entry into the app.
-     ============================================================ -->
-<div id="launcherScreen" class="launcher-screen" style="display:none;">
-    <div class="launcher-banner">
-        <img src="IMG_2514.png" alt="Fidel Classroom" class="launcher-appicon">
-        <p class="launcher-greeting" id="launcherGreeting">Selam 👋</p>
-        <div class="cups-grid">
-            <div class="cup-card cup-card-outline-green" data-mode="practice" onclick="enterModeIfUnlocked('practice', enterPracticeHome)">
-                <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
-                    <rect x="6" y="22" width="32" height="30" rx="7" fill="#dcfce7" stroke="#166534" stroke-width="1.5"/>
-                    <path d="M38 28 Q47 28 47 35 Q47 42 38 42" fill="none" stroke="#166534" stroke-width="1.5" stroke-linecap="round"/>
-                    <rect x="12" y="52" width="18" height="4" rx="2" fill="#166534" opacity="0.25"/>
-                    <path d="M16 17 Q16 13 19 15 Q22 17 19 20" fill="none" stroke="#166534" stroke-width="1.1" stroke-linecap="round"/>
-                    <path d="M23 15 Q23 11 26 13 Q29 15 26 18" fill="none" stroke="#166534" stroke-width="1.1" stroke-linecap="round"/>
-                    <text x="22" y="42" text-anchor="middle" font-size="11" font-weight="700" fill="#166534" font-family="serif" font-style="italic">ፊደል</text>
-                </svg>
-                <div class="cup-card-label">Fidel Practice</div>
-            </div>
-            <div class="cup-card cup-card-featured" onclick="enterStudentShellHomeTab()">
-                <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
-                    <rect x="6" y="22" width="32" height="30" rx="7" fill="#fef3c7" stroke="#b45309" stroke-width="1.5"/>
-                    <path d="M38 28 Q47 28 47 35 Q47 42 38 42" fill="none" stroke="#b45309" stroke-width="1.5" stroke-linecap="round"/>
-                    <rect x="12" y="52" width="18" height="4" rx="2" fill="#b45309" opacity="0.25"/>
-                    <path d="M16 17 Q16 13 19 15 Q22 17 19 20" fill="none" stroke="#b45309" stroke-width="1.1" stroke-linecap="round"/>
-                    <path d="M23 15 Q23 11 26 13 Q29 15 26 18" fill="none" stroke="#b45309" stroke-width="1.1" stroke-linecap="round"/>
-                    <text x="22" y="42" text-anchor="middle" font-size="9" font-weight="700" fill="#b45309" font-family="sans-serif">ውድድር</text>
-                </svg>
-                <div class="cup-card-label">Fidel Competition</div>
-            </div>
-            <div class="cup-card cup-card-outline-indigo" data-mode="wordBuilder" onclick="enterWordBuilderHome()">
-                <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
-                    <rect x="6" y="22" width="32" height="30" rx="7" fill="#ede9fe" stroke="#4f46e5" stroke-width="1.5"/>
-                    <path d="M38 28 Q47 28 47 35 Q47 42 38 42" fill="none" stroke="#4f46e5" stroke-width="1.5" stroke-linecap="round"/>
-                    <rect x="12" y="52" width="18" height="4" rx="2" fill="#4f46e5" opacity="0.25"/>
-                    <path d="M16 17 Q16 13 19 15 Q22 17 19 20" fill="none" stroke="#4f46e5" stroke-width="1.1" stroke-linecap="round"/>
-                    <path d="M23 15 Q23 11 26 13 Q29 15 26 18" fill="none" stroke="#4f46e5" stroke-width="1.1" stroke-linecap="round"/>
-                    <text x="22" y="42" text-anchor="middle" font-size="10" font-weight="700" fill="#4f46e5" font-family="sans-serif">ቃላት</text>
-                </svg>
-                <div class="cup-card-label">Word Builder</div>
-            </div>
-            <div class="cup-card cup-card-outline-blue" onclick="enterModeIfUnlocked('amharicPath', enterAmharicPath)">
-                <svg width="56" height="64" viewBox="0 0 56 64" fill="none">
-                    <rect x="6" y="22" width="32" height="30" rx="7" fill="#e0e7ff" stroke="#4338ca" stroke-width="1.5"/>
-                    <path d="M38 28 Q47 28 47 35 Q47 42 38 42" fill="none" stroke="#4338ca" stroke-width="1.5" stroke-linecap="round"/>
-                    <rect x="12" y="52" width="18" height="4" rx="2" fill="#4338ca" opacity="0.25"/>
-                    <path d="M16 17 Q16 13 19 15 Q22 17 19 20" fill="none" stroke="#4338ca" stroke-width="1.1" stroke-linecap="round"/>
-                    <path d="M23 15 Q23 11 26 13 Q29 15 26 18" fill="none" stroke="#4338ca" stroke-width="1.1" stroke-linecap="round"/>
-                    <text x="22" y="42" text-anchor="middle" font-size="9" font-weight="700" fill="#4338ca" font-family="sans-serif">ጉዞዬ</text>
-                </svg>
-                <div class="cup-card-label">Amharic Path</div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<!-- ============================================================
      STUDENT SHELL — the persistent, app-style home for every student
      after login: Home / Learn / Competition / Profile behind one bottom
      nav, replacing the old Mode Select → separate full-screen destination
@@ -662,6 +597,32 @@
      ============================================================ -->
 <div id="studentShellScreen" style="display:none; min-height:100vh; padding:0 16px calc(180px + env(safe-area-inset-bottom, 0px)); background:#f5f5f0;">
 
+    <!-- Computer sidebar (900px+ only; see .app-sidebar CSS). Hidden and
+         out of flow below 900px, where the bottom nav below still owns
+         navigation. Nav destinations mirror the bottom nav's for now —
+         Fidel/Word Builder/Amharic Path/Team/Community as their own rows
+         is a later phase; this phase only adds the frame. -->
+    <aside class="app-sidebar" id="appSidebar">
+        <div class="app-sidebar-brand">
+            <span class="app-sidebar-logo">ፊ</span>
+            <span class="app-sidebar-name">Fidel Classroom</span>
+        </div>
+        <button type="button" class="app-sidebar-upload" onclick="openWritingQuickLink()">
+            <span data-icon="plus"></span> Upload
+        </button>
+        <nav class="app-sidebar-nav" aria-label="Main">
+            <button type="button" class="app-sidebar-link active" data-tab="home" onclick="switchStudentShellTab('home')"><span data-icon="house"></span> Home</button>
+            <button type="button" class="app-sidebar-link" onclick="enterModeIfUnlocked('practice', enterPracticeHome)"><span>ሀ</span> Fidel</button>
+            <button type="button" class="app-sidebar-link" onclick="enterWordBuilderHome()"><span>ቃ</span> Word Builder</button>
+            <button type="button" class="app-sidebar-link" onclick="enterModeIfUnlocked('amharicPath', enterAmharicPath)"><span>ጉ</span> Amharic Path</button>
+            <div class="app-sidebar-divider"></div>
+            <button type="button" class="app-sidebar-link" data-tab="competition" onclick="switchStudentShellTab('competition')"><span data-icon="trophy"></span> Team</button>
+            <button type="button" class="app-sidebar-link" onclick="chooseModeCommunity()"><span data-icon="confetti"></span> Community</button>
+            <button type="button" class="app-sidebar-link" data-tab="profile" onclick="switchStudentShellTab('profile')"><span data-icon="user"></span> Profile</button>
+        </nav>
+    </aside>
+
+    <div class="stushell-content">
     <div class="stushell-tab-panel active" data-tab="home">
         <!-- Top banner — green/gold gradient strip holding the app icon,
              the community icon, and the Selam greeting together as one
@@ -915,6 +876,7 @@
                 <span>Log Out</span>
             </button>
         </div>
+    </div>
     </div>
 
     <nav class="stushell-bottomnav" id="stushellBottomNav">
@@ -2089,9 +2051,9 @@
 <!-- END CAN-DO STATEMENTS -->
 
 <script src="js/icons.js?v=4" defer></script>
-<script src="js/navigation.js?v=10" defer></script>
+<script src="js/navigation.js?v=11" defer></script>
 <script src="js/app.js?v=29" defer></script>
-<script src="js/auth.js?v=19" defer></script>
+<script src="js/auth.js?v=20" defer></script>
 <script src="js/guide.js?v=10" defer></script>
 <script src="js/utils/compress.js?v=9" defer></script>
 <script src="js/game.js?v=10" defer></script>
@@ -2116,7 +2078,7 @@
 <script src="js/calendar.js?v=7" defer></script>
 <script src="js/menu.js?v=11" defer></script>
 <script src="js/push.js?v=8" defer></script>
-<script src="js/studentshell.js?v=13" defer></script>
+<script src="js/studentshell.js?v=14" defer></script>
 
 <script>
     if ('serviceWorker' in navigator) {
