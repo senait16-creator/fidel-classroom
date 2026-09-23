@@ -98,6 +98,10 @@ async function handleAuth() {
 // Post-auth routing
 // ---------------------------------------------------------------------------
 
+// Set by resolveCaptainStatus() and consumed by fetchTeamName() -- see the
+// comment in resolveCaptainStatus() for why.
+let _lastFetchedTeam = null;
+
 // Self-heals profiles.is_captain against teams.captain_id. The two are
 // meant to move together — setTeamCaptain() in teacher.js updates both —
 // but a captain changed directly in the Supabase table editor (bypassing
@@ -110,9 +114,14 @@ async function resolveCaptainStatus(profile) {
 
     const { data: team } = await _supabase
         .from('teams')
-        .select('captain_id')
+        .select('captain_id, name')
         .eq('id', profile.team_id)
         .maybeSingle();
+
+    // Every call site here is immediately followed by applyProfileToHeader(),
+    // which needs this same team row just for its name -- stash it so that
+    // doesn't cost a second sequential round trip to the same row during login.
+    _lastFetchedTeam = team ? { id: profile.team_id, name: team.name || null } : null;
 
     const actuallyCaptain = !!team && team.captain_id === profile.id;
     if (actuallyCaptain === !!profile.is_captain) return profile;
@@ -259,6 +268,7 @@ async function recheckAccessStatus() {
 
 async function fetchTeamName(teamId) {
     if (!teamId) return null;
+    if (_lastFetchedTeam?.id === teamId) return _lastFetchedTeam.name;
     const { data: team } = await _supabase
         .from('teams')
         .select('name')
