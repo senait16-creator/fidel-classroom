@@ -82,30 +82,17 @@ let chapterListReturnScreen = null;
 // choice without re-asking the fluency question.
 // -----------------------------------------------------------------------------
 
-// Amharic Path now forks into two intentionally separate tracks: Guided
-// Path (js/guidedpath.js — a parallel experiment built directly from Word
-// Builder's vocabulary) and Original Path (everything below in this file,
-// unchanged). Kept separate in the database too — nothing borrows the
-// other's progress until one approach proves out.
+// Goes straight to the chapter list/continue-chapter home — the
+// intermediate track-choice screen (Guided Path vs. Original Path) is
+// removed; Guided Path is still shell-stage with nothing real to show
+// (js/guidedpath.js and its table are left in place, just unreached from
+// the live flow, per standing "don't delete the dormant experiment" note).
 function enterAmharicPath() {
     if (!currentProfile) return;
 
-    showScreen("amharicPathTrackScreen");
-    // "Continue Chapter" card only ever reflects Original Path progress —
-    // Guided Path is still shell-stage with nothing real to show yet.
-    renderAmharicPathChapterCard('amharicPathTrackChapterMount', 'amharicPathTrackScreen');
-}
-
-function enterOriginalAmharicPath() {
     showScreen("amharicPathHomeScreen");
     renderAmharicPathChapterCard();
 }
-window.enterOriginalAmharicPath = enterOriginalAmharicPath;
-
-function exitOriginalAmharicPath() {
-    showScreen("amharicPathTrackScreen");
-}
-window.exitOriginalAmharicPath = exitOriginalAmharicPath;
 
 // "Yes" persists the flag and moves on to the mode choice (or straight to
 // an already-chosen mode). "Not yet" is intentionally NOT persisted — it

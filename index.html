@@ -1355,58 +1355,6 @@
     </div>
 </div>
 
-<!-- Amharic Path — track choice. Everyone lands here after tapping the cup
-     card: Guided Path (js/guidedpath.js — a parallel experiment built
-     directly from Word Builder's vocabulary) or Original Path (below,
-     unchanged). Kept separate in the interface and the database until one
-     approach proves out. The fluency gate and Independent/Study Together
-     choice further below are paused for now. -->
-<div id="amharicPathTrackScreen" style="display:none; max-width:640px; margin:60px auto; padding:0 16px;">
-    <div class="workspace-title">
-        <span><span data-icon="book"></span> Amharic Path</span>
-        <button class="btn-secondary" onclick="exitAmharicPath()">← Back</button>
-    </div>
-
-    <!-- Continue card — Original Path progress only; Guided Path is still
-         shell-stage with no real progress to show yet. -->
-    <div id="amharicPathTrackChapterMount" class="chapter-list-card"><p style="color:#94a3b8;">Loading...</p></div>
-
-    <!-- Prototype: persistent area switcher, same four modes as the
-         Launcher/Home cup grid, so switching doesn't require going
-         back through Home first. -->
-    <div class="mode-switcher-strip" style="margin-top:18px;">
-        <button type="button" class="mode-switcher-btn" data-mode="practice" onclick="enterModeIfUnlocked('practice', enterPracticeHome)" style="color:#166534;">
-            <span class="mode-switcher-icon">ፊደል</span>
-            <span class="mode-switcher-label">Practice</span>
-        </button>
-        <button type="button" class="mode-switcher-btn" onclick="enterStudentShellHomeTab()" style="color:#b45309;">
-            <span class="mode-switcher-icon">ውድድር</span>
-            <span class="mode-switcher-label">Competition</span>
-        </button>
-        <button type="button" class="mode-switcher-btn" data-mode="wordBuilder" onclick="enterWordBuilderHome()" style="color:#4f46e5;">
-            <span class="mode-switcher-icon">ቃላት</span>
-            <span class="mode-switcher-label">Word Builder</span>
-        </button>
-        <button type="button" class="mode-switcher-btn active" style="color:#4338ca;">
-            <span class="mode-switcher-icon">ጉዞዬ</span>
-            <span class="mode-switcher-label">Amharic Path</span>
-        </button>
-    </div>
-    <div class="stushell-supporting-label" style="margin-top:18px;">Or Choose a Track</div>
-    <div class="amharic-path-grid">
-        <button type="button" class="amharic-path-card guided-path" onclick="enterGuidedPath()">
-            <span class="amharic-path-card-icon"><span data-icon="book-open"></span></span>
-            <span class="amharic-path-card-title">Continue My Words</span>
-            <span class="amharic-path-card-desc">Use the vocabulary you've already learned in Word Builder</span>
-        </button>
-        <button type="button" class="amharic-path-card original-path" onclick="enterOriginalAmharicPath()">
-            <span class="amharic-path-card-icon"><span data-icon="globe"></span></span>
-            <span class="amharic-path-card-title">Explore Amharic</span>
-            <span class="amharic-path-card-desc">Follow the existing chapters</span>
-        </button>
-    </div>
-</div>
-
 <!-- Guided Path — SHELL STAGE: chapters are listed but not yet playable.
      Real content (sentences, dialogue, grammar) is a following stage. -->
 <div id="guidedPathScreen" style="display:none; max-width:480px; margin:60px auto; padding:0 16px;">
@@ -1425,7 +1373,7 @@
 <div id="amharicPathHomeScreen" style="display:none; max-width:480px; margin:60px auto; padding:0 16px;">
     <div class="workspace-title">
         <span><span data-icon="book"></span> Explore Amharic</span>
-        <button class="btn-secondary" onclick="exitOriginalAmharicPath()">← Back</button>
+        <button class="btn-secondary" onclick="enterModeSelect()">← Home</button>
     </div>
     <p class="subtitle" style="text-align:left; margin-bottom:18px;">From Fidel to Fluent</p>
 
@@ -2097,7 +2045,7 @@
 <!-- END CAN-DO STATEMENTS -->
 
 <script src="js/icons.js?v=4" defer></script>
-<script src="js/navigation.js?v=11" defer></script>
+<script src="js/navigation.js?v=12" defer></script>
 <script src="js/app.js?v=29" defer></script>
 <script src="js/auth.js?v=20" defer></script>
 <script src="js/guide.js?v=10" defer></script>
@@ -2105,7 +2053,7 @@
 <script src="js/game.js?v=10" defer></script>
 <script src="js/submissions.js?v=15" defer></script>
 <script src="js/teacher.js?v=33" defer></script>
-<script src="js/reading.js?v=28" defer></script>
+<script src="js/reading.js?v=29" defer></script>
 <script src="js/guidedpath.js?v=1" defer></script>
 <script src="js/wordbuilder.js?v=14" defer></script>
     <script src="js/letterboard.js?v=17" defer></script>
