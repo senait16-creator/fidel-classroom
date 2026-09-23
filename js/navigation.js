@@ -44,6 +44,7 @@ const ALL_SCREENS = [
     "amharicPathHomeScreen",
     "readingLevelsScreen",
     "readingLevelDetailScreen",
+    "lessonStudyScreen",
     "studyTogetherScreen",
     "myGrowthScreen",
     "letterBoardScreen",
