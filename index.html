@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=87">
+    <link rel="stylesheet" href="style.css?v=88">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -1988,9 +1988,11 @@
         </div>
         <div style="display:flex; gap:6px; background:#f1f5f9; border-radius:12px; padding:4px; margin-bottom:16px;">
             <button type="button" id="wbViewLevelBtn" onclick="switchWordBuilderLevelsView('level')"
-                    style="flex:1; border:none; border-radius:9px; padding:9px; font-size:12.5px; font-weight:700; cursor:pointer; background:white; color:#166534; box-shadow:0 1px 3px rgba(0,0,0,0.08);">By Level</button>
+                    style="flex:1; border:none; border-radius:9px; padding:9px; font-size:12px; font-weight:700; cursor:pointer; background:white; color:#166534; box-shadow:0 1px 3px rgba(0,0,0,0.08);">By Level</button>
             <button type="button" id="wbViewTopicBtn" onclick="switchWordBuilderLevelsView('topic')"
-                    style="flex:1; border:none; border-radius:9px; padding:9px; font-size:12.5px; font-weight:700; cursor:pointer; background:none; color:#64748b;">By Topic</button>
+                    style="flex:1; border:none; border-radius:9px; padding:9px; font-size:12px; font-weight:700; cursor:pointer; background:none; color:#64748b;">By Topic</button>
+            <button type="button" id="wbViewMyWordsBtn" onclick="switchWordBuilderLevelsView('mywords')"
+                    style="flex:1; border:none; border-radius:9px; padding:9px; font-size:12px; font-weight:700; cursor:pointer; background:none; color:#64748b;">My Words</button>
         </div>
         <div id="wordBuilderLevelsMount"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
     </div>
@@ -2120,7 +2122,7 @@
 <script src="js/teacher.js?v=33" defer></script>
 <script src="js/reading.js?v=29" defer></script>
 <script src="js/guidedpath.js?v=1" defer></script>
-<script src="js/wordbuilder.js?v=19" defer></script>
+<script src="js/wordbuilder.js?v=20" defer></script>
     <script src="js/letterboard.js?v=19" defer></script>
 <script src="js/team/progress.js?v=32" defer></script>
 <script src="js/team/levels.js?v=14" defer></script>

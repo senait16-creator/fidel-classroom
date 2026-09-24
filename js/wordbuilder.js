@@ -221,7 +221,7 @@ async function enterWordBuilderHome() {
     const nextLevel = allLevels.find(l => l.level_number > targetLevel.level_number && (wordsByLevel[l.level_number] || []).length > 0);
     const upNextHtml = nextLevel
         ? `
-            <div class="wb-home-upnext-note" onclick="openWordBuilderLevel(${nextLevel.level_number})">
+            <div class="wb-home-upnext-note" onclick="openWordBuilderLevelPage(${nextLevel.level_number})">
                 <span>Up Next — Level ${nextLevel.level_number}${nextLevel.topic_title ? ` · ${nextLevel.topic_title}` : ''}</span>
                 <span>→</span>
             </div>
@@ -243,7 +243,7 @@ async function enterWordBuilderHome() {
         <div class="wb-home-words-card">
             ${wordRowsHtml}
         </div>
-        <div class="wb-home-view-all-link" onclick="openWordBuilderLevel(${targetLevel.level_number})">View all ${levelWords.length} words →</div>
+        <div class="wb-home-view-all-link" onclick="openWordBuilderLevelPage(${targetLevel.level_number})">View all ${levelWords.length} words →</div>
         <div class="wb-home-view-all-link" onclick="enterWordBuilder()">Browse by level or topic →</div>
 
         <div class="wb-home-progress-mini" style="margin-top:14px;">
@@ -257,12 +257,7 @@ async function enterWordBuilderHome() {
 window.enterWordBuilderHome = enterWordBuilderHome;
 
 // ---------------------------------------------------------------------------
-// Level list
-// ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
-// By Level / By Topic toggle — a second way to browse the same words,
-// grouped by topic instead of sequence. Words above the student's current
+// By Level / By Topic / My Words toggle. Words above the student's current
 // level are still shown (a preview, not a lock) with a small "needs X" tag.
 // ---------------------------------------------------------------------------
 
@@ -281,24 +276,26 @@ const WORD_BUILDER_TOPICS = [
     { name: 'Describing Words', emoji: '🔤' }
 ];
 
-let wordBuilderLevelsViewMode = 'level'; // 'level' | 'topic'
+let wordBuilderLevelsViewMode = 'level'; // 'level' | 'topic' | 'mywords'
 let wordBuilderCurrentTopic = null;
-let wordBuilderTopicWordsCache = [];
-// Set while a single Topic-view word is being practiced, so finishing it
-// returns to that topic's word list instead of falling into the full
-// end-of-level review/Final Challenge sequence (which is level-scoped).
+// Set while a single word is being practiced in isolation (from a Topic
+// list, a Level page, or My Words), so finishing it returns to wherever it
+// was tapped from instead of falling into the full end-of-level review/
+// Final Challenge sequence (which is level-scoped).
 let wordBuilderTopicPracticeMode = false;
 
-const WB_VIEW_TOGGLE_BTN_BASE = 'flex:1; border:none; border-radius:9px; padding:9px; font-size:12.5px; font-weight:700; cursor:pointer;';
+const WB_VIEW_TOGGLE_BTN_BASE = 'flex:1; border:none; border-radius:9px; padding:9px; font-size:12px; font-weight:700; cursor:pointer;';
 
 function updateWordBuilderLevelsToggleUI() {
     const levelBtn = document.getElementById('wbViewLevelBtn');
     const topicBtn = document.getElementById('wbViewTopicBtn');
-    if (!levelBtn || !topicBtn) return;
+    const myWordsBtn = document.getElementById('wbViewMyWordsBtn');
+    if (!levelBtn || !topicBtn || !myWordsBtn) return;
     const active = WB_VIEW_TOGGLE_BTN_BASE + 'background:white; color:#166534; box-shadow:0 1px 3px rgba(0,0,0,0.08);';
     const inactive = WB_VIEW_TOGGLE_BTN_BASE + 'background:none; color:#64748b;';
     levelBtn.setAttribute('style', wordBuilderLevelsViewMode === 'level' ? active : inactive);
     topicBtn.setAttribute('style', wordBuilderLevelsViewMode === 'topic' ? active : inactive);
+    myWordsBtn.setAttribute('style', wordBuilderLevelsViewMode === 'mywords' ? active : inactive);
 }
 
 function switchWordBuilderLevelsView(mode) {
@@ -306,6 +303,149 @@ function switchWordBuilderLevelsView(mode) {
     renderWordBuilderLevelsList();
 }
 window.switchWordBuilderLevelsView = switchWordBuilderLevelsView;
+
+// ---------------------------------------------------------------------------
+// Shared word-card grid -- one look for a word everywhere it's browsable
+// (a Level page, a Topic's word list, My Words): read words show full
+// detail and a check; unread core words show only the emoji/word plus a
+// "New" tag, so nothing here spoils a word the student hasn't reached yet;
+// expansion words always carry a "Bonus" tag and only ever open the
+// read-only preview, never the practice walk; words whose letters aren't
+// unlocked yet (Topic/My Words only -- a Level page's words share one
+// unlock state) carry a small "needs X" note instead.
+// ---------------------------------------------------------------------------
+
+let wordBuilderWordCardCache = [];
+let wordBuilderCardReturnContext = null; // { type: 'topic' } | { type: 'level', levelNumber } | { type: 'mywords' }
+
+function wbWordCardInnerHtml(word, opts) {
+    const missingLetters = opts.missingLetters;
+    const read = opts.read;
+    const locked = !word.is_expansion && missingLetters && missingLetters.length > 0;
+    const tagHtml = word.is_expansion
+        ? '<span class="wb-card-tag wb-card-tag-bonus">Bonus</span>'
+        : (!read && !locked ? '<span class="wb-card-tag wb-card-tag-new">New</span>' : '');
+    return `
+        ${tagHtml}
+        <div class="wb-card-emoji">${word.emoji || '📖'}</div>
+        <div class="wb-card-amharic">${word.amharic_text}</div>
+        ${read ? `
+            ${word.transliteration ? `<div class="wb-card-translit">${word.transliteration}</div>` : ''}
+            <div class="wb-card-meaning">${word.english_meaning || ''}</div>
+            <div class="wb-card-check">✓</div>
+        ` : ''}
+        ${locked ? `<div class="wb-card-locked">Level ${word.level_number} · needs ${missingLetters.slice(0, 2).join(', ')}</div>` : ''}
+    `;
+}
+
+function wbWordCardHtml(word, opts, onclickExpr) {
+    return `<div class="wb-word-card" onclick="${onclickExpr}">${wbWordCardInnerHtml(word, opts)}</div>`;
+}
+
+// Decides what tapping a card actually does: expansion and locked words
+// always preview; an unread core word on a Level page starts the level's
+// walk at that word (continuing through the rest of the level after);
+// everything else (read words anywhere, unlocked words in Topic/My Words)
+// runs the 3-step practice for just that one word.
+function wbWordCardTapExpr(word, opts) {
+    if (word.is_expansion) return `previewWordBuilderWordCard('${word.id}')`;
+    if (opts.missingLetters && opts.missingLetters.length > 0) return `previewWordBuilderWordCard('${word.id}')`;
+    if (opts.context === 'level' && !opts.read) return `openWordBuilderLevel(${opts.levelNumber}, '${word.id}')`;
+    return `openWordBuilderSingleWordPractice('${word.id}')`;
+}
+
+// A locked-for-now or bonus/expansion word: picture + meaning only, no
+// practice yet -- a preview, not a wall, matching the rest of Word
+// Builder's soft-nudge approach to letters the student hasn't learned yet.
+function previewWordBuilderWordCard(wordId) {
+    const word = wordBuilderWordCardCache.find(w => w.id === wordId);
+    const mount = document.getElementById('wordBuilderLessonMount');
+    if (!word || !mount) return;
+
+    const ctx = wordBuilderCardReturnContext;
+    const backLabel = ctx && ctx.type === 'level' ? '← Back to level' : ctx && ctx.type === 'mywords' ? '← Back to My Words' : '← Back to topic';
+    const backExpr = ctx && ctx.type === 'level' ? `openWordBuilderLevelPage(${ctx.levelNumber})`
+        : ctx && ctx.type === 'mywords' ? `renderWordBuilderMyWords()`
+        : `openWordBuilderTopic(wordBuilderCurrentTopic)`;
+    const note = word.is_expansion
+        ? 'This is a bonus recognition word — a sneak peek, not part of the main practice walk.'
+        : `This word is Level ${word.level_number} — a sneak peek for now. Practice unlocks once you know its letters.`;
+
+    mount.innerHTML = `
+        <div style="background:white; border:1px solid #e2e8f0; border-radius:18px; padding:44px 20px;
+                    text-align:center; box-shadow:0 4px 20px rgba(20,83,45,0.07);">
+            ${word.emoji ? `<div style="font-size:56px; margin-bottom:10px;">${word.emoji}</div>` : ''}
+            <div style="font-family:'Abyssinica SIL',serif; font-size:40px; color:#1e293b; margin-bottom:6px;">${word.amharic_text}</div>
+            ${word.english_meaning ? `<div style="font-size:16px; font-weight:700; color:#166534;">${word.english_meaning}</div>` : ''}
+        </div>
+        <p style="font-size:11.5px; color:#94a3b8; text-align:center; margin-top:12px;">${note}</p>
+        <button class="btn-secondary" style="width:100%; margin-top:10px;" onclick="${backExpr}">${backLabel}</button>
+    `;
+}
+window.previewWordBuilderWordCard = previewWordBuilderWordCard;
+
+// Full practice for one word tapped from a card grid -- reuses the same
+// Read it / Build it / Use it walk as a normal level, scoped to just this
+// word (wordBuilderCoreWords has one entry) while still pulling the rest
+// of its real level's words into wordBuilderWords for decoy/distractor
+// pools, exactly like the core/expansion split already does.
+async function openWordBuilderSingleWordPractice(wordId) {
+    const cached = wordBuilderWordCardCache.find(w => w.id === wordId);
+    if (!cached) return;
+
+    const [{ data: level }, { data: levelWords }, { data: progress }, { data: sentenceRows }] = await Promise.all([
+        _supabase.from('word_builder_levels').select('level_number, topic_title').eq('level_number', cached.level_number).maybeSingle(),
+        _supabase.from('word_builder_words')
+            .select('id, item_order, amharic_text, transliteration, english_meaning, grammar_note, emoji, is_expansion')
+            .eq('level_number', cached.level_number).is('archived_at', null).order('item_order'),
+        _supabase.from('word_builder_progress').select('word_id').eq('student_id', currentUser.id),
+        _supabase.from('word_builder_sentences')
+            .select('id, word_id, amharic_sentence, translation, grammar_notice').eq('word_id', wordId)
+    ]);
+
+    const sentenceIds = (sentenceRows || []).map(s => s.id);
+    const { data: glossRows } = sentenceIds.length
+        ? await _supabase.from('word_builder_sentence_glosses')
+            .select('sentence_id, item_order, amharic_chunk, transliteration, gloss_meaning, is_target')
+            .in('sentence_id', sentenceIds).order('item_order')
+        : { data: [] };
+
+    const fullWord = (levelWords || []).find(w => w.id === wordId) || cached;
+
+    wordBuilderCurrentLevel = level;
+    wordBuilderWords = levelWords && levelWords.length ? levelWords : [fullWord];
+    wordBuilderCoreWords = [fullWord];
+    wordBuilderReadWordIds = new Set((progress || []).map(r => r.word_id));
+    wordBuilderSentencesByWordId = {};
+    (sentenceRows || []).forEach(s => {
+        wordBuilderSentencesByWordId[s.word_id] = { ...s, glosses: (glossRows || []).filter(g => g.sentence_id === s.id) };
+    });
+
+    wordBuilderTopicPracticeMode = true;
+    wordBuilderIndex = 0;
+    showScreen('wordBuilderLessonScreen', '');
+    renderWordBuilderWordCard();
+}
+window.openWordBuilderSingleWordPractice = openWordBuilderSingleWordPractice;
+
+function finishWordBuilderSingleWordPractice() {
+    const mount = document.getElementById('wordBuilderLessonMount');
+    if (mount) {
+        mount.innerHTML = `
+            <div style="text-align:center; padding:40px 20px;">
+                <div style="font-size:44px; margin-bottom:10px;">✅</div>
+                <div style="font-size:18px; font-weight:800; color:#166534;">Word Complete</div>
+            </div>
+        `;
+    }
+    wordBuilderTopicPracticeMode = false;
+    const ctx = wordBuilderCardReturnContext;
+    setTimeout(() => {
+        if (ctx && ctx.type === 'level') openWordBuilderLevelPage(ctx.levelNumber);
+        else if (ctx && ctx.type === 'mywords') renderWordBuilderMyWords();
+        else openWordBuilderTopic(wordBuilderCurrentTopic);
+    }, 1100);
+}
 
 async function renderWordBuilderTopicGrid() {
     const mount = document.getElementById('wordBuilderLevelsMount');
@@ -370,118 +510,139 @@ async function openWordBuilderTopic(topicName) {
 
     const [{ data: wordRows }, { data: wordProgress }, known] = await Promise.all([
         _supabase.from('word_builder_words')
-            .select('id, level_number, item_order, amharic_text, english_meaning, emoji, topic')
+            .select('id, level_number, item_order, amharic_text, transliteration, english_meaning, emoji, is_expansion, topic')
             .eq('topic', topicName).is('archived_at', null).order('level_number', { ascending: true }).order('item_order', { ascending: true }),
         _supabase.from('word_builder_progress').select('word_id').eq('student_id', currentUser.id),
         getWordBuilderKnownLetters()
     ]);
 
-    wordBuilderTopicWordsCache = wordRows || [];
+    wordBuilderWordCardCache = wordRows || [];
+    wordBuilderCardReturnContext = { type: 'topic' };
     const readWordIds = new Set((wordProgress || []).map(r => r.word_id));
 
-    const rowsHtml = wordBuilderTopicWordsCache.map(w => {
-        const done = readWordIds.has(w.id);
-        const missing = wordBuilderMissingLettersForLevel(w.level_number, known);
-        const readable = missing.length === 0;
-        const tag = readable ? '' : `<div style="font-size:10px; color:#d97706; margin-top:2px;">Level ${w.level_number} · needs ${missing.slice(0, 2).join(', ')}</div>`;
-        return `
-            <div onclick="${readable ? `openWordBuilderTopicWord('${w.id}')` : `previewWordBuilderTopicWord('${w.id}')`}"
-                 style="display:flex; align-items:center; gap:12px; background:white; border:1px solid #e2e8f0;
-                        border-radius:14px; padding:12px 14px; margin-bottom:9px; cursor:pointer; ${readable ? '' : 'opacity:0.75;'}">
-                <div style="width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center;
-                            font-size:18px; flex-shrink:0; background:${done ? 'rgba(22,101,52,0.1)' : '#f7f5ef'};">${done ? '✓' : (w.emoji || '📖')}</div>
-                <div style="flex:1; min-width:0;">
-                    <div style="font-family:'Abyssinica SIL',serif; font-size:16px; font-weight:700; color:#1e293b;">${w.amharic_text}</div>
-                    <div style="font-size:11.5px; color:#94a3b8;">${w.english_meaning || ''}</div>
-                    ${tag}
-                </div>
-            </div>`;
+    const cardsHtml = wordBuilderWordCardCache.map(w => {
+        const read = readWordIds.has(w.id);
+        const missing = w.is_expansion ? [] : wordBuilderMissingLettersForLevel(w.level_number, known);
+        const opts = { read: read, missingLetters: missing, context: 'topic' };
+        return wbWordCardHtml(w, opts, wbWordCardTapExpr(w, opts));
     }).join('');
 
     if (mount) {
-        mount.innerHTML = rowsHtml || '<p style="color:#94a3b8; font-size:13px;">No words in this topic yet.</p>';
+        mount.innerHTML = wordBuilderWordCardCache.length
+            ? `<div class="wb-word-grid">${cardsHtml}</div>`
+            : '<p style="color:#94a3b8; font-size:13px;">No words in this topic yet.</p>';
     }
 }
 window.openWordBuilderTopic = openWordBuilderTopic;
 
-// A locked-for-now word: picture + meaning only, no practice yet -- a
-// preview, not a wall, matching the rest of Word Builder's soft-nudge
-// approach to letters the student hasn't learned yet.
-function previewWordBuilderTopicWord(wordId) {
-    const word = wordBuilderTopicWordsCache.find(w => w.id === wordId);
-    const mount = document.getElementById('wordBuilderLessonMount');
-    if (!word || !mount) return;
+// ---------------------------------------------------------------------------
+// My Words -- every word this student has read, newest first, with Level
+// and Topic filter chips. Cards flip in place to reveal the meaning
+// (rather than navigating away like Level page/Topic cards do), since
+// browsing what you already know is the point here, not launching practice.
+// ---------------------------------------------------------------------------
+
+let wordBuilderMyWordsLevelFilter = null;
+let wordBuilderMyWordsTopicFilter = null;
+let wordBuilderMyWordsFlipped = new Set();
+
+async function renderWordBuilderMyWords() {
+    // Self-sufficient like openWordBuilderTopic/openWordBuilderLevelPage --
+    // reachable both from the toggle bar (already on this screen) and from
+    // finishing a single-word practice session (currently on the Lesson
+    // screen), so it has to switch screens itself rather than assume.
+    showScreen('wordBuilderLevelsScreen', '');
+    wordBuilderLevelsViewMode = 'mywords';
+    updateWordBuilderLevelsToggleUI();
+
+    const mount = document.getElementById('wordBuilderLevelsMount');
+    if (!mount) return;
+    mount.innerHTML = '<p style="color:#94a3b8; font-size:13px;">Loading...</p>';
+
+    const { data: progressRows } = await _supabase
+        .from('word_builder_progress')
+        .select('word_id, read_at')
+        .eq('student_id', currentUser.id)
+        .order('read_at', { ascending: false });
+
+    const orderedIds = (progressRows || []).map(r => r.word_id);
+    if (orderedIds.length === 0) {
+        mount.innerHTML = '<p style="color:#94a3b8; font-size:13px; text-align:center; margin-top:20px;">Nothing read yet — words you finish will show up here.</p>';
+        return;
+    }
+
+    const { data: wordRows } = await _supabase
+        .from('word_builder_words')
+        .select('id, level_number, item_order, amharic_text, transliteration, english_meaning, emoji, is_expansion, topic')
+        .in('id', orderedIds).is('archived_at', null);
+
+    const byId = {};
+    (wordRows || []).forEach(w => { byId[w.id] = w; });
+    const allReadWords = orderedIds.map(id => byId[id]).filter(Boolean); // newest-first, from progressRows' order
+
+    wordBuilderWordCardCache = allReadWords;
+    wordBuilderCardReturnContext = { type: 'mywords' };
+
+    const levelsPresent = [...new Set(allReadWords.map(w => w.level_number))].sort((a, b) => a - b);
+    const topicsPresent = [...new Set(allReadWords.map(w => w.topic).filter(Boolean))];
+
+    const filtered = allReadWords.filter(w =>
+        (wordBuilderMyWordsLevelFilter === null || w.level_number === wordBuilderMyWordsLevelFilter) &&
+        (wordBuilderMyWordsTopicFilter === null || w.topic === wordBuilderMyWordsTopicFilter)
+    );
+
+    const chip = (label, active, onclick) =>
+        `<button type="button" class="wb-filter-chip${active ? ' wb-filter-chip-active' : ''}" onclick="${onclick}">${label}</button>`;
+
+    const levelChipsHtml = chip('All Levels', wordBuilderMyWordsLevelFilter === null, "setWordBuilderMyWordsFilter('level', null)")
+        + levelsPresent.map(l => chip(`Level ${l}`, wordBuilderMyWordsLevelFilter === l, `setWordBuilderMyWordsFilter('level', ${l})`)).join('');
+    const topicChipsHtml = chip('All Topics', wordBuilderMyWordsTopicFilter === null, "setWordBuilderMyWordsFilter('topic', null)")
+        + topicsPresent.map(t => chip(t, wordBuilderMyWordsTopicFilter === t, `setWordBuilderMyWordsFilter('topic', '${t.replace(/'/g, "\\'")}')`)).join('');
+
+    const cardsHtml = filtered.map(w => wbMyWordsCardHtml(w)).join('');
 
     mount.innerHTML = `
-        <div style="background:white; border:1px solid #e2e8f0; border-radius:18px; padding:44px 20px;
-                    text-align:center; box-shadow:0 4px 20px rgba(20,83,45,0.07);">
-            ${word.emoji ? `<div style="font-size:56px; margin-bottom:10px;">${word.emoji}</div>` : ''}
-            <div style="font-family:'Abyssinica SIL',serif; font-size:40px; color:#1e293b; margin-bottom:6px;">${word.amharic_text}</div>
-            ${word.english_meaning ? `<div style="font-size:16px; font-weight:700; color:#166534;">${word.english_meaning}</div>` : ''}
-        </div>
-        <p style="font-size:11.5px; color:#94a3b8; text-align:center; margin-top:12px;">This word is Level ${word.level_number} — a sneak peek for now. Practice unlocks once you know its letters.</p>
-        <button class="btn-secondary" style="width:100%; margin-top:10px;" onclick="openWordBuilderTopic(wordBuilderCurrentTopic)">← Back to topic</button>
+        <div style="font-size:13px; font-weight:700; color:#166534; margin-bottom:12px;">You can read ${allReadWords.length} word${allReadWords.length === 1 ? '' : 's'}.</div>
+        <div class="wb-filter-chip-row">${levelChipsHtml}</div>
+        <div class="wb-filter-chip-row" style="margin-bottom:14px;">${topicChipsHtml}</div>
+        <div class="wb-word-grid">${cardsHtml || '<p style="color:#94a3b8; font-size:13px; grid-column:1/-1;">No words match this filter.</p>'}</div>
     `;
 }
-window.previewWordBuilderTopicWord = previewWordBuilderTopicWord;
+window.renderWordBuilderMyWords = renderWordBuilderMyWords;
 
-// Full practice for one word tapped from the Topic view -- reuses the same
-// Read it / Build it / Use it walk as a normal level, scoped to just this
-// word (wordBuilderCoreWords has one entry) while still pulling the rest
-// of its real level's words into wordBuilderWords for decoy/distractor
-// pools, exactly like the core/expansion split already does.
-async function openWordBuilderTopicWord(wordId) {
-    const cached = wordBuilderTopicWordsCache.find(w => w.id === wordId);
-    if (!cached) return;
-
-    const [{ data: level }, { data: levelWords }, { data: progress }, { data: sentenceRows }] = await Promise.all([
-        _supabase.from('word_builder_levels').select('level_number, topic_title').eq('level_number', cached.level_number).maybeSingle(),
-        _supabase.from('word_builder_words')
-            .select('id, item_order, amharic_text, transliteration, english_meaning, grammar_note, emoji, is_expansion')
-            .eq('level_number', cached.level_number).is('archived_at', null).order('item_order'),
-        _supabase.from('word_builder_progress').select('word_id').eq('student_id', currentUser.id),
-        _supabase.from('word_builder_sentences')
-            .select('id, word_id, amharic_sentence, translation, grammar_notice').eq('word_id', wordId)
-    ]);
-
-    const sentenceIds = (sentenceRows || []).map(s => s.id);
-    const { data: glossRows } = sentenceIds.length
-        ? await _supabase.from('word_builder_sentence_glosses')
-            .select('sentence_id, item_order, amharic_chunk, transliteration, gloss_meaning, is_target')
-            .in('sentence_id', sentenceIds).order('item_order')
-        : { data: [] };
-
-    const fullWord = (levelWords || []).find(w => w.id === wordId) || cached;
-
-    wordBuilderCurrentLevel = level;
-    wordBuilderWords = levelWords && levelWords.length ? levelWords : [fullWord];
-    wordBuilderCoreWords = [fullWord];
-    wordBuilderReadWordIds = new Set((progress || []).map(r => r.word_id));
-    wordBuilderSentencesByWordId = {};
-    (sentenceRows || []).forEach(s => {
-        wordBuilderSentencesByWordId[s.word_id] = { ...s, glosses: (glossRows || []).filter(g => g.sentence_id === s.id) };
-    });
-
-    wordBuilderTopicPracticeMode = true;
-    wordBuilderIndex = 0;
-    showScreen('wordBuilderLessonScreen', '');
-    renderWordBuilderWordCard();
+function setWordBuilderMyWordsFilter(kind, value) {
+    if (kind === 'level') wordBuilderMyWordsLevelFilter = value;
+    else wordBuilderMyWordsTopicFilter = value;
+    renderWordBuilderMyWords();
 }
-window.openWordBuilderTopicWord = openWordBuilderTopicWord;
+window.setWordBuilderMyWordsFilter = setWordBuilderMyWordsFilter;
 
-function finishWordBuilderTopicWordPractice() {
-    const mount = document.getElementById('wordBuilderLessonMount');
-    if (mount) {
-        mount.innerHTML = `
-            <div style="text-align:center; padding:40px 20px;">
-                <div style="font-size:44px; margin-bottom:10px;">✅</div>
-                <div style="font-size:18px; font-weight:800; color:#166534;">Word Complete</div>
-            </div>
-        `;
+function wbMyWordsCardHtml(word) {
+    if (wordBuilderMyWordsFlipped.has(word.id)) {
+        return `
+            <div class="wb-word-card wb-word-card-flipped" onclick="toggleWordBuilderMyWordsFlip('${word.id}')">
+                <div class="wb-card-amharic">${word.amharic_text}</div>
+                ${word.transliteration ? `<div class="wb-card-translit">${word.transliteration}</div>` : ''}
+                <div class="wb-card-meaning">${word.english_meaning || ''}</div>
+                <div class="wb-card-practice-link" onclick="event.stopPropagation(); openWordBuilderSingleWordPractice('${word.id}')">Practice →</div>
+            </div>`;
     }
-    wordBuilderTopicPracticeMode = false;
-    setTimeout(() => openWordBuilderTopic(wordBuilderCurrentTopic), 1100);
+    const tagHtml = word.is_expansion ? '<span class="wb-card-tag wb-card-tag-bonus">Bonus</span>' : '';
+    return `
+        <div class="wb-word-card" onclick="toggleWordBuilderMyWordsFlip('${word.id}')">
+            ${tagHtml}
+            <div class="wb-card-emoji">${word.emoji || '📖'}</div>
+            <div class="wb-card-amharic">${word.amharic_text}</div>
+            <div class="wb-card-check">✓</div>
+        </div>`;
 }
+
+function toggleWordBuilderMyWordsFlip(wordId) {
+    if (wordBuilderMyWordsFlipped.has(wordId)) wordBuilderMyWordsFlipped.delete(wordId);
+    else wordBuilderMyWordsFlipped.add(wordId);
+    renderWordBuilderMyWords();
+}
+window.toggleWordBuilderMyWordsFlip = toggleWordBuilderMyWordsFlip;
 
 async function renderWordBuilderLevelsList() {
     const mount = document.getElementById('wordBuilderLevelsMount');
@@ -489,6 +650,9 @@ async function renderWordBuilderLevelsList() {
     updateWordBuilderLevelsToggleUI();
     if (wordBuilderLevelsViewMode === 'topic') {
         return renderWordBuilderTopicGrid();
+    }
+    if (wordBuilderLevelsViewMode === 'mywords') {
+        return renderWordBuilderMyWords();
     }
     mount.innerHTML = '<p style="color:#94a3b8; font-size:13px;">Loading...</p>';
 
@@ -540,7 +704,7 @@ async function renderWordBuilderLevelsList() {
             <div class="word-builder-level-row" style="display:flex; align-items:center; gap:12px; background:white;
                         border:1px solid #e2e8f0; border-radius:14px; padding:12px 14px; margin-bottom:9px;
                         ${!clickable ? 'opacity:0.6;' : 'cursor:pointer;'}"
-                 ${clickable ? `onclick="openWordBuilderLevel(${level.level_number})"` : ''}>
+                 ${clickable ? `onclick="openWordBuilderLevelPage(${level.level_number})"` : ''}>
                 <div style="width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center;
                             font-weight:800; font-size:13px; flex-shrink:0; background:${numBg}; color:${numColor};">${stateIcon}</div>
                 <div style="flex:1; min-width:0;">
@@ -555,10 +719,89 @@ async function renderWordBuilderLevelsList() {
 window.renderWordBuilderLevelsList = renderWordBuilderLevelsList;
 
 // ---------------------------------------------------------------------------
-// Inside a level — one word at a time
+// Level page — a browsable gallery of every word in the level (core +
+// expansion), reached by tapping a level. Distinct from the actual lesson
+// walk (openWordBuilderLevel), which this page's Continue button launches.
 // ---------------------------------------------------------------------------
 
-async function openWordBuilderLevel(levelNumber) {
+async function openWordBuilderLevelPage(levelNumber) {
+    showScreen('wordBuilderLessonScreen', '');
+    setWordBuilderLessonBackButton('level');
+    const crumb = document.getElementById('wordBuilderLessonCrumb');
+    const mount = document.getElementById('wordBuilderLessonMount');
+    if (crumb) crumb.innerText = `LEVEL ${levelNumber}`;
+    if (mount) mount.innerHTML = '<p style="color:#94a3b8; font-size:13px;">Loading...</p>';
+
+    const [{ data: level }, { data: words }, { data: levelProgress }, { data: wordProgress }, known] = await Promise.all([
+        _supabase.from('word_builder_levels').select('level_number, topic_title').eq('level_number', levelNumber).maybeSingle(),
+        _supabase.from('word_builder_words')
+            .select('id, item_order, amharic_text, transliteration, english_meaning, emoji, is_expansion, level_number')
+            .eq('level_number', levelNumber).is('archived_at', null).order('item_order'),
+        _supabase.from('word_builder_level_progress').select('level_number').eq('student_id', currentUser.id),
+        _supabase.from('word_builder_progress').select('word_id').eq('student_id', currentUser.id),
+        getWordBuilderKnownLetters()
+    ]);
+
+    if (!words || words.length === 0) {
+        if (mount) mount.innerHTML = '<p style="color:#94a3b8; font-size:13px; text-align:center; margin-top:40px;">No words in this level yet, check back soon.</p>';
+        return;
+    }
+
+    if (crumb) crumb.innerText = `LEVEL ${level.level_number}${level.topic_title ? ` · ${level.topic_title.toUpperCase()}` : ''}`;
+
+    wordBuilderWordCardCache = words;
+    wordBuilderCardReturnContext = { type: 'level', levelNumber: levelNumber };
+
+    const readWordIds = new Set((wordProgress || []).map(r => r.word_id));
+    const readCount = words.filter(w => readWordIds.has(w.id)).length;
+    const letters = WORD_BUILDER_LEVEL_LETTERS[levelNumber] || [];
+    const isComplete = new Set((levelProgress || []).map(r => r.level_number)).has(levelNumber);
+
+    const cardsHtml = words.map(w => {
+        const read = readWordIds.has(w.id);
+        const missing = w.is_expansion ? [] : wordBuilderMissingLettersForLevel(w.level_number, known);
+        const opts = { read: read, missingLetters: missing, context: 'level', levelNumber: levelNumber };
+        return wbWordCardHtml(w, opts, wbWordCardTapExpr(w, opts));
+    }).join('');
+
+    if (mount) {
+        mount.innerHTML = `
+            <div style="background:white; border:1px solid #e2e8f0; border-radius:18px; padding:20px; margin-bottom:18px;">
+                <div style="font-size:18px; font-weight:800; color:#1e293b; margin-bottom:4px;">${level.topic_title || `Level ${level.level_number}`}</div>
+                ${letters.length ? `<div style="font-family:'Abyssinica SIL',serif; font-size:16px; color:#94a3b8; margin-bottom:8px;">${letters.join(' ')}</div>` : ''}
+                <div style="font-size:12.5px; font-weight:700; color:#94a3b8; margin-bottom:14px;">${readCount} of ${words.length} words</div>
+                <button class="btn-primary" style="width:100%;" onclick="openWordBuilderLevel(${levelNumber})">Continue →</button>
+            </div>
+            <div class="wb-word-grid">${cardsHtml}</div>
+            ${isComplete ? `<button class="btn-secondary" style="width:100%; margin-top:18px;" onclick="rerunWordBuilderFinalChallenge(${levelNumber})">Final Challenge</button>` : ''}
+        `;
+    }
+}
+window.openWordBuilderLevelPage = openWordBuilderLevelPage;
+
+async function rerunWordBuilderFinalChallenge(levelNumber) {
+    const [{ data: level }, { data: words }] = await Promise.all([
+        _supabase.from('word_builder_levels').select('level_number, topic_title').eq('level_number', levelNumber).maybeSingle(),
+        _supabase.from('word_builder_words').select('id, amharic_text, english_meaning').eq('level_number', levelNumber).is('archived_at', null)
+    ]);
+    wordBuilderCurrentLevel = level;
+    wordBuilderWords = words || [];
+    showScreen('wordBuilderLessonScreen', '');
+    setWordBuilderLessonBackButton('level');
+    const crumb = document.getElementById('wordBuilderLessonCrumb');
+    if (crumb) crumb.innerText = `LEVEL ${level.level_number}${level.topic_title ? ` · ${level.topic_title.toUpperCase()}` : ''}`;
+    renderWordBuilderFinalChallengeStart();
+}
+window.rerunWordBuilderFinalChallenge = rerunWordBuilderFinalChallenge;
+
+// ---------------------------------------------------------------------------
+// Inside a level — one word at a time. `startAtWordId`, when given, begins
+// the walk at that specific word instead of the first unread one (used by
+// the Level page's unread-word cards); otherwise this is the normal
+// Continue behavior.
+// ---------------------------------------------------------------------------
+
+async function openWordBuilderLevel(levelNumber, startAtWordId) {
     wordBuilderTopicPracticeMode = false;
     setWordBuilderLessonBackButton('level');
     const { data: level } = await _supabase
@@ -614,8 +857,13 @@ async function openWordBuilderLevel(levelNumber) {
         return;
     }
 
-    wordBuilderIndex = wordBuilderCoreWords.findIndex(w => !wordBuilderReadWordIds.has(w.id));
-    if (wordBuilderIndex === -1) wordBuilderIndex = 0;
+    if (startAtWordId) {
+        const idx = wordBuilderCoreWords.findIndex(w => w.id === startAtWordId);
+        wordBuilderIndex = idx !== -1 ? idx : 0;
+    } else {
+        wordBuilderIndex = wordBuilderCoreWords.findIndex(w => !wordBuilderReadWordIds.has(w.id));
+        if (wordBuilderIndex === -1) wordBuilderIndex = 0;
+    }
 
     showScreen('wordBuilderLessonScreen', '');
     renderWordBuilderWordCard();
@@ -1024,7 +1272,7 @@ async function advanceWordBuilderWord() {
         wordBuilderIndex++;
         renderWordBuilderWordCard();
     } else if (wordBuilderTopicPracticeMode) {
-        finishWordBuilderTopicWordPractice();
+        finishWordBuilderSingleWordPractice();
     } else {
         startWordBuilderReviewSequence();
     }
