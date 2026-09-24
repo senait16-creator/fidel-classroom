@@ -43,7 +43,13 @@ function getWordBuilderCumulativeLetters(levelNumber) {
 }
 
 let wordBuilderCurrentLevel = null;
+// wordBuilderWords: every word in the level (core + expansion) -- the pool
+// used for review/Final Challenge/distractor choices. wordBuilderCoreWords:
+// just the core words, in the fixed order they're walked through one at a
+// time. Expansion words are recognition-only -- they show up in review and
+// Final Challenge but never get their own full build/picture/spell/etc walk.
 let wordBuilderWords = [];
+let wordBuilderCoreWords = [];
 let wordBuilderReadWordIds = new Set();
 let wordBuilderIndex = 0;
 let wordBuilderSentencesByWordId = {};
@@ -145,7 +151,7 @@ async function enterWordBuilderHome() {
 
     const [{ data: levels }, { data: wordRows }, { data: levelProgress }, { data: wordProgress }, unlockedLevels] = await Promise.all([
         _supabase.from('word_builder_levels').select('level_number, topic_title').order('level_number'),
-        _supabase.from('word_builder_words').select('id, level_number, item_order, amharic_text, english_meaning').order('item_order'),
+        _supabase.from('word_builder_words').select('id, level_number, item_order, amharic_text, english_meaning').is('archived_at', null).order('item_order'),
         _supabase.from('word_builder_level_progress').select('level_number').eq('student_id', currentUser.id),
         _supabase.from('word_builder_progress').select('word_id').eq('student_id', currentUser.id),
         getWordBuilderUnlockedLevels()
@@ -272,7 +278,7 @@ async function renderWordBuilderLevelsList() {
 
     const [{ data: levels }, { data: wordRows }, { data: levelProgress }, unlockedLevels] = await Promise.all([
         _supabase.from('word_builder_levels').select('level_number, topic_title').order('level_number'),
-        _supabase.from('word_builder_words').select('id, level_number'),
+        _supabase.from('word_builder_words').select('id, level_number').is('archived_at', null),
         _supabase.from('word_builder_level_progress').select('level_number').eq('student_id', currentUser.id),
         getWordBuilderUnlockedLevels()
     ]);
@@ -339,8 +345,9 @@ async function openWordBuilderLevel(levelNumber) {
 
     const { data: words } = await _supabase
         .from('word_builder_words')
-        .select('id, item_order, amharic_text, transliteration, english_meaning, grammar_note, emoji')
+        .select('id, item_order, amharic_text, transliteration, english_meaning, grammar_note, emoji, is_expansion')
         .eq('level_number', levelNumber)
+        .is('archived_at', null)
         .order('item_order');
 
     const { data: progress } = await _supabase
@@ -365,6 +372,7 @@ async function openWordBuilderLevel(levelNumber) {
 
     wordBuilderCurrentLevel = level;
     wordBuilderWords = words || [];
+    wordBuilderCoreWords = wordBuilderWords.filter(w => !w.is_expansion);
     wordBuilderReadWordIds = new Set((progress || []).map(r => r.word_id));
     wordBuilderSentencesByWordId = {};
     (sentenceRows || []).forEach(s => {
@@ -382,7 +390,7 @@ async function openWordBuilderLevel(levelNumber) {
         return;
     }
 
-    wordBuilderIndex = wordBuilderWords.findIndex(w => !wordBuilderReadWordIds.has(w.id));
+    wordBuilderIndex = wordBuilderCoreWords.findIndex(w => !wordBuilderReadWordIds.has(w.id));
     if (wordBuilderIndex === -1) wordBuilderIndex = 0;
 
     showScreen('wordBuilderLessonScreen', '');
@@ -430,7 +438,7 @@ function renderWordBuilderStep() {
     if (!crumb || !mount) return;
 
     const level = wordBuilderCurrentLevel;
-    const word = wordBuilderWords[wordBuilderIndex];
+    const word = wordBuilderCoreWords[wordBuilderIndex];
 
     while (wordBuilderStepIndex < WORD_BUILDER_STEPS.length &&
            wordBuilderStepShouldSkip(word, WORD_BUILDER_STEPS[wordBuilderStepIndex])) {
@@ -463,7 +471,7 @@ function renderWordBuilderStep() {
     mount.innerHTML = `
         ${stepBuilders[stepName](word)}
         <div style="display:flex; justify-content:center; gap:6px; margin-top:20px;">${dots}</div>
-        <p style="font-size:11px; color:#cbd5e1; text-align:center; margin-top:6px;">Word ${wordBuilderIndex + 1} of ${wordBuilderWords.length}</p>
+        <p style="font-size:11px; color:#cbd5e1; text-align:center; margin-top:6px;">Word ${wordBuilderIndex + 1} of ${wordBuilderCoreWords.length}</p>
     `;
 }
 
@@ -727,7 +735,7 @@ function wbStepMatchHtml(word) {
 }
 
 function answerWordBuilderMatchStep(btnEl, chosenId) {
-    const word = wordBuilderWords[wordBuilderIndex];
+    const word = wordBuilderCoreWords[wordBuilderIndex];
     const buttons = document.querySelectorAll('#wbMatchChoices button');
     buttons.forEach(btn => btn.setAttribute('disabled', 'true'));
 
@@ -773,7 +781,7 @@ function wbStepWhichMeaningHtml(word) {
 }
 
 function answerWordBuilderWhichMeaningStep(btnEl, chosenId) {
-    const word = wordBuilderWords[wordBuilderIndex];
+    const word = wordBuilderCoreWords[wordBuilderIndex];
     const buttons = document.querySelectorAll('#wbWhichMeaningChoices button');
     buttons.forEach(btn => btn.setAttribute('disabled', 'true'));
 
@@ -830,7 +838,7 @@ window.showWordBuilderLetterInfo = showWordBuilderLetterInfo;
 // the old manual "I Read It" tap with an automatic save the moment the
 // learner has actually done the work.
 async function finishWordBuilderWord() {
-    const word = wordBuilderWords[wordBuilderIndex];
+    const word = wordBuilderCoreWords[wordBuilderIndex];
 
     const { error } = await _supabase.from('word_builder_progress').upsert({
         student_id: currentUser.id,
@@ -851,7 +859,7 @@ async function advanceWordBuilderWord() {
     wordBuilderSpellForWordId = null;
     wordBuilderMatchChoicesForWordId = null;
     wordBuilderSentenceForWordId = null;
-    if (wordBuilderIndex < wordBuilderWords.length - 1) {
+    if (wordBuilderIndex < wordBuilderCoreWords.length - 1) {
         wordBuilderIndex++;
         renderWordBuilderWordCard();
     } else {
@@ -915,6 +923,7 @@ async function startWordBuilderMixedReview() {
         .from('word_builder_words')
         .select('id, level_number, item_order, amharic_text, transliteration, english_meaning, grammar_note, emoji')
         .in('level_number', completedLevels)
+        .is('archived_at', null)
         .order('item_order');
 
     const pool = (words || []).filter(w => w.english_meaning);

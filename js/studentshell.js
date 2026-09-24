@@ -253,7 +253,7 @@ window.renderCaptainTasksCard = renderCaptainTasksCard;
 async function fetchWordBuilderNextStep() {
     const [{ data: wbLevels }, { data: wordRows }, { data: levelProgress }, { data: wordProgress }] = await Promise.all([
         _supabase.from('word_builder_levels').select('level_number, topic_title').order('level_number'),
-        _supabase.from('word_builder_words').select('id, level_number, item_order, amharic_text, english_meaning').order('item_order'),
+        _supabase.from('word_builder_words').select('id, level_number, item_order, amharic_text, english_meaning').is('archived_at', null).order('item_order'),
         _supabase.from('word_builder_level_progress').select('level_number').eq('student_id', currentUser.id),
         _supabase.from('word_builder_progress').select('word_id').eq('student_id', currentUser.id)
     ]);
@@ -359,7 +359,7 @@ async function renderCurriculumWordBuilderRow() {
 
     const [{ data: wbLevels }, { data: wordRows }, { data: levelProgress }] = await Promise.all([
         _supabase.from('word_builder_levels').select('level_number, topic_title').order('level_number'),
-        _supabase.from('word_builder_words').select('id, level_number, amharic_text').order('item_order'),
+        _supabase.from('word_builder_words').select('id, level_number, amharic_text').is('archived_at', null).order('item_order'),
         _supabase.from('word_builder_level_progress').select('level_number').eq('student_id', currentUser.id)
     ]);
     if (!wbLevels?.length) { mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No levels yet.</p>`; return; }
