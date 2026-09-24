@@ -6544,6 +6544,68 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     cursor: pointer;
 }
 
+/* Captain tasks card — leadership to-dos on Home, separate from the
+   captain's own (Solo) learning card below it. Same "captain chrome"
+   gradient as .captain-team-card so the two read as one visual family. */
+
+.captain-tasks-card {
+    border-radius: 22px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+    color: white;
+    background: linear-gradient(135deg, #14532d, #166534 60%, #15803d);
+    box-shadow: 0 14px 30px rgba(20,83,45,0.22);
+}
+
+.captain-tasks-collapsed {
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 700;
+    opacity: 0.92;
+}
+
+.captain-tasks-title {
+    font-size: 13.5px;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+.captain-tasks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.captain-task-row {
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.24);
+    border-radius: 12px;
+    padding: 9px 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+.captain-tasks-hub-btn {
+    width: 100%;
+    border: none;
+    border-radius: 13px;
+    padding: 12px;
+    background: white;
+    color: #14532d;
+    font-size: 13.5px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+/* "Your own learning (Solo)" note on a captain's Fidel next-step card */
+.nextstep-captain-note {
+    margin: 6px 0 0;
+    font-size: 11.5px;
+    color: #94a3b8;
+    font-style: italic;
+}
+
 /* Captain Team Hub overlay */
 
 .captain-hub-header {

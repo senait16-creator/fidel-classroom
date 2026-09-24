@@ -642,6 +642,11 @@
 
         <div class="stushell-home-note" id="stushellHomeNoteMount" style="display:none;"></div>
 
+        <!-- Captain tasks — leadership to-dos, separate from the captain's
+             own (Solo) learning below. Collapses to one line when there's
+             nothing to do. Captains/no-team students never see this. -->
+        <div class="captain-tasks-card" id="captainTasksCard" style="display:none;"></div>
+
         <div class="nextsteps-header">
             <h2>Your next steps</h2>
             <span class="nextsteps-subhead">Pick any one</span>
@@ -652,12 +657,13 @@
                  same data, just relocated into the next-steps grid. -->
             <div class="nextstep-card nextstep-fidel" id="challengeCurrentLevelCard">
                 <div class="nextstep-eyebrow-row">
-                    <span class="nextstep-eyebrow nextstep-eyebrow-fidel">Fidel</span>
+                    <span class="nextstep-eyebrow nextstep-eyebrow-fidel" id="challengeCurrentLevelEyebrow">Fidel</span>
                     <span class="nextstep-recommended" id="nextstepRecommendedBadge" style="display:none;">Recommended</span>
                 </div>
                 <div id="challengeDashMapMount">
                     <p style="color:#94a3b8; font-size:13px;">Loading current level...</p>
                 </div>
+                <p class="nextstep-captain-note" id="challengeCurrentLevelCaptainNote" style="display:none;">Doesn't count toward your team.</p>
             </div>
 
             <div class="nextstep-card nextstep-wordbuilder" id="nextstepWordBuilderCard">
@@ -2000,13 +2006,13 @@
 <script src="js/guide.js?v=10" defer></script>
 <script src="js/utils/compress.js?v=9" defer></script>
 <script src="js/game.js?v=10" defer></script>
-<script src="js/submissions.js?v=16" defer></script>
+<script src="js/submissions.js?v=17" defer></script>
 <script src="js/teacher.js?v=33" defer></script>
 <script src="js/reading.js?v=29" defer></script>
 <script src="js/guidedpath.js?v=1" defer></script>
 <script src="js/wordbuilder.js?v=14" defer></script>
     <script src="js/letterboard.js?v=18" defer></script>
-<script src="js/team/progress.js?v=31" defer></script>
+<script src="js/team/progress.js?v=32" defer></script>
 <script src="js/team/levels.js?v=14" defer></script>
 <script src="js/team/map.js?v=9" defer></script>
 <script src="js/team/hub.js?v=26" defer></script>
@@ -2017,11 +2023,11 @@
         <script src="js/starboard.js?v=1" defer></script>
 <script src="js/wordle.js?v=9" defer></script>
 <script src="intro.js?v=1" defer></script>
-<script src="js/challenge.js?v=37" defer></script>
+<script src="js/challenge.js?v=38" defer></script>
 <script src="js/calendar.js?v=7" defer></script>
 <script src="js/menu.js?v=11" defer></script>
 <script src="js/push.js?v=8" defer></script>
-<script src="js/studentshell.js?v=18" defer></script>
+<script src="js/studentshell.js?v=19" defer></script>
 
 <script>
     if ('serviceWorker' in navigator) {
