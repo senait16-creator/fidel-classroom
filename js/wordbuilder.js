@@ -202,15 +202,19 @@ async function enterWordBuilderHome() {
 
     const levelWords = wordsByLevel[targetLevel.level_number] || [];
     const readCount = levelWords.filter(w => readWordIds.has(w.id)).length;
-    const previewWords = levelWords.slice(0, 4);
+    // Only words already read -- anything still ahead hasn't hit its own
+    // Read-it/Check reveal yet, so showing its meaning here would spoil it.
+    const previewWords = levelWords.filter(w => readWordIds.has(w.id)).slice(0, 4);
     const levelsDoneCount = completedLevels.size;
 
-    const wordRowsHtml = previewWords.map(w => `
-        <div class="wb-home-word-row">
-            <span class="wb-home-word-amharic">${w.amharic_text}</span>
-            <span class="wb-home-word-meaning">${w.english_meaning || ''}</span>
-        </div>
-    `).join('');
+    const wordRowsHtml = previewWords.length
+        ? previewWords.map(w => `
+            <div class="wb-home-word-row">
+                <span class="wb-home-word-amharic">${w.amharic_text}</span>
+                <span class="wb-home-word-meaning">${w.english_meaning || ''}</span>
+            </div>
+        `).join('')
+        : `<div style="padding:14px 0; text-align:center; color:#94a3b8; font-size:12.5px;">Nothing read yet — tap Continue Learning to start.</div>`;
 
     // "Up Next" — an invitation forward, not a lock. Always the very next
     // level with words, whether or not its letters are Fidel-known yet.
@@ -240,9 +244,9 @@ async function enterWordBuilderHome() {
             ${wordRowsHtml}
         </div>
         <div class="wb-home-view-all-link" onclick="openWordBuilderLevel(${targetLevel.level_number})">View all ${levelWords.length} words →</div>
-        <div class="wb-home-view-all-link" onclick="enterWordBuilder()">Browse all levels →</div>
+        <div class="wb-home-view-all-link" onclick="enterWordBuilder()">Browse by level or topic →</div>
 
-        <div class="wb-home-progress-mini">
+        <div class="wb-home-progress-mini" style="margin-top:14px;">
             <span>Level ${targetLevel.level_number} of ${totalLevels}</span>
             <div class="wb-home-progress-mini-track"><div class="wb-home-progress-mini-fill" style="width:${miniProgressPercent}%;"></div></div>
         </div>
@@ -338,9 +342,26 @@ async function renderWordBuilderTopicGrid() {
     mount.innerHTML = `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">${cardsHtml}</div>`;
 }
 
+// The Lesson screen's back button is one static element shared by every
+// kind of content shown there (a level walk, Mixed Review, a Topic word
+// list) -- its label and destination have to be set explicitly for
+// whichever one is currently showing, rather than always saying "Levels".
+function setWordBuilderLessonBackButton(mode) {
+    const btn = document.getElementById('wordBuilderLessonBackBtn');
+    if (!btn) return;
+    if (mode === 'topic') {
+        btn.textContent = '← Topics';
+        btn.setAttribute('onclick', "switchWordBuilderLevelsView('topic'); showScreen('wordBuilderLevelsScreen', '');");
+    } else {
+        btn.textContent = '← Levels';
+        btn.setAttribute('onclick', "switchWordBuilderLevelsView('level'); showScreen('wordBuilderLevelsScreen', '');");
+    }
+}
+
 async function openWordBuilderTopic(topicName) {
     wordBuilderCurrentTopic = topicName;
     showScreen('wordBuilderLessonScreen', '');
+    setWordBuilderLessonBackButton('topic');
     const crumb = document.getElementById('wordBuilderLessonCrumb');
     if (crumb) crumb.innerText = topicName.toUpperCase();
 
@@ -539,6 +560,7 @@ window.renderWordBuilderLevelsList = renderWordBuilderLevelsList;
 
 async function openWordBuilderLevel(levelNumber) {
     wordBuilderTopicPracticeMode = false;
+    setWordBuilderLessonBackButton('level');
     const { data: level } = await _supabase
         .from('word_builder_levels')
         .select('level_number, topic_title')
@@ -1048,6 +1070,7 @@ window.startWordBuilderReviewSequence = startWordBuilderReviewSequence;
 
 async function startWordBuilderMixedReview() {
     if (!currentUser) return;
+    setWordBuilderLessonBackButton('level');
 
     const { data: levelProgress } = await _supabase
         .from('word_builder_level_progress')
