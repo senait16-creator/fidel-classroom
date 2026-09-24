@@ -987,6 +987,20 @@ function renderChallengeInlineFlashcard(fidelObj) {
             if (Math.abs(dx) < 40 || Math.abs(dy) > Math.abs(dx)) return;
             challengeFlashStep(dx < 0 ? 1 : -1);
         }, { passive: true });
+
+        // Right Shift = next card, Left Shift = previous, same idea as
+        // swiping left/right. A document-level listener (this card isn't
+        // focusable) guarded by the family detail screen's own visibility,
+        // since there's no single open/close hook to add/remove it from
+        // the way the standalone flashcard screen (js/game.js) has.
+        document.addEventListener("keydown", (e) => {
+            if (e.code !== "ShiftLeft" && e.code !== "ShiftRight") return;
+            const detailScreen = document.getElementById("challengeFamilyDetailScreen");
+            if (!detailScreen || detailScreen.style.display !== "block") return;
+            const tag = document.activeElement?.tagName;
+            if (tag === "INPUT" || tag === "TEXTAREA") return;
+            challengeFlashStep(e.code === "ShiftRight" ? 1 : -1);
+        });
     }
 }
 
