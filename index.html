@@ -663,7 +663,7 @@
                 <div id="challengeDashMapMount">
                     <p style="color:#94a3b8; font-size:13px;">Loading current level...</p>
                 </div>
-                <p class="nextstep-captain-note" id="challengeCurrentLevelCaptainNote" style="display:none;">Doesn't count toward your team.</p>
+                <p class="nextstep-captain-note" id="challengeCurrentLevelCaptainNote" style="display:none;">— doesn't count toward the team.</p>
             </div>
 
             <div class="nextstep-card nextstep-wordbuilder" id="nextstepWordBuilderCard">
@@ -695,7 +695,7 @@
              captain tools) lives in the Team tab; this is just enough to
              orient + a way in. Captains additionally see a pending-writing
              badge here instead of a standalone Home note. -->
-        <div class="team-teaser-card" id="teamTeaserCard" onclick="chooseModeChallenge()">
+        <div class="team-teaser-card" id="teamTeaserCard" style="display:none;" onclick="chooseModeChallenge()">
             <div class="team-teaser-top">
                 <span class="team-teaser-eyebrow">Your team</span>
                 <span class="team-teaser-badge" id="teamTeaserWritingBadge" style="display:none;" onclick="event.stopPropagation(); openTeamHubFromHome();"></span>
@@ -740,75 +740,21 @@
          already does this. -->
     <a href="javascript:void(0)" class="team-tab-back-link" onclick="enterStudentShellHomeTab()">← Back to Home</a>
 
-    <!-- Fidel Mastery header — same screen for Solo and Competition
-         students; the badge is the only thing that says which mode
-         you're in, set by renderChallengeDashboard(). -->
-    <div class="fidel-mastery-header">
-        <h1 class="fidel-mastery-title">Fidel Mastery</h1>
-        <span class="fidel-mastery-badge" id="competitionModeBadge" style="display:none;">🏆 Competition · <span id="competitionModeBadgeTeam"></span></span>
+    <!-- Fidel Mastery — the curriculum page. Same page for Solo and
+         Competition students; only the header color/badge and the bottom
+         line differ, set by renderFidelMasteryPage() in challenge.js. -->
+    <div class="fm-header" id="fmHeader">
+        <span class="fm-header-badge" id="fmHeaderBadge">Solo</span>
+        <div class="fm-header-level-text" id="fmHeaderLevelText">Level 1 of 11</div>
+        <div class="fm-header-progress-track"><div class="fm-header-progress-fill" id="fmHeaderProgressFill" style="width:0%;"></div></div>
+        <button type="button" class="fm-header-continue-btn" id="fmHeaderContinueBtn">Continue</button>
     </div>
 
-    <!-- ============================================================
-         CAPTAIN TEAM CARD — captains only. A prominent team summary
-         plus one obvious entry point into Team Hub, replacing the old
-         always-open seven-card Captain Dashboard (captains are still
-         learners too, so nothing about Learn/Home changes for them).
-         ============================================================ -->
-    <div id="captainTeamCard" class="captain-team-card" style="display:none;">
-        <div class="captain-team-top">
-            <span class="captain-team-dot" id="captainTeamDot"></span>
-            <span id="captainTeamMetaLine">Loading...</span>
-        </div>
-        <div class="captain-team-avatars" id="captainTeamAvatars"></div>
-        <div class="captain-team-cleared-line" id="captainTeamClearedLine"></div>
-        <div class="captain-attn-chip" id="captainAttnChip" style="display:none;"></div>
-        <button type="button" class="captain-hub-btn" onclick="openCaptainTeamHub()">Open Team Hub →</button>
+    <div class="fm-level-grid" id="fmLevelGrid">
+        <p style="color:#94a3b8; font-size:13px;">Loading levels...</p>
     </div>
 
     <div class="challenge-dash-grid">
-
-        <section class="challenge-dash-card" id="challengeTeamUrgencyCard" style="display:none;">
-            <div id="teamUrgencyMount"></div>
-        </section>
-
-        <section class="challenge-dash-card" id="challengeTeamStatusMount" style="display:none;">
-            <button id="challengeYourTeamBtn" class="challenge-team-row-btn">
-                <span class="challenge-team-row-dot" id="challengeYourTeamDot"></span>
-                <span class="challenge-team-row-name" id="challengeYourTeamName">Your Team</span>
-                <span class="challenge-team-row-arrow">→</span>
-                <span class="challenge-team-row-stat" id="challengeYourTeamStat"></span>
-            </button>
-
-            <div id="challengeTeamStatusContent" class="challenge-team-status-content">
-                <p style="color:#94a3b8;font-size:13px;">Loading team status...</p>
-            </div>
-        </section>
-
-        <section class="challenge-dash-card" id="studentMeetingCard" style="display:none;">
-            <div class="challenge-card-title"><span data-icon="calendar"></span> Team Lesson Schedule</div>
-            <div id="studentMeetingMount"></div>
-        </section>
-
-        <section class="challenge-dash-card" id="challengeTeamRaceCard" style="display:none;">
-            <div class="challenge-card-title">
-                🏁 Team Race
-                <button type="button" class="race-info-btn" onclick="this.parentElement.nextElementSibling.classList.toggle('open')" aria-label="How team ranking works">ⓘ</button>
-            </div>
-            <p class="race-explainer-text">Teams move up when every member reaches the next level. Individual progress helps break ties.</p>
-            <div id="challengeDashRaceMount">
-                <p style="color:#94a3b8;font-size:13px;">Loading race...</p>
-            </div>
-        </section>
-
-        <section class="challenge-dash-card timeline-preview-card">
-            <div class="challenge-card-title">🕰️ Competition Timeline</div>
-            <div id="timelinePreviewMiniCalendar" class="timeline-mini-calendar"></div>
-            <div id="timelinePreviewHighlights" class="timeline-preview-highlights">
-                <p style="color:#94a3b8;font-size:13px;">Loading...</p>
-            </div>
-            <button type="button" class="timeline-view-full-btn" onclick="openCompetitionCalendar()">View Full Competition Timeline →</button>
-        </section>
-
         <section class="challenge-dash-card">
             <div class="challenge-card-title" id="currentLevelResourcesTitle"><span data-icon="books"></span> Level Resources</div>
 
@@ -850,9 +796,21 @@
                     <small>Matching game for this level's families</small>
                 </div>
             </button>
-        </section>
 
+            <button type="button" class="challenge-resource-btn" onclick="openLetterBoard()">
+                <span><span data-icon="book-open"></span></span>
+                <div>
+                    <strong>Browse all letters</strong>
+                    <small>Every Fidel letter in one library</small>
+                </div>
+            </button>
+        </section>
     </div>
+
+    <!-- Team students: "Competition · [Team] · [position] →" opens the
+         separate Team page (race/meeting/timeline). Solo students: a
+         short explainer of how teams work instead. -->
+    <div class="fm-bottom-line" id="fmBottomLine"></div>
     </div>
 
     <div class="stushell-tab-panel" data-tab="profile">
@@ -1058,6 +1016,94 @@
     <div id="challengeLevelsGrid" class="challenge-levels-grid"></div>
 </div>
 
+<!-- ============================================================
+     TEAM PAGE — race, weekly meeting, timeline, and (for captains)
+     the Team Hub entry card. Reached from Fidel Mastery's bottom line
+     for team students only; Solo students never see this screen.
+     ============================================================ -->
+<div id="teamPageScreen" style="display:none; max-width:700px; margin:0 auto; padding:0 16px calc(48px + env(safe-area-inset-bottom, 0px));">
+    <div class="workspace-title">
+        <span><span data-icon="trophy"></span> Competition</span>
+        <button class="btn-secondary" onclick="enterStudentShellCompetitionTab()">← Back</button>
+    </div>
+
+    <div id="captainTeamCard" class="captain-team-card" style="display:none;">
+        <div class="captain-team-top">
+            <span class="captain-team-dot" id="captainTeamDot"></span>
+            <span id="captainTeamMetaLine">Loading...</span>
+        </div>
+        <div class="captain-team-avatars" id="captainTeamAvatars"></div>
+        <div class="captain-team-cleared-line" id="captainTeamClearedLine"></div>
+        <div class="captain-attn-chip" id="captainAttnChip" style="display:none;"></div>
+        <button type="button" class="captain-hub-btn" onclick="openCaptainTeamHub()">Open Team Hub →</button>
+    </div>
+
+    <div class="challenge-dash-grid">
+
+        <section class="challenge-dash-card" id="challengeTeamUrgencyCard" style="display:none;">
+            <div id="teamUrgencyMount"></div>
+        </section>
+
+        <section class="challenge-dash-card" id="challengeTeamStatusMount" style="display:none;">
+            <button id="challengeYourTeamBtn" class="challenge-team-row-btn">
+                <span class="challenge-team-row-dot" id="challengeYourTeamDot"></span>
+                <span class="challenge-team-row-name" id="challengeYourTeamName">Your Team</span>
+                <span class="challenge-team-row-arrow">→</span>
+                <span class="challenge-team-row-stat" id="challengeYourTeamStat"></span>
+            </button>
+
+            <div id="challengeTeamStatusContent" class="challenge-team-status-content">
+                <p style="color:#94a3b8;font-size:13px;">Loading team status...</p>
+            </div>
+        </section>
+
+        <section class="challenge-dash-card" id="studentMeetingCard" style="display:none;">
+            <div class="challenge-card-title"><span data-icon="calendar"></span> Team Lesson Schedule</div>
+            <div id="studentMeetingMount"></div>
+        </section>
+
+        <section class="challenge-dash-card" id="challengeTeamRaceCard" style="display:none;">
+            <div class="challenge-card-title">
+                🏁 Team Race
+                <button type="button" class="race-info-btn" onclick="this.parentElement.nextElementSibling.classList.toggle('open')" aria-label="How team ranking works">ⓘ</button>
+            </div>
+            <p class="race-explainer-text">Teams move up when every member reaches the next level. Individual progress helps break ties.</p>
+            <div id="challengeDashRaceMount">
+                <p style="color:#94a3b8;font-size:13px;">Loading race...</p>
+            </div>
+        </section>
+
+        <section class="challenge-dash-card timeline-preview-card">
+            <div class="challenge-card-title">🕰️ Competition Timeline</div>
+            <div id="timelinePreviewMiniCalendar" class="timeline-mini-calendar"></div>
+            <div id="timelinePreviewHighlights" class="timeline-preview-highlights">
+                <p style="color:#94a3b8;font-size:13px;">Loading...</p>
+            </div>
+            <button type="button" class="timeline-view-full-btn" onclick="openCompetitionCalendar()">View Full Competition Timeline →</button>
+        </section>
+
+    </div>
+</div>
+
+<!-- ============================================================
+     SOLO COMPETITION EXPLAINER — short overlay for Solo students
+     explaining how teams work and how to join one. Opened from Fidel
+     Mastery's "ⓘ Competition" bottom line.
+     ============================================================ -->
+<div id="soloCompetitionInfoOverlay" style="display:none; position:fixed; inset:0; z-index:9996; background:rgba(0,0,0,0.4); align-items:center; justify-content:center; padding:20px;">
+    <div style="background:#fff; border-radius:20px; padding:24px; max-width:380px; width:100%; text-align:center;">
+        <div style="font-size:36px; margin-bottom:8px;">🏁</div>
+        <p style="font-size:16px; font-weight:800; color:#1c1b17; margin-bottom:10px;">How Competition works</p>
+        <p style="font-size:13.5px; color:#475569; line-height:1.5; margin-bottom:8px; text-align:left;">
+            Students on a team race together: everyone's letters count toward the team's level, there's a weekly Star of the Week, and a team meeting schedule.
+        </p>
+        <p style="font-size:13.5px; color:#475569; line-height:1.5; margin-bottom:18px; text-align:left;">
+            Your own Fidel progress counts the same either way — teams are optional. Ask Senait if you'd like to join one.
+        </p>
+        <button type="button" class="btn-primary" style="width:100%;" onclick="closeSoloCompetitionInfo()">Got it</button>
+    </div>
+</div>
+
 <div id="challengeFamilyScreen" style="display:none; max-width:700px; margin:40px auto; padding:0 16px;">
     <div class="workspace-title">
         <span id="challengeFamilyTitle">Level</span>
@@ -1122,8 +1168,8 @@
         <div class="challenge-inline-section-label"><span data-icon="pencil"></span> Submit Photo</div>
         <div id="challengeWritingLockCard" class="submit-card-locked" style="display:none;">
             <div class="lock-icon"><span data-icon="lock"></span></div>
-            <div class="lock-title">Locked</div>
-            <div class="lock-sub">Pass the matching game (streak of 20) to unlock</div>
+            <div class="lock-title" id="challengeWritingLockTitle">Locked</div>
+            <div class="lock-sub" id="challengeWritingLockSub">Pass the matching game (streak of 20) to unlock</div>
         </div>
         <button id="challengeDetailWritingBtn" class="challenge-step-btn writing-step" style="display:none;">
             <span class="step-icon-circle"><span data-icon="pencil"></span></span>
@@ -1999,8 +2045,8 @@
 </div>
 <!-- END CAN-DO STATEMENTS -->
 
-<script src="js/icons.js?v=4" defer></script>
-<script src="js/navigation.js?v=14" defer></script>
+<script src="js/icons.js?v=5" defer></script>
+<script src="js/navigation.js?v=15" defer></script>
 <script src="js/app.js?v=29" defer></script>
 <script src="js/auth.js?v=21" defer></script>
 <script src="js/guide.js?v=10" defer></script>
@@ -2023,11 +2069,11 @@
         <script src="js/starboard.js?v=1" defer></script>
 <script src="js/wordle.js?v=9" defer></script>
 <script src="intro.js?v=1" defer></script>
-<script src="js/challenge.js?v=38" defer></script>
+<script src="js/challenge.js?v=39" defer></script>
 <script src="js/calendar.js?v=7" defer></script>
 <script src="js/menu.js?v=11" defer></script>
 <script src="js/push.js?v=8" defer></script>
-<script src="js/studentshell.js?v=19" defer></script>
+<script src="js/studentshell.js?v=20" defer></script>
 
 <script>
     if ('serviceWorker' in navigator) {

@@ -57,7 +57,10 @@ async function enterStudentShellHomeTab() {
     const eyebrow = document.getElementById('challengeCurrentLevelEyebrow');
     const captainNote = document.getElementById('challengeCurrentLevelCaptainNote');
     if (eyebrow) eyebrow.innerText = currentProfile?.is_captain ? 'Your own learning (Solo)' : 'Fidel';
-    if (captainNote) captainNote.style.display = currentProfile?.is_captain ? '' : 'none';
+    if (captainNote) {
+        captainNote.innerText = '— doesn’t count toward the team.';
+        captainNote.style.display = currentProfile?.is_captain ? '' : 'none';
+    }
 
     if (typeof renderChallengeDashboardMap === 'function') await renderChallengeDashboardMap(levels, myLevel);
     if (typeof renderLevelCompletionBanner === 'function') await renderLevelCompletionBanner('levelCompletionMount');
@@ -65,7 +68,9 @@ async function enterStudentShellHomeTab() {
     if (typeof renderCaptainTasksCard === 'function') await renderCaptainTasksCard();
 
     renderTeamTeaser(team);
-    if (typeof renderCaptainHomeWritingStatus === 'function') await renderCaptainHomeWritingStatus();
+    // Captain's pending-review count now lives on the Captain tasks card
+    // above (renderCaptainTasksCard()) instead of this badge on the team
+    // teaser, so it isn't shown twice.
 
     await Promise.all([
         renderWordBuilderNextStepCard(),
@@ -86,14 +91,19 @@ window.enterStudentShellHomeTab = enterStudentShellHomeTab;
 // ---------------------------------------------------------------------------
 
 async function renderTeamTeaser(team) {
+    const card = document.getElementById('teamTeaserCard');
+
+    // Solo (no-team) students get the "ⓘ Competition" line on Fidel
+    // Mastery instead -- this card would just repeat that.
+    if (!currentProfile?.team_id) {
+        if (card) card.style.display = 'none';
+        return;
+    }
+    if (card) card.style.display = '';
+
     const nameEl = document.getElementById('teamTeaserName');
     const subEl = document.getElementById('teamTeaserSub');
     if (nameEl) nameEl.innerText = team.name;
-
-    if (!currentProfile?.team_id) {
-        if (subEl) subEl.innerText = 'Join a team to unlock team races and the Star Board.';
-        return;
-    }
 
     let meetingLine = '';
     try {
