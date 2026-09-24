@@ -11,7 +11,9 @@
 
 function openHamburgerMenu() {
     document.getElementById('hamburgerMenuOverlay').style.display = 'block';
-    document.getElementById('hamburgerMenuPanel').style.transform = 'translateX(0)';
+    const panel = document.getElementById('hamburgerMenuPanel');
+    panel.style.transform = 'translateX(0)';
+    panel.style.boxShadow = '-8px 0 32px rgba(0,0,0,0.15)';
     if (typeof updatePushMenuButton === 'function') updatePushMenuButton();
 }
 
@@ -19,6 +21,11 @@ function closeHamburgerMenu() {
     document.getElementById('hamburgerMenuPanel').style.transform = 'translateX(100%)';
     setTimeout(() => {
         document.getElementById('hamburgerMenuOverlay').style.display = 'none';
+        // The panel sits just off-screen at rest -- its own box-shadow, left
+        // on unconditionally, bled ~40px past the panel's edge into the
+        // viewport as a permanent gray sliver down the right side of every
+        // screen. Clearing it once the slide-out finishes removes that.
+        document.getElementById('hamburgerMenuPanel').style.boxShadow = 'none';
     }, 250);
 }
 
