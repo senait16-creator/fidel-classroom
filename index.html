@@ -727,7 +727,7 @@
         <section class="challenge-dash-card">
             <div class="challenge-card-title" id="currentLevelResourcesTitle"><span data-icon="books"></span> Level Resources</div>
 
-            <button class="challenge-resource-btn" onclick="window.open('https://amharicteacher.com/hahu','_blank')">
+            <button class="challenge-resource-btn" onclick="openSoundsPreview()">
                 <span><span data-icon="speaker"></span></span>
                 <div>
                     <strong>Sounds</strong>
@@ -1073,6 +1073,27 @@
     </div>
 </div>
 
+<!-- ============================================================
+     SOUNDS SNEAK PEEK — a preview of the external Fidel-sounds page
+     instead of jumping straight there. iframe src is set lazily on
+     open (not on page load), and the "Open full page" link is always
+     shown, not conditional, since a cross-origin site could block
+     embedding and there's no fully reliable way to detect that from
+     here.
+     ============================================================ -->
+<div id="soundsPreviewOverlay" style="display:none; position:fixed; inset:0; z-index:9997; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; padding:16px;">
+    <div style="background:#fff; border-radius:20px; overflow:hidden; max-width:480px; width:100%; max-height:85vh; display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid #e2e8f0; flex-shrink:0;">
+            <span style="font-size:14px; font-weight:800; color:#1c1b17; display:flex; align-items:center; gap:6px;"><span data-icon="speaker"></span> Fidel Sounds — sneak peek</span>
+            <button type="button" onclick="closeSoundsPreview()" style="background:#f1f5f9; border:none; border-radius:50%; width:30px; height:30px; font-size:15px; cursor:pointer; flex-shrink:0;">✕</button>
+        </div>
+        <iframe id="soundsPreviewFrame" title="Fidel Sounds preview" src="" style="width:100%; height:55vh; border:none; background:#f8fafc; flex:1;"></iframe>
+        <a href="https://amharicteacher.com/hahu" target="_blank" rel="noopener" style="display:block; text-align:center; padding:13px; font-size:13px; font-weight:700; color:#166534; text-decoration:none; border-top:1px solid #e2e8f0; flex-shrink:0;">
+            Open full page to hear the sounds ↗
+        </a>
+    </div>
+</div>
+
 <div id="challengeFamilyScreen" style="display:none; max-width:700px; margin:40px auto; padding:0 16px;">
     <div class="workspace-title">
         <span id="challengeFamilyTitle">Level</span>
@@ -1089,9 +1110,9 @@
     </div>
 
     <div class="row-resource-links">
-        <a class="row-resource-link" href="https://amharicteacher.com/hahu" target="_blank" rel="noopener">
+        <button type="button" class="row-resource-link" onclick="openSoundsPreview()">
             <span class="rl-icon"><span data-icon="speaker"></span></span> Listen <span class="rl-arrow">↗</span>
-        </a>
+        </button>
         <button type="button" class="row-resource-link alt" onclick="openLevelResourcesOverlay()">
             <span class="rl-icon"><span data-icon="books"></span></span> Learn <span class="rl-arrow">↗</span>
         </button>
@@ -1166,14 +1187,14 @@
         </div>
 
         <div style="display:flex; flex-direction:column; gap:10px;">
-            <a href="https://amharicteacher.com/hahu" target="_blank" rel="noopener" style="display:flex; align-items:center; gap:12px; padding:14px 16px; background:#fff7ed; border:1px solid #fed7aa; border-radius:12px; text-decoration:none; color:#1e293b;">
+            <button type="button" onclick="openSoundsPreview()" style="width:100%; font:inherit; cursor:pointer; display:flex; align-items:center; gap:12px; padding:14px 16px; background:#fff7ed; border:1px solid #fed7aa; border-radius:12px; text-decoration:none; color:#1e293b; text-align:left;">
                 <span style="font-size:24px; flex-shrink:0;"><span data-icon="speaker"></span></span>
                 <div>
                     <div style="font-size:14px; font-weight:700; color:#c2410c;">Letter Sounds</div>
                     <div style="font-size:12px; color:#64748b; margin-top:2px;">Hear Fidel sounds pronounced out loud</div>
                 </div>
                 <span style="margin-left:auto; color:#94a3b8; font-size:12px;">↗</span>
-            </a>
+            </button>
 
             <a href="https://www.youtube.com/watch?v=QgssO7_WkSk&t=160s" target="_blank" rel="noopener" style="display:flex; align-items:center; gap:12px; padding:14px 16px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; text-decoration:none; color:#1e293b;">
                 <span style="font-size:24px; flex-shrink:0;">▶️</span>
@@ -1725,14 +1746,14 @@
                 <span style="margin-left:auto; color:#94a3b8; font-size:12px;">↗</span>
             </a>
 
-            <a href="https://amharicteacher.com/hahu" target="_blank" rel="noopener" style="display:flex; align-items:center; gap:12px; padding:14px 16px; background:#fff7ed; border:1px solid #fed7aa; border-radius:12px; text-decoration:none; color:#1e293b; transition:all 0.2s;">
+            <button type="button" onclick="openSoundsPreview()" style="width:100%; font:inherit; cursor:pointer; text-align:left; display:flex; align-items:center; gap:12px; padding:14px 16px; background:#fff7ed; border:1px solid #fed7aa; border-radius:12px; text-decoration:none; color:#1e293b; transition:all 0.2s;">
                 <span style="font-size:24px; flex-shrink:0;"><span data-icon="speaker"></span></span>
                 <div>
                     <div style="font-size:14px; font-weight:700; color:#c2410c;">Letter Sounds</div>
                     <div style="font-size:12px; color:#64748b; margin-top:2px;">Hear Fidel sounds pronounced out loud</div>
                 </div>
                 <span style="margin-left:auto; color:#94a3b8; font-size:12px;">↗</span>
-            </a>
+            </button>
 
             <a href="https://www.youtube.com/results?search_query=amharic+alphabet+song" target="_blank" rel="noopener" style="display:flex; align-items:center; gap:12px; padding:14px 16px; background:#fdf4ff; border:1px solid #e9d5ff; border-radius:12px; text-decoration:none; color:#1e293b; transition:all 0.2s;">
                 <span style="font-size:24px; flex-shrink:0;"><span data-icon="music"></span></span>
@@ -2026,7 +2047,7 @@
 <script src="js/reading.js?v=29" defer></script>
 <script src="js/guidedpath.js?v=1" defer></script>
 <script src="js/wordbuilder.js?v=14" defer></script>
-    <script src="js/letterboard.js?v=18" defer></script>
+    <script src="js/letterboard.js?v=19" defer></script>
 <script src="js/team/progress.js?v=32" defer></script>
 <script src="js/team/levels.js?v=14" defer></script>
 <script src="js/team/map.js?v=9" defer></script>
@@ -2038,7 +2059,7 @@
         <script src="js/starboard.js?v=1" defer></script>
 <script src="js/wordle.js?v=9" defer></script>
 <script src="intro.js?v=1" defer></script>
-<script src="js/challenge.js?v=39" defer></script>
+<script src="js/challenge.js?v=40" defer></script>
 <script src="js/calendar.js?v=7" defer></script>
 <script src="js/menu.js?v=11" defer></script>
 <script src="js/push.js?v=8" defer></script>
