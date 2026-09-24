@@ -110,49 +110,17 @@ function renderLetterBoardQuickLinks() {
 }
 
 // ---------------------------------------------------------------------------
-// Practice Home — solo-practice counterpart to Competition's Home (hero +
-// Continue card), scoped to FIDEL_BOARD_LEVELS/student_family_progress
-// instead of team-gated levels. Reuses the exact same .challenge-continue-*
-// markup/classes Competition's Continue card uses, just fed practice data.
+// Practice Home is retired — Fidel Mastery is one screen for Solo and
+// Competition students now (js/challenge.js's chooseModeChallenge()).
+// Kept as a thin alias since it's still wired up from several existing
+// entry points (sidebar, curriculum row, "Short on time?" buttons) that
+// don't need to change. The Letter Board screen below (its own separate,
+// hard-coded FIDEL_BOARD_LEVELS grid) is no longer routed to from
+// anywhere live, but is left in place rather than deleted.
 // ---------------------------------------------------------------------------
 
-async function enterPracticeHome() {
-    showScreen('practiceHomeScreen', 'block');
-    if (typeof applyModeLockStyling === 'function') applyModeLockStyling();
-
-    await loadLetterBoardProgress();
-    const progress = _lbProgressCache || {};
-
-    const allFamilies = FIDEL_BOARD_LEVELS.flatMap(row => row.families);
-    const masteredCount = allFamilies.filter(f => progress[f.base] === 'mastered').length;
-    const total = allFamilies.length;
-
-    const percent = Math.min(100, Math.round((masteredCount / total) * 100));
-    const fill = document.getElementById('practiceProgressFill');
-    const label = document.getElementById('practiceProgressLabel');
-    if (fill) fill.style.width = `${percent}%`;
-    if (label) label.innerText = `${masteredCount} / ${total} Letters`;
-
-    // First set with something left to master — falls back to the last set
-    // if everything's already mastered, so there's always something to show.
-    const targetSet = FIDEL_BOARD_LEVELS.find(row => row.families.some(f => progress[f.base] !== 'mastered'))
-        || FIDEL_BOARD_LEVELS[FIDEL_BOARD_LEVELS.length - 1];
-    const targetFamily = targetSet.families.find(f => progress[f.base] !== 'mastered') || targetSet.families[0];
-
-    const tilesHtml = targetSet.families.map(f =>
-        `<div class="challenge-continue-tile${f.base === targetFamily.base ? ' active' : ''}">${f.base}</div>`
-    ).join('');
-
-    const mount = document.getElementById('practiceContinueMount');
-    if (mount) {
-        mount.innerHTML = `
-            <p class="challenge-continue-label">Continue ${ordinalSetLabel(targetSet.level)}</p>
-            <div class="challenge-continue-tiles">${tilesHtml}</div>
-            <button class="challenge-continue-btn" id="practiceContinueBtn">Practice ${targetFamily.base} family</button>
-        `;
-        const btn = document.getElementById('practiceContinueBtn');
-        if (btn) btn.onclick = () => openFamilyFromBoard(targetFamily.base);
-    }
+function enterPracticeHome() {
+    return chooseModeChallenge();
 }
 window.enterPracticeHome = enterPracticeHome;
 

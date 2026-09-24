@@ -581,11 +581,10 @@
         </button>
         <nav class="app-sidebar-nav" aria-label="Main">
             <button type="button" class="app-sidebar-link active" data-tab="home" onclick="switchStudentShellTab('home')"><span data-icon="house"></span> Home</button>
-            <button type="button" class="app-sidebar-link" onclick="enterModeIfUnlocked('practice', enterPracticeHome)"><span>ሀ</span> Fidel</button>
+            <button type="button" class="app-sidebar-link" data-tab="competition" onclick="chooseModeChallenge()"><span>ሀ</span> Fidel Mastery</button>
             <button type="button" class="app-sidebar-link" onclick="enterWordBuilderHome()"><span>ቃ</span> Word Builder</button>
             <button type="button" class="app-sidebar-link" onclick="enterModeIfUnlocked('amharicPath', enterAmharicPath)"><span>ጉ</span> Amharic Path</button>
             <div class="app-sidebar-divider"></div>
-            <button type="button" class="app-sidebar-link" data-tab="competition" onclick="chooseModeChallenge()"><span data-icon="trophy"></span> Team</button>
             <button type="button" class="app-sidebar-link" onclick="chooseModeCommunity()"><span data-icon="confetti"></span> Community</button>
             <button type="button" class="app-sidebar-link" data-tab="profile" onclick="switchStudentShellTab('profile')"><span data-icon="user"></span> Profile</button>
         </nav>
@@ -704,6 +703,14 @@
          already does this. -->
     <a href="javascript:void(0)" class="team-tab-back-link" onclick="enterStudentShellHomeTab()">← Back to Home</a>
 
+    <!-- Fidel Mastery header — same screen for Solo and Competition
+         students; the badge is the only thing that says which mode
+         you're in, set by renderChallengeDashboard(). -->
+    <div class="fidel-mastery-header">
+        <h1 class="fidel-mastery-title">Fidel Mastery</h1>
+        <span class="fidel-mastery-badge" id="competitionModeBadge" style="display:none;">🏆 Competition · <span id="competitionModeBadgeTeam"></span></span>
+    </div>
+
     <!-- ============================================================
          CAPTAIN TEAM CARD — captains only. A prominent team summary
          plus one obvious entry point into Team Hub, replacing the old
@@ -727,7 +734,7 @@
             <div id="teamUrgencyMount"></div>
         </section>
 
-        <section class="challenge-dash-card" id="challengeTeamStatusMount">
+        <section class="challenge-dash-card" id="challengeTeamStatusMount" style="display:none;">
             <button id="challengeYourTeamBtn" class="challenge-team-row-btn">
                 <span class="challenge-team-row-dot" id="challengeYourTeamDot"></span>
                 <span class="challenge-team-row-name" id="challengeYourTeamName">Your Team</span>
@@ -745,7 +752,7 @@
             <div id="studentMeetingMount"></div>
         </section>
 
-        <section class="challenge-dash-card">
+        <section class="challenge-dash-card" id="challengeTeamRaceCard" style="display:none;">
             <div class="challenge-card-title">
                 🏁 Team Race
                 <button type="button" class="race-info-btn" onclick="this.parentElement.nextElementSibling.classList.toggle('open')" aria-label="How team ranking works">ⓘ</button>
@@ -1690,64 +1697,6 @@
 </div>
 
 <!-- ============================================================
-     FIDEL PRACTICE HOME — a self-paced contextual home for solo letter
-     practice, mirroring Competition's Home (hero + Continue card)
-     but scoped to user_progress.mastered_letters instead of team
-     levels. "Continue" opens that specific family via the existing
-     openFamilyFromBoard(); "Browse Full Library" opens the full
-     letterBoardScreen unfiltered.
-     ============================================================ -->
-<div id="practiceHomeScreen" style="display:none; min-height:100vh; padding:0 16px calc(180px + env(safe-area-inset-bottom, 0px)); background:#f5f5f0;">
-    <div style="max-width:480px; margin:0 auto; padding-top:32px;">
-        <div class="workspace-title">
-            <span><span data-icon="pencil"></span> Fidel Practice</span>
-            <button class="btn-secondary" onclick="enterModeSelect()">← Home</button>
-        </div>
-
-        <div class="challenge-dash-hero" style="background:linear-gradient(135deg,#14532d,#166534,#22c55e);">
-            <div class="challenge-hero-meta-row">
-                <span class="challenge-hero-team-dot" style="background:rgba(255,255,255,.5);"></span>
-                <span>Practicing Solo</span>
-            </div>
-            <div class="pe-progress-track"><div class="pe-progress-fill" id="practiceProgressFill" style="width:0%;"></div></div>
-            <div class="pe-progress-caption" id="practiceProgressLabel">– / – Letters</div>
-        </div>
-
-        <div class="challenge-continue-card">
-            <div id="practiceContinueMount">
-                <p style="color:#94a3b8; font-size:13px;">Loading...</p>
-            </div>
-        </div>
-
-        <!-- Prototype: persistent area switcher, same four modes as the
-             Launcher/Home cup grid, so switching doesn't require going
-             back through Home first. -->
-        <div class="mode-switcher-strip">
-            <button type="button" class="mode-switcher-btn active" style="color:#166534;">
-                <span class="mode-switcher-icon">ፊደል</span>
-                <span class="mode-switcher-label">Practice</span>
-            </button>
-            <button type="button" class="mode-switcher-btn" onclick="enterStudentShellHomeTab()" style="color:#b45309;">
-                <span class="mode-switcher-icon">ውድድር</span>
-                <span class="mode-switcher-label">Competition</span>
-            </button>
-            <button type="button" class="mode-switcher-btn" data-mode="wordBuilder" onclick="enterWordBuilderHome()" style="color:#4f46e5;">
-                <span class="mode-switcher-icon">ቃላት</span>
-                <span class="mode-switcher-label">Word Builder</span>
-            </button>
-            <button type="button" class="mode-switcher-btn" data-mode="amharicPath" onclick="enterModeIfUnlocked('amharicPath', enterAmharicPath)" style="color:#4338ca;">
-                <span class="mode-switcher-icon">ጉዞዬ</span>
-                <span class="mode-switcher-label">Amharic Path</span>
-            </button>
-        </div>
-
-        <button type="button" class="btn-secondary" style="width:100%; margin-top:6px;" onclick="openLetterBoard()">
-            <span data-icon="book-open"></span> Browse Full Library →
-        </button>
-    </div>
-</div>
-
-<!-- ============================================================
      CHALLENGE MAP OVERLAY
      ============================================================ -->
 
@@ -2014,19 +1963,19 @@
 <!-- END CAN-DO STATEMENTS -->
 
 <script src="js/icons.js?v=4" defer></script>
-<script src="js/navigation.js?v=12" defer></script>
+<script src="js/navigation.js?v=13" defer></script>
 <script src="js/app.js?v=29" defer></script>
 <script src="js/auth.js?v=21" defer></script>
 <script src="js/guide.js?v=10" defer></script>
 <script src="js/utils/compress.js?v=9" defer></script>
 <script src="js/game.js?v=10" defer></script>
-<script src="js/submissions.js?v=15" defer></script>
+<script src="js/submissions.js?v=16" defer></script>
 <script src="js/teacher.js?v=33" defer></script>
 <script src="js/reading.js?v=29" defer></script>
 <script src="js/guidedpath.js?v=1" defer></script>
 <script src="js/wordbuilder.js?v=14" defer></script>
-    <script src="js/letterboard.js?v=17" defer></script>
-<script src="js/team/progress.js?v=30" defer></script>
+    <script src="js/letterboard.js?v=18" defer></script>
+<script src="js/team/progress.js?v=31" defer></script>
 <script src="js/team/levels.js?v=14" defer></script>
 <script src="js/team/map.js?v=9" defer></script>
 <script src="js/team/hub.js?v=26" defer></script>
@@ -2037,11 +1986,11 @@
         <script src="js/starboard.js?v=1" defer></script>
 <script src="js/wordle.js?v=9" defer></script>
 <script src="intro.js?v=1" defer></script>
-<script src="js/challenge.js?v=36" defer></script>
+<script src="js/challenge.js?v=37" defer></script>
 <script src="js/calendar.js?v=7" defer></script>
 <script src="js/menu.js?v=11" defer></script>
 <script src="js/push.js?v=8" defer></script>
-<script src="js/studentshell.js?v=17" defer></script>
+<script src="js/studentshell.js?v=18" defer></script>
 
 <script>
     if ('serviceWorker' in navigator) {

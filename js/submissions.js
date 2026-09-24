@@ -485,15 +485,23 @@ async function finalizeWritingSubmission(imageUrl) {
         return showNotificationToast("Couldn't submit: " + (error.message || "unknown error"));
     }
 
-    showNotificationToast(`Submitted! Your captain will review it soon. ${icon("confetti")}`);
+    const reviewer = currentProfile?.team_id ? "Your captain" : "Your teacher";
+    showNotificationToast(`Submitted! ${reviewer} will review it soon. ${icon("confetti")}`);
     closeWritingSubmitScreen();
 
-    if (typeof sendPushNotification === 'function' && currentProfile?.team_id) {
-        sendPushNotification({
-            type: 'writing_submitted',
-            team_id: currentProfile.team_id,
-            base_letter: writingSubmitContext.baseLetter
-        });
+    if (typeof sendPushNotification === 'function') {
+        if (currentProfile?.team_id) {
+            sendPushNotification({
+                type: 'writing_submitted',
+                team_id: currentProfile.team_id,
+                base_letter: writingSubmitContext.baseLetter
+            });
+        } else {
+            sendPushNotification({
+                type: 'writing_submitted_solo',
+                base_letter: writingSubmitContext.baseLetter
+            });
+        }
     }
 }
 

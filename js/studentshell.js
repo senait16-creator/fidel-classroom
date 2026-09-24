@@ -407,11 +407,6 @@ async function fetchStudentShellMilestones(limit) {
 // ---------------------------------------------------------------------------
 
 async function openWritingQuickLink() {
-    if (!currentProfile?.team_id) {
-        showNotificationToast("You'll be able to submit writing once you're on a team.");
-        return;
-    }
-
     const currentLevel = await getMyCurrentLevel();
 
     const { data: level } = await _supabase
@@ -582,10 +577,6 @@ async function openUploadSheet() {
 
     const sub = document.getElementById('uploadSheetHandwritingSub');
     if (!sub) return;
-    if (!currentProfile?.team_id) {
-        sub.innerText = "You'll be able to submit once you're on a team";
-        return;
-    }
 
     const currentLevel = await getMyCurrentLevel();
     const { data: level } = await _supabase
