@@ -143,7 +143,7 @@ async function renderChallengeDashboard() {
         };
     }
 
-    renderFidelMasteryLevelGrid(levels, myLevel);
+    renderFidelMasteryLevelGrid(levels, myLevel, targetFamily);
 
     const bottomLine = document.getElementById("fmBottomLine");
     if (bottomLine) {
@@ -176,7 +176,7 @@ async function renderChallengeDashboard() {
 // 11 level cards: Done ✓ / You're here / Upcoming, based on the
 // student's own current_level (never the team's) -- a captain's or any
 // team member's own grid always reflects their individual progress.
-function renderFidelMasteryLevelGrid(levels, myLevel) {
+function renderFidelMasteryLevelGrid(levels, myLevel, targetFamily) {
     const grid = document.getElementById("fmLevelGrid");
     if (!grid) return;
 
@@ -196,7 +196,18 @@ function renderFidelMasteryLevelGrid(levels, myLevel) {
             <div class="fm-level-letters">${(level.letter_families || []).join(' ')}</div>
             <div class="fm-level-state">${stateLabel}</div>
         `;
-        card.onclick = () => openChallengeFamilyPicker(level);
+        // "You're here" goes straight to the same family the Continue
+        // button (here and on Home) opens, instead of the picker --
+        // tapping your current level shouldn't be a different, extra step
+        // from tapping Continue right above it.
+        if (state === "current") {
+            const fidelObj = targetFamily ? alphabetData.find(f => f.base === targetFamily) : null;
+            card.onclick = fidelObj
+                ? () => openChallengeFamilyDetail(fidelObj, level.level_number, 'dashboard')
+                : () => openChallengeFamilyPicker(level);
+        } else {
+            card.onclick = () => openChallengeFamilyPicker(level);
+        }
         grid.appendChild(card);
     });
 }
