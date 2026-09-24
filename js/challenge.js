@@ -241,6 +241,31 @@ function closeSoloCompetitionInfo() {
 }
 window.closeSoloCompetitionInfo = closeSoloCompetitionInfo;
 
+// ---------------------------------------------------------------------------
+// Sounds sneak peek — every "Sounds"/"Listen"/"Letter Sounds" resource link
+// across the app opens this preview instead of jumping straight to the
+// external site. The iframe's src is set on first open, not page load.
+// ---------------------------------------------------------------------------
+
+function openSoundsPreview() {
+    const overlay = document.getElementById("soundsPreviewOverlay");
+    const frame = document.getElementById("soundsPreviewFrame");
+    if (!overlay) return;
+    // frame.src (the IDL property) resolves an empty attribute against the
+    // page's own URL, so it reads as a non-empty string even before this
+    // ever runs -- getAttribute() is the only reliable "has this been set
+    // yet" check here.
+    if (frame && !frame.getAttribute("src")) frame.setAttribute("src", "https://amharicteacher.com/hahu");
+    overlay.style.display = "flex";
+}
+window.openSoundsPreview = openSoundsPreview;
+
+function closeSoundsPreview() {
+    const overlay = document.getElementById("soundsPreviewOverlay");
+    if (overlay) overlay.style.display = "none";
+}
+window.closeSoundsPreview = closeSoundsPreview;
+
 // The resource videos/links themselves are the same regardless of level
 // (general Fidel alphabet resources), so this just labels the card with
 // the student's actual current level and points Practice at it.

@@ -66,7 +66,7 @@ const LETTER_BOARD_QUICK_LINKS = [
     {
         icon: icon('speaker'), label: 'Letter Sounds',
         desc: 'Hear Fidel sounds pronounced out loud',
-        href: 'https://amharicteacher.com/hahu'
+        action: () => (typeof openSoundsPreview === 'function' ? openSoundsPreview() : window.open('https://amharicteacher.com/hahu', '_blank', 'noopener'))
     },
     {
         icon: icon('music'), label: 'Alphabet Songs',
