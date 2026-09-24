@@ -26,7 +26,6 @@
 // =============================================================================
 
 const ALL_SCREENS = [
-    "practiceHomeScreen",
     "wordBuilderHomeScreen",
     "modeSelectScreen",
     "studentDashboard",

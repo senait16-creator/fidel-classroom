@@ -59,20 +59,17 @@ function enterModeSelect() {
     localStorage.setItem('fidel_has_visited', '1');
 }
 
+// Fidel Practice and Fidel Challenge merged into one Fidel Mastery track:
+// everyone uses the same 11 levels/3 families and the same family picker,
+// streak game, and writing-review flow below — chooseModeChallenge() is
+// simply the one entry point now, team or no team. Kept as a thin alias
+// (rather than updating every call site) since it's still wired up from
+// several existing entry points (cup card, "Short on time?" buttons).
 function chooseModePractice() {
-    if (typeof openLetterBoard === 'function') {
-        openLetterBoard();
-    } else {
-        launchDashboard("student");
-    }
+    return chooseModeChallenge();
 }
 
 async function chooseModeChallenge() {
-    if (!currentProfile?.team_id) {
-        showNotificationToast("Fidel Challenge is team-based. Your teacher will assign you to a team soon!");
-        return;
-    }
-
     if (typeof enterStudentShellCompetitionTab === "function") {
         await enterStudentShellCompetitionTab();
     } else {
@@ -89,7 +86,13 @@ async function renderChallengeDashboard() {
         getMyCurrentLevel()
     ]);
 
+    const hasTeam = !!currentProfile?.team_id;
     const teamHex = getTeamHex(team.name);
+
+    const modeBadge = document.getElementById("competitionModeBadge");
+    const modeBadgeTeam = document.getElementById("competitionModeBadgeTeam");
+    if (modeBadge) modeBadge.style.display = hasTeam ? "inline-flex" : "none";
+    if (modeBadgeTeam) modeBadgeTeam.innerText = team.name;
 
     // Note: the hero (team dot, meta line, progress bar) lives on the Home
     // tab and is rendered once by enterStudentShellHomeTab() — this
@@ -110,7 +113,7 @@ async function renderChallengeDashboard() {
     const teamNameEl = document.getElementById("challengeYourTeamName");
     const teamStatEl = document.getElementById("challengeYourTeamStat");
     const statusContent = document.getElementById("challengeTeamStatusContent");
-    if (currentProfile?.is_captain) {
+    if (currentProfile?.is_captain || !hasTeam) {
         if (teamStatusSection) teamStatusSection.style.display = "none";
     } else {
         if (teamStatusSection) teamStatusSection.style.display = "";
@@ -138,7 +141,7 @@ async function renderChallengeDashboard() {
     // ── Weekly Team Meeting, read-only for students — captains already
     //    have the editable version in the Captain Dashboard above. ──
     const studentMeetingCard = document.getElementById("studentMeetingCard");
-    if (currentProfile?.is_captain) {
+    if (currentProfile?.is_captain || !hasTeam) {
         if (studentMeetingCard) studentMeetingCard.style.display = "none";
     } else if (typeof loadStudentMeetingDisplay === "function") {
         await loadStudentMeetingDisplay();
@@ -175,8 +178,17 @@ async function renderChallengeDashboard() {
 
     // ── Render Competition-tab sections ────────────────────────
     await renderTeamUrgencyCard(team);
-    await renderChallengeTeamStatus(team);
-    await renderChallengeDashboardRace();
+
+    if (hasTeam) {
+        await renderChallengeTeamStatus(team);
+    } else if (statusContent) {
+        statusContent.innerHTML = "";
+    }
+
+    const raceCard = document.getElementById("challengeTeamRaceCard");
+    if (raceCard) raceCard.style.display = hasTeam ? "" : "none";
+    if (hasTeam) await renderChallengeDashboardRace();
+
     if (typeof renderTimelinePreview === "function") await renderTimelinePreview();
     wireCurrentLevelResources(levels, myLevel);
 }
@@ -800,7 +812,7 @@ async function refreshChallengeDetailWritingGate(fidelObj, levelNumber) {
     const streakDone = !!progress?.streak_passed;
     if (lockCard) lockCard.style.display = streakDone ? "none" : "block";
     writeBtn.style.display = streakDone ? "flex" : "none";
-    if (writeSub) writeSub.innerText = "Submit for captain review";
+    if (writeSub) writeSub.innerText = currentProfile?.team_id ? "Submit for captain review" : "Submit for teacher review";
 
     writeBtn.onclick = streakDone
         ? () => {

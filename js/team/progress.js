@@ -626,7 +626,7 @@ function buildLiveTestSchedulingLink() {
 }
 
 async function checkLevelCompletionStatus() {
-    if (!currentProfile?.team_id || currentProfile?.is_captain) return null;
+    if (currentProfile?.is_captain) return null;
 
     const myLevel = await getMyCurrentLevel();
 
@@ -683,6 +683,8 @@ async function renderLevelCompletionBanner(mountId) {
     if (status.existingRequest?.status === 'approved') {
         // Approval doesn't mean the whole team has advanced yet — point the
         // student at encouraging teammates instead of implying they're done.
+        // Solo students have no team to wait on, so they just get the good news.
+        const hasTeam = !!currentProfile?.team_id;
         mount.innerHTML = `
             <div style="background:#f0fdf4; border:2px solid #166534; border-radius:16px;
                         padding:20px; text-align:center; margin-bottom:16px;">
@@ -691,12 +693,14 @@ async function renderLevelCompletionBanner(mountId) {
                     Your teacher approved your level!
                 </p>
                 <p style="font-size:13px; color:#15803d; margin-bottom:16px;">
-                    Encourage your teammates so your team can begin Level ${status.level + 1} together.
+                    ${hasTeam
+                        ? `Encourage your teammates so your team can begin Level ${status.level + 1} together.`
+                        : `You're ready to start Level ${status.level + 1}.`}
                 </p>
-                <button id="levelApprovalEncourageBtn" class="btn-primary"
+                ${hasTeam ? `<button id="levelApprovalEncourageBtn" class="btn-primary"
                         style="max-width:280px; margin:0 auto; display:block;">
                     ${icon('megaphone')} Encourage Your Team
-                </button>
+                </button>` : ''}
             </div>`;
 
         const encourageBtn = document.getElementById('levelApprovalEncourageBtn');
@@ -742,7 +746,7 @@ async function renderLevelCompletionBanner(mountId) {
                     You cleared all 3 families!
                 </p>
                 <p style="font-size:13px; color:#475569; margin-bottom:16px;">
-                    Submit for teacher approval to advance your team to
+                    Submit for teacher approval to move up to
                     Level ${status.level + 1}.
                 </p>
                 <button onclick="submitLevelCompletion(${status.level})"
