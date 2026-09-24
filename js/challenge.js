@@ -6,6 +6,11 @@ let challengeLevelsCache = null;
 let activeChallengeLevel = null;
 let activeChallengeFamilyObj = null;
 let activeChallengeFamilyLevel = null;
+// Whether the level currently open in the family picker/detail screens is
+// the student's own current level -- practice (letters, flashcards, the
+// matching game) stays open on any level, but handwriting submission and
+// level approval only ever apply to this one, so progress stays in order.
+let activeChallengeLevelIsCurrent = true;
 // Where the family detail screen's "Back" button should go: 'dashboard' when
 // reached via the Continue button's direct jump, 'picker' when reached via
 // the Level Overview (family picker) grid or its own "View All Families" link.
@@ -79,6 +84,10 @@ async function chooseModeChallenge() {
     }
 }
 
+// Fidel Mastery — the curriculum page. Same page and same header/grid
+// for Solo and Competition students; a captain's own progress never
+// affects the team, so they get the Solo-styled header even though they
+// have a team_id (see item 2 of the captain redesign).
 async function renderChallengeDashboard() {
     const [team, levels, myLevel] = await Promise.all([
         getTeamBoardInfo(),
@@ -87,111 +96,150 @@ async function renderChallengeDashboard() {
     ]);
 
     const hasTeam = !!currentProfile?.team_id;
+    const soloLearning = !hasTeam || !!currentProfile?.is_captain;
     const teamHex = getTeamHex(team.name);
+    const totalLevels = levels.length || 11;
 
-    const modeBadge = document.getElementById("competitionModeBadge");
-    const modeBadgeTeam = document.getElementById("competitionModeBadgeTeam");
-    if (modeBadge) modeBadge.style.display = hasTeam ? "inline-flex" : "none";
-    if (modeBadgeTeam) modeBadgeTeam.innerText = team.name;
+    const header = document.getElementById("fmHeader");
+    const badge = document.getElementById("fmHeaderBadge");
+    const levelText = document.getElementById("fmHeaderLevelText");
+    const progressFill = document.getElementById("fmHeaderProgressFill");
+    const continueBtn = document.getElementById("fmHeaderContinueBtn");
 
-    // Note: the hero (team dot, meta line, progress bar) lives on the Home
-    // tab and is rendered once by enterStudentShellHomeTab() — this
-    // Competition-tab render used to redundantly re-render it too (both
-    // pulled from team.current_level so they never disagreed), but now
-    // that the hero shows the student's own individual progress, only
-    // Home should own it.
-
-    // ── Your Team — collapsed to one row (dot, name, rank/percent),
-    //    tap to expand the full status panel below. Team is information
-    //    on this page, not a separate destination. Captains get the
-    //    richer Captain Dashboard's Team Progress card instead, so this
-    //    whole card is hidden for them to avoid showing the same
-    //    information twice. ──
-    const teamStatusSection = document.getElementById("challengeTeamStatusMount");
-    const teamBtn = document.getElementById("challengeYourTeamBtn");
-    const teamDot = document.getElementById("challengeYourTeamDot");
-    const teamNameEl = document.getElementById("challengeYourTeamName");
-    const teamStatEl = document.getElementById("challengeYourTeamStat");
-    const statusContent = document.getElementById("challengeTeamStatusContent");
-    if (currentProfile?.is_captain || !hasTeam) {
-        if (teamStatusSection) teamStatusSection.style.display = "none";
-    } else {
-        if (teamStatusSection) teamStatusSection.style.display = "";
-        if (teamDot) teamDot.style.background = teamHex;
-        if (teamNameEl) teamNameEl.innerText = team.name;
-        if (teamStatEl && typeof computeTeamRaceStandings === "function") {
-            const ordinals = ["1st", "2nd", "3rd", "4th", "5th", "6th"];
-            computeTeamRaceStandings().then(standings => {
-                const rankIdx = standings.findIndex(s => s.id === currentProfile.team_id);
-                if (rankIdx !== -1) {
-                    teamStatEl.innerText = `${ordinals[rankIdx] || `${rankIdx + 1}th`} · Level ${standings[rankIdx].level}`;
-                }
-            });
-        }
-        if (teamBtn) {
-            teamBtn.onclick = () => {
-                if (!statusContent) return;
-                const isOpen = statusContent.style.display === "block";
-                statusContent.style.display = isOpen ? "none" : "block";
-            };
-        }
-        if (statusContent) statusContent.style.display = "none";
+    if (header) {
+        header.style.background = soloLearning
+            ? "linear-gradient(135deg, #14532d, #166534 60%, #15803d)"
+            : `linear-gradient(135deg, ${teamHex}, ${teamHex}dd 60%, ${teamHex}bb)`;
     }
+    if (badge) badge.innerText = soloLearning ? "Solo" : team.name;
+    if (levelText) levelText.innerText = `Level ${myLevel} of ${totalLevels}`;
+    if (progressFill) progressFill.style.width = `${Math.min(100, Math.max(0, Math.round(((myLevel - 1) / totalLevels) * 100)))}%`;
 
-    // ── Weekly Team Meeting, read-only for students — captains already
-    //    have the editable version in the Captain Dashboard above. ──
-    const studentMeetingCard = document.getElementById("studentMeetingCard");
-    if (currentProfile?.is_captain || !hasTeam) {
-        if (studentMeetingCard) studentMeetingCard.style.display = "none";
-    } else if (typeof loadStudentMeetingDisplay === "function") {
-        await loadStudentMeetingDisplay();
+    const currentLevel = levels.find(l => l.level_number === myLevel) || levels[0];
+    let targetFamily = null;
+    if (currentLevel && (currentLevel.letter_families || []).length > 0) {
+        const { data: progressRows } = await _supabase
+            .from('student_family_progress')
+            .select('base_letter, streak_passed, writing_passed')
+            .eq('student_id', currentUser.id)
+            .eq('level_number', currentLevel.level_number);
+        targetFamily = currentLevel.letter_families.find(fam => {
+            const row = (progressRows || []).find(r => r.base_letter === fam);
+            return !(row?.streak_passed && row?.writing_passed);
+        });
     }
-
-    // ── Captain team card + Team Hub — prominent team summary and one
-    //    entry point into the leadership tools, replacing the old
-    //    always-open Captain Dashboard. ─────
-    if (typeof renderCaptainTeamCard === "function") await renderCaptainTeamCard();
-
-    // Pending Writing Reviews — collapsed behind the CTA button,
-    // loadCaptainWritingQueue() also fills in the count pill.
-    const reviewMount = document.getElementById("captainWritingQueueMount");
-    const reviewToggleBtn = document.getElementById("captainReviewToggleBtn");
-    if (reviewToggleBtn && reviewMount) {
-        reviewToggleBtn.onclick = () => {
-            const isOpen = reviewMount.style.display === "block";
-            reviewMount.style.display = isOpen ? "none" : "block";
-            reviewToggleBtn.innerText = isOpen ? "📝 Review Writing" : "📝 Hide Review Queue";
+    if (continueBtn) {
+        continueBtn.innerText = targetFamily
+            ? `Continue: ${targetFamily} family →`
+            : currentLevel ? `Review Level ${currentLevel.level_number} →` : "Continue →";
+        continueBtn.onclick = () => {
+            if (!currentLevel) return;
+            const fidelObj = targetFamily ? alphabetData.find(f => f.base === targetFamily) : null;
+            if (fidelObj) {
+                openChallengeFamilyDetail(fidelObj, currentLevel.level_number, 'dashboard');
+            } else {
+                openChallengeFamilyPicker(currentLevel);
+            }
         };
     }
 
+    renderFidelMasteryLevelGrid(levels, myLevel);
+
+    const bottomLine = document.getElementById("fmBottomLine");
+    if (bottomLine) {
+        if (hasTeam) {
+            let posLabel = "";
+            if (typeof computeTeamRaceStandings === "function") {
+                const ordinals = ["1st", "2nd", "3rd", "4th", "5th", "6th"];
+                const standings = await computeTeamRaceStandings();
+                const rankIdx = standings.findIndex(s => s.id === currentProfile.team_id);
+                if (rankIdx !== -1) posLabel = ` · ${ordinals[rankIdx] || `${rankIdx + 1}th`}`;
+            }
+            bottomLine.innerHTML = `<a href="javascript:void(0)" onclick="enterTeamPage()">🏆 Competition · ${team.name}${posLabel} →</a>`;
+        } else {
+            bottomLine.innerHTML = `<a href="javascript:void(0)" onclick="openSoloCompetitionInfo()">ⓘ Competition</a>`;
+        }
+    }
+
+    wireCurrentLevelResources(levels, myLevel);
+
+    // Pre-load the Team Hub overlay's content for captains so it's ready
+    // the instant they open it from the Captain tasks card on Home.
     if (currentProfile?.is_captain) {
         if (typeof loadCaptainWritingQueue === "function") await loadCaptainWritingQueue();
         if (typeof loadCaptainRecentlyApproved === "function") await loadCaptainRecentlyApproved();
         if (typeof loadCaptainTeamProgress === "function") await loadCaptainTeamProgress();
         if (typeof renderStarPicker === "function") await renderStarPicker("starPickerMount");
     }
+}
 
-    // Note: the "Continue Level" card (challengeCurrentLevelCard) and the
-    // level-completion approval banner both live on the Home tab and are
-    // fully owned by enterStudentShellHomeTab() — this used to redundantly
-    // re-render them here too on every Competition-tab visit.
+// 11 level cards: Done ✓ / You're here / Upcoming, based on the
+// student's own current_level (never the team's) -- a captain's or any
+// team member's own grid always reflects their individual progress.
+function renderFidelMasteryLevelGrid(levels, myLevel) {
+    const grid = document.getElementById("fmLevelGrid");
+    if (!grid) return;
 
-    // ── Render Competition-tab sections ────────────────────────
-    await renderTeamUrgencyCard(team);
-
-    if (hasTeam) {
-        await renderChallengeTeamStatus(team);
-    } else if (statusContent) {
-        statusContent.innerHTML = "";
+    if (!levels.length) {
+        grid.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No levels found yet.</p>`;
+        return;
     }
 
-    const raceCard = document.getElementById("challengeTeamRaceCard");
-    if (raceCard) raceCard.style.display = hasTeam ? "" : "none";
-    if (hasTeam) await renderChallengeDashboardRace();
-
-    if (typeof renderTimelinePreview === "function") await renderTimelinePreview();
-    wireCurrentLevelResources(levels, myLevel);
+    grid.innerHTML = "";
+    levels.forEach(level => {
+        const state = level.level_number < myLevel ? "done" : level.level_number === myLevel ? "current" : "upcoming";
+        const stateLabel = state === "done" ? "Done ✓" : state === "current" ? "You're here" : "Upcoming";
+        const card = document.createElement("div");
+        card.className = `fm-level-card fm-level-${state}`;
+        card.innerHTML = `
+            <div class="fm-level-number">${level.level_number}</div>
+            <div class="fm-level-letters">${(level.letter_families || []).join(' ')}</div>
+            <div class="fm-level-state">${stateLabel}</div>
+        `;
+        card.onclick = () => openChallengeFamilyPicker(level);
+        grid.appendChild(card);
+    });
 }
+
+// ---------------------------------------------------------------------------
+// Team page — race, weekly meeting, timeline, and (for captains) the Team
+// Hub entry card. A separate destination from Fidel Mastery, reached only
+// from its "Competition · [Team] · [position] →" bottom line.
+// ---------------------------------------------------------------------------
+
+async function enterTeamPage() {
+    if (typeof hideAllScreens === "function") hideAllScreens();
+    const screen = document.getElementById("teamPageScreen");
+    if (screen) screen.style.display = "block";
+    window.scrollTo({ top: 0 });
+
+    const team = await getTeamBoardInfo();
+
+    if (typeof renderCaptainTeamCard === "function") await renderCaptainTeamCard();
+    await renderTeamUrgencyCard(team);
+    await renderChallengeTeamStatus(team);
+    if (typeof loadStudentMeetingDisplay === "function") await loadStudentMeetingDisplay();
+    await renderChallengeDashboardRace();
+    if (typeof renderTimelinePreview === "function") await renderTimelinePreview();
+}
+window.enterTeamPage = enterTeamPage;
+
+// ---------------------------------------------------------------------------
+// Solo Competition explainer — short "how teams work" overlay, reached
+// from Fidel Mastery's "ⓘ Competition" bottom line for Solo students.
+// ---------------------------------------------------------------------------
+
+function openSoloCompetitionInfo() {
+    const overlay = document.getElementById("soloCompetitionInfoOverlay");
+    if (overlay) overlay.style.display = "flex";
+}
+window.openSoloCompetitionInfo = openSoloCompetitionInfo;
+
+function closeSoloCompetitionInfo() {
+    const overlay = document.getElementById("soloCompetitionInfoOverlay");
+    if (overlay) overlay.style.display = "none";
+}
+window.closeSoloCompetitionInfo = closeSoloCompetitionInfo;
 
 // The resource videos/links themselves are the same regardless of level
 // (general Fidel alphabet resources), so this just labels the card with
@@ -588,6 +636,8 @@ async function renderChallengeLevelsView() {
 
 async function openChallengeFamilyPicker(level) {
     activeChallengeLevel = level;
+    const myLevel = typeof getMyCurrentLevel === "function" ? await getMyCurrentLevel() : 1;
+    activeChallengeLevelIsCurrent = level.level_number === myLevel;
 
     const studentShell = document.getElementById("studentShellScreen");
     const challengeLevels = document.getElementById("challengeLevelsScreen");
@@ -758,6 +808,11 @@ async function openChallengeFamilyDetail(fidelObj, levelNumber, returnTo = 'pick
     activeChallengeFamilyObj = fidelObj;
     activeChallengeFamilyLevel = levelNumber;
     challengeFamilyDetailReturnTo = returnTo;
+    // Reached directly from a Continue button (bypassing the picker, which
+    // is where this normally gets set) as well as from the picker itself --
+    // re-verify here so it's always correct regardless of entry point.
+    const myLevel = typeof getMyCurrentLevel === "function" ? await getMyCurrentLevel() : 1;
+    activeChallengeLevelIsCurrent = levelNumber === myLevel;
     document.getElementById("challengeFamilyScreen").style.display = "none";
     document.getElementById("studentShellScreen").style.display = "none";
     document.getElementById("challengeFamilyDetailScreen").style.display = "block";
@@ -807,6 +862,24 @@ async function refreshChallengeDetailWritingGate(fidelObj, levelNumber) {
         .maybeSingle();
 
     const streakDone = !!progress?.streak_passed;
+    const lockTitle = document.getElementById("challengeWritingLockTitle");
+    const lockSub = document.getElementById("challengeWritingLockSub");
+
+    // Handwriting and level approval only ever apply to the student's own
+    // current level -- browsing a Done or Upcoming level's letters,
+    // flashcards, and matching game stays open, but submitting a photo
+    // here would let progress get out of order.
+    if (!activeChallengeLevelIsCurrent) {
+        if (lockCard) lockCard.style.display = "block";
+        if (lockTitle) lockTitle.innerText = "Not your current level";
+        if (lockSub) lockSub.innerText = "Handwriting opens when you reach this level.";
+        writeBtn.style.display = "none";
+        writeBtn.onclick = null;
+        return;
+    }
+    if (lockTitle) lockTitle.innerText = "Locked";
+    if (lockSub) lockSub.innerText = `Pass the matching game (streak of ${STREAK_THRESHOLD}) to unlock`;
+
     if (lockCard) lockCard.style.display = streakDone ? "none" : "block";
     writeBtn.style.display = streakDone ? "flex" : "none";
     if (writeSub) writeSub.innerText = (currentProfile?.team_id && !currentProfile?.is_captain) ? "Submit for captain review" : "Submit for teacher review";
