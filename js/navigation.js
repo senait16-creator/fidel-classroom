@@ -107,6 +107,12 @@ function showScreen(screenId, displayMode) {
         }
     }
 
+    // These screens swap in fresh, usually shorter, content -- without this,
+    // a scroll position left over from a longer previous screen carries
+    // straight through, so the new screen can render already scrolled deep
+    // into itself with nothing visible above the fold.
+    window.scrollTo(0, 0);
+
     syncHamburgerHost(screenId);
 }
 

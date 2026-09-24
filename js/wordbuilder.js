@@ -1097,6 +1097,11 @@ let wordBuilderFinalCorrectCount = 0;
 let wordBuilderFinalRetryRound = false;
 
 function renderWordBuilderFinalChallengeStart() {
+    // Reached from mid-lesson without a showScreen() call, so nothing else
+    // resets scroll on the way in -- whatever position the last word's
+    // steps left behind would otherwise carry straight into the test.
+    window.scrollTo(0, 0);
+
     const pool = wordBuilderWords.filter(w => w.english_meaning);
     if (pool.length < 2) {
         return completeWordBuilderLevel();
@@ -1124,9 +1129,6 @@ function renderWordBuilderFinalChallengeQuestion() {
     const pool = wordBuilderWords.filter(w => w.english_meaning && w.id !== target.id);
     const distractors = wordBuilderShuffle(pool).slice(0, 3);
     const choices = wordBuilderShuffle([target, ...distractors]);
-
-    const crumb = document.getElementById('wordBuilderLessonCrumb');
-    if (crumb) crumb.innerText = 'FINAL CHALLENGE';
 
     const mount = document.getElementById('wordBuilderLessonMount');
     if (!mount) return;
@@ -1168,9 +1170,6 @@ function answerWordBuilderFinalChallenge(btnEl, chosenId, correctId) {
 window.answerWordBuilderFinalChallenge = answerWordBuilderFinalChallenge;
 
 function renderWordBuilderFinalChallengeScore() {
-    const crumb = document.getElementById('wordBuilderLessonCrumb');
-    if (crumb) crumb.innerText = 'FINAL CHALLENGE';
-
     const mount = document.getElementById('wordBuilderLessonMount');
     if (!mount) return;
 
