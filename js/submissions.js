@@ -485,12 +485,17 @@ async function finalizeWritingSubmission(imageUrl) {
         return showNotificationToast("Couldn't submit: " + (error.message || "unknown error"));
     }
 
-    const reviewer = currentProfile?.team_id ? "Your captain" : "Your teacher";
+    // A captain has a team_id but reviews nobody's submissions but their
+    // own teammates' -- their own writing follows the Solo flow straight
+    // to Senait, same as a no-team student's.
+    const goesToCaptain = !!currentProfile?.team_id && !currentProfile?.is_captain;
+
+    const reviewer = goesToCaptain ? "Your captain" : "Your teacher";
     showNotificationToast(`Submitted! ${reviewer} will review it soon. ${icon("confetti")}`);
     closeWritingSubmitScreen();
 
     if (typeof sendPushNotification === 'function') {
-        if (currentProfile?.team_id) {
+        if (goesToCaptain) {
             sendPushNotification({
                 type: 'writing_submitted',
                 team_id: currentProfile.team_id,

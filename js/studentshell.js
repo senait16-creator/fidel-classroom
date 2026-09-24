@@ -51,17 +51,18 @@ async function enterStudentShellHomeTab() {
         typeof getMyCurrentLevel === 'function' ? getMyCurrentLevel() : 1
     ]);
 
-    // Fidel's next-step card is hidden for captains (they get the Captain
-    // Dashboard on the Team tab instead) — unchanged from before this
-    // redesign, just relocated into the next-steps grid.
-    const currentLevelCard = document.getElementById('challengeCurrentLevelCard');
-    if (currentLevelCard) currentLevelCard.style.display = currentProfile?.is_captain ? 'none' : '';
-    const recommendedBadge = document.getElementById('nextstepRecommendedBadge');
-    if (recommendedBadge) recommendedBadge.style.display = currentProfile?.is_captain ? 'none' : '';
+    // Captains are leadership, not contestants -- their own learning is
+    // the same Fidel next-step card everyone gets, just labeled as their
+    // own (Solo) practice so it's clear it's separate from the team.
+    const eyebrow = document.getElementById('challengeCurrentLevelEyebrow');
+    const captainNote = document.getElementById('challengeCurrentLevelCaptainNote');
+    if (eyebrow) eyebrow.innerText = currentProfile?.is_captain ? 'Your own learning (Solo)' : 'Fidel';
+    if (captainNote) captainNote.style.display = currentProfile?.is_captain ? '' : 'none';
 
     if (typeof renderChallengeDashboardMap === 'function') await renderChallengeDashboardMap(levels, myLevel);
     if (typeof renderLevelCompletionBanner === 'function') await renderLevelCompletionBanner('levelCompletionMount');
     if (typeof renderStudentShellHomeNote === 'function') await renderStudentShellHomeNote();
+    if (typeof renderCaptainTasksCard === 'function') await renderCaptainTasksCard();
 
     renderTeamTeaser(team);
     if (typeof renderCaptainHomeWritingStatus === 'function') await renderCaptainHomeWritingStatus();
@@ -139,6 +140,99 @@ async function renderCaptainHomeWritingStatus() {
     badge.style.display = 'inline-flex';
 }
 window.renderCaptainHomeWritingStatus = renderCaptainHomeWritingStatus;
+
+// ---------------------------------------------------------------------------
+// Captain tasks — leadership to-dos, at the top of Home, separate from the
+// captain's own (Solo) learning further down. Collapses to one line when
+// there's nothing that needs the captain's attention.
+//
+// "Inactive 7+ days" has no dedicated last-active tracking anywhere in the
+// app, so it's approximated from the most recent timestamp across the
+// activity tables already queried elsewhere (family progress, writing
+// submissions, Amharic Path lessons) -- a teammate with no rows in any of
+// these, ever, counts as inactive too.
+// ---------------------------------------------------------------------------
+
+async function computeLastActiveByMember(memberIds) {
+    if (memberIds.length === 0) return {};
+
+    const [{ data: familyRows }, { data: writingRows }, { data: chapterRows }] = await Promise.all([
+        _supabase.from('student_family_progress').select('student_id, completed_at').in('student_id', memberIds).not('completed_at', 'is', null),
+        _supabase.from('writing_submissions').select('student_id, submitted_at').in('student_id', memberIds),
+        _supabase.from('chapter_lesson_progress').select('student_id, completed_at').in('student_id', memberIds)
+    ]);
+
+    const lastActive = {};
+    const consider = (studentId, ts) => {
+        if (!ts) return;
+        if (!lastActive[studentId] || ts > lastActive[studentId]) lastActive[studentId] = ts;
+    };
+    (familyRows || []).forEach(r => consider(r.student_id, r.completed_at));
+    (writingRows || []).forEach(r => consider(r.student_id, r.submitted_at));
+    (chapterRows || []).forEach(r => consider(r.student_id, r.completed_at));
+    return lastActive;
+}
+
+async function renderCaptainTasksCard() {
+    const card = document.getElementById('captainTasksCard');
+    if (!card) return;
+
+    if (!currentProfile?.is_captain || !currentProfile?.team_id) {
+        card.style.display = 'none';
+        return;
+    }
+
+    card.style.display = 'block';
+    card.innerHTML = `<p style="color:#e5e7eb; font-size:13px;">Loading...</p>`;
+
+    const teamId = currentProfile.team_id;
+
+    const { data: members } = await _supabase
+        .from('profiles').select('id, nickname, avatar')
+        .eq('team_id', teamId).neq('id', currentUser.id);
+    const memberIds = (members || []).map(m => m.id);
+
+    const [{ count: pendingCount }, { data: starPick }, { data: meeting }, lastActiveByMember] = await Promise.all([
+        memberIds.length > 0
+            ? _supabase.from('writing_submissions').select('id', { count: 'exact', head: true }).in('student_id', memberIds).eq('status', 'pending')
+            : Promise.resolve({ count: 0 }),
+        typeof _starWeekStart === 'function'
+            ? _supabase.from('star_of_week').select('student_id').eq('team_id', teamId).eq('week_start', _starWeekStart()).maybeSingle()
+            : Promise.resolve({ data: null }),
+        _supabase.from('team_meetings').select('day_of_week, meeting_time').eq('team_id', teamId).maybeSingle(),
+        computeLastActiveByMember(memberIds)
+    ]);
+
+    const sevenDaysAgoIso = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const inactiveCount = (members || []).filter(m => {
+        const last = lastActiveByMember[m.id];
+        return !last || last < sevenDaysAgoIso;
+    }).length;
+
+    const starPicked = !!starPick;
+    const hasTasks = (pendingCount || 0) > 0 || !starPicked || inactiveCount > 0;
+
+    if (!hasTasks) {
+        card.innerHTML = `<p class="captain-tasks-collapsed">👑 Captain · all caught up.</p>`;
+        return;
+    }
+
+    const meetingLine = meeting?.day_of_week
+        ? `${meeting.day_of_week}${meeting.meeting_time ? ` · ${typeof formatMeetingTimeForDisplay === 'function' ? formatMeetingTimeForDisplay(meeting.meeting_time) : meeting.meeting_time}` : ''}`
+        : 'Not set yet';
+
+    card.innerHTML = `
+        <div class="captain-tasks-title">👑 Captain tasks</div>
+        <div class="captain-tasks-list">
+            ${(pendingCount || 0) > 0 ? `<div class="captain-task-row">📝 ${pendingCount} writing submission${pendingCount === 1 ? '' : 's'} to review</div>` : ''}
+            ${!starPicked ? `<div class="captain-task-row">⭐ Star of the week not picked yet</div>` : ''}
+            ${inactiveCount > 0 ? `<div class="captain-task-row">💤 ${inactiveCount} teammate${inactiveCount === 1 ? '' : 's'} inactive 7+ days</div>` : ''}
+            <div class="captain-task-row">📅 Next meeting: ${meetingLine}</div>
+        </div>
+        <button type="button" class="captain-tasks-hub-btn" onclick="openCaptainTeamHub()">Open Team Hub →</button>
+    `;
+}
+window.renderCaptainTasksCard = renderCaptainTasksCard;
 
 // ---------------------------------------------------------------------------
 // Word Builder next-step card — same "prefer where they left off, else
@@ -314,10 +408,7 @@ async function renderCurriculumAmharicPathList() {
 // ---------------------------------------------------------------------------
 
 function wireNextStepsTimeButtons() {
-    const goToRecommended = () => {
-        if (currentProfile?.is_captain) return enterModeIfUnlocked('amharicPath', enterAmharicPath);
-        return enterModeIfUnlocked('practice', enterPracticeHome);
-    };
+    const goToRecommended = () => enterModeIfUnlocked('practice', enterPracticeHome);
     const reviewBtn = document.getElementById('nextstepsReviewBtn');
     const fullBtn = document.getElementById('nextstepsFullLessonBtn');
     if (reviewBtn) reviewBtn.onclick = goToRecommended;

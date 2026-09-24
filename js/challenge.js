@@ -429,7 +429,7 @@ async function renderChallengeDashboardMap(levels, myLevel) {
 
     let targetFamily = null;
     const families = currentLevel.letter_families || [];
-    if (!currentProfile?.is_captain && families.length > 0) {
+    if (families.length > 0) {
         const { data: progressRows } = await _supabase
             .from('student_family_progress')
             .select('base_letter, streak_passed, writing_passed')
@@ -766,14 +766,11 @@ async function openChallengeFamilyDetail(fidelObj, levelNumber, returnTo = 'pick
 
     const body = document.getElementById("challengeFamilyPracticeBody");
 
-    if (currentProfile?.is_captain) {
-        if (body) body.style.display = "none";
-        const box = document.getElementById("challengeWritingStatusBox");
-        box.style.display = "block";
-        box.innerHTML = `<div class="challenge-writing-status approved">${icon('crown')} As team captain, you're exempt. Focus on reviewing your team's submissions!</div>`;
-        return;
-    }
-
+    // Captains are leadership, not contestants -- their own practice here
+    // is exactly the Solo flow everyone else gets (see refreshChallenge-
+    // DetailWritingGate() below for how their writing submission routes to
+    // Senait instead of a captain review queue they'd otherwise be reviewing
+    // themselves in).
     if (body) body.style.display = "block";
     renderWritingStatusForFamily(fidelObj.base);
     renderChallengeInlineFlashcard(fidelObj);
@@ -812,7 +809,7 @@ async function refreshChallengeDetailWritingGate(fidelObj, levelNumber) {
     const streakDone = !!progress?.streak_passed;
     if (lockCard) lockCard.style.display = streakDone ? "none" : "block";
     writeBtn.style.display = streakDone ? "flex" : "none";
-    if (writeSub) writeSub.innerText = currentProfile?.team_id ? "Submit for captain review" : "Submit for teacher review";
+    if (writeSub) writeSub.innerText = (currentProfile?.team_id && !currentProfile?.is_captain) ? "Submit for captain review" : "Submit for teacher review";
 
     writeBtn.onclick = streakDone
         ? () => {

@@ -626,7 +626,6 @@ function buildLiveTestSchedulingLink() {
 }
 
 async function checkLevelCompletionStatus() {
-    if (currentProfile?.is_captain) return null;
 
     const myLevel = await getMyCurrentLevel();
 
@@ -684,7 +683,10 @@ async function renderLevelCompletionBanner(mountId) {
         // Approval doesn't mean the whole team has advanced yet — point the
         // student at encouraging teammates instead of implying they're done.
         // Solo students have no team to wait on, so they just get the good news.
-        const hasTeam = !!currentProfile?.team_id;
+        // Captains have a team_id but their own level-up never moves the
+        // team (advance_student_level_if_ready excludes captains from the
+        // team's floor-level calculation) -- treat them like Solo here too.
+        const hasTeam = !!currentProfile?.team_id && !currentProfile?.is_captain;
         mount.innerHTML = `
             <div style="background:#f0fdf4; border:2px solid #166534; border-radius:16px;
                         padding:20px; text-align:center; margin-bottom:16px;">
