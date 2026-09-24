@@ -228,12 +228,14 @@ function openFlashcardStudy(deck, title, onClose) {
     const screen = document.getElementById("flashcardScreen");
     screen.addEventListener("touchstart", handleFlashcardTouchStart, { passive: true });
     screen.addEventListener("touchend", handleFlashcardTouchEnd, { passive: true });
+    document.addEventListener("keydown", handleFlashcardKeydown);
 }
 
 function closeFlashcardStudy() {
     const screen = document.getElementById("flashcardScreen");
     screen.removeEventListener("touchstart", handleFlashcardTouchStart);
     screen.removeEventListener("touchend", handleFlashcardTouchEnd);
+    document.removeEventListener("keydown", handleFlashcardKeydown);
     screen.style.display = "none";
     if (flashcardCloseCallback) flashcardCloseCallback();
 }
@@ -259,6 +261,21 @@ function handleFlashcardTouchEnd(e) {
     if (Math.abs(dx) < 40 || Math.abs(dy) > Math.abs(dx)) return;
     if (dx < 0) { flashcardIndex = (flashcardIndex + 1) % flashcardDeck.length; }
     else        { flashcardIndex = (flashcardIndex - 1 + flashcardDeck.length) % flashcardDeck.length; }
+    renderFlashcard();
+}
+
+// Right Shift = next card, Left Shift = previous -- same idea as swiping
+// left/right, for anyone on a computer. Distinguishing the two requires
+// e.code (ShiftLeft/ShiftRight), since e.key is just "Shift" for both.
+function handleFlashcardKeydown(e) {
+    if (e.code !== "ShiftLeft" && e.code !== "ShiftRight") return;
+    const tag = document.activeElement?.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA") return;
+    if (e.code === "ShiftRight") {
+        flashcardIndex = (flashcardIndex + 1) % flashcardDeck.length;
+    } else {
+        flashcardIndex = (flashcardIndex - 1 + flashcardDeck.length) % flashcardDeck.length;
+    }
     renderFlashcard();
 }
 
