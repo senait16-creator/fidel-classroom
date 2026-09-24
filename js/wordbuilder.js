@@ -1,33 +1,46 @@
 // =============================================================================
 // WORD BUILDER — js/wordbuilder.js
 // Self-paced reading path, independent of Fidel Competition's team/level
-// progress but loosely mirrors its 12 levels' letter families, paired up
-// two at a time into 6 Word Builder levels. The card itself is always
-// open — each individual LEVEL unlocks on its own once
-// the student has learned that level's letters, checked primarily
-// against Fidel Practice (available to every student, team or solo)
-// with Competition's streak progress also counting if they have it.
+// progress but tracking its 11 levels' letter families 1:1 (10 Word
+// Builder levels since Level 1 here covers Competition's first two). The
+// card itself is always open — each individual LEVEL unlocks on its own
+// once the student has learned every letter readable by it (this level's
+// and all earlier), checked primarily against Fidel Practice (available
+// to every student, team or solo) with Competition's streak progress
+// also counting if they have it.
 //
 // Loads AFTER app.js/reading.js — relies on globals defined there:
 //   _supabase, currentUser, currentProfile, showNotificationToast, showScreen
 // =============================================================================
 
-// Each Word Builder level pairs TWO Competition levels' families (6
-// letters, 42 characters) rather than one (3 letters, 21 characters) —
-// three letters alone turned out too sparse to write real words with,
-// confirmed while drafting actual Level 1 content. Built from the real
-// challenge_levels.letter_families data (11 levels after ቨ was dropped),
-// paired up: (1,2) (3,4) (5,6) (7,8) (9,10) (11). Level 11 has no partner
-// (33 letters doesn't split into pairs evenly), so the last "pair" is just
-// its own 3 letters instead of 6.
+// Curriculum Lab structure (Senait's Notion page: "🌱 Curriculum Lab —
+// Fidel → Word Builder → Amharic Path 2.0"): 10 levels, tracking Fidel
+// Competition's 11 levels 1:1 except Level 1 here covers Competition's
+// first two levels (6 letters) — three letters alone turned out too
+// sparse to write real words with, confirmed while drafting actual
+// Level 1 content. Each entry is that level's own NEW families only;
+// use getWordBuilderCumulativeLetters() for "every letter readable by
+// this level," since words may use any letter from that level or earlier.
 const WORD_BUILDER_LEVEL_LETTERS = {
     1: ['ሀ', 'ለ', 'ሐ', 'መ', 'ሠ', 'ረ'],
-    2: ['ሰ', 'ሸ', 'ቀ', 'በ', 'ተ', 'ቸ'],
-    3: ['ኀ', 'ነ', 'ኘ', 'አ', 'ከ', 'ኸ'],
-    4: ['ወ', 'ዐ', 'ዘ', 'ዠ', 'የ', 'ደ'],
-    5: ['ጀ', 'ገ', 'ጠ', 'ጨ', 'ጰ', 'ጸ'],
-    6: ['ፀ', 'ፈ', 'ፐ']
+    2: ['ሰ', 'ሸ', 'ቀ'],
+    3: ['በ', 'ተ', 'ቸ'],
+    4: ['ኀ', 'ነ', 'ኘ'],
+    5: ['አ', 'ከ', 'ኸ'],
+    6: ['ወ', 'ዐ', 'ዘ'],
+    7: ['ዠ', 'የ', 'ደ'],
+    8: ['ጀ', 'ገ', 'ጠ'],
+    9: ['ጨ', 'ጰ', 'ጸ'],
+    10: ['ፀ', 'ፈ', 'ፐ']
 };
+
+function getWordBuilderCumulativeLetters(levelNumber) {
+    let letters = [];
+    for (let n = 1; n <= levelNumber; n++) {
+        letters = letters.concat(WORD_BUILDER_LEVEL_LETTERS[n] || []);
+    }
+    return letters;
+}
 
 let wordBuilderCurrentLevel = null;
 let wordBuilderWords = [];
@@ -44,7 +57,7 @@ let wordBuilderSentenceTapped = new Set();  // indices into this word's gloss ar
 // (no picture authored, no sentence authored, not enough other words in
 // the level to build a believable multiple-choice match) rather than
 // showing a broken or trivial step.
-const WORD_BUILDER_STEPS = ['build', 'picture', 'sentence', 'flashcard', 'spell', 'match'];
+const WORD_BUILDER_STEPS = ['build', 'picture', 'whichMeaning', 'sentence', 'flashcard', 'spell', 'match'];
 let wordBuilderStepIndex = 0;
 let wordBuilderFlashcardFlipped = false;
 let wordBuilderSpellForWordId = null;
@@ -79,7 +92,10 @@ async function getWordBuilderUnlockedLevels() {
     const unlocked = new Set();
     Object.keys(WORD_BUILDER_LEVEL_LETTERS).forEach(levelKey => {
         const levelNumber = Number(levelKey);
-        const knowsAll = WORD_BUILDER_LEVEL_LETTERS[levelNumber].every(
+        // Cumulative, not just this level's own new letters -- a word at
+        // this level can use any letter from here or earlier, so "ready
+        // for this level" has to mean all of those, not just the newest 3.
+        const knowsAll = getWordBuilderCumulativeLetters(levelNumber).every(
             letter => streakPassedLetters.has(letter) || masteredLetters.has(letter)
         );
         if (knowsAll) unlocked.add(levelNumber);
@@ -93,7 +109,7 @@ async function getWordBuilderUnlockedLevels() {
 // ---------------------------------------------------------------------------
 
 function enterWordBuilder() {
-    showScreen('wordBuilderLevelsScreen');
+    showScreen('wordBuilderLevelsScreen', '');
     renderWordBuilderLevelsList();
 }
 window.enterWordBuilder = enterWordBuilder;
@@ -121,7 +137,7 @@ const WORD_BUILDER_STEP_PREVIEW = [
 ];
 
 async function enterWordBuilderHome() {
-    showScreen('wordBuilderHomeScreen', 'block');
+    showScreen('wordBuilderHomeScreen', '');
     if (typeof applyModeLockStyling === 'function') applyModeLockStyling();
 
     const mount = document.getElementById('wordBuilderHomeMount');
@@ -359,7 +375,7 @@ async function openWordBuilderLevel(levelNumber) {
     });
 
     if (wordBuilderWords.length === 0) {
-        showScreen('wordBuilderLessonScreen');
+        showScreen('wordBuilderLessonScreen', '');
         document.getElementById('wordBuilderLessonCrumb').innerText = `LEVEL ${levelNumber}`;
         document.getElementById('wordBuilderLessonMount').innerHTML =
             '<p style="color:#94a3b8; font-size:13px; text-align:center; margin-top:40px;">No words in this level yet, check back soon.</p>';
@@ -369,7 +385,7 @@ async function openWordBuilderLevel(levelNumber) {
     wordBuilderIndex = wordBuilderWords.findIndex(w => !wordBuilderReadWordIds.has(w.id));
     if (wordBuilderIndex === -1) wordBuilderIndex = 0;
 
-    showScreen('wordBuilderLessonScreen');
+    showScreen('wordBuilderLessonScreen', '');
     renderWordBuilderWordCard();
 }
 window.openWordBuilderLevel = openWordBuilderLevel;
@@ -385,6 +401,14 @@ function renderWordBuilderWordCard() {
 // shrinks to whatever content has actually been authored.
 function wordBuilderStepShouldSkip(word, stepName) {
     if (stepName === 'picture') return !word.emoji;
+    // whichMeaning replaces picture+match's meaning-testing for abstract
+    // words that have no emoji to show or match on -- one real step in
+    // place of two skipped ones, not extra practice for picture words.
+    if (stepName === 'whichMeaning') {
+        if (word.emoji || !word.english_meaning) return true;
+        const distractorPool = wordBuilderWords.filter(w => w.id !== word.id && w.english_meaning);
+        return distractorPool.length < 1;
+    }
     if (stepName === 'sentence') {
         const s = wordBuilderSentencesByWordId[word.id];
         return !s || !s.glosses || s.glosses.length === 0;
@@ -424,6 +448,7 @@ function renderWordBuilderStep() {
     const stepBuilders = {
         build: wbStepBuildHtml,
         picture: wbStepPictureHtml,
+        whichMeaning: wbStepWhichMeaningHtml,
         sentence: wbStepSentenceHtml,
         flashcard: wbStepFlashcardHtml,
         spell: wbStepSpellHtml,
@@ -581,12 +606,38 @@ window.flipWordBuilderFlashcard = flipWordBuilderFlashcard;
 // substitute; real HTML5 drag events are unreliable on touch, and this is
 // the same interaction Duolingo itself actually uses). Tap a filled slot
 // to send its tile back to the pool.
+// Decoys: other vowel-order forms of the same families used in the word
+// (e.g. ሚ/ሞ/ሩ for ማር, which uses the መ and ረ families) -- reading the
+// word right means telling ማ apart from its siblings ሚ/ሙ/ሜ/ም/ሞ, not
+// just recognizing loose letter shapes.
+function getWordBuilderSpellDecoys(wordLetters, count) {
+    const usedChars = new Set(wordLetters);
+    const families = [];
+    const seenBase = new Set();
+    wordLetters.forEach(ch => {
+        const fam = typeof alphabetData !== 'undefined' ? alphabetData.find(f => f.family.includes(ch)) : null;
+        if (fam && !seenBase.has(fam.base)) {
+            seenBase.add(fam.base);
+            families.push(fam);
+        }
+    });
+    let pool = [];
+    families.forEach(fam => {
+        fam.family.forEach(ch => { if (!usedChars.has(ch)) pool.push(ch); });
+    });
+    return wordBuilderShuffle(pool).slice(0, count);
+}
+
 function wbStepSpellHtml(word) {
     const letters = Array.from(word.amharic_text.replace(/\s+/g, ''));
 
     if (wordBuilderSpellForWordId !== word.id) {
         wordBuilderSpellForWordId = word.id;
-        wordBuilderSpellPool = wordBuilderShuffle(letters.map(ch => ({ ch, placed: false })));
+        const decoys = getWordBuilderSpellDecoys(letters, 3);
+        wordBuilderSpellPool = wordBuilderShuffle(
+            letters.map(ch => ({ ch, placed: false }))
+                .concat(decoys.map(ch => ({ ch, placed: false })))
+        );
         wordBuilderSpellSlots = new Array(letters.length).fill(null);
     }
 
@@ -692,6 +743,52 @@ function answerWordBuilderMatchStep(btnEl, chosenId) {
 }
 window.answerWordBuilderMatchStep = answerWordBuilderMatchStep;
 
+// Step for words with no emoji -- same multiple-choice mechanic as Match,
+// English meaning choices instead of picture choices, so abstract words
+// (ሁሉ, ሙሉ, ሌላ, ...) get real meaning-recall practice too instead of
+// silently skipping both the Meaning and Match steps.
+let wordBuilderWhichMeaningChoicesForWordId = null;
+let wordBuilderWhichMeaningChoices = [];
+
+function wbStepWhichMeaningHtml(word) {
+    if (wordBuilderWhichMeaningChoicesForWordId !== word.id) {
+        wordBuilderWhichMeaningChoicesForWordId = word.id;
+        const distractors = wordBuilderShuffle(wordBuilderWords.filter(w => w.id !== word.id && w.english_meaning)).slice(0, 3);
+        wordBuilderWhichMeaningChoices = wordBuilderShuffle([word, ...distractors]);
+    }
+
+    return `
+        <div style="text-align:center;">
+            <div style="font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#94a3b8; margin-bottom:8px;">Which meaning?</div>
+            <div style="font-family:'Abyssinica SIL',serif; font-size:30px; color:#1e293b; margin-bottom:20px;">${word.amharic_text}</div>
+            <div id="wbWhichMeaningChoices" style="display:flex; flex-direction:column; gap:10px;">
+                ${wordBuilderWhichMeaningChoices.map(c => `
+                    <button onclick="answerWordBuilderWhichMeaningStep(this, '${c.id}')"
+                            style="font-size:15px; font-weight:700; padding:16px; background:white; border:1px solid #e2e8f0;
+                                   border-radius:14px; cursor:pointer; color:#1e293b;">${c.english_meaning}</button>
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
+
+function answerWordBuilderWhichMeaningStep(btnEl, chosenId) {
+    const word = wordBuilderWords[wordBuilderIndex];
+    const buttons = document.querySelectorAll('#wbWhichMeaningChoices button');
+    buttons.forEach(btn => btn.setAttribute('disabled', 'true'));
+
+    if (chosenId === word.id) {
+        btnEl.style.borderColor = '#166534';
+        btnEl.style.background = 'rgba(22,101,52,0.08)';
+        setTimeout(() => renderWordBuilderMatchSuccess(), 500);
+    } else {
+        btnEl.style.borderColor = '#dc2626';
+        btnEl.style.background = 'rgba(220,38,38,0.06)';
+        setTimeout(() => buttons.forEach(btn => btn.removeAttribute('disabled')), 700);
+    }
+}
+window.answerWordBuilderWhichMeaningStep = answerWordBuilderWhichMeaningStep;
+
 function renderWordBuilderMatchSuccess() {
     const mount = document.getElementById('wordBuilderLessonMount');
     if (mount) {
@@ -766,10 +863,9 @@ window.advanceWordBuilderWord = advanceWordBuilderWord;
 // ---------------------------------------------------------------------------
 // End-of-level review sequence, shown once after the last word:
 //   Quick Review (one "which word means X" question per word)
-//   -> Read What You Know (full word list, no hints, twice — ordered then
-//      shuffled, for reading speed)
 //   -> Find the Word (same matching mechanic, reversed framing, 2 words)
-//   -> Final Challenge (the word list once more, then level complete)
+//   -> Find It In The Sentence (tap the word inside a real sentence)
+//   -> Final Challenge (every word, no hints, scored -- see below)
 // Skipped entirely for very small levels — not enough words to build
 // believable wrong answers from.
 // ---------------------------------------------------------------------------
@@ -789,9 +885,71 @@ function startWordBuilderReviewSequence() {
     }
     renderWordBuilderMatchStage(wordBuilderShuffle(pool), {
         crumb: 'QUICK REVIEW', title: 'Quick Review', promptLabel: 'Which word means'
-    }, renderWordBuilderReadWhatYouKnow);
+    }, renderWordBuilderFindWordStage);
 }
 window.startWordBuilderReviewSequence = startWordBuilderReviewSequence;
+
+// ---------------------------------------------------------------------------
+// Mixed Review — 10 words pulled from any level the student has already
+// completed (not the current level's own end-of-level review above).
+// This is what Home's "5-minute review" button opens; previously that
+// button was just an alias for Fidel Practice regardless of which app
+// area it was pressed from.
+// ---------------------------------------------------------------------------
+
+async function startWordBuilderMixedReview() {
+    if (!currentUser) return;
+
+    const { data: levelProgress } = await _supabase
+        .from('word_builder_level_progress')
+        .select('level_number')
+        .eq('student_id', currentUser.id);
+    const completedLevels = (levelProgress || []).map(r => r.level_number);
+
+    if (completedLevels.length === 0) {
+        showNotificationToast("Finish a Word Builder level first, then come back for a mixed review!");
+        return;
+    }
+
+    const { data: words } = await _supabase
+        .from('word_builder_words')
+        .select('id, level_number, item_order, amharic_text, transliteration, english_meaning, grammar_note, emoji')
+        .in('level_number', completedLevels)
+        .order('item_order');
+
+    const pool = (words || []).filter(w => w.english_meaning);
+    if (pool.length < 3) {
+        showNotificationToast("Not enough words yet for a mixed review — keep learning!");
+        return;
+    }
+
+    // renderWordBuilderMatchStage's distractor pool reads this global, so
+    // it needs to reflect the mixed cross-level pool, not any one level's
+    // words, for the rest of this review.
+    wordBuilderWords = pool;
+    const reviewSet = wordBuilderShuffle(pool).slice(0, Math.min(10, pool.length));
+
+    showScreen('wordBuilderLessonScreen', '');
+
+    renderWordBuilderMatchStage(reviewSet, {
+        crumb: 'MIXED REVIEW', title: 'Mixed Review', promptLabel: 'Which word means'
+    }, () => {
+        const crumb = document.getElementById('wordBuilderLessonCrumb');
+        if (crumb) crumb.innerText = 'MIXED REVIEW';
+        const mount = document.getElementById('wordBuilderLessonMount');
+        if (mount) {
+            mount.innerHTML = `
+                <div style="text-align:center; padding-top:40px;">
+                    <div style="font-size:44px; margin-bottom:10px;">${icon('confetti')}</div>
+                    <div style="font-size:18px; font-weight:800; color:#166534; margin-bottom:6px;">Nice review!</div>
+                    <div style="font-size:13px; color:#94a3b8; margin-bottom:24px;">You went through ${reviewSet.length} words from levels you've already learned.</div>
+                    <button class="btn-primary" style="width:100%;" onclick="enterStudentShellHomeTab()">Back to Home</button>
+                </div>
+            `;
+        }
+    });
+}
+window.startWordBuilderMixedReview = startWordBuilderMixedReview;
 
 // A single "pick the matching word" question, reused for both Quick Review
 // (asks about every word once) and Find the Word (asks about a couple).
@@ -849,42 +1007,6 @@ function answerWordBuilderMatch(btnEl, chosenId, correctId) {
 }
 window.answerWordBuilderMatch = answerWordBuilderMatch;
 
-// A passive recap: the word list with no hints, one "Continue" button.
-// Reused for both "Read What You Know" (twice — ordered, then shuffled)
-// and "Final Challenge" (once more, right before level completion).
-function renderWordBuilderRecapScreen(words, title, subtitle, onContinue) {
-    const crumb = document.getElementById('wordBuilderLessonCrumb');
-    if (crumb) crumb.innerText = title.toUpperCase();
-
-    window.wordBuilderRecapOnContinue = onContinue;
-
-    const mount = document.getElementById('wordBuilderLessonMount');
-    if (!mount) return;
-
-    mount.innerHTML = `
-        <div style="text-align:center; padding-top:10px;">
-            <div style="font-size:12.5px; color:#94a3b8; margin-bottom:18px;">${subtitle}</div>
-            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:22px;">
-                ${words.map(w => `
-                    <div style="background:white; border:1px solid #e2e8f0; border-radius:14px; padding:16px;
-                                font-family:'Abyssinica SIL',serif; font-size:26px; color:#1e293b;">${w.amharic_text}</div>
-                `).join('')}
-            </div>
-            <button class="btn-primary" onclick="wordBuilderRecapOnContinue()">Continue →</button>
-        </div>
-    `;
-}
-
-function renderWordBuilderReadWhatYouKnow() {
-    renderWordBuilderRecapScreen(
-        wordBuilderWords, 'Read What You Know', "These are the words you've learned. No hints this time.",
-        () => renderWordBuilderRecapScreen(
-            wordBuilderShuffle(wordBuilderWords), 'Read What You Know', 'Now try them in a different order.',
-            renderWordBuilderFindWordStage
-        )
-    );
-}
-
 function renderWordBuilderFindWordStage() {
     const pool = wordBuilderWords.filter(w => w.english_meaning);
     const subset = wordBuilderShuffle(pool).slice(0, Math.min(2, pool.length));
@@ -903,7 +1025,7 @@ let wordBuilderSentenceGameQueue = [];
 function renderWordBuilderFindInSentenceStage() {
     const pool = wordBuilderWords.filter(w => wordBuilderSentencesByWordId[w.id]);
     if (pool.length === 0) {
-        return renderWordBuilderFinalChallenge();
+        return renderWordBuilderFinalChallengeStart();
     }
     wordBuilderSentenceGameQueue = wordBuilderShuffle(pool).slice(0, Math.min(2, pool.length));
     renderWordBuilderFindInSentenceQuestion();
@@ -911,7 +1033,7 @@ function renderWordBuilderFindInSentenceStage() {
 
 function renderWordBuilderFindInSentenceQuestion() {
     if (wordBuilderSentenceGameQueue.length === 0) {
-        return renderWordBuilderFinalChallenge();
+        return renderWordBuilderFinalChallengeStart();
     }
 
     const target = wordBuilderSentenceGameQueue[0];
@@ -956,11 +1078,101 @@ function answerWordBuilderFindInSentence(spanEl, isTargetStr) {
 }
 window.answerWordBuilderFindInSentence = answerWordBuilderFindInSentence;
 
-function renderWordBuilderFinalChallenge() {
-    renderWordBuilderRecapScreen(
-        wordBuilderWords, 'Final Challenge', 'Read all of these without any hints.',
-        completeWordBuilderLevel
-    );
+// The real Final Challenge: every word, no hints, choose its meaning,
+// scored ("7 of 8"). Anything missed comes back once more at the end for
+// reinforcement, but the score itself only counts first attempts.
+let wordBuilderFinalQueue = [];
+let wordBuilderFinalMissed = [];
+let wordBuilderFinalTotal = 0;
+let wordBuilderFinalCorrectCount = 0;
+let wordBuilderFinalRetryRound = false;
+
+function renderWordBuilderFinalChallengeStart() {
+    const pool = wordBuilderWords.filter(w => w.english_meaning);
+    if (pool.length < 2) {
+        return completeWordBuilderLevel();
+    }
+    wordBuilderFinalQueue = wordBuilderShuffle(pool);
+    wordBuilderFinalMissed = [];
+    wordBuilderFinalTotal = pool.length;
+    wordBuilderFinalCorrectCount = 0;
+    wordBuilderFinalRetryRound = false;
+    renderWordBuilderFinalChallengeQuestion();
+}
+
+function renderWordBuilderFinalChallengeQuestion() {
+    if (wordBuilderFinalQueue.length === 0) {
+        if (!wordBuilderFinalRetryRound && wordBuilderFinalMissed.length > 0) {
+            wordBuilderFinalRetryRound = true;
+            wordBuilderFinalQueue = wordBuilderShuffle(wordBuilderFinalMissed);
+            wordBuilderFinalMissed = [];
+        } else {
+            return renderWordBuilderFinalChallengeScore();
+        }
+    }
+
+    const target = wordBuilderFinalQueue[0];
+    const pool = wordBuilderWords.filter(w => w.english_meaning && w.id !== target.id);
+    const distractors = wordBuilderShuffle(pool).slice(0, 3);
+    const choices = wordBuilderShuffle([target, ...distractors]);
+
+    const crumb = document.getElementById('wordBuilderLessonCrumb');
+    if (crumb) crumb.innerText = 'FINAL CHALLENGE';
+
+    const mount = document.getElementById('wordBuilderLessonMount');
+    if (!mount) return;
+
+    mount.innerHTML = `
+        <div style="text-align:center; padding-top:16px;">
+            <div style="font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#94a3b8; margin-bottom:10px;">${wordBuilderFinalRetryRound ? 'One more try' : 'Final Challenge · no hints'}</div>
+            <div style="font-family:'Abyssinica SIL',serif; font-size:32px; color:#1e293b; margin-bottom:22px;">${target.amharic_text}</div>
+            <div id="wbFinalChoices" style="display:flex; flex-direction:column; gap:10px;">
+                ${choices.map(c => `
+                    <button onclick="answerWordBuilderFinalChallenge(this, '${c.id}', '${target.id}')"
+                            style="font-size:15px; font-weight:700; padding:16px; background:white; border:1px solid #e2e8f0;
+                                   border-radius:14px; cursor:pointer; color:#1e293b;">${c.english_meaning}</button>
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
+
+function answerWordBuilderFinalChallenge(btnEl, chosenId, correctId) {
+    const buttons = document.querySelectorAll('#wbFinalChoices button');
+    buttons.forEach(btn => btn.setAttribute('disabled', 'true'));
+
+    const target = wordBuilderFinalQueue[0];
+    wordBuilderFinalQueue = wordBuilderFinalQueue.slice(1);
+
+    if (chosenId === correctId) {
+        btnEl.style.borderColor = '#166534';
+        btnEl.style.background = 'rgba(22,101,52,0.08)';
+        if (!wordBuilderFinalRetryRound) wordBuilderFinalCorrectCount++;
+    } else {
+        btnEl.style.borderColor = '#dc2626';
+        btnEl.style.background = 'rgba(220,38,38,0.06)';
+        wordBuilderFinalMissed.push(target);
+    }
+
+    setTimeout(() => renderWordBuilderFinalChallengeQuestion(), chosenId === correctId ? 500 : 1000);
+}
+window.answerWordBuilderFinalChallenge = answerWordBuilderFinalChallenge;
+
+function renderWordBuilderFinalChallengeScore() {
+    const crumb = document.getElementById('wordBuilderLessonCrumb');
+    if (crumb) crumb.innerText = 'FINAL CHALLENGE';
+
+    const mount = document.getElementById('wordBuilderLessonMount');
+    if (!mount) return;
+
+    mount.innerHTML = `
+        <div style="text-align:center; padding-top:40px;">
+            <div style="font-size:44px; margin-bottom:10px;">${icon('star')}</div>
+            <div style="font-size:22px; font-weight:800; color:#1e293b; margin-bottom:6px;">${wordBuilderFinalCorrectCount} of ${wordBuilderFinalTotal}</div>
+            <div style="font-size:13px; color:#94a3b8; margin-bottom:24px;">words read correctly on the first try</div>
+            <button class="btn-primary" style="width:100%;" onclick="completeWordBuilderLevel()">Continue →</button>
+        </div>
+    `;
 }
 
 // ---------------------------------------------------------------------------
@@ -1012,7 +1224,7 @@ async function completeWordBuilderLevel() {
             </div>
             ${nextLevelReady
                 ? `<button class="btn-primary" onclick="openWordBuilderLevel(${nextLevel.level_number})">Continue to Level ${nextLevel.level_number} →</button>`
-                : `<button class="btn-primary" onclick="showScreen('wordBuilderLevelsScreen'); renderWordBuilderLevelsList();">Back to Levels</button>`}
+                : `<button class="btn-primary" onclick="showScreen('wordBuilderLevelsScreen', ''); renderWordBuilderLevelsList();">Back to Levels</button>`}
             ${nextLevelNewLetters
                 ? `<p style="font-size:11.5px; color:#94a3b8; margin-top:12px;">Level ${nextLevel.level_number} uses some new letters (${WORD_BUILDER_LEVEL_LETTERS[nextLevel.level_number].join(' ')}) — Fidel Practice can help, but you can dive in now too.</p>`
                 : ''}

@@ -413,15 +413,18 @@ async function renderCurriculumAmharicPathList() {
 }
 
 // ---------------------------------------------------------------------------
-// "Short on time?" row — both currently lead to the same recommended next
-// action; a true lighter-weight review mode is a future refinement.
+// "Short on time?" row — 5-minute review opens Word Builder's cross-level
+// mixed review; full lesson leads to the recommended next action.
 // ---------------------------------------------------------------------------
 
 function wireNextStepsTimeButtons() {
     const goToRecommended = () => enterModeIfUnlocked('practice', enterPracticeHome);
     const reviewBtn = document.getElementById('nextstepsReviewBtn');
     const fullBtn = document.getElementById('nextstepsFullLessonBtn');
-    if (reviewBtn) reviewBtn.onclick = goToRecommended;
+    if (reviewBtn) reviewBtn.onclick = () => {
+        if (typeof startWordBuilderMixedReview === 'function') startWordBuilderMixedReview();
+        else goToRecommended();
+    };
     if (fullBtn) fullBtn.onclick = goToRecommended;
 }
 
