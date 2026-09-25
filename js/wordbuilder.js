@@ -327,8 +327,8 @@ function wbWordCardInnerHtml(word, opts) {
         : (!read && !locked ? '<span class="wb-card-tag wb-card-tag-new">New</span>' : '');
     return `
         ${tagHtml}
-        <div class="wb-card-emoji">${word.emoji || '📖'}</div>
-        <div class="wb-card-amharic">${word.amharic_text}</div>
+        ${word.emoji ? `<div class="wb-card-emoji">${word.emoji}</div>` : ''}
+        <div class="wb-card-amharic${word.emoji ? '' : ' wb-card-amharic-large'}">${word.amharic_text}</div>
         ${read ? `
             ${word.transliteration ? `<div class="wb-card-translit">${word.transliteration}</div>` : ''}
             <div class="wb-card-meaning">${word.english_meaning || ''}</div>
@@ -621,7 +621,7 @@ function wbMyWordsCardHtml(word) {
     if (wordBuilderMyWordsFlipped.has(word.id)) {
         return `
             <div class="wb-word-card wb-word-card-flipped" onclick="toggleWordBuilderMyWordsFlip('${word.id}')">
-                <div class="wb-card-amharic">${word.amharic_text}</div>
+                <div class="wb-card-amharic${word.emoji ? '' : ' wb-card-amharic-large'}">${word.amharic_text}</div>
                 ${word.transliteration ? `<div class="wb-card-translit">${word.transliteration}</div>` : ''}
                 <div class="wb-card-meaning">${word.english_meaning || ''}</div>
                 <div class="wb-card-practice-link" onclick="event.stopPropagation(); openWordBuilderSingleWordPractice('${word.id}')">Practice →</div>
@@ -631,8 +631,8 @@ function wbMyWordsCardHtml(word) {
     return `
         <div class="wb-word-card" onclick="toggleWordBuilderMyWordsFlip('${word.id}')">
             ${tagHtml}
-            <div class="wb-card-emoji">${word.emoji || '📖'}</div>
-            <div class="wb-card-amharic">${word.amharic_text}</div>
+            ${word.emoji ? `<div class="wb-card-emoji">${word.emoji}</div>` : ''}
+            <div class="wb-card-amharic${word.emoji ? '' : ' wb-card-amharic-large'}">${word.amharic_text}</div>
             <div class="wb-card-check">✓</div>
         </div>`;
 }
@@ -767,8 +767,7 @@ async function openWordBuilderLevelPage(levelNumber) {
     if (mount) {
         mount.innerHTML = `
             <div style="background:white; border:1px solid #e2e8f0; border-radius:18px; padding:20px; margin-bottom:18px;">
-                <div style="font-size:18px; font-weight:800; color:#1e293b; margin-bottom:4px;">${level.topic_title || `Level ${level.level_number}`}</div>
-                ${letters.length ? `<div style="font-family:'Abyssinica SIL',serif; font-size:16px; color:#94a3b8; margin-bottom:8px;">${letters.join(' ')}</div>` : ''}
+                ${letters.length ? `<div style="font-family:'Abyssinica SIL',serif; font-size:28px; font-weight:700; color:#1e293b; margin-bottom:10px;">${letters.join(' ')}</div>` : ''}
                 <div style="font-size:12.5px; font-weight:700; color:#94a3b8; margin-bottom:14px;">${readCount} of ${words.length} words</div>
                 <button class="btn-primary" style="width:100%;" onclick="openWordBuilderLevel(${levelNumber})">Continue →</button>
             </div>
