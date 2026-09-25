@@ -217,7 +217,7 @@ async function loadTeamPracticeFeed() {
             id, base_letter, image_url, created_at, post_type, uploader_id,
             profiles!uploader_id(nickname, avatar)
         `)
-        .eq('team_id', currentProfile.team_id)
+        .eq('team_id', getEffectiveTeamId())
         .order('created_at', { ascending: false })
         .limit(20);
 
@@ -299,6 +299,7 @@ function formatTimeAgo(isoStr) {
 }
 
 async function toggleReaction(postId, emoji, buttonEl) {
+    if (blockIfPreviewing()) return;
     const isCurrentlyReacted = buttonEl.classList.contains('reacted');
     const card = buttonEl.closest('.practice-post-card');
     card.querySelectorAll('.reaction-btn').forEach(btn => btn.classList.remove('reacted'));
@@ -319,6 +320,7 @@ async function toggleReaction(postId, emoji, buttonEl) {
 }
 
 async function deleteTeamPost(postId, imageUrl) {
+    if (blockIfPreviewing()) return;
     if (!confirm('Delete this post?')) return;
 
     const pathMatch = imageUrl.match(/team_practice_posts\/(.+)$/);
@@ -351,6 +353,7 @@ function openTeamHubPracticePost() {
 }
 
 async function uploadTeamPracticePhoto(file, baseLetter) {
+    if (blockIfPreviewing()) return;
     if (file.size > 20 * 1024 * 1024) {
         return showNotificationToast('File too large. Please use a photo under 20MB.');
     }
@@ -1022,9 +1025,10 @@ async function loadStudentMeetingDisplay() {
     const card = document.getElementById('studentMeetingCard');
     const mount = document.getElementById('studentMeetingMount');
     if (!card || !mount) return;
-    if (!currentProfile?.team_id) { card.style.display = 'none'; return; }
+    const teamId = getEffectiveTeamId();
+    if (!teamId) { card.style.display = 'none'; return; }
 
-    const markup = await buildLessonScheduleMarkup(currentProfile.team_id);
+    const markup = await buildLessonScheduleMarkup(teamId);
     if (!markup) { card.style.display = 'none'; return; }
 
     card.style.display = 'block';

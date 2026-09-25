@@ -95,7 +95,8 @@ async function renderTeamTeaser(team) {
 
     // Solo (no-team) students get the "ⓘ Competition" line on Fidel
     // Mastery instead -- this card would just repeat that.
-    if (!currentProfile?.team_id) {
+    const teamId = getEffectiveTeamId();
+    if (!teamId) {
         if (card) card.style.display = 'none';
         return;
     }
@@ -109,7 +110,7 @@ async function renderTeamTeaser(team) {
     try {
         const { data: meeting } = await _supabase
             .from('team_meetings').select('day_of_week, meeting_time')
-            .eq('team_id', currentProfile.team_id).maybeSingle();
+            .eq('team_id', teamId).maybeSingle();
         if (meeting?.day_of_week) {
             const time = typeof formatMeetingTimeForDisplay === 'function' ? formatMeetingTimeForDisplay(meeting.meeting_time) : meeting.meeting_time;
             meetingLine = `Meets ${meeting.day_of_week}${time ? ` · ${time}` : ''}`;
@@ -486,11 +487,12 @@ async function fetchStudentShellMilestones(limit) {
             .order('event_date', { ascending: false })
             .limit(limit)
     ];
-    if (currentProfile?.team_id) {
+    const teamId = getEffectiveTeamId();
+    if (teamId) {
         queries.push(
             _supabase.from('calendar_events')
                 .select('event_type, event_date, level_number, title')
-                .eq('team_id', currentProfile.team_id)
+                .eq('team_id', teamId)
                 .eq('event_type', 'team_level_up')
                 .order('event_date', { ascending: false })
                 .limit(limit)
@@ -552,7 +554,10 @@ async function renderStudentShellProfile() {
     if (nameEl) nameEl.innerHTML = `${currentProfile?.nickname || 'Student'} ${icon('pencil')}`;
 
     const team = await (typeof getTeamBoardInfo === 'function' ? getTeamBoardInfo() : Promise.resolve(null));
-    if (teamEl) teamEl.innerText = currentProfile?.team_id ? team.name : 'Practicing Solo';
+    if (teamEl) teamEl.innerText = getEffectiveTeamId() ? team.name : 'Practicing Solo';
+
+    const previewRow = document.getElementById('stushellPreviewRow');
+    if (previewRow) previewRow.style.display = currentProfile?.is_admin ? 'flex' : 'none';
 
     const badgeEl = document.getElementById('stushellCaptainBadge');
     const badgeTeamEl = document.getElementById('stushellCaptainBadgeTeam');

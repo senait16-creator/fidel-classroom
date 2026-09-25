@@ -320,6 +320,7 @@ function clearChallengePracticePad() {
 // ---------------------------------------------------------------------------
 
 async function uploadSketchpadDrawingCanvasData() {
+    if (blockIfPreviewing()) return;
     const canvas = document.getElementById('sketchpad');
     if (!canvas) return;
 
@@ -372,6 +373,7 @@ async function uploadSketchpadDrawingCanvasData() {
 // ---------------------------------------------------------------------------
 
 async function postPhotoToTeamFeed(file) {
+    if (blockIfPreviewing()) return;
     if (!file) return;
     if (!file.type?.startsWith('image/')) return showNotificationToast("Please choose an image file.");
     if (file.size > 25 * 1024 * 1024) return showNotificationToast("Photo is too large. Please use one under 25MB.");
@@ -413,6 +415,7 @@ window.postPhotoToTeamFeed = postPhotoToTeamFeed;
 // ---------------------------------------------------------------------------
 
 async function submitWritingPhoto(file) {
+    if (blockIfPreviewing()) return;
     if (!file) return;
     if (!writingSubmitContext?.baseLetter) return showNotificationToast("Choose a letter before submitting.");
     if (file.size > 25 * 1024 * 1024) return showNotificationToast("Photo is too large. Please use one under 25MB.");
@@ -437,6 +440,7 @@ async function submitWritingPhoto(file) {
 // ---------------------------------------------------------------------------
 
 async function submitWritingSketch() {
+    if (blockIfPreviewing()) return;
     const canvas = document.getElementById("writingSketchpad");
     const emptyCheck = document.createElement("canvas");
     emptyCheck.width  = canvas.width;
@@ -488,7 +492,7 @@ async function finalizeWritingSubmission(imageUrl) {
     // A captain has a team_id but reviews nobody's submissions but their
     // own teammates' -- their own writing follows the Solo flow straight
     // to Senait, same as a no-team student's.
-    const goesToCaptain = !!currentProfile?.team_id && !currentProfile?.is_captain;
+    const goesToCaptain = !!getEffectiveTeamId() && !currentProfile?.is_captain;
 
     const reviewer = goesToCaptain ? "Your captain" : "Your teacher";
     showNotificationToast(`Submitted! ${reviewer} will review it soon. ${icon("confetti")}`);
@@ -518,6 +522,7 @@ async function finalizeWritingSubmission(imageUrl) {
 // ---------------------------------------------------------------------------
 
 async function shareApprovedWritingToClass(imageUrl, baseLetter, btnEl) {
+    if (blockIfPreviewing()) return;
     if (btnEl) { btnEl.disabled = true; btnEl.innerText = "Sharing..."; }
 
     const { error } = await _supabase.from('team_practice_posts').insert({

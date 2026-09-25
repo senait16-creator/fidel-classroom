@@ -27,6 +27,27 @@
 
 <div id="toastContainer"></div>
 
+<!-- Preview-as-student banner — admin-only, shown while previewTeamId is
+     set. Lives outside the screen-swap system (like toastContainer) so it
+     stays visible across every screen without needing per-screen markup. -->
+<div id="previewBanner" style="display:none; position:fixed; top:0; left:0; right:0; z-index:9990; background:#166534; color:white; padding:10px 16px; text-align:center; font-size:14px; font-weight:600; align-items:center; justify-content:center; gap:10px;">
+    <span id="previewBannerText">Previewing as a student</span>
+    <button type="button" onclick="exitPreviewAsStudent()" style="background:rgba(255,255,255,0.2); border:none; color:white; padding:4px 14px; border-radius:999px; cursor:pointer; font-weight:700; font-size:13px;">Exit</button>
+</div>
+
+<!-- Preview-as-student team picker -->
+<div id="previewTeamPickerOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9991; align-items:center; justify-content:center; padding:24px;">
+    <div style="background:white; border-radius:20px; padding:28px 24px; max-width:380px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+        <h3 style="margin:0 0 6px; font-size:18px; font-weight:800; color:#1e293b;">Preview as student</h3>
+        <p style="margin:0 0 16px; font-size:13px; color:#64748b;">Pick a team to preview. View-only — nothing you do while previewing is saved.</p>
+        <select id="previewTeamPickerSelect" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid #e2e8f0; font-size:15px; margin-bottom:16px;"></select>
+        <div style="display:flex; gap:10px;">
+            <button type="button" class="btn-secondary" style="flex:1;" onclick="closePreviewTeamPicker()">Cancel</button>
+            <button type="button" class="btn-primary" style="flex:1;" onclick="confirmPreviewTeamPicker()">Preview →</button>
+        </div>
+    </div>
+</div>
+
 <!-- Hamburger — a single shared button, physically moved (via
      syncHamburgerHost() in navigation.js) into whichever screen's own
      header slot is relevant, instead of floating fixed over every screen.
@@ -813,6 +834,11 @@
         </div>
 
         <div class="stushell-card">
+            <button type="button" class="stushell-settings-row" id="stushellPreviewRow" style="display:none;" onclick="openPreviewTeamPicker()">
+                <span data-icon="user"></span>
+                <span>Preview as student</span>
+                <span class="stushell-settings-arrow">→</span>
+            </button>
             <button type="button" class="stushell-settings-row" id="stushellNotifRow" onclick="togglePushNotifications()">
                 <span data-icon="bell"></span>
                 <span>Notifications</span>
@@ -2126,34 +2152,35 @@
 <!-- END CAN-DO STATEMENTS -->
 
 <script src="js/icons.js?v=5" defer></script>
-<script src="js/navigation.js?v=15" defer></script>
-<script src="js/app.js?v=29" defer></script>
+<script src="js/navigation.js?v=16" defer></script>
+<script src="js/app.js?v=30" defer></script>
 <script src="js/auth.js?v=21" defer></script>
 <script src="js/guide.js?v=10" defer></script>
 <script src="js/utils/compress.js?v=9" defer></script>
 <script src="js/game.js?v=11" defer></script>
-<script src="js/submissions.js?v=17" defer></script>
+<script src="js/submissions.js?v=18" defer></script>
 <script src="js/teacher.js?v=33" defer></script>
-<script src="js/reading.js?v=32" defer></script>
+<script src="js/reading.js?v=33" defer></script>
 <script src="js/guidedpath.js?v=1" defer></script>
 <script src="js/wordbuilder.js?v=21" defer></script>
     <script src="js/letterboard.js?v=19" defer></script>
-<script src="js/team/progress.js?v=32" defer></script>
+<script src="js/team/progress.js?v=33" defer></script>
 <script src="js/team/levels.js?v=14" defer></script>
-<script src="js/team/map.js?v=9" defer></script>
-<script src="js/team/hub.js?v=26" defer></script>
+<script src="js/team/map.js?v=10" defer></script>
+<script src="js/team/hub.js?v=27" defer></script>
     <script src="js/community.js?v=8" defer></script>
     <script src="js/dailyfeed.js?v=1" defer></script>
-    <script src="js/songweek.js?v=1" defer></script>
+    <script src="js/songweek.js?v=2" defer></script>
     <script src="js/candostatement.js?v=5" defer></script>
-        <script src="js/starboard.js?v=1" defer></script>
+        <script src="js/starboard.js?v=2" defer></script>
 <script src="js/wordle.js?v=9" defer></script>
 <script src="intro.js?v=1" defer></script>
-<script src="js/challenge.js?v=42" defer></script>
+<script src="js/challenge.js?v=43" defer></script>
 <script src="js/calendar.js?v=7" defer></script>
 <script src="js/menu.js?v=12" defer></script>
 <script src="js/push.js?v=8" defer></script>
-<script src="js/studentshell.js?v=21" defer></script>
+<script src="js/studentshell.js?v=22" defer></script>
+<script src="js/preview.js?v=1" defer></script>
 
 <script>
     if ('serviceWorker' in navigator) {

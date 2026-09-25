@@ -698,12 +698,13 @@ async function renderStudyTogetherCheckIn() {
     const mount = document.getElementById('studyTogetherCheckInMount');
     if (!card || !mount) return;
 
-    if (!currentProfile?.team_id || typeof buildLessonScheduleMarkup !== 'function') {
+    const teamId = getEffectiveTeamId();
+    if (!teamId || typeof buildLessonScheduleMarkup !== 'function') {
         card.style.display = 'none';
         return;
     }
 
-    const markup = await buildLessonScheduleMarkup(currentProfile.team_id);
+    const markup = await buildLessonScheduleMarkup(teamId);
     if (!markup) { card.style.display = 'none'; return; }
 
     card.style.display = 'block';

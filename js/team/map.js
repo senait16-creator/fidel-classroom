@@ -22,11 +22,12 @@ async function renderChallengeMap() {
             Loading map...
         </div>`;
 
+    const effectiveTeamId = getEffectiveTeamId();
     const [teamsRes, levelsRes, myTeamRes] = await Promise.all([
         _supabase.from('teams').select('id, name, current_level').eq('is_active', true).eq('is_test', false).order('name'),
         _supabase.from('challenge_levels').select('level_number, title, letter_families').order('level_number'),
-        currentProfile?.team_id
-            ? _supabase.from('teams').select('current_level').eq('id', currentProfile.team_id).maybeSingle()
+        effectiveTeamId
+            ? _supabase.from('teams').select('current_level').eq('id', effectiveTeamId).maybeSingle()
             : Promise.resolve({ data: null })
     ]);
 
@@ -68,10 +69,10 @@ async function renderChallengeMap() {
         dot.innerHTML = `
             <span style="width:10px; height:10px; border-radius:50%;
                          background:${getTeamHex(team.name)}; display:inline-block;
-                         ${team.id === currentProfile?.team_id ? 'box-shadow:0 0 0 2px white, 0 0 0 3px ' + getTeamHex(team.name) + ';' : ''}">
+                         ${team.id === effectiveTeamId ? 'box-shadow:0 0 0 2px white, 0 0 0 3px ' + getTeamHex(team.name) + ';' : ''}">
             </span>
-            ${team.name.replace(' Team', '').replace(/[🔴🔵🟢🟡🟣⚫⚪]/g, '').trim()} 
-            ${team.id === currentProfile?.team_id ? '<span style="color:#166534;">(you)</span>' : ''}
+            ${team.name.replace(' Team', '').replace(/[🔴🔵🟢🟡🟣⚫⚪]/g, '').trim()}
+            ${team.id === effectiveTeamId ? '<span style="color:#166534;">(you)</span>' : ''}
         `;
         legend.appendChild(dot);
     });
@@ -103,7 +104,7 @@ async function renderChallengeMap() {
             const isCurrent = levelNum === myCurrentLevel;
             const isLocked = levelNum > myCurrentLevel;
             const teamsHere = teamsByLevel[levelNum] || [];
-            const isMyTeamHere = teamsHere.some(t => t.id === currentProfile?.team_id);
+            const isMyTeamHere = teamsHere.some(t => t.id === effectiveTeamId);
 
             // Level node wrapper
             const nodeWrap = document.createElement('div');
@@ -192,7 +193,7 @@ async function renderChallengeMap() {
                 flex-wrap: wrap; max-width: 60px; min-height: 12px;
             `;
             teamsHere.forEach(team => {
-                const isMe = team.id === currentProfile?.team_id;
+                const isMe = team.id === effectiveTeamId;
                 const dot = document.createElement('div');
                 dot.title = team.name;
                 dot.style.cssText = `
