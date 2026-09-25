@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=89">
+    <link rel="stylesheet" href="style.css?v=90">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -1466,14 +1466,41 @@
     </div>
 </div>
 
-<div id="readingLevelsScreen" style="display:none; max-width:900px; margin:40px auto; padding:0 16px;">
-    <div class="workspace-title">
-        <span><span data-icon="book"></span> Amharic Path</span>
-        <button class="btn-secondary" onclick="exitChapterList()">← Back</button>
+<div id="readingLevelsScreen" style="display:none; min-height:100vh; padding:0 16px 48px;">
+    <aside class="app-sidebar">
+        <div class="app-sidebar-brand">
+            <span class="app-sidebar-logo">ፊ</span>
+            <span class="app-sidebar-name">Fidel Classroom</span>
+        </div>
+        <button type="button" class="app-sidebar-upload" onclick="openUploadSheet()">
+            <span data-icon="plus"></span> Upload
+        </button>
+        <nav class="app-sidebar-nav" aria-label="Main">
+            <button type="button" class="app-sidebar-link" onclick="enterStudentShellHomeTab()"><span data-icon="house"></span> Home</button>
+            <button type="button" class="app-sidebar-link" onclick="chooseModeChallenge()"><span>ሀ</span> Fidel Mastery</button>
+            <button type="button" class="app-sidebar-link" onclick="enterWordBuilderHome()"><span>ቃ</span> Word Builder</button>
+            <button type="button" class="app-sidebar-link active" onclick="enterModeIfUnlocked('amharicPath', enterAmharicPath)"><span>ጉ</span> Amharic Path</button>
+            <div class="app-sidebar-divider"></div>
+            <button type="button" class="app-sidebar-link" onclick="chooseModeCommunity()"><span data-icon="confetti"></span> Community</button>
+            <button type="button" class="app-sidebar-link" onclick="enterStudentShellHomeTab().then(() => switchStudentShellTab('profile'))"><span data-icon="user"></span> Profile</button>
+        </nav>
+    </aside>
+    <div class="stushell-content">
+    <div style="max-width:1040px; margin:0 auto; padding-top:24px;">
+        <div class="workspace-title">
+            <span><span data-icon="book"></span> Amharic Path</span>
+            <button class="btn-secondary team-tab-back-link" onclick="exitChapterList()">← Home</button>
+        </div>
+        <p class="subtitle" style="text-align:left; margin-bottom:18px;">Put the words you can read to use.</p>
+
+        <div id="pathCurrentLessonMount"></div>
+
+        <div class="path-shell">
+            <div id="pathChaptersMount" class="path-chapters"></div>
+            <aside id="pathToolboxMount" class="path-toolbox" aria-label="Toolbox"></aside>
+        </div>
     </div>
-    <p class="subtitle" style="text-align:left; margin-bottom:4px;">From Fidel to Fluent </p>
-    <div id="growthEntryMount"></div>
-    <div id="readingLevelsGrid" class="chapter-list-grid"></div>
+    </div>
 </div>
 
 <div id="myGrowthScreen" style="display:none; max-width:600px; margin:40px auto; padding:0 16px;">
@@ -1557,6 +1584,24 @@
     </div>
     <p class="subtitle" style="text-align:left; margin-bottom:14px;">Extra examples, practice, and reference material for this lesson. Optional — take as much or as little as you want.</p>
     <div id="lessonStudyMount"></div>
+</div>
+
+<!-- Amharic Path 2.0 lesson flow — five screens (See it / Notice / Try it /
+     Make it yours / Put it together) instead of the old 10-step walk.
+     Gated behind reading_levels.lesson_flow_version = 2; Chapters 1-3 never
+     reach this screen. -->
+<div id="lessonV2Screen" style="display:none; min-height:100vh; padding:0 16px 48px;">
+    <div style="max-width:640px; margin:0 auto; padding-top:24px;">
+        <div class="lessonv2-header">
+            <button type="button" class="btn-secondary lessonv2-back" onclick="exitLessonV2()">← Back</button>
+            <div id="lessonV2Progress" class="lessonv2-progress"></div>
+            <button type="button" class="btn-secondary lessonv2-words-btn" onclick="openLessonV2WordsPanel()"><span data-icon="book-open"></span> Words</button>
+        </div>
+        <div id="lessonV2Title" class="lessonv2-title"></div>
+        <div id="lessonV2Mount" class="lessonv2-mount"></div>
+    </div>
+
+    <div id="lessonV2WordsPanel" class="lessonv2-panel" style="display:none;"></div>
 </div>
 
 <!-- My Amharic Path — Study Together dashboard. Same chapters as
@@ -2120,7 +2165,7 @@
 <script src="js/game.js?v=11" defer></script>
 <script src="js/submissions.js?v=17" defer></script>
 <script src="js/teacher.js?v=33" defer></script>
-<script src="js/reading.js?v=29" defer></script>
+<script src="js/reading.js?v=32" defer></script>
 <script src="js/guidedpath.js?v=1" defer></script>
 <script src="js/wordbuilder.js?v=21" defer></script>
     <script src="js/letterboard.js?v=19" defer></script>

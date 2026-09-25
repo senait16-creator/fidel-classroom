@@ -73,6 +73,11 @@ let studyTogetherCurrentLevel = null;
 // any chapter started from that list) returns to Study Together instead.
 let chapterListReturnScreen = null;
 
+// Where Study More's own back button goes — "readingLevelDetailScreen"
+// (default, opened mid-lesson) or "readingLevelsScreen" (opened from the
+// Amharic Path home Toolbox, without going through a lesson first).
+let lessonStudyReturnScreen = "readingLevelDetailScreen";
+
 // -----------------------------------------------------------------------------
 // Entry point — gated behind a self-reported "can you read the Fidel?"
 // question, then a one-time choice between Independent Study (solo,
@@ -90,8 +95,9 @@ let chapterListReturnScreen = null;
 function enterAmharicPath() {
     if (!currentProfile) return;
 
-    showScreen("amharicPathHomeScreen");
-    renderAmharicPathChapterCard();
+    chapterListReturnScreen = null;
+    showScreen("readingLevelsScreen", "");
+    renderAmharicPathHome();
 }
 
 // "Yes" persists the flag and moves on to the mode choice (or straight to
@@ -123,8 +129,8 @@ async function chooseAmharicPathMode(mode) {
         renderStudyTogetherScreen();
     } else {
         chapterListReturnScreen = null;
-        showScreen("readingLevelsScreen");
-        renderReadingLevelsList();
+        showScreen("readingLevelsScreen", "");
+        renderAmharicPathHome();
     }
 }
 
@@ -142,8 +148,8 @@ function exitAmharicPath() {
 // instead of exiting My Amharic Path entirely.
 function openAllChaptersFromStudyTogether() {
     chapterListReturnScreen = "studyTogetherScreen";
-    showScreen("readingLevelsScreen");
-    renderReadingLevelsList();
+    showScreen("readingLevelsScreen", "");
+    renderAmharicPathHome();
 }
 
 function exitChapterList() {
@@ -167,10 +173,23 @@ function exitChapterList() {
 async function fetchReadingLevels() {
     if (readingLevelsCache) return readingLevelsCache;
 
-    const { data, error } = await _supabase
+    // word_builder_words and lesson_flow_version are newer columns
+    // (Amharic Path 2.0 migration) — if they haven't been added to the
+    // database yet, fall back to the select without them rather than
+    // breaking the whole chapter list. Missing lesson_flow_version just
+    // means every chapter is treated as the old 10-step flow, which is
+    // correct until the migration runs.
+    let { data, error } = await _supabase
         .from('reading_levels')
-        .select('level_number, title, can_do_category, intro_summary, intro_highlights, admin_only')
+        .select('level_number, title, can_do_category, intro_summary, intro_highlights, admin_only, word_builder_words, lesson_flow_version')
         .order('level_number', { ascending: true });
+
+    if (error) {
+        ({ data, error } = await _supabase
+            .from('reading_levels')
+            .select('level_number, title, can_do_category, intro_summary, intro_highlights, admin_only')
+            .order('level_number', { ascending: true }));
+    }
 
     if (error) {
         console.error("Failed to load chapters:", error);
@@ -179,8 +198,14 @@ async function fetchReadingLevels() {
     }
 
     // admin_only chapters (curriculum pilots not yet QA'd/approved for
-    // students) are only visible on the account building them.
-    readingLevelsCache = (data || []).filter(l => !l.admin_only || currentProfile?.is_admin);
+    // students) are only visible on the account building them — and are
+    // sorted first so a pilot the admin is actively testing doesn't get
+    // buried below the chapters students already see. Array.sort is
+    // stable, so within each group level_number order (already applied by
+    // the query above) is preserved.
+    readingLevelsCache = (data || [])
+        .filter(l => !l.admin_only || currentProfile?.is_admin)
+        .sort((a, b) => (b.admin_only ? 1 : 0) - (a.admin_only ? 1 : 0));
     return readingLevelsCache;
 }
 
@@ -334,10 +359,207 @@ function escapeHtml(str) {
 }
 
 // -----------------------------------------------------------------------------
-// Amharic Path home — single landing screen: resume the current chapter,
-// browse all chapters, or a quick daily Wordle. Reuses the same
-// fetchCurrentChapterSummary() the (currently paused) Study Together
-// dashboard used for its own chapter card.
+// Amharic Path home (readingLevelsScreen) — the one page that replaced the
+// old home → chapter list → lesson list flow. A current-lesson card up top,
+// every chapter as its own section below with its lessons inline (tapping
+// one opens it directly), and a Toolbox alongside instead of My Growth.
+// -----------------------------------------------------------------------------
+
+async function renderAmharicPathHome() {
+    const currentMount = document.getElementById('pathCurrentLessonMount');
+    const chaptersMount = document.getElementById('pathChaptersMount');
+    const toolboxMount = document.getElementById('pathToolboxMount');
+    if (currentMount) currentMount.innerHTML = `<p style="color:#94a3b8;">Loading...</p>`;
+    if (chaptersMount) chaptersMount.innerHTML = `<p style="color:#94a3b8;">Loading...</p>`;
+    if (toolboxMount) toolboxMount.innerHTML = '';
+
+    const [levels, lessons, chapterProgress, lessonProgress] = await Promise.all([
+        fetchReadingLevels(),
+        fetchAllLessons(),
+        fetchMyChapterProgressAll(),
+        fetchMyLessonProgressAll()
+    ]);
+
+    const passedByLevel = {};
+    chapterProgress.forEach(row => { passedByLevel[row.level_number] = row.checkpoint_passed; });
+    const completedLessonIds = new Set(lessonProgress.filter(r => r.completed_at).map(r => r.lesson_id));
+
+    const chapters = levels.map(level => {
+        const lessonsForLevel = lessons.filter(l => l.level_number === level.level_number);
+        const isComplete = !!passedByLevel[level.level_number];
+        const totalCount = lessonsForLevel.length;
+        const completedCount = lessonsForLevel.filter(l => completedLessonIds.has(l.id)).length;
+        return { level, lessons: lessonsForLevel, isComplete, totalCount, completedCount };
+    });
+
+    const withLessons = chapters.filter(c => c.lessons.length > 0);
+    const current = withLessons.find(c => !c.isComplete) || withLessons[withLessons.length - 1];
+
+    if (!current) {
+        if (currentMount) currentMount.innerHTML = '';
+        if (toolboxMount) toolboxMount.innerHTML = '';
+        if (!chapters.length) {
+            if (chaptersMount) chaptersMount.innerHTML = `<p style="color:#94a3b8;">No chapters yet, check back soon.</p>`;
+        } else {
+            renderPathChapterSections(chaptersMount, chapters, completedLessonIds, null);
+        }
+        return;
+    }
+
+    let currentLessonIndex = current.lessons.findIndex(l => !completedLessonIds.has(l.id));
+    if (currentLessonIndex === -1) currentLessonIndex = current.lessons.length - 1;
+
+    // Stash as the active chapter/lesson so the Toolbox's Study More card
+    // (and this card's own Start/Continue button) can act on it without a
+    // second fetch — the same state enterChapter() itself would set.
+    activeReadingLevel = current.level;
+    activeLessons = current.lessons;
+    activeLessonIndex = currentLessonIndex;
+    activeChapterCompletedIds = completedLessonIds;
+
+    const hasStarted = current.completedCount > 0;
+    await renderPathCurrentLessonCard(currentMount, current, currentLessonIndex, hasStarted);
+    renderPathChapterSections(chaptersMount, chapters, completedLessonIds, current.level.level_number);
+    renderPathToolbox(toolboxMount, current);
+}
+
+async function renderPathCurrentLessonCard(mount, current, lessonIndex, hasStarted) {
+    if (!mount) return;
+    const lesson = current.lessons[lessonIndex];
+
+    const vocab = await fetchChapterVocab(current.level.level_number, lesson.lesson_order);
+    const phrases = vocab.slice(0, 3).map(v => v.amharic_word).filter(Boolean);
+
+    mount.innerHTML = `
+        <div class="path-current-card">
+            <div class="path-current-eyebrow">Chapter ${current.level.level_number} · Lesson ${lessonIndex + 1}${lesson.estimated_minutes ? ` · ${lesson.estimated_minutes} min` : ''}</div>
+            <div class="path-current-title">${escapeHtml(lesson.is_challenge ? 'Chapter Challenge' : lesson.title)}</div>
+            ${lesson.learning_objective ? `<p class="path-current-goal">By the end: ${escapeHtml(lesson.learning_objective)}</p>` : ''}
+            ${phrases.length ? `<div class="path-current-phrases">${phrases.map(p => `<span class="path-current-phrase-chip">${escapeHtml(p)}</span>`).join('')}</div>` : ''}
+            <button type="button" class="btn-primary path-current-btn">${hasStarted ? 'Continue →' : 'Start →'}</button>
+        </div>
+    `;
+
+    mount.querySelector('.path-current-btn').onclick = () => {
+        readingLevelDetailReturnScreen = 'readingLevelsScreen';
+        enterChapter(current.level.level_number, lessonIndex);
+    };
+}
+
+// currentLevelNumber marks which chapter's active lesson gets the
+// "You're here" tag — null when nothing's in progress yet (every chapter
+// shown plain).
+function renderPathChapterSections(mount, chapters, completedLessonIds, currentLevelNumber) {
+    if (!mount) return;
+    mount.innerHTML = '';
+
+    chapters.forEach(chapter => {
+        const { level, lessons, totalCount, completedCount, isComplete } = chapter;
+        const percent = totalCount ? Math.round((completedCount / totalCount) * 100) : 0;
+        const isCurrentChapter = level.level_number === currentLevelNumber;
+
+        const section = document.createElement('div');
+        section.className = 'chapter-list-card path-chapter-section';
+
+        if (!lessons.length) {
+            section.innerHTML = `
+                <div class="path-chapter-section-header">
+                    <div>
+                        <div class="path-chapter-section-title">${level.level_number}. ${escapeHtml(level.title)}</div>
+                        <div class="path-chapter-section-meta">Coming soon</div>
+                    </div>
+                </div>
+                <p class="path-chapter-coming-soon">Lessons for this chapter aren't ready yet.</p>
+            `;
+            mount.appendChild(section);
+            return;
+        }
+
+        const rowsHtml = lessons.map((lesson, index) => {
+            const isDone = completedLessonIds.has(lesson.id);
+            const isHere = isCurrentChapter && index === activeLessonIndex;
+            const numBadge = isDone ? '✓' : (lesson.is_challenge ? `<span class="path-lesson-challenge-icon">${icon('trophy')}</span>` : (index + 1));
+            return `
+                <button type="button" class="lesson-picker-row${isDone ? ' done' : ''}${isHere ? ' resume' : ''}" data-level="${level.level_number}" data-index="${index}">
+                    <span class="lesson-picker-num">${numBadge}</span>
+                    <span class="lesson-picker-body">
+                        <span class="lesson-picker-title">${escapeHtml(lesson.is_challenge ? 'Chapter Challenge' : lesson.title)}</span>
+                        <span class="lesson-picker-meta">${escapeHtml(lesson.lesson_focus || '')}</span>
+                    </span>
+                    ${isHere ? '<span class="lesson-picker-tag path-lesson-you-are-here">You\'re here</span>' : ''}
+                </button>
+            `;
+        }).join('');
+
+        section.innerHTML = `
+            <div class="path-chapter-section-header">
+                <div>
+                    <div class="path-chapter-section-title">${level.level_number}. ${escapeHtml(level.title)}</div>
+                    <div class="path-chapter-section-meta">${completedCount} of ${totalCount} lesson${totalCount === 1 ? '' : 's'}${isComplete ? ' • Chapter complete ✓' : ''}</div>
+                </div>
+            </div>
+            <div class="chapter-progress-track"><div class="chapter-progress-fill" style="width:${percent}%;"></div></div>
+            <div class="lesson-picker-list">${rowsHtml}</div>
+        `;
+
+        section.querySelectorAll('.lesson-picker-row').forEach(row => {
+            row.onclick = () => {
+                readingLevelDetailReturnScreen = 'readingLevelsScreen';
+                enterChapter(Number(row.dataset.level), Number(row.dataset.index));
+            };
+        });
+
+        mount.appendChild(section);
+    });
+}
+
+function renderPathToolbox(mount, current) {
+    if (!mount) return;
+    const wbWords = Array.isArray(current.level.word_builder_words) ? current.level.word_builder_words : [];
+
+    mount.innerHTML = `
+        <button type="button" class="path-toolbox-card" id="pathToolboxPhrases">
+            <div class="path-toolbox-card-title">${icon('book-open')} My Phrases</div>
+            <div class="path-toolbox-card-sub">Every word and phrase from your lessons so far.</div>
+        </button>
+        <button type="button" class="path-toolbox-card" id="pathToolboxPatterns">
+            <div class="path-toolbox-card-title">${icon('puzzle')} Patterns</div>
+            <div class="path-toolbox-card-sub">Grammar you've seen so far.</div>
+        </button>
+        <button type="button" class="path-toolbox-card" id="pathToolboxStudyMore">
+            <div class="path-toolbox-card-title">${icon('book')} Study More</div>
+            <div class="path-toolbox-card-sub">Go deeper on your current lesson.</div>
+        </button>
+        ${wbWords.length ? `
+        <div class="path-toolbox-card path-toolbox-wb-card">
+            <div class="path-toolbox-wb-label">${icon('sparkle')} From Word Builder</div>
+            <div class="path-toolbox-wb-words">${wbWords.map(w => `<span class="path-current-phrase-chip">${escapeHtml(w)}</span>`).join('')}</div>
+        </div>` : ''}
+    `;
+
+    mount.querySelector('#pathToolboxPhrases').onclick = () => openMyGrowthSection('growthVocabMount');
+    mount.querySelector('#pathToolboxPatterns').onclick = () => openMyGrowthSection('growthGrammarMount');
+    mount.querySelector('#pathToolboxStudyMore').onclick = () => openStudyMoreForCurrentLesson();
+}
+
+function openMyGrowthSection(anchorId) {
+    enterMyGrowth();
+    setTimeout(() => {
+        const el = document.getElementById(anchorId);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 60);
+}
+
+async function openStudyMoreForCurrentLesson() {
+    if (!activeReadingLevel || !activeLessons.length) return;
+    lessonStudyReturnScreen = 'readingLevelsScreen';
+    await enterLessonStudyMore();
+}
+
+// -----------------------------------------------------------------------------
+// OLD Amharic Path home (amharicPathHomeScreen) — superseded by the shell
+// above. Left in place, unreached from the live flow, per the standing
+// "don't delete dormant screens" pattern rather than ripping it out.
 // -----------------------------------------------------------------------------
 
 // mountId/returnScreen let this same card be reused on the Amharic Path
@@ -581,7 +803,10 @@ function closeChapterGoals() {
 // that isn't marked complete yet (chapter_lesson_progress)
 // -----------------------------------------------------------------------------
 
-async function enterChapter(levelNumber) {
+// startAtIndex, when given, opens that lesson directly instead of the
+// lesson-picker list — used when a lesson row is tapped straight from the
+// Amharic Path home page instead of coming through the chapter's own list.
+async function enterChapter(levelNumber, startAtIndex) {
     const levels = await fetchReadingLevels();
     activeReadingLevel = levels.find(l => l.level_number === levelNumber);
     if (!activeReadingLevel) return showNotificationToast("Couldn't find this chapter.");
@@ -609,11 +834,15 @@ async function enterChapter(levelNumber) {
 
     let resumeIndex = lessons.findIndex(l => !activeChapterCompletedIds.has(l.id));
     if (resumeIndex === -1) resumeIndex = lessons.length - 1;
-    activeLessonIndex = resumeIndex;
+    activeLessonIndex = typeof startAtIndex === 'number' ? startAtIndex : resumeIndex;
 
     showScreen("readingLevelDetailScreen", "block");
 
-    openLessonPicker();
+    if (typeof startAtIndex === 'number') {
+        openCurrentLesson();
+    } else {
+        openLessonPicker();
+    }
 }
 
 // Shown first when entering a chapter — every lesson in order, completion
@@ -663,6 +892,13 @@ function continueChapterFromStudyTogether(levelNumber) {
 async function openCurrentLesson() {
     const lesson = activeLessons[activeLessonIndex];
 
+    // The Chapter Challenge always uses the existing checkpoint system
+    // regardless of the chapter's lesson_flow_version — only ordinary
+    // lessons get the 2.0 five-screen flow.
+    if (!lesson.is_challenge && activeReadingLevel.lesson_flow_version === 2) {
+        return enterLessonV2();
+    }
+
     document.getElementById("lessonPickerView").style.display = "none";
     document.getElementById("readingLevelDetailTitle").innerText =
         `${activeReadingLevel.title} · Lesson ${activeLessonIndex + 1} of ${activeLessons.length}: ${lesson.title}`;
@@ -699,6 +935,7 @@ async function openCurrentLesson() {
     activeStepList.push('conversation', 'vocab', 'grammar', 'reading', 'speaking', 'practice', 'complete');
 
     activeStepIndex = 0;
+    lastStepDirection = 1;
     renderCurrentStep();
 }
 
@@ -764,10 +1001,543 @@ function exitReadingLevelDetail() {
         document.getElementById("amharicPathHomeScreen").style.display = "block";
         renderAmharicPathChapterCard();
     } else {
-        document.getElementById("readingLevelsScreen").style.display = "block";
-        renderReadingLevelsList();
+        showScreen("readingLevelsScreen", "");
+        renderAmharicPathHome();
     }
 }
+
+// -----------------------------------------------------------------------------
+// Amharic Path 2.0 lesson flow — five screens instead of the old 10-step
+// walk: See it (model conversation) / Notice (the pattern) / Try it
+// (multiple-choice with per-answer feedback) / Make it yours (build a
+// sentence from tiles with the student's own name) / Put it together (a
+// practice conversation the student partly fills in). Reached only for
+// lessons in a chapter with reading_levels.lesson_flow_version = 2 (see
+// openCurrentLesson above) — Chapters 1-3 never touch any of this.
+//
+// Like the old flow's "skip empty steps" fix, a screen with nothing built
+// for it yet is left out of the sequence entirely rather than shown empty
+// — this is what makes the Lesson 2-5 stubs (title only, no content yet)
+// navigable: with nothing to show, all five screens skip and the lesson
+// goes straight to "lesson complete."
+// -----------------------------------------------------------------------------
+
+let v2Lesson = null;
+let v2ConversationModel = [];
+let v2PracticeConversation = [];
+let v2PatternSection = null;
+let v2BuildSection = null;
+let v2QuizBlocks = [];
+let v2Vocab = [];
+let v2Conjugations = [];
+let v2AvailableScreens = [];
+let v2ScreenIndex = 0;
+let v2TryItIndex = 0;
+let v2TogetherIndex = 0;
+let v2BuildPlaced = [];
+let v2BuildTilesShuffled = [];
+
+async function enterLessonV2() {
+    const lesson = activeLessons[activeLessonIndex];
+    v2Lesson = lesson;
+    v2ScreenIndex = 0;
+
+    showScreen('lessonV2Screen');
+    document.getElementById('lessonV2WordsPanel').style.display = 'none';
+    document.getElementById('lessonV2Title').innerText =
+        `${activeReadingLevel.title} · Lesson ${activeLessonIndex + 1} of ${activeLessons.length}: ${lesson.title}`;
+    document.getElementById('lessonV2Mount').innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
+
+    const levelNumber = activeReadingLevel.level_number;
+    const lessonOrder = lesson.lesson_order;
+
+    const [modelLines, practiceLines, sections, quiz, vocab, conjugations] = await Promise.all([
+        fetchV2Conversation(levelNumber, lessonOrder, 'model'),
+        fetchV2Conversation(levelNumber, lessonOrder, 'practice'),
+        fetchLessonSections(levelNumber, lessonOrder),
+        fetchV2Quiz(levelNumber, lessonOrder),
+        fetchChapterVocab(levelNumber, lessonOrder),
+        fetchChapterConjugations(levelNumber, lessonOrder)
+    ]);
+
+    v2ConversationModel = modelLines;
+    v2PracticeConversation = practiceLines;
+    v2PatternSection = sections.find(s => s.section_type === 'pattern') || null;
+    v2BuildSection = sections.find(s => s.section_type === 'build_sentence') || null;
+    v2QuizBlocks = quiz;
+    v2Vocab = vocab;
+    v2Conjugations = conjugations;
+
+    renderV2WordsPanel();
+    renderV2Screen();
+}
+window.enterLessonV2 = enterLessonV2;
+
+function exitLessonV2() {
+    if (readingLevelDetailReturnScreen === "studyTogetherScreen") {
+        showScreen("studyTogetherScreen", "block");
+        renderStudyTogetherScreen();
+    } else {
+        showScreen("readingLevelsScreen", "");
+        renderAmharicPathHome();
+    }
+}
+window.exitLessonV2 = exitLessonV2;
+
+// conversation_type/choices/correct_index/feedback are the Amharic Path
+// 2.0 migration columns — if they haven't been added to the database yet,
+// 'model' falls back to every row (pre-migration data is all model-style
+// dialogue) and 'practice' simply comes back empty (that screen skips)
+// rather than erroring the whole lesson.
+async function fetchV2Conversation(levelNumber, lessonOrder, type) {
+    let { data, error } = await _supabase
+        .from('lesson_conversations')
+        .select('id, item_order, speaker_label, line_amharic, line_translation, conversation_type, choices, correct_index, feedback')
+        .eq('level_number', levelNumber)
+        .eq('lesson_order', lessonOrder)
+        .eq('conversation_type', type)
+        .order('item_order', { ascending: true });
+
+    if (error) {
+        if (type !== 'model') return [];
+        ({ data, error } = await _supabase
+            .from('lesson_conversations')
+            .select('id, item_order, speaker_label, line_amharic, line_translation')
+            .eq('level_number', levelNumber)
+            .eq('lesson_order', lessonOrder)
+            .order('item_order', { ascending: true }));
+    }
+
+    if (error) {
+        console.error("Failed to load conversation:", error);
+        return [];
+    }
+    return data || [];
+}
+
+// choices/correct_index/feedback are the 2.0 migration columns — if they
+// haven't been added yet, Try It has nothing to show (screen skips) until
+// they are, rather than erroring the whole lesson.
+async function fetchV2Quiz(levelNumber, lessonOrder) {
+    const { data, error } = await _supabase
+        .from('lesson_quiz_blocks')
+        .select('id, block_order, prompt, choices, correct_index, feedback')
+        .eq('level_number', levelNumber)
+        .eq('lesson_order', lessonOrder)
+        .eq('is_study_layer', false)
+        .order('block_order', { ascending: true });
+
+    if (error) {
+        console.error("Failed to load quiz:", error);
+        return [];
+    }
+    return (data || []).filter(q => Array.isArray(q.choices) && q.choices.length > 0);
+}
+
+// Builds the list of screens that actually have content for this lesson,
+// in the fixed See it → Notice → Try it → Make it yours → Put it together
+// order, then renders whichever one v2ScreenIndex points to.
+function renderV2Screen() {
+    v2AvailableScreens = [];
+    if (v2ConversationModel.length) v2AvailableScreens.push('see');
+    if (v2PatternSection) v2AvailableScreens.push('notice');
+    if (v2QuizBlocks.length) v2AvailableScreens.push('try');
+    if (v2BuildSection) v2AvailableScreens.push('yours');
+    if (v2PracticeConversation.length) v2AvailableScreens.push('together');
+
+    if (v2AvailableScreens.length === 0) {
+        renderV2Empty();
+        return;
+    }
+
+    if (v2ScreenIndex >= v2AvailableScreens.length) {
+        return finishV2Lesson();
+    }
+
+    renderV2ProgressBar();
+
+    const mount = document.getElementById('lessonV2Mount');
+    const screen = v2AvailableScreens[v2ScreenIndex];
+    if (screen === 'see') renderV2SeeIt(mount);
+    else if (screen === 'notice') renderV2Notice(mount);
+    else if (screen === 'try') { v2TryItIndex = 0; renderV2TryIt(mount); }
+    else if (screen === 'yours') renderV2MakeItYours(mount);
+    else if (screen === 'together') { v2TogetherIndex = 0; renderV2PutTogether(mount); }
+}
+
+function renderV2ProgressBar() {
+    const bar = document.getElementById('lessonV2Progress');
+    if (!bar) return;
+    bar.innerHTML = v2AvailableScreens.map((_, i) =>
+        `<span class="lessonv2-progress-seg${i <= v2ScreenIndex ? ' done' : ''}"></span>`
+    ).join('');
+}
+
+function renderV2Empty() {
+    document.getElementById('lessonV2Progress').innerHTML = '';
+    document.getElementById('lessonV2Mount').innerHTML = `
+        <div class="lessonv2-empty">
+            <p style="color:#94a3b8; font-size:14px;">This lesson's content isn't built yet — check back soon.</p>
+            <button type="button" class="btn-primary lessonv2-continue">Continue →</button>
+        </div>
+    `;
+    document.querySelector('#lessonV2Mount .lessonv2-continue').onclick = finishV2Lesson;
+}
+
+function goToNextV2Screen() {
+    v2ScreenIndex++;
+    renderV2Screen();
+}
+
+async function finishV2Lesson() {
+    await goToNextLesson();
+}
+
+// ---- Screen 1: See it — model conversation, Amharic only, tap to reveal ----
+
+function renderV2SeeIt(mount) {
+    mount.innerHTML = `
+        <div class="lessonv2-screen-label">See It</div>
+        <p class="lessonv2-screen-hint">Read the conversation. Tap a line to see what it means.</p>
+        <div class="lessonv2-convo">
+            ${v2ConversationModel.map((line, i) => `
+                <button type="button" class="lessonv2-convo-line" data-i="${i}">
+                    <span class="lessonv2-convo-speaker">${escapeHtml(line.speaker_label)}</span>
+                    <span class="lessonv2-convo-amharic">${escapeHtml(line.line_amharic)}</span>
+                    <span class="lessonv2-convo-english" style="display:none;">${escapeHtml(line.line_translation || '')}</span>
+                </button>
+            `).join('')}
+        </div>
+        <button type="button" class="btn-primary lessonv2-continue">Continue →</button>
+    `;
+
+    mount.querySelectorAll('.lessonv2-convo-line').forEach(btn => {
+        btn.onclick = () => {
+            const eng = btn.querySelector('.lessonv2-convo-english');
+            eng.style.display = eng.style.display === 'none' ? 'block' : 'none';
+        };
+    });
+    mount.querySelector('.lessonv2-continue').onclick = goToNextV2Screen;
+}
+
+// ---- Screen 2: Notice — the pattern, changing part highlighted ----
+
+function renderV2Notice(mount) {
+    const section = v2PatternSection;
+    const rows = section.rows || [];
+    const baseWord = rows[0]?.amharic || '';
+
+    mount.innerHTML = `
+        <div class="lessonv2-screen-label">Notice</div>
+        <div class="lessonv2-notice-explain">${section.body_html || ''}</div>
+        <div class="lessonv2-pattern-rows">
+            ${rows.map((row, i) => `
+                <div class="lessonv2-pattern-row${i === 0 ? ' base' : ''}">
+                    <div class="lessonv2-pattern-amharic">${highlightV2PatternChange(baseWord, row)}</div>
+                    <div class="lessonv2-pattern-label">${escapeHtml(row.label || '')}</div>
+                </div>
+            `).join('')}
+        </div>
+        <button type="button" class="btn-primary lessonv2-continue">Continue →</button>
+    `;
+
+    mount.querySelector('.lessonv2-continue').onclick = goToNextV2Screen;
+}
+
+// Highlights the part of a pattern row's word that changed from the base
+// word (e.g. base "ስም" → "ስሜ" highlights "ሜ"). In Ge'ez script the change
+// is often a modified final glyph rather than an appended suffix (ም → ሜ
+// is one character changing, not one being added), so a plain string-diff
+// can't find it reliably. Content authors instead mark the exact piece to
+// call out via an explicit `highlight` substring on the row; this only
+// falls back to a startsWith diff (works for true suffixes like ህ/ሽ) when
+// no `highlight` was authored.
+function highlightV2PatternChange(base, row) {
+    const word = row.amharic;
+    if (!word) return '';
+
+    if (row.highlight && word.includes(row.highlight)) {
+        const idx = word.indexOf(row.highlight);
+        const before = word.slice(0, idx);
+        const match = word.slice(idx, idx + row.highlight.length);
+        const after = word.slice(idx + row.highlight.length);
+        return `${escapeHtml(before)}<span class="lessonv2-pattern-highlight">${escapeHtml(match)}</span>${escapeHtml(after)}`;
+    }
+
+    if (!base || word === base || !word.startsWith(base)) return escapeHtml(word);
+    const stem = word.slice(0, base.length);
+    const added = word.slice(base.length);
+    return `${escapeHtml(stem)}<span class="lessonv2-pattern-highlight">${escapeHtml(added)}</span>`;
+}
+
+// ---- Screen 3: Try it — multiple-choice, one question at a time, with
+// per-answer feedback ----
+
+function renderV2TryIt(mount) {
+    const q = v2QuizBlocks[v2TryItIndex];
+    mount.innerHTML = `
+        <div class="lessonv2-screen-label">Try It · ${v2TryItIndex + 1} of ${v2QuizBlocks.length}</div>
+        <p class="lessonv2-tryit-prompt">${escapeHtml(q.prompt)}</p>
+        <div class="lessonv2-tryit-choices">
+            ${q.choices.map((c, i) => `<button type="button" class="lessonv2-choice-btn" data-i="${i}">${escapeHtml(c)}</button>`).join('')}
+        </div>
+        <div class="lessonv2-tryit-feedback" style="display:none;"></div>
+    `;
+
+    mount.querySelectorAll('.lessonv2-choice-btn').forEach(btn => {
+        btn.onclick = () => handleV2TryItAnswer(mount, q, Number(btn.dataset.i));
+    });
+}
+
+function handleV2TryItAnswer(mount, q, chosenIndex) {
+    const buttons = mount.querySelectorAll('.lessonv2-choice-btn');
+    const isCorrect = chosenIndex === q.correct_index;
+
+    buttons.forEach(b => { b.disabled = true; });
+    buttons[chosenIndex].classList.add(isCorrect ? 'correct' : 'incorrect');
+    if (!isCorrect && q.correct_index != null && buttons[q.correct_index]) {
+        buttons[q.correct_index].classList.add('correct');
+    }
+
+    const isLast = v2TryItIndex >= v2QuizBlocks.length - 1;
+    const why = Array.isArray(q.feedback) ? q.feedback[chosenIndex] : '';
+
+    const feedbackEl = mount.querySelector('.lessonv2-tryit-feedback');
+    feedbackEl.className = `lessonv2-tryit-feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+    feedbackEl.style.display = 'block';
+    feedbackEl.innerHTML = `
+        <p>${isCorrect ? '✓ Right!' : '✗ Not quite.'} ${escapeHtml(why || '')}</p>
+        <button type="button" class="btn-primary lessonv2-tryit-next">${isLast ? 'Continue →' : 'Next Question →'}</button>
+    `;
+    feedbackEl.querySelector('.lessonv2-tryit-next').onclick = () => {
+        v2TryItIndex++;
+        if (v2TryItIndex < v2QuizBlocks.length) {
+            renderV2TryIt(mount);
+        } else {
+            goToNextV2Screen();
+        }
+    };
+}
+
+// ---- Screen 4: Make it yours — build a sentence from tiles using the
+// student's own name ----
+
+function renderV2MakeItYours(mount) {
+    const nickname = currentProfile?.nickname || 'you';
+    const correctOrder = (v2BuildSection.rows || []).map(t =>
+        typeof t === 'string' ? t.replace('{{name}}', nickname) : String(t)
+    );
+
+    v2BuildPlaced = [];
+    v2BuildTilesShuffled = shuffleV2Array(correctOrder.map(text => ({ text, used: false })));
+
+    mount.innerHTML = `
+        <div class="lessonv2-screen-label">Make It Yours</div>
+        <div class="lessonv2-notice-explain">${v2BuildSection.body_html || ''}</div>
+        <div class="lessonv2-build-slots" id="lessonv2BuildSlots"></div>
+        <div class="lessonv2-build-tiles" id="lessonv2BuildTiles"></div>
+        <div class="lessonv2-build-feedback" style="display:none;"></div>
+    `;
+
+    renderV2BuildTiles(mount, correctOrder);
+}
+
+function renderV2BuildTiles(mount, correctOrder) {
+    const slotsEl = mount.querySelector('#lessonv2BuildSlots');
+    const tilesEl = mount.querySelector('#lessonv2BuildTiles');
+
+    slotsEl.innerHTML = correctOrder.map((_, i) =>
+        `<span class="lessonv2-build-slot${v2BuildPlaced[i] ? ' filled' : ''}">${v2BuildPlaced[i] ? escapeHtml(v2BuildPlaced[i]) : ''}</span>`
+    ).join('');
+
+    tilesEl.innerHTML = v2BuildTilesShuffled.map((tile, i) =>
+        `<button type="button" class="lessonv2-build-tile${tile.used ? ' used' : ''}" data-shuffled-i="${i}" ${tile.used ? 'disabled' : ''}>${escapeHtml(tile.text)}</button>`
+    ).join('');
+
+    tilesEl.querySelectorAll('.lessonv2-build-tile:not(.used)').forEach(btn => {
+        btn.onclick = () => {
+            const idx = Number(btn.dataset.shuffledI);
+            v2BuildTilesShuffled[idx].used = true;
+            v2BuildPlaced.push(v2BuildTilesShuffled[idx].text);
+            renderV2BuildTiles(mount, correctOrder);
+
+            if (v2BuildPlaced.length === correctOrder.length) {
+                checkV2Build(mount, correctOrder);
+            }
+        };
+    });
+}
+
+function checkV2Build(mount, correctOrder) {
+    const isCorrect = v2BuildPlaced.every((t, i) => t === correctOrder[i]);
+    const feedbackEl = mount.querySelector('.lessonv2-build-feedback');
+    feedbackEl.style.display = 'block';
+
+    if (isCorrect) {
+        feedbackEl.innerHTML = `
+            <p class="lessonv2-build-correct">✓ Nice! ${escapeHtml(v2BuildPlaced.join(' '))}</p>
+            <button type="button" class="btn-primary lessonv2-continue">Continue →</button>
+        `;
+        feedbackEl.querySelector('.lessonv2-continue').onclick = goToNextV2Screen;
+    } else {
+        feedbackEl.innerHTML = `
+            <p class="lessonv2-build-incorrect">Not quite — try again.</p>
+            <button type="button" class="btn-secondary lessonv2-build-retry">Try Again</button>
+        `;
+        feedbackEl.querySelector('.lessonv2-build-retry').onclick = () => renderV2MakeItYours(mount);
+    }
+}
+
+function shuffleV2Array(arr) {
+    const copy = [...arr];
+    for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+}
+
+// ---- Screen 5: Put it together — a practice conversation with less
+// support; fixed lines just display, blank lines are multiple-choice with
+// feedback (same shape as Try It) ----
+
+function renderV2PutTogether(mount) {
+    mount.innerHTML = `
+        <div class="lessonv2-screen-label">Put It Together</div>
+        <p class="lessonv2-screen-hint">Play your part in the conversation.</p>
+        <div class="lessonv2-convo" id="lessonv2TogetherConvo"></div>
+    `;
+    renderV2TogetherStep(mount);
+}
+
+function renderV2TogetherStep(mount) {
+    // Clear the previous turn's choices/feedback/nav — they were appended
+    // directly to `mount` (siblings of #lessonv2TogetherConvo), so a fresh
+    // convoEl.innerHTML alone doesn't remove them.
+    mount.querySelectorAll('.lessonv2-tryit-choices, .lessonv2-tryit-feedback, .lessonv2-together-nav').forEach(el => el.remove());
+
+    const convoEl = mount.querySelector('#lessonv2TogetherConvo');
+    let html = '';
+    for (let i = 0; i <= v2TogetherIndex && i < v2PracticeConversation.length; i++) {
+        const line = v2PracticeConversation[i];
+        html += `
+            <div class="lessonv2-convo-line static">
+                <span class="lessonv2-convo-speaker">${escapeHtml(line.speaker_label)}</span>
+                <span class="lessonv2-convo-amharic" data-line-i="${i}">${line.line_amharic ? escapeHtml(line.line_amharic) : ''}</span>
+            </div>
+        `;
+    }
+    convoEl.innerHTML = html;
+
+    const current = v2PracticeConversation[v2TogetherIndex];
+
+    if (Array.isArray(current.choices) && current.choices.length) {
+        renderV2TogetherChoices(mount, current);
+    } else {
+        appendV2TogetherNav(mount);
+    }
+}
+
+function renderV2TogetherChoices(mount, line) {
+    const choicesEl = document.createElement('div');
+    choicesEl.className = 'lessonv2-tryit-choices';
+    choicesEl.innerHTML = line.choices.map((c, i) =>
+        `<button type="button" class="lessonv2-choice-btn" data-i="${i}">${escapeHtml(c)}</button>`
+    ).join('');
+    mount.appendChild(choicesEl);
+
+    choicesEl.querySelectorAll('.lessonv2-choice-btn').forEach(btn => {
+        btn.onclick = () => {
+            const chosenIndex = Number(btn.dataset.i);
+            const isCorrect = chosenIndex === line.correct_index;
+
+            choicesEl.querySelectorAll('.lessonv2-choice-btn').forEach(b => { b.disabled = true; });
+            btn.classList.add(isCorrect ? 'correct' : 'incorrect');
+            if (!isCorrect && line.correct_index != null && choicesEl.children[line.correct_index]) {
+                choicesEl.children[line.correct_index].classList.add('correct');
+            }
+
+            const lineEl = mount.querySelector(`.lessonv2-convo-amharic[data-line-i="${v2TogetherIndex}"]`);
+            if (lineEl && line.correct_index != null) lineEl.textContent = line.choices[line.correct_index];
+
+            const why = Array.isArray(line.feedback) ? line.feedback[chosenIndex] : '';
+            const feedbackEl = document.createElement('div');
+            feedbackEl.className = `lessonv2-tryit-feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+            feedbackEl.innerHTML = `<p>${isCorrect ? '✓ Right!' : '✗ Not quite.'} ${escapeHtml(why || '')}</p>`;
+            mount.appendChild(feedbackEl);
+
+            appendV2TogetherNav(mount);
+        };
+    });
+}
+
+function appendV2TogetherNav(mount) {
+    const existing = mount.querySelector('.lessonv2-together-nav');
+    if (existing) existing.remove();
+
+    const isFinal = v2TogetherIndex >= v2PracticeConversation.length - 1;
+    const nav = document.createElement('div');
+    nav.className = 'lessonv2-together-nav';
+    nav.innerHTML = `<button type="button" class="btn-primary">${isFinal ? 'Continue →' : 'Continue →'}</button>`;
+    nav.querySelector('button').onclick = () => {
+        v2TogetherIndex++;
+        if (v2TogetherIndex < v2PracticeConversation.length) {
+            renderV2TogetherStep(mount);
+        } else {
+            goToNextV2Screen();
+        }
+    };
+    mount.appendChild(nav);
+}
+
+// ---- Words & Patterns panel — Today's Words + Grammar, opened from the
+// header instead of being required steps in the flow ----
+
+function renderV2WordsPanel() {
+    const panel = document.getElementById('lessonV2WordsPanel');
+    let html = `
+        <div class="lessonv2-panel-header">
+            <span>Words &amp; Patterns</span>
+            <button type="button" class="lessonv2-panel-close" onclick="closeLessonV2WordsPanel()">✕</button>
+        </div>
+    `;
+
+    if (v2Vocab.length) {
+        html += `<div class="lessonv2-panel-section-label">${icon('book-open')} Today's Words</div>`;
+        html += v2Vocab.map(w => `
+            <div class="lessonv2-panel-word">
+                <span class="lessonv2-panel-word-amharic">${escapeHtml(w.amharic_word)}</span>
+                <span class="lessonv2-panel-word-meaning">${escapeHtml(w.english_meaning)}</span>
+            </div>
+        `).join('');
+    }
+
+    if (v2Conjugations.length) {
+        html += `<div class="lessonv2-panel-section-label">${icon('brain')} Grammar</div>`;
+        html += v2Conjugations.map(v => `
+            <div class="lessonv2-panel-verb">
+                <strong>${escapeHtml(v.verb_amharic)}</strong> — ${escapeHtml(v.verb_english)}
+                ${(v.forms || []).map(f => `<div class="lessonv2-panel-form">${escapeHtml(f.pronoun)}: ${escapeHtml(f.amharic)}</div>`).join('')}
+            </div>
+        `).join('');
+    }
+
+    if (!v2Vocab.length && !v2Conjugations.length) {
+        html += `<p style="color:#94a3b8; font-size:13px;">Nothing added for this lesson yet.</p>`;
+    }
+
+    panel.innerHTML = html;
+}
+
+function openLessonV2WordsPanel() {
+    document.getElementById('lessonV2WordsPanel').style.display = 'block';
+}
+window.openLessonV2WordsPanel = openLessonV2WordsPanel;
+
+function closeLessonV2WordsPanel() {
+    document.getElementById('lessonV2WordsPanel').style.display = 'none';
+}
+window.closeLessonV2WordsPanel = closeLessonV2WordsPanel;
 
 // -----------------------------------------------------------------------------
 // Lesson sections and quiz — data-driven curriculum content
@@ -886,8 +1656,15 @@ window.enterLessonStudyMore = enterLessonStudyMore;
 
 function exitLessonStudyMore() {
     document.getElementById('lessonStudyScreen').style.display = 'none';
-    document.getElementById('readingLevelDetailScreen').style.display = 'block';
-    document.getElementById('lessonNormalView').style.display = 'block';
+
+    if (lessonStudyReturnScreen === 'readingLevelsScreen') {
+        showScreen('readingLevelsScreen', '');
+        renderAmharicPathHome();
+    } else {
+        document.getElementById('readingLevelDetailScreen').style.display = 'block';
+        document.getElementById('lessonNormalView').style.display = 'block';
+    }
+    lessonStudyReturnScreen = 'readingLevelDetailScreen';
 }
 window.exitLessonStudyMore = exitLessonStudyMore;
 
@@ -915,6 +1692,11 @@ function sectionTypeLabel(type) {
 // below its content — sections aren't gated on completion (consistent with
 // the rest of the app), Continue just always moves forward.
 // -----------------------------------------------------------------------------
+
+// Which way the student was moving when the current step was reached —
+// used only to keep skipping content-free steps in the same direction
+// instead of bouncing back and forth.
+let lastStepDirection = 1;
 
 async function renderCurrentStep() {
     const step = activeStepList[activeStepIndex];
@@ -948,21 +1730,43 @@ document.getElementById('lessonStepProgress').innerHTML = `
     } else if (step === 'complete') {
         renderLessonCompleteStep(mount);
     } else {
-        // These sections are async and replace mount.innerHTML wholesale
-        // once their data loads, so the nav has to be appended AFTER they
-        // finish — appending it first just gets wiped out by that replace.
-        if (step === 'conversation') await renderConversationSection(mount, levelNumber, lessonOrder);
-        else if (step === 'vocab') await renderVocabSection(mount, levelNumber, lessonOrder);
-        else if (step === 'grammar') await renderConjugationSection(mount, levelNumber, lessonOrder);
-        else if (step === 'reading') await renderLessonReadingSection(mount, levelNumber, lessonOrder);
-        else if (step === 'speaking') await renderSpeakingSection(mount, levelNumber, lessonOrder);
-        else if (step === 'practice') await renderPracticeSection(mount, levelNumber, lessonOrder);
-        appendStepNav(mount, { showBack: true });
+        // These sections are async, optional (a lesson may not have any
+        // content for them), and replace mount.innerHTML wholesale once
+        // their data loads. Each one reports back whether it actually had
+        // content — when it didn't, skip straight past it (in whichever
+        // direction the student was already moving) instead of showing a
+        // "nothing here yet" screen. Bottoms out safely: 'goal' and
+        // 'complete' always have content, so the skip can never run off
+        // both ends of the step list.
+        let hadContent;
+        if (step === 'conversation') hadContent = await renderConversationSection(mount, levelNumber, lessonOrder);
+        else if (step === 'vocab') hadContent = await renderVocabSection(mount, levelNumber, lessonOrder);
+        else if (step === 'grammar') hadContent = await renderConjugationSection(mount, levelNumber, lessonOrder);
+        else if (step === 'reading') hadContent = await renderLessonReadingSection(mount, levelNumber, lessonOrder);
+        else if (step === 'speaking') hadContent = await renderSpeakingSection(mount, levelNumber, lessonOrder);
+        else if (step === 'practice') hadContent = await renderPracticeSection(mount, levelNumber, lessonOrder);
+
+        if (hadContent === false) {
+            const nextIndex = activeStepIndex + lastStepDirection;
+            if (nextIndex >= 0 && nextIndex < activeStepList.length) {
+                activeStepIndex = nextIndex;
+                return renderCurrentStep();
+            }
+        }
+
+        // The conversation step's own Continue both marks it read and
+        // advances — no separate "I've Read It" button next to it.
+        if (step === 'conversation') {
+            appendStepNav(mount, { showBack: true, onContinue: () => { markConversationRead(levelNumber, lessonOrder); goToNextStep(); } });
+        } else {
+            appendStepNav(mount, { showBack: true });
+        }
     }
 }
 
 function goToNextStep() {
     if (activeStepIndex < activeStepList.length - 1) {
+        lastStepDirection = 1;
         activeStepIndex++;
         renderCurrentStep();
     }
@@ -970,12 +1774,13 @@ function goToNextStep() {
 
 function goToPrevStep() {
     if (activeStepIndex > 0) {
+        lastStepDirection = -1;
         activeStepIndex--;
         renderCurrentStep();
     }
 }
 
-function appendStepNav(mount, { showBack = true, continueLabel = 'Continue →' } = {}) {
+function appendStepNav(mount, { showBack = true, continueLabel = 'Continue →', onContinue = goToNextStep } = {}) {
     const existingNav = mount.querySelector('.lesson-step-nav');
     if (existingNav) existingNav.remove();
 
@@ -985,7 +1790,7 @@ function appendStepNav(mount, { showBack = true, continueLabel = 'Continue →' 
         ${showBack ? `<button class="btn-secondary lesson-step-back">← Back</button>` : '<span></span>'}
         <button class="btn-primary lesson-step-continue">${continueLabel}</button>
     `;
-    nav.querySelector('.lesson-step-continue').onclick = goToNextStep;
+    nav.querySelector('.lesson-step-continue').onclick = onContinue;
     const backBtn = nav.querySelector('.lesson-step-back');
     if (backBtn) backBtn.onclick = goToPrevStep;
     mount.appendChild(nav);
@@ -1110,19 +1915,12 @@ async function renderConversationSection(mount, levelNumber, lessonOrder) {
 
     if (error || !lines || lines.length === 0) {
         mount.innerHTML = `<div class="eyebrow">${icon('chat')} Conversation</div><p style="color:#94a3b8; font-size:13px;">No conversation added for this lesson yet.</p>`;
-        return;
+        return false;
     }
 
-    const { data: progress } = await _supabase
-        .from('lesson_conversation_progress')
-        .select('has_read')
-        .eq('student_id', currentUser.id)
-        .eq('level_number', levelNumber)
-        .eq('lesson_order', lessonOrder)
-        .maybeSingle();
-
-    const hasRead = !!progress?.has_read;
-
+    // No separate "I've Read It" button here — the step's own Continue
+    // button (appended by renderCurrentStep) marks it read AND advances in
+    // one click, so the screen only ever shows one forward action.
     mount.innerHTML = `
         <div class="eyebrow">${icon('chat')} Conversation</div>
         <div class="conversation-lines">
@@ -1136,13 +1934,11 @@ async function renderConversationSection(mount, levelNumber, lessonOrder) {
                 </div>
             `).join('')}
         </div>
-        <button class="btn-primary conversation-read-btn" style="margin-top:14px;">${hasRead ? '✓ Read' : "I've Read It"}</button>
     `;
-
-    mount.querySelector('.conversation-read-btn').onclick = () => markConversationRead(levelNumber, lessonOrder, mount);
+    return true;
 }
 
-async function markConversationRead(levelNumber, lessonOrder, mount) {
+async function markConversationRead(levelNumber, lessonOrder) {
     const { error } = await _supabase
         .from('lesson_conversation_progress')
         .upsert({
@@ -1155,12 +1951,8 @@ async function markConversationRead(levelNumber, lessonOrder, mount) {
 
     if (error) {
         console.error("Failed to save conversation progress:", error);
-        return showNotificationToast("Couldn't save: " + error.message);
+        showNotificationToast("Couldn't save: " + error.message);
     }
-
-    const btn = mount.querySelector('.conversation-read-btn');
-    if (btn) btn.innerText = '✓ Read';
-    showGobezToast('Nice work!');
 }
 
 // -----------------------------------------------------------------------------
@@ -1214,7 +2006,7 @@ async function renderVocabSection(mount, levelNumber, lessonOrder) {
     const words = await fetchChapterVocab(levelNumber, lessonOrder);
     if (words.length === 0) {
         mount.innerHTML = `<div class="eyebrow">${icon('book-open')} Today's Words</div><p style="color:#94a3b8; font-size:13px;">No vocabulary added for this lesson yet.</p>`;
-        return;
+        return false;
     }
 
     const knownById = await fetchMyVocabProgress(words.map(w => w.id));
@@ -1253,6 +2045,7 @@ async function renderVocabSection(mount, levelNumber, lessonOrder) {
 
         mount.appendChild(card);
     });
+    return true;
 }
 
 async function toggleVocabKnown(vocabId, nextKnown, card) {
@@ -1314,7 +2107,7 @@ async function renderConjugationSection(mount, levelNumber, lessonOrder) {
     const verbs = await fetchChapterConjugations(levelNumber, lessonOrder);
     if (verbs.length === 0) {
         mount.innerHTML = `<div class="eyebrow">${icon('brain')} Grammar Spotlight</div><p style="color:#94a3b8; font-size:13px;">No grammar added for this lesson yet.</p>`;
-        return;
+        return false;
     }
 
     const practicedById = await fetchMyConjugationProgress(verbs.map(v => v.id));
@@ -1345,6 +2138,7 @@ async function renderConjugationSection(mount, levelNumber, lessonOrder) {
         card.querySelector('.conjugation-practiced-btn').onclick = () => markConjugationPracticed(verb.id, card);
         mount.appendChild(card);
     });
+    return true;
 }
 
 async function markConjugationPracticed(conjugationId, card) {
@@ -1382,7 +2176,7 @@ async function renderLessonReadingSection(mount, levelNumber, lessonOrder) {
 
     if (error || !items || items.length === 0) {
         mount.innerHTML = `<div class="eyebrow">${icon('books')} Read the Conversation Again</div><p style="color:#94a3b8; font-size:13px;">No reading passages added for this lesson yet.</p>`;
-        return;
+        return false;
     }
 
     activeReadingItems = items;
@@ -1405,6 +2199,7 @@ async function renderLessonReadingSection(mount, levelNumber, lessonOrder) {
 
     mount.innerHTML = `<div class="eyebrow">${icon('books')} Read the Conversation Again</div><div id="readingStepContent"></div>`;
     renderCurrentReadingItem(progressByItemId);
+    return true;
 }
 
 function renderCurrentReadingItem(progressByItemId) {
@@ -1567,7 +2362,7 @@ async function renderSpeakingSection(mount, levelNumber, lessonOrder) {
 
     if (error || !prompts || prompts.length === 0) {
         mount.innerHTML = `<div class="eyebrow">🎙 Speaking</div><p style="color:#94a3b8; font-size:13px;">No speaking prompts added for this lesson yet.</p>`;
-        return;
+        return false;
     }
 
     const { data: progressRows } = await _supabase
@@ -1591,6 +2386,7 @@ async function renderSpeakingSection(mount, levelNumber, lessonOrder) {
         card.querySelector('.speaking-practiced-btn').onclick = () => markSpeakingPracticed(prompt.id, card);
         mount.appendChild(card);
     });
+    return true;
 }
 
 async function markSpeakingPracticed(promptId, card) {
@@ -1625,13 +2421,14 @@ async function renderPracticeSection(mount, levelNumber, lessonOrder) {
     const words = await fetchChapterVocab(levelNumber, lessonOrder);
     if (words.length === 0) {
         mount.innerHTML = `<div class="eyebrow">${icon('pencil')} Practice</div><p style="color:#94a3b8; font-size:13px;">Add vocabulary to this lesson to unlock a practice drill.</p>`;
-        return;
+        return false;
     }
 
     practiceDeck = words;
     practiceIndex = 0;
     mount.innerHTML = `<div class="eyebrow">${icon('pencil')} Practice</div><div id="practiceCardMount"></div>`;
     renderPracticeCard(document.getElementById('practiceCardMount'));
+    return true;
 }
 
 function renderPracticeCard(mount) {
@@ -1900,8 +2697,8 @@ function enterMyGrowth() {
 }
 
 function exitMyGrowth() {
-    showScreen("readingLevelsScreen");
-    renderReadingLevelsList();
+    showScreen("readingLevelsScreen", "");
+    renderAmharicPathHome();
 }
 
 async function loadMyGrowthScreen() {

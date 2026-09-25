@@ -43,6 +43,7 @@ const ALL_SCREENS = [
     "readingLevelsScreen",
     "readingLevelDetailScreen",
     "lessonStudyScreen",
+    "lessonV2Screen",
     "studyTogetherScreen",
     "myGrowthScreen",
     "letterBoardScreen",
