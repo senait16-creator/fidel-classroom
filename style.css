@@ -5139,6 +5139,12 @@ body {
     overflow-x: hidden;
 }
 
+/* Preview-as-student banner is position:fixed at the top of the viewport
+   — this pushes normal page content down so it doesn't sit underneath it. */
+body.previewing-as-student {
+    padding-top: 44px;
+}
+
 button, .cup-card, .workspace-action-btn, .fidel-card, .challenge-level-card, .challenge-family-card {
     -webkit-tap-highlight-color: transparent;
 }

@@ -56,7 +56,7 @@ async function renderSongOfWeek(targetId = 'songOfWeekMount') {
     mount.innerHTML = `<div class="eyebrow">Song of the Week</div><p class="mini-sub">Loading...</p>`;
 
     const weekKey = getSongWeekKey();
-    const myTeamId = currentProfile?.team_id;
+    const myTeamId = getEffectiveTeamId();
 
     const { data: teams } = await _supabase
         .from('teams')
@@ -122,6 +122,7 @@ async function renderSongOfWeek(targetId = 'songOfWeekMount') {
 }
 
 async function submitTeamSong(targetId) {
+    if (blockIfPreviewing()) return;
     const input = document.getElementById(`${targetId}-url`);
     const url = input ? input.value.trim() : '';
     if (!url) return showNotificationToast('Paste a song link first!');

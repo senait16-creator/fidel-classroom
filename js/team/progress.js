@@ -145,6 +145,7 @@ function canExpandRaceTeam(teamId) {
 // both the Fidel Challenge and embedded practice-sheet streak games so
 // they can't drift apart.
 async function saveStreakProgress(baseLetter, levelNumber, bestStreak, passed) {
+    if (blockIfPreviewing()) return;
     const { data: existing } = await _supabase
         .from('student_family_progress')
         .select('best_streak, streak_passed')
@@ -384,7 +385,7 @@ function renderDetailedRaceStandings(mount, mountId, standings) {
     standings_div.className = 'race-standings';
 
     standings.forEach((team, idx) => {
-        const isYou = team.id === currentProfile?.team_id;
+        const isYou = team.id === getEffectiveTeamId();
         const color = getTeamColor(team.name);
         const rowId = `raceRow-${mountId}-${team.id}`;
 
@@ -458,11 +459,11 @@ function renderTop3RaceStandings(mount, mountId, standings) {
     ];
 
     const top3 = standings.slice(0, 3);
-    const yourRankIdx = standings.findIndex(t => t.id === currentProfile?.team_id);
+    const yourRankIdx = standings.findIndex(t => t.id === getEffectiveTeamId());
     const yourTeamOutsideTop3 = yourRankIdx >= 3 ? standings[yourRankIdx] : null;
 
     const rowHtml = (team, idx) => {
-        const isYou = team.id === currentProfile?.team_id;
+        const isYou = team.id === getEffectiveTeamId();
         const color = getRaceTeamColor(team.name);
         const rankHtml = idx < 3
             ? `<div class="race-top3-medal">${medals[idx]}</div>`
@@ -505,7 +506,7 @@ function renderCompactRaceStandings(mount, standings) {
     ];
 
     const rowsHtml = standings.map((team, idx) => {
-        const isYou = team.id === currentProfile?.team_id;
+        const isYou = team.id === getEffectiveTeamId();
         const color = getRaceTeamColor(team.name);
         const rankHtml = idx < 3
             ? `<div class="community-race-medal">${medals[idx]}</div>`
@@ -686,7 +687,7 @@ async function renderLevelCompletionBanner(mountId) {
         // Captains have a team_id but their own level-up never moves the
         // team (advance_student_level_if_ready excludes captains from the
         // team's floor-level calculation) -- treat them like Solo here too.
-        const hasTeam = !!currentProfile?.team_id && !currentProfile?.is_captain;
+        const hasTeam = !!getEffectiveTeamId() && !currentProfile?.is_captain;
         mount.innerHTML = `
             <div style="background:#f0fdf4; border:2px solid #166534; border-radius:16px;
                         padding:20px; text-align:center; margin-bottom:16px;">
@@ -761,6 +762,7 @@ async function renderLevelCompletionBanner(mountId) {
 }
 
 async function submitLevelCompletion(levelNumber) {
+    if (blockIfPreviewing()) return;
     showNotificationToast("Submitting for teacher approval...");
 
     const { error } = await _supabase

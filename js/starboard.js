@@ -199,6 +199,7 @@ function starPickSubmission(idx) {
 }
 
 async function saveStarOfWeek() {
+    if (blockIfPreviewing()) return;
     const member = _starMembers[_starPick.memberIdx];
     if (!member) return;
 

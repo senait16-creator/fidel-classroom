@@ -95,7 +95,7 @@ async function renderChallengeDashboard() {
         getMyCurrentLevel()
     ]);
 
-    const hasTeam = !!currentProfile?.team_id;
+    const hasTeam = !!getEffectiveTeamId();
     const soloLearning = !hasTeam || !!currentProfile?.is_captain;
     const teamHex = getTeamHex(team.name);
     const totalLevels = levels.length || 11;
@@ -152,7 +152,7 @@ async function renderChallengeDashboard() {
             if (typeof computeTeamRaceStandings === "function") {
                 const ordinals = ["1st", "2nd", "3rd", "4th", "5th", "6th"];
                 const standings = await computeTeamRaceStandings();
-                const rankIdx = standings.findIndex(s => s.id === currentProfile.team_id);
+                const rankIdx = standings.findIndex(s => s.id === getEffectiveTeamId());
                 if (rankIdx !== -1) posLabel = ` · ${ordinals[rankIdx] || `${rankIdx + 1}th`}`;
             }
             bottomLine.innerHTML = `<a href="javascript:void(0)" onclick="enterTeamPage()">🏆 Competition · ${team.name}${posLabel} →</a>`;
@@ -301,7 +301,8 @@ async function renderTeamUrgencyCard(team) {
     const mount = document.getElementById("teamUrgencyMount");
     if (!card || !mount) return;
 
-    if (currentProfile?.is_captain || !currentProfile?.team_id) {
+    const teamId = getEffectiveTeamId();
+    if (currentProfile?.is_captain || !teamId) {
         card.style.display = "none";
         return;
     }
@@ -311,7 +312,7 @@ async function renderTeamUrgencyCard(team) {
     const { data: members } = await _supabase
         .from('profiles')
         .select('id, nickname, is_captain')
-        .eq('team_id', currentProfile.team_id);
+        .eq('team_id', teamId);
 
     const teammates = (members || []).filter(m => !m.is_captain && m.id !== currentUser.id);
     if (teammates.length === 0) {
@@ -388,7 +389,7 @@ async function renderChallengeTeamStatus(team) {
     const { data: members, error: memberError } = await _supabase
         .from('profiles')
         .select('id, nickname, avatar, is_captain')
-        .eq('team_id', currentProfile.team_id)
+        .eq('team_id', getEffectiveTeamId())
         .order('is_captain', { ascending: false })
         .order('nickname');
 
@@ -605,11 +606,12 @@ async function fetchChallengeLevels() {
 }
 
 async function getTeamBoardInfo() {
-    if (!currentProfile?.team_id) return { name: "No Team Yet", current_level: 1, streak_count: 0 };
+    const teamId = getEffectiveTeamId();
+    if (!teamId) return { name: "No Team Yet", current_level: 1, streak_count: 0 };
     const { data: team, error } = await _supabase
         .from('teams')
         .select('name, current_level, streak_count')
-        .eq('id', currentProfile.team_id)
+        .eq('id', teamId)
         .maybeSingle();
     if (error || !team) return { name: "No Team Yet", current_level: 1, streak_count: 0 };
     return { name: team.name || "Your Team", current_level: team.current_level || 1, streak_count: team.streak_count || 0 };

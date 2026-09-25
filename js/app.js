@@ -28,6 +28,31 @@ const TEAMS = ["Red Team 🔴", "Blue Team 🔵", "Green Team 🟢", "Yellow Tea
 
 let currentUser = null;
 let currentProfile = null; // { id, email, nickname, avatar, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode }
+
+// Client-side-only "Preview as student" override (see js/preview.js) —
+// is_admin accounts can browse the student UI as if they belonged to a
+// chosen team, without ever writing to it or changing their own
+// profile.team_id in the database. getEffectiveTeamId() is what every
+// team-scoped DISPLAY read should call instead of currentProfile.team_id;
+// blockIfPreviewing() is what every WRITE that would attach the admin to
+// a team's stats should call first, bailing out with a toast if it
+// returns true.
+let previewTeamId = null;
+let previewTeamName = null;
+
+function getEffectiveTeamId() {
+    return previewTeamId || currentProfile?.team_id || null;
+}
+
+function isPreviewingStudent() {
+    return !!previewTeamId;
+}
+
+function blockIfPreviewing() {
+    if (!isPreviewingStudent()) return false;
+    showNotificationToast("Preview only: nothing is saved.");
+    return true;
+}
 let masteredLetters = [];
 let activeBaseFidel = null;
 let activeFamilyArrayData = [];
