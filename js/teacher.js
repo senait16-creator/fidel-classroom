@@ -81,6 +81,31 @@ async function approveAccessRequest(studentId, status, mountId) {
 }
 window.approveAccessRequest = approveAccessRequest;
 
+// Inline "✓ Approve" on a pending student's roster row — the dedicated
+// Access Requests queue panel (loadTeacherAccessRequests above) isn't
+// mounted anywhere in the current dashboard layout, so this is the only
+// reachable approve action today. Reuses the same update as
+// approveAccessRequest, then refreshes the roster (which that function
+// doesn't do, since it was written for the other panel).
+async function approveStudentFromRoster(studentId, nickname) {
+    showNotificationToast(`Approving ${nickname}...`);
+
+    const { error } = await _supabase
+        .from('profiles')
+        .update({ access_status: 'approved' })
+        .eq('id', studentId);
+
+    if (error) {
+        console.error("Failed to approve student:", error);
+        return showNotificationToast("Couldn't approve: " + error.message);
+    }
+
+    showGobezToast(`${nickname} is in! ${icon('confetti')}`);
+    await loadTeacherRosterData();
+    if (typeof loadTeacherClassroomOverview === 'function') await loadTeacherClassroomOverview();
+}
+window.approveStudentFromRoster = approveStudentFromRoster;
+
 // ---------------------------------------------------------------------------
 // Roster
 // ---------------------------------------------------------------------------
@@ -288,7 +313,8 @@ async function loadTeacherRosterData() {
                         <span class="roster-solo-avatar">${s.avatar || '🦁'}</span>
                         <span class="roster-solo-name">${s.nickname}</span>
                         ${isPending
-                            ? `<span class="roster-pending-chip">⏳ Pending Access</span>`
+                            ? `<span class="roster-pending-chip">⏳ Pending Access</span>
+                               <button class="btn-approve" style="font-size:11px; padding:6px 10px;" onclick="approveStudentFromRoster('${s.id}', '${s.nickname.replace(/'/g, "\\'")}')">✓ Approve</button>`
                             : `<span class="roster-solo-sub">${sub}</span>`}
                         <button class="roster-student-menu-btn" onclick="toggleRosterActions('solo-${s.id}')" aria-label="Actions">⋯</button>
                         <div class="roster-student-actions roster-solo-actions" id="rosterActions-solo-${s.id}" style="display:none;">
