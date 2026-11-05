@@ -241,22 +241,14 @@ async function renderCompetitionTab() {
     const soloNote = document.getElementById("soloCompetitionNote");
     if (soloNote) soloNote.style.display = hasTeam ? "none" : "block";
 
+    await renderCompetitionHero(team, hasTeam);
+
     if (typeof renderCaptainTeamCard === "function") await renderCaptainTeamCard();
 
     const statusMount = document.getElementById("challengeTeamStatusMount");
     if (statusMount) statusMount.style.display = hasTeam ? "" : "none";
 
     if (hasTeam) {
-        // Nothing else ever populated these three -- the function that
-        // used to isn't called anymore, so "your team" identity is set
-        // here now instead.
-        const nameEl = document.getElementById("challengeYourTeamName");
-        const dotEl = document.getElementById("challengeYourTeamDot");
-        const statEl = document.getElementById("challengeYourTeamStat");
-        if (nameEl) nameEl.innerText = team.name;
-        if (dotEl) dotEl.style.background = getTeamHex(team.name);
-        if (statEl) statEl.innerText = `Level ${team.current_level} · 🔥 ${team.streak_count || 0} streak`;
-
         await renderTeamUrgencyCard(team);
         await renderChallengeTeamStatus(team);
         // Team members used to need a tap to reveal, but nothing wires
@@ -269,9 +261,56 @@ async function renderCompetitionTab() {
     if (typeof loadStudentMeetingDisplay === "function") await loadStudentMeetingDisplay();
     await renderChallengeDashboardRace();
     if (typeof renderChallengeTeamPoints === "function") await renderChallengeTeamPoints();
+    // Classroom-wide (every team, not just yours) so Competition feels
+    // like the whole room is moving, not just a static leaderboard. Reuses
+    // Community's existing renderRecentAchievements() as-is.
+    if (typeof renderRecentAchievements === "function") await renderRecentAchievements("competitionActivityMount");
     if (typeof renderTimelinePreview === "function") await renderTimelinePreview();
 }
 window.renderCompetitionTab = renderCompetitionTab;
+
+// Strong team identity at the top of Competition -- the "energy" piece
+// from the old Fidel Competition page, modernized with a team-colored
+// gradient instead of a plain text row. Rank uses the same recency score
+// as the rest of this tab (Recent Points, Fidel Mastery's bottom line),
+// not the level/floor standings, so it's consistent everywhere "rank" is
+// shown as part of Competition.
+async function renderCompetitionHero(team, hasTeam) {
+    const hero = document.getElementById("competitionHero");
+    if (!hero) return;
+
+    if (!hasTeam) {
+        hero.style.display = "none";
+        return;
+    }
+    hero.style.display = "flex";
+
+    const teamHex = getTeamHex(team.name);
+    hero.style.background = `linear-gradient(135deg, ${teamHex}, ${teamHex}dd 55%, ${teamHex}aa)`;
+
+    const nameEl = document.getElementById("competitionHeroName");
+    const levelEl = document.getElementById("competitionHeroLevel");
+    const streakEl = document.getElementById("competitionHeroStreak");
+    const rankEl = document.getElementById("competitionHeroRank");
+    const membersEl = document.getElementById("competitionHeroMembers");
+
+    if (nameEl) nameEl.innerText = team.name;
+    if (levelEl) levelEl.innerText = team.current_level;
+    if (streakEl) streakEl.innerText = team.streak_count || 0;
+
+    const [{ count: memberCount }, standings] = await Promise.all([
+        _supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('team_id', getEffectiveTeamId()),
+        typeof computeTeamRecentScoreStandings === "function" ? computeTeamRecentScoreStandings() : Promise.resolve([])
+    ]);
+
+    if (membersEl) membersEl.innerText = memberCount || 0;
+
+    if (rankEl) {
+        const ordinals = ["1st", "2nd", "3rd", "4th", "5th", "6th"];
+        const rankIdx = standings.findIndex(s => s.id === getEffectiveTeamId());
+        rankEl.innerText = rankIdx !== -1 ? (ordinals[rankIdx] || `${rankIdx + 1}th`) : "–";
+    }
+}
 
 // ---------------------------------------------------------------------------
 // Solo Competition explainer — short "how teams work" overlay, reached

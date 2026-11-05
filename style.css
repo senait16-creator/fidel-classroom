@@ -8711,6 +8711,29 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     padding: 12px 14px; font-size: 13px; color: #92722a; margin-bottom: 16px; line-height: 1.5;
 }
 
+/* Competition tab — team hero. Strong, colorful team identity up top
+   (team-colored gradient, set via JS from getTeamHex) instead of a plain
+   text row, echoing the old Fidel Competition page's energy. */
+.competition-hero {
+    display: none; flex-direction: column; gap: 16px; padding: 22px 18px;
+    border-radius: 22px; color: #ffffff; margin-bottom: 16px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.2);
+}
+.competition-hero-name { font-size: 23px; font-weight: 900; letter-spacing: -0.01em; text-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+.competition-hero-stats { display: flex; justify-content: space-between; gap: 6px; }
+.competition-hero-stat { display: flex; flex-direction: column; align-items: center; flex: 1; }
+.competition-hero-stat-value { font-size: 21px; font-weight: 900; }
+.competition-hero-stat-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; opacity: 0.85; margin-top: 2px; }
+
+/* Team Race gets a touch more visual weight than the other cards -- it's
+   the "major visual section" of this tab, same billing it had on the old
+   Fidel Competition page. */
+.challenge-dash-card-major {
+    border: 2px solid #fcd34d;
+    box-shadow: 0 10px 26px rgba(217,119,6,0.14);
+}
+.challenge-dash-card-major .challenge-card-title { font-size: 16.5px; }
+
 .curriculum-header { margin: 6px 0 12px; }
 .curriculum-header h2 { margin: 0; font-size: 17px; font-weight: 800; color: #1c1b17; }
 
