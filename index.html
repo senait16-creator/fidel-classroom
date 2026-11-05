@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=93">
+    <link rel="stylesheet" href="style.css?v=94">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -634,6 +634,7 @@
         </button>
         <nav class="app-sidebar-nav" aria-label="Main">
             <button type="button" class="app-sidebar-link active" data-tab="home" onclick="switchStudentShellTab('home')"><span data-icon="house"></span> Home</button>
+            <button type="button" class="app-sidebar-link" data-tab="team" onclick="switchStudentShellTab('team')"><span data-icon="trophy"></span> Competition</button>
             <button type="button" class="app-sidebar-link" data-tab="competition" onclick="chooseModeChallenge()"><span>ሀ</span> Fidel Mastery</button>
             <button type="button" class="app-sidebar-link" onclick="enterWordBuilderHome()"><span>ቃ</span> Word Builder</button>
             <button type="button" class="app-sidebar-link" onclick="enterModeIfUnlocked('amharicPath', enterAmharicPath)"><span>ጉ</span> Amharic Path</button>
@@ -911,6 +912,97 @@
             </button>
         </div>
     </div>
+
+    <!-- Competition — a persistent bottom-nav destination now, not just a
+         link off the Fidel Mastery page. Standings, your team, your
+         teammates, recent points, and streaks, all in one place, so the
+         classroom feels active rather than just a leaderboard. The whole
+         inner content here is the same #teamPageScreen markup that used
+         to live as its own full-screen overlay -- moved, not duplicated,
+         so every render function below (renderCaptainTeamCard,
+         renderTeamUrgencyCard, renderChallengeTeamStatus,
+         loadStudentMeetingDisplay, renderChallengeDashboardRace,
+         renderChallengeTeamPoints, renderTimelinePreview) still targets
+         the exact same mount ids and needed no changes itself. -->
+    <div class="stushell-tab-panel" data-tab="team">
+        <div class="nextsteps-header">
+            <h2>🏆 Classroom Competition</h2>
+            <span class="nextsteps-subhead">Updated as the class practices</span>
+        </div>
+
+        <div id="soloCompetitionNote" class="solo-competition-note" style="display:none;">
+            You're practicing solo, so you're not on a team board yet. Standings below still
+            show how every team in the classroom is doing — ask your teacher about joining one.
+        </div>
+
+        <div id="captainTeamCard" class="captain-team-card" style="display:none;">
+            <div class="captain-team-top">
+                <span class="captain-team-dot" id="captainTeamDot"></span>
+                <span id="captainTeamMetaLine">Loading...</span>
+            </div>
+            <div class="captain-team-avatars" id="captainTeamAvatars"></div>
+            <div class="captain-team-cleared-line" id="captainTeamClearedLine"></div>
+            <div class="captain-attn-chip" id="captainAttnChip" style="display:none;"></div>
+            <button type="button" class="captain-hub-btn" onclick="openCaptainTeamHub()">Open Team Hub →</button>
+        </div>
+
+        <div class="challenge-dash-grid">
+
+            <section class="challenge-dash-card" id="challengeTeamUrgencyCard" style="display:none;">
+                <div id="teamUrgencyMount"></div>
+            </section>
+
+            <section class="challenge-dash-card" id="challengeTeamStatusMount" style="display:none;">
+                <button id="challengeYourTeamBtn" class="challenge-team-row-btn">
+                    <span class="challenge-team-row-dot" id="challengeYourTeamDot"></span>
+                    <span class="challenge-team-row-name" id="challengeYourTeamName">Your Team</span>
+                    <span class="challenge-team-row-arrow">→</span>
+                    <span class="challenge-team-row-stat" id="challengeYourTeamStat"></span>
+                </button>
+
+                <div id="challengeTeamStatusContent" class="challenge-team-status-content">
+                    <p style="color:#94a3b8;font-size:13px;">Loading team status...</p>
+                </div>
+            </section>
+
+            <section class="challenge-dash-card" id="studentMeetingCard" style="display:none;">
+                <div class="challenge-card-title"><span data-icon="calendar"></span> Team Lesson Schedule</div>
+                <div id="studentMeetingMount"></div>
+            </section>
+
+            <section class="challenge-dash-card" id="challengeTeamRaceCard" style="display:none;">
+                <div class="challenge-card-title">
+                    🏁 Team Standings
+                    <button type="button" class="race-info-btn" onclick="this.parentElement.nextElementSibling.classList.toggle('open')" aria-label="How team ranking works">ⓘ</button>
+                </div>
+                <p class="race-explainer-text">Teams move up when every member reaches the next level. Individual progress helps break ties.</p>
+                <div id="challengeDashRaceMount">
+                    <p style="color:#94a3b8;font-size:13px;">Loading standings...</p>
+                </div>
+            </section>
+
+            <section class="challenge-dash-card" id="challengeTeamPointsCard" style="display:none;">
+                <div class="challenge-card-title">
+                    🔥 Recent Points
+                    <button type="button" class="race-info-btn" onclick="this.parentElement.nextElementSibling.classList.toggle('open')" aria-label="How points work">ⓘ</button>
+                </div>
+                <p class="race-explainer-text" id="pointsExplainerText">Based on recent practice, writing, and level-ups — not total Fidel level — so every cohort can compete.</p>
+                <div id="challengeTeamPointsMount">
+                    <p style="color:#94a3b8;font-size:13px;">Loading points...</p>
+                </div>
+            </section>
+
+            <section class="challenge-dash-card timeline-preview-card">
+                <div class="challenge-card-title">🕰️ Competition Timeline</div>
+                <div id="timelinePreviewMiniCalendar" class="timeline-mini-calendar"></div>
+                <div id="timelinePreviewHighlights" class="timeline-preview-highlights">
+                    <p style="color:#94a3b8;font-size:13px;">Loading...</p>
+                </div>
+                <button type="button" class="timeline-view-full-btn" onclick="openCompetitionCalendar()">View Full Competition Timeline →</button>
+            </section>
+
+        </div>
+    </div>
     </div>
 
     <nav class="stushell-bottomnav" id="stushellBottomNav">
@@ -921,6 +1013,13 @@
                     <span class="stushell-nav-icon-on" data-icon-duotone="house"></span>
                 </span>
                 <span class="stushell-nav-tab-label">Home</span>
+            </button>
+            <button class="stushell-nav-tab" data-tab="team" onclick="switchStudentShellTab('team')">
+                <span class="stushell-nav-icon-wrap">
+                    <span class="stushell-nav-icon-off" data-icon="trophy"></span>
+                    <span class="stushell-nav-icon-on" data-icon-duotone="trophy"></span>
+                </span>
+                <span class="stushell-nav-tab-label">Competition</span>
             </button>
             <button class="stushell-nav-upload-btn" aria-label="Upload a photo" onclick="openUploadSheet()">
                 <span data-icon="plus"></span>
@@ -1060,86 +1159,6 @@
         <div class="challenge-board-progress-fill" id="challengeBoardProgressFill" style="width:0%;"></div>
     </div>
     <div id="challengeLevelsGrid" class="challenge-levels-grid"></div>
-</div>
-
-<!-- ============================================================
-     TEAM PAGE — race, weekly meeting, timeline, and (for captains)
-     the Team Hub entry card. Reached from Fidel Mastery's bottom line
-     for team students only; Solo students never see this screen.
-     ============================================================ -->
-<div id="teamPageScreen" style="display:none; max-width:700px; margin:0 auto; padding:0 16px calc(48px + env(safe-area-inset-bottom, 0px));">
-    <div class="workspace-title">
-        <span><span data-icon="trophy"></span> Competition</span>
-        <button class="btn-secondary" onclick="enterStudentShellCompetitionTab()">← Back</button>
-    </div>
-
-    <div id="captainTeamCard" class="captain-team-card" style="display:none;">
-        <div class="captain-team-top">
-            <span class="captain-team-dot" id="captainTeamDot"></span>
-            <span id="captainTeamMetaLine">Loading...</span>
-        </div>
-        <div class="captain-team-avatars" id="captainTeamAvatars"></div>
-        <div class="captain-team-cleared-line" id="captainTeamClearedLine"></div>
-        <div class="captain-attn-chip" id="captainAttnChip" style="display:none;"></div>
-        <button type="button" class="captain-hub-btn" onclick="openCaptainTeamHub()">Open Team Hub →</button>
-    </div>
-
-    <div class="challenge-dash-grid">
-
-        <section class="challenge-dash-card" id="challengeTeamUrgencyCard" style="display:none;">
-            <div id="teamUrgencyMount"></div>
-        </section>
-
-        <section class="challenge-dash-card" id="challengeTeamStatusMount" style="display:none;">
-            <button id="challengeYourTeamBtn" class="challenge-team-row-btn">
-                <span class="challenge-team-row-dot" id="challengeYourTeamDot"></span>
-                <span class="challenge-team-row-name" id="challengeYourTeamName">Your Team</span>
-                <span class="challenge-team-row-arrow">→</span>
-                <span class="challenge-team-row-stat" id="challengeYourTeamStat"></span>
-            </button>
-
-            <div id="challengeTeamStatusContent" class="challenge-team-status-content">
-                <p style="color:#94a3b8;font-size:13px;">Loading team status...</p>
-            </div>
-        </section>
-
-        <section class="challenge-dash-card" id="studentMeetingCard" style="display:none;">
-            <div class="challenge-card-title"><span data-icon="calendar"></span> Team Lesson Schedule</div>
-            <div id="studentMeetingMount"></div>
-        </section>
-
-        <section class="challenge-dash-card" id="challengeTeamRaceCard" style="display:none;">
-            <div class="challenge-card-title">
-                🏁 Team Race
-                <button type="button" class="race-info-btn" onclick="this.parentElement.nextElementSibling.classList.toggle('open')" aria-label="How team ranking works">ⓘ</button>
-            </div>
-            <p class="race-explainer-text">Teams move up when every member reaches the next level. Individual progress helps break ties.</p>
-            <div id="challengeDashRaceMount">
-                <p style="color:#94a3b8;font-size:13px;">Loading race...</p>
-            </div>
-        </section>
-
-        <section class="challenge-dash-card" id="challengeTeamPointsCard" style="display:none;">
-            <div class="challenge-card-title">
-                🔥 Recent Points
-                <button type="button" class="race-info-btn" onclick="this.parentElement.nextElementSibling.classList.toggle('open')" aria-label="How points work">ⓘ</button>
-            </div>
-            <p class="race-explainer-text">Based on recent practice, writing, and level-ups — not total Fidel level — so every cohort can compete.</p>
-            <div id="challengeTeamPointsMount">
-                <p style="color:#94a3b8;font-size:13px;">Loading points...</p>
-            </div>
-        </section>
-
-        <section class="challenge-dash-card timeline-preview-card">
-            <div class="challenge-card-title">🕰️ Competition Timeline</div>
-            <div id="timelinePreviewMiniCalendar" class="timeline-mini-calendar"></div>
-            <div id="timelinePreviewHighlights" class="timeline-preview-highlights">
-                <p style="color:#94a3b8;font-size:13px;">Loading...</p>
-            </div>
-            <button type="button" class="timeline-view-full-btn" onclick="openCompetitionCalendar()">View Full Competition Timeline →</button>
-        </section>
-
-    </div>
 </div>
 
 <!-- ============================================================
@@ -2214,7 +2233,7 @@
 <!-- END CAN-DO STATEMENTS -->
 
 <script src="js/icons.js?v=5" defer></script>
-<script src="js/navigation.js?v=16" defer></script>
+<script src="js/navigation.js?v=17" defer></script>
 <script src="js/app.js?v=31" defer></script>
 <script src="js/auth.js?v=23" defer></script>
 <script src="js/guide.js?v=10" defer></script>
@@ -2226,7 +2245,7 @@
 <script src="js/guidedpath.js?v=1" defer></script>
 <script src="js/wordbuilder.js?v=21" defer></script>
     <script src="js/letterboard.js?v=19" defer></script>
-<script src="js/team/progress.js?v=35" defer></script>
+<script src="js/team/progress.js?v=36" defer></script>
 <script src="js/team/levels.js?v=14" defer></script>
 <script src="js/team/map.js?v=10" defer></script>
 <script src="js/team/hub.js?v=28" defer></script>
@@ -2237,11 +2256,11 @@
         <script src="js/starboard.js?v=3" defer></script>
 <script src="js/wordle.js?v=9" defer></script>
 <script src="intro.js?v=1" defer></script>
-<script src="js/challenge.js?v=45" defer></script>
+<script src="js/challenge.js?v=46" defer></script>
 <script src="js/calendar.js?v=7" defer></script>
 <script src="js/menu.js?v=12" defer></script>
 <script src="js/push.js?v=8" defer></script>
-<script src="js/studentshell.js?v=24" defer></script>
+<script src="js/studentshell.js?v=25" defer></script>
 <script src="js/preview.js?v=1" defer></script>
 
 <script>
