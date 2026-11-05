@@ -1835,6 +1835,65 @@ header {
     background: #f0fdfa;
 }
 
+/* renderAvatar()'s <img> output — sizing comes from the inline
+   width/height it sets per call site; this just makes it round and
+   crop cleanly regardless of the source photo's aspect ratio. */
+.avatar-photo-img {
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    vertical-align: middle;
+}
+
+/* Profile setup/edit screen — photo preview + upload button */
+.avatar-photo-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+.avatar-photo-preview {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+.avatar-photo-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.avatar-photo-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+}
+.avatar-photo-upload-btn {
+    width: auto;
+    padding: 8px 14px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.avatar-photo-remove-link {
+    background: none;
+    border: none;
+    color: #991b1b;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+}
+
 /* Toast / confetti */
 
 #toastContainer {

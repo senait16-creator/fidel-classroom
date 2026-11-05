@@ -455,7 +455,7 @@ async function renderCaptainTeamCard() {
     if (meta) meta.innerText = `${team.name} • Level ${team.current_level}`;
 
     const { data: members } = await _supabase
-        .from('profiles').select('id, nickname, avatar, is_captain')
+        .from('profiles').select('id, nickname, avatar, avatar_photo_url, is_captain')
         .eq('team_id', currentProfile.team_id)
         .order('is_captain', { ascending: false })
         .order('nickname');
@@ -464,7 +464,7 @@ async function renderCaptainTeamCard() {
     if (avatarsEl) {
         const shown = (members || []).slice(0, 5);
         const extra = (members || []).length - shown.length;
-        avatarsEl.innerHTML = shown.map(m => `<span class="captain-team-avatar">${m.avatar || '🦁'}</span>`).join('')
+        avatarsEl.innerHTML = shown.map(m => `<span class="captain-team-avatar">${renderAvatar(m, 26)}</span>`).join('')
             + (extra > 0 ? `<span class="captain-team-avatar-more">+${extra}</span>` : '');
     }
 
@@ -552,7 +552,7 @@ async function loadCaptainWritingQueue() {
         .from('writing_submissions')
         .select(`
             id, base_letter, image_url, status, submitted_at, student_id,
-            profiles!writing_submissions_student_id_fkey(nickname, avatar)
+            profiles!writing_submissions_student_id_fkey(nickname, avatar, avatar_photo_url)
         `)
         .in('student_id', memberIds)
         .eq('status', 'pending')
@@ -588,7 +588,7 @@ async function loadCaptainWritingQueue() {
             <img src="${sub.image_url}" alt="Writing sample" style="cursor:pointer;"
                  onclick="window.open('${sub.image_url}', '_blank')">
             <div class="teacher-submission-meta">
-                <strong>${sub.profiles?.avatar || '🦁'} ${sub.profiles?.nickname || 'Student'}</strong>
+                <strong>${renderAvatar(sub.profiles, 20)} ${sub.profiles?.nickname || 'Student'}</strong>
                 <span class="letter">${sub.base_letter}</span>
                 <span style="font-size:11px; color:#94a3b8; display:block; margin-bottom:8px;">
                     ${formatTimeAgo(sub.submitted_at)}
@@ -638,7 +638,7 @@ async function loadCaptainRecentlyApproved() {
         .from('writing_submissions')
         .select(`
             id, base_letter, reviewed_at, reviewed_by, student_id,
-            profiles!writing_submissions_student_id_fkey(nickname, avatar)
+            profiles!writing_submissions_student_id_fkey(nickname, avatar, avatar_photo_url)
         `)
         .in('student_id', memberIds)
         .eq('status', 'approved')
@@ -661,7 +661,7 @@ async function loadCaptainRecentlyApproved() {
 
         return `
             <div class="captain-approved-row">
-                <span>${sub.profiles?.avatar || '🦁'} <strong>${sub.profiles?.nickname || 'Student'}</strong>:
+                <span>${renderAvatar(sub.profiles, 18)} <strong>${sub.profiles?.nickname || 'Student'}</strong>:
                     <span class="captain-approved-letter">${sub.base_letter}</span>
                 </span>
                 <span class="captain-approved-by">✓ by ${reviewerLabel}</span>
@@ -749,7 +749,7 @@ async function loadCaptainTeamProgress() {
         .from('teams').select('current_level').eq('id', currentProfile.team_id).maybeSingle();
 
     const { data: members } = await _supabase
-        .from('profiles').select('id, nickname, avatar, is_captain, current_level')
+        .from('profiles').select('id, nickname, avatar, avatar_photo_url, is_captain, current_level')
         .eq('team_id', currentProfile.team_id);
 
     if (!members || members.length === 0) {
@@ -791,7 +791,7 @@ async function loadCaptainTeamProgress() {
         if (member.is_captain) {
             row.innerHTML = `
                 <div class="captain-member-header" style="cursor:default;">
-                    <span>${member.avatar || '🦁'} ${member.nickname}</span>
+                    <span>${renderAvatar(member, 20)} ${member.nickname}</span>
                     <span class="team-member-progress" style="color:#b45309;">${icon('crown')} Captain, exempt</span>
                 </div>`;
             mount.appendChild(row);
@@ -838,7 +838,7 @@ async function loadCaptainTeamProgress() {
             <div class="captain-member-header"
                  onclick="this.parentElement.querySelector('.captain-member-details').classList.toggle('open');
                           this.querySelector('.captain-member-toggle').classList.toggle('collapsed');">
-                <span>${member.avatar || '🦁'} ${member.nickname}</span>
+                <span>${renderAvatar(member, 20)} ${member.nickname}</span>
                 <span style="display:flex; align-items:center; gap:6px;">
                     <span class="captain-member-level-badge${isBehind ? ' behind' : ''}">Level ${myLevel}</span>
                     <span class="team-member-progress">${clearedCount} / ${families.length} cleared</span>

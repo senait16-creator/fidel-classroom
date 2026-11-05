@@ -388,7 +388,7 @@ async function renderChallengeTeamStatus(team) {
 
     const { data: members, error: memberError } = await _supabase
         .from('profiles')
-        .select('id, nickname, avatar, is_captain')
+        .select('id, nickname, avatar, avatar_photo_url, is_captain')
         .eq('team_id', getEffectiveTeamId())
         .order('is_captain', { ascending: false })
         .order('nickname');
@@ -430,7 +430,7 @@ async function renderChallengeTeamStatus(team) {
         if (member.is_captain) {
             return `
                 <div class="teammate-card">
-                    <div class="teammate-avatar">${member.avatar || '👑'}</div>
+                    <div class="teammate-avatar">${renderAvatar(member, 36)}</div>
                     <div>
                         <div class="teammate-name">${member.nickname || 'Captain'}</div>
                         <div class="teammate-meta">Level ${currentLevel}</div>
@@ -466,7 +466,7 @@ async function renderChallengeTeamStatus(team) {
 
         return `
             <div class="teammate-card">
-                <div class="teammate-avatar">${member.avatar || '🦁'}</div>
+                <div class="teammate-avatar">${renderAvatar(member, 36)}</div>
                 <div>
                     <div class="teammate-name">${member.nickname || 'Student'}</div>
                     <div class="teammate-meta">${meta}</div>

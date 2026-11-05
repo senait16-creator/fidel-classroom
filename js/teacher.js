@@ -24,7 +24,7 @@ async function loadTeacherAccessRequests(mountId) {
 
     const { data: pending, error } = await _supabase
         .from('profiles')
-        .select('id, nickname, email, avatar')
+        .select('id, nickname, email, avatar, avatar_photo_url')
         .eq('access_status', 'pending')
         .eq('is_admin', false)
         .order('nickname');
@@ -47,7 +47,7 @@ async function loadTeacherAccessRequests(mountId) {
         row.style.cssText = "display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;";
         row.innerHTML = `
             <div>
-                <strong>${p.avatar || '🦁'} ${p.nickname || 'Unnamed'}</strong>
+                <strong>${renderAvatar(p, 22)} ${p.nickname || 'Unnamed'}</strong>
                 <div style="font-size:12px; color:#64748b;">${p.email || ''}</div>
             </div>
             <div style="display:flex; gap:8px;">
@@ -167,7 +167,7 @@ async function loadTeacherRosterData() {
         { data: userProgress },
         { data: approvedLevelCompletions }
     ] = await Promise.all([
-        _supabase.from('profiles').select('id, nickname, avatar, email, team_id, is_captain, is_admin, access_status, current_level'),
+        _supabase.from('profiles').select('id, nickname, avatar, avatar_photo_url, email, team_id, is_captain, is_admin, access_status, current_level'),
         _supabase.from('teams').select('id, name, current_level'),
         (typeof fetchChallengeLevels === 'function' ? fetchChallengeLevels() : Promise.resolve([])),
         _supabase.from('student_family_progress').select('student_id, base_letter, level_number, streak_passed, writing_passed, best_streak'),
@@ -244,7 +244,7 @@ async function loadTeacherRosterData() {
             : `<div class="roster-attention-card">${attentionList.map(s => {
                 return `
                     <div class="roster-attention-row">
-                        <div class="roster-attention-avatar">${s.avatar || '🦁'}</div>
+                        <div class="roster-attention-avatar">${renderAvatar(s, 32)}</div>
                         <div>
                             <div class="roster-attention-name">${s.nickname}</div>
                             <div class="roster-attention-reason">✍️ Writing pending review</div>
@@ -271,7 +271,7 @@ async function loadTeacherRosterData() {
                     const status = statusByStudent[s.id];
                     return `
                         <div class="roster-student-row">
-                            <div class="roster-student-avatar">${s.avatar || '🦁'}</div>
+                            <div class="roster-student-avatar">${renderAvatar(s, 32)}</div>
                             <div>
                                 <div class="roster-student-name">${s.nickname}${s.is_captain ? ' <span class="roster-captain-badge">👑</span>' : ''}</div>
                                 <div class="roster-student-meta">Level ${s.current_level || 1}${status.family ? ` · ${status.family} family` : ''}</div>
@@ -310,7 +310,7 @@ async function loadTeacherRosterData() {
                 const isPending = s.access_status === 'pending';
                 return `
                     <div class="roster-solo-row">
-                        <span class="roster-solo-avatar">${s.avatar || '🦁'}</span>
+                        <span class="roster-solo-avatar">${renderAvatar(s, 20)}</span>
                         <span class="roster-solo-name">${s.nickname}</span>
                         ${isPending
                             ? `<span class="roster-pending-chip">⏳ Pending Access</span>
@@ -614,7 +614,7 @@ async function loadCurrentCaptains() {
 
     const { data: teams } = await _supabase
         .from('teams')
-        .select('id, name, captain_id, profiles!teams_captain_id_fkey(nickname, avatar)')
+        .select('id, name, captain_id, profiles!teams_captain_id_fkey(nickname, avatar, avatar_photo_url)')
         .order('name');
 
     mount.innerHTML = '';
@@ -622,7 +622,7 @@ async function loadCurrentCaptains() {
         if (!team.captain_id) return;
         const row = document.createElement('div');
         row.className = 'current-captain-row';
-        row.innerHTML = `<span>${team.name}</span><strong>${icon('crown')} ${team.profiles?.avatar || '🦁'} ${team.profiles?.nickname || 'Unknown'}</strong>`;
+        row.innerHTML = `<span>${team.name}</span><strong>${icon('crown')} ${renderAvatar(team.profiles, 18)} ${team.profiles?.nickname || 'Unknown'}</strong>`;
         mount.appendChild(row);
     });
 
@@ -641,7 +641,7 @@ async function loadTeacherWritingQueue() {
 
     const { data: submissions, error } = await _supabase
         .from('writing_submissions')
-        .select('id, base_letter, image_url, status, submitted_at, student_id, profiles!writing_submissions_student_id_fkey(nickname, avatar)')
+        .select('id, base_letter, image_url, status, submitted_at, student_id, profiles!writing_submissions_student_id_fkey(nickname, avatar, avatar_photo_url)')
         .eq('status', 'pending')
         .order('submitted_at', { ascending: true });
 
@@ -663,7 +663,7 @@ async function loadTeacherWritingQueue() {
         card.innerHTML = `
             <img src="${sub.image_url}" alt="Writing sample">
             <div class="teacher-submission-meta">
-                <strong>${sub.profiles?.avatar || '🦁'} ${sub.profiles?.nickname || 'Student'}</strong>
+                <strong>${renderAvatar(sub.profiles, 20)} ${sub.profiles?.nickname || 'Student'}</strong>
                 <span class="letter">${sub.base_letter}</span>
                 <div class="teacher-submission-actions">
                     <button class="btn-approve" data-id="${sub.id}" data-student="${sub.student_id}" data-letter="${sub.base_letter}">✓ Approve</button>
@@ -886,7 +886,7 @@ async function loadTeamMembersForRoster(teamId, mountEl) {
 
     const { data: members } = await _supabase
         .from('profiles')
-        .select('id, nickname, avatar, is_captain, current_level')
+        .select('id, nickname, avatar, avatar_photo_url, is_captain, current_level')
         .eq('team_id', teamId)
         .order('nickname');
 
@@ -916,7 +916,7 @@ async function loadTeamMembersForRoster(teamId, mountEl) {
 
         if (member.is_captain) {
             memberRow.innerHTML = `
-                <span>${member.avatar || '🦁'} ${member.nickname}</span>
+                <span>${renderAvatar(member, 20)} ${member.nickname}</span>
                 <span class="team-member-progress" style="color:#b45309;">${icon('crown')} Captain, exempt</span>
             `;
         } else {
@@ -928,7 +928,7 @@ async function loadTeamMembersForRoster(teamId, mountEl) {
             }).length;
 
             memberRow.innerHTML = `
-                <span>${member.avatar || '🦁'} ${member.nickname}</span>
+                <span>${renderAvatar(member, 20)} ${member.nickname}</span>
                 <span class="team-member-progress">Level ${memberLevel} · ${clearedCount} / ${families.length} families cleared</span>
             `;
         }
@@ -1106,7 +1106,7 @@ async function loadTeacherCaptainOverview() {
 
     const { data: captains } = await _supabase
         .from('profiles')
-        .select('id, nickname, avatar, team_id, teams!profiles_team_id_fkey(name)')
+        .select('id, nickname, avatar, avatar_photo_url, team_id, teams!profiles_team_id_fkey(name)')
         .eq('is_captain', true)
         .order('nickname');
 
@@ -1143,7 +1143,7 @@ async function loadTeacherCaptainOverview() {
             : `Team health: ${pending} review${pending > 1 ? 's' : ''}, consider a nudge`;
         return `
             <div class="teacher-captain-row ${pending > 0 ? 'needs-nudge' : ''}">
-                <div class="teacher-captain-avatar">${cap.avatar || '👑'}</div>
+                <div class="teacher-captain-avatar">${renderAvatar(cap, 32)}</div>
                 <div>
                     <div class="teacher-captain-name">${cap.nickname || 'Captain'}: ${cap.teams?.name || 'No team'}</div>
                     <div class="teacher-captain-meta">${health}</div>

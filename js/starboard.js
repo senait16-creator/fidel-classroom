@@ -34,7 +34,7 @@ async function renderStarBoard(mountId) {
         .from('star_of_week')
         .select(`
             id, team_id, shoutout, submission_image_url, week_start,
-            student:profiles!star_of_week_student_id_fkey(nickname, avatar),
+            student:profiles!star_of_week_student_id_fkey(nickname, avatar, avatar_photo_url),
             teams(name)
         `)
         .eq('week_start', _starWeekStart())
@@ -56,14 +56,13 @@ async function renderStarBoard(mountId) {
     }
 
     const cards = stars.map(s => {
-        const avatar   = s.student?.avatar || '🦁';
         const name     = s.student?.nickname || 'Student';
         const teamName = s.teams?.name || 'Team';
         return `
         <div class="star-board-card">
             <div class="star-board-card-top">
                 <div class="star-avatar-badge">
-                    <span class="star-avatar-emoji">${avatar}</span>
+                    <span class="star-avatar-emoji">${renderAvatar(s.student, 48)}</span>
                     <span class="star-gold-star">${icon('star')}</span>
                 </div>
                 <div>
@@ -106,7 +105,7 @@ async function renderStarPicker(mountId) {
     // Current pick this week (if any)
     const { data: existing } = await _supabase
         .from('star_of_week')
-        .select('student_id, shoutout, student:profiles!star_of_week_student_id_fkey(nickname, avatar)')
+        .select('student_id, shoutout, student:profiles!star_of_week_student_id_fkey(nickname, avatar, avatar_photo_url)')
         .eq('team_id', currentProfile.team_id)
         .eq('week_start', _starWeekStart())
         .maybeSingle();
@@ -114,7 +113,7 @@ async function renderStarPicker(mountId) {
     // Teammates (not the captain themselves — spread the spotlight!)
     const { data: members } = await _supabase
         .from('profiles')
-        .select('id, nickname, avatar')
+        .select('id, nickname, avatar, avatar_photo_url')
         .eq('team_id', currentProfile.team_id)
         .neq('id', currentUser.id)
         .order('nickname');
@@ -128,7 +127,7 @@ async function renderStarPicker(mountId) {
 
     const currentBanner = existing ? `
         <div class="star-current-banner">
-            ${icon('star')} This week: <strong>${existing.student?.avatar || '🦁'}
+            ${icon('star')} This week: <strong>${renderAvatar(existing.student, 20)}
             ${existing.student?.nickname || 'Student'}</strong>
             <span style="color:#92400e;"> · tap a name to change your pick</span>
         </div>` : `
@@ -138,7 +137,7 @@ async function renderStarPicker(mountId) {
 
     const chips = _starMembers.map((m, i) => `
         <button class="star-picker-chip" id="starChip${i}" onclick="starPickMember(${i})">
-            ${m.avatar || '🦁'} ${m.nickname}
+            ${renderAvatar(m, 20)} ${m.nickname}
         </button>`).join('');
 
     mount.innerHTML = `

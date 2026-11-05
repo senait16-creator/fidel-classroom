@@ -718,7 +718,7 @@ async function renderStudyTogetherFeed() {
 
     const { data: posts, error } = await _supabase
         .from('chapter_feed_posts')
-        .select('id, student_id, level_number, body_text, created_at, profiles!chapter_feed_posts_student_id_fkey(nickname, avatar)')
+        .select('id, student_id, level_number, body_text, created_at, profiles!chapter_feed_posts_student_id_fkey(nickname, avatar, avatar_photo_url)')
         .order('created_at', { ascending: false })
         .limit(30);
 
@@ -734,7 +734,7 @@ async function renderStudyTogetherFeed() {
 
     mount.innerHTML = posts.map(post => `
         <div class="study-together-feed-post">
-            <span class="study-together-feed-avatar">${post.profiles?.avatar || '🦁'}</span>
+            <span class="study-together-feed-avatar">${renderAvatar(post.profiles, 30)}</span>
             <div>
                 <div class="study-together-feed-name">${escapeHtml(post.profiles?.nickname || 'A student')}</div>
                 <div class="study-together-feed-text">${escapeHtml(post.body_text)}</div>

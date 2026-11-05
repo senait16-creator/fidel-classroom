@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=90">
+    <link rel="stylesheet" href="style.css?v=91">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -163,11 +163,24 @@
      PROFILE SETUP
      ============================================================ -->
 
-<div id="profileSetupScreen" class="app-card screen-fade-in" style="display:none;"> 
+<div id="profileSetupScreen" class="app-card screen-fade-in" style="display:none;">
     <h2 class="main-title" style="font-size:22px;">Create Your Profile</h2>
-    <p class="subtitle">Pick a nickname and avatar!</p>
+    <p class="subtitle">Pick a nickname and a photo or avatar!</p>
     <input type="text" id="displayName" placeholder="Your Nickname">
-    <div class="avatar-grid">
+
+    <div class="avatar-photo-row">
+        <div class="avatar-photo-preview" id="avatarPhotoPreview">🦁</div>
+        <div class="avatar-photo-actions">
+            <button type="button" class="btn-secondary avatar-photo-upload-btn" onclick="document.getElementById('avatarPhotoInput').click()">
+                <span data-icon="camera"></span> Take a photo or upload
+            </button>
+            <button type="button" class="avatar-photo-remove-link" id="avatarPhotoRemoveLink" style="display:none;" onclick="removeAvatarPhoto()">Remove photo</button>
+        </div>
+        <input type="file" id="avatarPhotoInput" accept="image/*" style="display:none;" onchange="handleAvatarPhotoChosen(this.files[0])">
+    </div>
+
+    <p class="subtitle" style="text-align:left; font-size:12px; margin:0 0 10px;">Or pick an emoji:</p>
+    <div class="avatar-grid" id="avatarEmojiGrid">
         <div class="avatar-option selected" onclick="selectAvatar('🦁', this)">🦁</div>
         <div class="avatar-option" onclick="selectAvatar('🦅', this)">🦅</div>
         <div class="avatar-option" onclick="selectAvatar('🐆', this)">🐆</div>
@@ -2184,33 +2197,33 @@
 
 <script src="js/icons.js?v=5" defer></script>
 <script src="js/navigation.js?v=16" defer></script>
-<script src="js/app.js?v=30" defer></script>
-<script src="js/auth.js?v=21" defer></script>
+<script src="js/app.js?v=31" defer></script>
+<script src="js/auth.js?v=22" defer></script>
 <script src="js/guide.js?v=10" defer></script>
 <script src="js/utils/compress.js?v=9" defer></script>
 <script src="js/game.js?v=11" defer></script>
 <script src="js/submissions.js?v=18" defer></script>
-<script src="js/teacher.js?v=34" defer></script>
-<script src="js/reading.js?v=33" defer></script>
+<script src="js/teacher.js?v=35" defer></script>
+<script src="js/reading.js?v=34" defer></script>
 <script src="js/guidedpath.js?v=1" defer></script>
 <script src="js/wordbuilder.js?v=21" defer></script>
     <script src="js/letterboard.js?v=19" defer></script>
-<script src="js/team/progress.js?v=33" defer></script>
+<script src="js/team/progress.js?v=34" defer></script>
 <script src="js/team/levels.js?v=14" defer></script>
 <script src="js/team/map.js?v=10" defer></script>
-<script src="js/team/hub.js?v=27" defer></script>
-    <script src="js/community.js?v=8" defer></script>
+<script src="js/team/hub.js?v=28" defer></script>
+    <script src="js/community.js?v=9" defer></script>
     <script src="js/dailyfeed.js?v=1" defer></script>
     <script src="js/songweek.js?v=2" defer></script>
     <script src="js/candostatement.js?v=5" defer></script>
-        <script src="js/starboard.js?v=2" defer></script>
+        <script src="js/starboard.js?v=3" defer></script>
 <script src="js/wordle.js?v=9" defer></script>
 <script src="intro.js?v=1" defer></script>
-<script src="js/challenge.js?v=43" defer></script>
+<script src="js/challenge.js?v=44" defer></script>
 <script src="js/calendar.js?v=7" defer></script>
 <script src="js/menu.js?v=12" defer></script>
 <script src="js/push.js?v=8" defer></script>
-<script src="js/studentshell.js?v=22" defer></script>
+<script src="js/studentshell.js?v=23" defer></script>
 <script src="js/preview.js?v=1" defer></script>
 
 <script>
