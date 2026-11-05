@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=94">
+    <link rel="stylesheet" href="style.css?v=95">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -752,7 +752,7 @@
              captain tools) lives in the Team tab; this is just enough to
              orient + a way in. Captains additionally see a pending-writing
              badge here instead of a standalone Home note. -->
-        <div class="team-teaser-card" id="teamTeaserCard" style="display:none;" onclick="chooseModeChallenge()">
+        <div class="team-teaser-card" id="teamTeaserCard" style="display:none;" onclick="enterTeamPage()">
             <div class="team-teaser-top">
                 <span class="team-teaser-eyebrow">Your team</span>
                 <span class="team-teaser-badge" id="teamTeaserWritingBadge" style="display:none;" onclick="event.stopPropagation(); openTeamHubFromHome();"></span>
@@ -960,6 +960,33 @@
             <span class="nextsteps-subhead">Updated as the class practices</span>
         </div>
 
+        <!-- Team hero -- the "strong team identity" piece from the old
+             Fidel Competition page, modernized: team-colored gradient,
+             name, level, streak, rank, and member count up front instead
+             of a small text row. Hidden for solo students (soloCompetitionNote
+             explains why instead). -->
+        <div id="competitionHero" class="competition-hero" style="display:none;">
+            <div class="competition-hero-name" id="competitionHeroName">Your Team</div>
+            <div class="competition-hero-stats">
+                <div class="competition-hero-stat">
+                    <span class="competition-hero-stat-value" id="competitionHeroLevel">–</span>
+                    <span class="competition-hero-stat-label">Level</span>
+                </div>
+                <div class="competition-hero-stat">
+                    <span class="competition-hero-stat-value" id="competitionHeroStreak">–</span>
+                    <span class="competition-hero-stat-label">🔥 Streak</span>
+                </div>
+                <div class="competition-hero-stat">
+                    <span class="competition-hero-stat-value" id="competitionHeroRank">–</span>
+                    <span class="competition-hero-stat-label">Rank</span>
+                </div>
+                <div class="competition-hero-stat">
+                    <span class="competition-hero-stat-value" id="competitionHeroMembers">–</span>
+                    <span class="competition-hero-stat-label">Members</span>
+                </div>
+            </div>
+        </div>
+
         <div id="soloCompetitionNote" class="solo-competition-note" style="display:none;">
             You're practicing solo, so you're not on a team board yet. Standings below still
             show how every team in the classroom is doing — ask your teacher about joining one.
@@ -983,13 +1010,7 @@
             </section>
 
             <section class="challenge-dash-card" id="challengeTeamStatusMount" style="display:none;">
-                <button id="challengeYourTeamBtn" class="challenge-team-row-btn">
-                    <span class="challenge-team-row-dot" id="challengeYourTeamDot"></span>
-                    <span class="challenge-team-row-name" id="challengeYourTeamName">Your Team</span>
-                    <span class="challenge-team-row-arrow">→</span>
-                    <span class="challenge-team-row-stat" id="challengeYourTeamStat"></span>
-                </button>
-
+                <div class="challenge-card-title">👥 Your Team</div>
                 <div id="challengeTeamStatusContent" class="challenge-team-status-content">
                     <p style="color:#94a3b8;font-size:13px;">Loading team status...</p>
                 </div>
@@ -1000,9 +1021,9 @@
                 <div id="studentMeetingMount"></div>
             </section>
 
-            <section class="challenge-dash-card" id="challengeTeamRaceCard" style="display:none;">
+            <section class="challenge-dash-card challenge-dash-card-major" id="challengeTeamRaceCard" style="display:none;">
                 <div class="challenge-card-title">
-                    🏁 Team Standings
+                    🏁 Team Race
                     <button type="button" class="race-info-btn" onclick="this.parentElement.nextElementSibling.classList.toggle('open')" aria-label="How team ranking works">ⓘ</button>
                 </div>
                 <p class="race-explainer-text">Teams move up when every member reaches the next level. Individual progress helps break ties.</p>
@@ -1019,6 +1040,17 @@
                 <p class="race-explainer-text" id="pointsExplainerText">Based on recent practice, writing, and level-ups — not total Fidel level — so every cohort can compete.</p>
                 <div id="challengeTeamPointsMount">
                     <p style="color:#94a3b8;font-size:13px;">Loading points...</p>
+                </div>
+            </section>
+
+            <!-- Recent Activity -- a classroom-wide ticker (every team, not
+                 just yours) so Competition feels like the classroom is
+                 actively moving, not just a static leaderboard. Reuses the
+                 Community page's renderRecentAchievements() as-is. -->
+            <section class="challenge-dash-card" id="competitionActivityCard">
+                <div class="challenge-card-title">📣 Recent Activity</div>
+                <div id="competitionActivityMount" class="achieve-list">
+                    <p style="color:#94a3b8;font-size:13px;">Loading...</p>
                 </div>
             </section>
 
@@ -2286,7 +2318,7 @@
         <script src="js/starboard.js?v=3" defer></script>
 <script src="js/wordle.js?v=9" defer></script>
 <script src="intro.js?v=1" defer></script>
-<script src="js/challenge.js?v=46" defer></script>
+<script src="js/challenge.js?v=47" defer></script>
 <script src="js/calendar.js?v=7" defer></script>
 <script src="js/menu.js?v=12" defer></script>
 <script src="js/push.js?v=8" defer></script>
