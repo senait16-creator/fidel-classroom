@@ -148,10 +148,13 @@ async function renderChallengeDashboard() {
     const bottomLine = document.getElementById("fmBottomLine");
     if (bottomLine) {
         if (hasTeam) {
+            // Recency-based ranking, not level/floor -- Competition is
+            // meant to reward recent participation so later cohorts can
+            // compete fairly against teams further along in the curriculum.
             let posLabel = "";
-            if (typeof computeTeamRaceStandings === "function") {
+            if (typeof computeTeamRecentScoreStandings === "function") {
                 const ordinals = ["1st", "2nd", "3rd", "4th", "5th", "6th"];
-                const standings = await computeTeamRaceStandings();
+                const standings = await computeTeamRecentScoreStandings();
                 const rankIdx = standings.findIndex(s => s.id === getEffectiveTeamId());
                 if (rankIdx !== -1) posLabel = ` · ${ordinals[rankIdx] || `${rankIdx + 1}th`}`;
             }
@@ -231,6 +234,7 @@ async function enterTeamPage() {
     await renderChallengeTeamStatus(team);
     if (typeof loadStudentMeetingDisplay === "function") await loadStudentMeetingDisplay();
     await renderChallengeDashboardRace();
+    if (typeof renderChallengeTeamPoints === "function") await renderChallengeTeamPoints();
     if (typeof renderTimelinePreview === "function") await renderTimelinePreview();
 }
 window.enterTeamPage = enterTeamPage;
@@ -500,15 +504,38 @@ function teamHexForStatus(teamName) {
 // levels" browse list — the Continue button already tells you what's
 // next, and the Team Race / Level Resources cards below cover everything
 // else this page used to spread across three sections.
-async function renderChallengeDashboardMap(levels, myLevel) {
+async function renderChallengeDashboardMap(levels, myLevel, team) {
     const mount = document.getElementById("challengeDashMapMount");
     if (!mount) return;
 
+    const totalLevels = levels.length || 11;
     const currentLevelNumber = myLevel || 1;
     const currentLevel = levels.find(l => l.level_number === currentLevelNumber) || levels[0];
 
+    // The card's new "where am I overall" line — always shown, regardless
+    // of which step below it's currently on.
+    const levelTextEl = document.getElementById("nextstepFidelLevelText");
+    const progressFillEl = document.getElementById("nextstepFidelProgressFill");
+    if (levelTextEl) levelTextEl.innerText = `Level ${currentLevelNumber} of ${totalLevels}`;
+    if (progressFillEl) progressFillEl.style.width = `${Math.min(100, Math.max(0, Math.round(((currentLevelNumber - 1) / totalLevels) * 100)))}%`;
+
     if (!currentLevel) {
         mount.innerHTML = `<p style="font-size:13px; color:#94a3b8;">No challenge levels found yet.</p>`;
+        return;
+    }
+
+    // Step 1 of the level cycle: live lesson first, then practice. Lessons
+    // are taught to the whole team at once (see teams.lesson_level_delivered),
+    // so solo/no-team students have nothing to wait on here.
+    const lessonDelivered = !team?.id || (team.lesson_level_delivered || 0) >= currentLevelNumber;
+
+    if (!lessonDelivered) {
+        mount.innerHTML = `
+            <p class="challenge-continue-label">Level ${currentLevelNumber} starts with a live lesson</p>
+            <p style="font-size:13px; color:#64748b; margin:2px 0 12px;">Your teacher introduces this level's Fidel families live — recognition, pronunciation, speaking, and handwriting — then you practice in the app.</p>
+            <a href="${buildLessonBookingLink(currentLevelNumber)}" target="_blank" rel="noopener" class="challenge-continue-btn" style="text-decoration:none; display:block; text-align:center; box-sizing:border-box;">
+                ${icon('calendar')} Book Level ${currentLevelNumber} Lesson
+            </a>`;
         return;
     }
 
@@ -525,6 +552,17 @@ async function renderChallengeDashboardMap(levels, myLevel) {
             const row = (progressRows || []).find(r => r.base_letter === fam);
             return !(row?.streak_passed && row?.writing_passed);
         });
+    }
+
+    // All families cleared — hand off to the Level Completion banner
+    // (#levelCompletionMount, just below this card) for the
+    // submit/awaiting-check/approved states, instead of duplicating that
+    // logic here with a second "what's next" message on the same page.
+    if (families.length > 0 && !targetFamily) {
+        mount.innerHTML = `
+            <p class="challenge-continue-label">Level ${currentLevel.level_number} families cleared! 🎉</p>
+            <p style="font-size:13px; color:#64748b;">See below to finish this level.</p>`;
+        return;
     }
 
     const tilesHtml = families.map(fam =>
@@ -607,14 +645,20 @@ async function fetchChallengeLevels() {
 
 async function getTeamBoardInfo() {
     const teamId = getEffectiveTeamId();
-    if (!teamId) return { name: "No Team Yet", current_level: 1, streak_count: 0 };
+    if (!teamId) return { id: null, name: "No Team Yet", current_level: 1, streak_count: 0, lesson_level_delivered: 0 };
     const { data: team, error } = await _supabase
         .from('teams')
-        .select('name, current_level, streak_count')
+        .select('name, current_level, streak_count, lesson_level_delivered')
         .eq('id', teamId)
         .maybeSingle();
-    if (error || !team) return { name: "No Team Yet", current_level: 1, streak_count: 0 };
-    return { name: team.name || "Your Team", current_level: team.current_level || 1, streak_count: team.streak_count || 0 };
+    if (error || !team) return { id: null, name: "No Team Yet", current_level: 1, streak_count: 0, lesson_level_delivered: 0 };
+    return {
+        id: teamId,
+        name: team.name || "Your Team",
+        current_level: team.current_level || 1,
+        streak_count: team.streak_count || 0,
+        lesson_level_delivered: team.lesson_level_delivered || 0
+    };
 }
 
 // Individual progression: each student's own unlocked level, independent
