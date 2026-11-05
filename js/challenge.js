@@ -216,28 +216,62 @@ function renderFidelMasteryLevelGrid(levels, myLevel, targetFamily) {
 }
 
 // ---------------------------------------------------------------------------
-// Team page — race, weekly meeting, timeline, and (for captains) the Team
-// Hub entry card. A separate destination from Fidel Mastery, reached only
-// from its "Competition · [Team] · [position] →" bottom line.
+// Competition — standings, your team, your teammates, recent points, and
+// streaks. Used to be its own full-screen overlay (#teamPageScreen),
+// reached only from Fidel Mastery's bottom line; now a persistent
+// bottom-nav tab (data-tab="team"), so enterTeamPage() just switches to
+// it. Kept under this name since every existing caller (Home's
+// Competition card, Fidel Mastery's bottom line) already calls it.
 // ---------------------------------------------------------------------------
 
 async function enterTeamPage() {
-    if (typeof hideAllScreens === "function") hideAllScreens();
-    const screen = document.getElementById("teamPageScreen");
-    if (screen) screen.style.display = "block";
-    window.scrollTo({ top: 0 });
+    showScreen('studentShellScreen', '');
+    switchStudentShellTab('team');
+}
+window.enterTeamPage = enterTeamPage;
 
+// The Competition tab's content, called by switchStudentShellTab() on
+// switching to data-tab="team". Same render functions #teamPageScreen
+// always used -- they target the same mount ids, just moved into the
+// tab-panel system, so none of them needed to change.
+async function renderCompetitionTab() {
     const team = await getTeamBoardInfo();
+    const hasTeam = !!getEffectiveTeamId();
+
+    const soloNote = document.getElementById("soloCompetitionNote");
+    if (soloNote) soloNote.style.display = hasTeam ? "none" : "block";
 
     if (typeof renderCaptainTeamCard === "function") await renderCaptainTeamCard();
-    await renderTeamUrgencyCard(team);
-    await renderChallengeTeamStatus(team);
+
+    const statusMount = document.getElementById("challengeTeamStatusMount");
+    if (statusMount) statusMount.style.display = hasTeam ? "" : "none";
+
+    if (hasTeam) {
+        // Nothing else ever populated these three -- the function that
+        // used to isn't called anymore, so "your team" identity is set
+        // here now instead.
+        const nameEl = document.getElementById("challengeYourTeamName");
+        const dotEl = document.getElementById("challengeYourTeamDot");
+        const statEl = document.getElementById("challengeYourTeamStat");
+        if (nameEl) nameEl.innerText = team.name;
+        if (dotEl) dotEl.style.background = getTeamHex(team.name);
+        if (statEl) statEl.innerText = `Level ${team.current_level} · 🔥 ${team.streak_count || 0} streak`;
+
+        await renderTeamUrgencyCard(team);
+        await renderChallengeTeamStatus(team);
+        // Team members used to need a tap to reveal, but nothing wires
+        // that toggle anymore -- shown by default now instead, since
+        // "who's on my team" is one of the things this screen exists to answer.
+        const statusContent = document.getElementById("challengeTeamStatusContent");
+        if (statusContent) statusContent.style.display = "block";
+    }
+
     if (typeof loadStudentMeetingDisplay === "function") await loadStudentMeetingDisplay();
     await renderChallengeDashboardRace();
     if (typeof renderChallengeTeamPoints === "function") await renderChallengeTeamPoints();
     if (typeof renderTimelinePreview === "function") await renderTimelinePreview();
 }
-window.enterTeamPage = enterTeamPage;
+window.renderCompetitionTab = renderCompetitionTab;
 
 // ---------------------------------------------------------------------------
 // Solo Competition explainer — short "how teams work" overlay, reached
@@ -612,7 +646,10 @@ async function renderChallengeDashboardRace() {
     if (!mount) return;
 
     if (typeof renderTeamRaceView === "function") {
-        await renderTeamRaceView("challengeDashRaceMount", { mode: "top3" });
+        // Full detailed standings by default now that Competition is a
+        // dedicated screen rather than a card (renderTeamRaceView defaults
+        // to 'challenge' mode when no options are passed).
+        await renderTeamRaceView("challengeDashRaceMount");
     } else {
         mount.innerHTML = `<p style="font-size:13px; color:#94a3b8;">Team race loading soon.</p>`;
     }

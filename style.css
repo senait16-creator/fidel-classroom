@@ -8733,6 +8733,12 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 /* Profile tab — combined "Cohort · Team · Fidel Level N" identity line. */
 .stushell-identity-line { font-size: 11px; color: #94a3b8; font-weight: 600; margin-top: 1px; }
 
+/* Competition tab — solo-student note shown in place of the team cards. */
+.solo-competition-note {
+    background: #fdf6ec; border: 1px solid #f3e3c6; border-radius: 13px;
+    padding: 12px 14px; font-size: 13px; color: #92722a; margin-bottom: 16px; line-height: 1.5;
+}
+
 .curriculum-header { margin: 6px 0 12px; }
 .curriculum-header h2 { margin: 0; font-size: 17px; font-weight: 800; color: #1c1b17; }
 

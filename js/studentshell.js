@@ -28,6 +28,9 @@ function switchStudentShellTab(tabName) {
     if (tabName === 'profile' && typeof renderStudentShellProfile === 'function') {
         renderStudentShellProfile();
     }
+    if (tabName === 'team' && typeof renderCompetitionTab === 'function') {
+        renderCompetitionTab();
+    }
 }
 window.switchStudentShellTab = switchStudentShellTab;
 

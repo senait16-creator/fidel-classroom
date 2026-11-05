@@ -33,7 +33,6 @@ const ALL_SCREENS = [
     "studentShellScreen",
     "captainDashboardScreen",
     "challengeLevelsScreen",
-    "teamPageScreen",
     "challengeFamilyScreen",
     "challengeFamilyDetailScreen",
     "amharicPathGateScreen",

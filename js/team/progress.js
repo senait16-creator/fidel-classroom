@@ -233,6 +233,17 @@ async function renderChallengeTeamPoints() {
     const mount = document.getElementById('challengeTeamPointsMount');
     if (!card || !mount) return;
 
+    // Generated straight from the real scoring constants so this can't
+    // drift out of sync with how points actually get earned.
+    const explainerEl = document.getElementById('pointsExplainerText');
+    if (explainerEl) {
+        explainerEl.innerHTML = `Every team member's recent activity adds up for the team: `
+            + `<strong>+${RECENT_SCORE_POINTS.writingApproved} pt</strong> per approved writing submission, `
+            + `<strong>+${RECENT_SCORE_POINTS.levelApproved} pts</strong> per level completed, `
+            + `<strong>+${RECENT_SCORE_POINTS.streakCleared} pt</strong> per practice streak cleared — `
+            + `counted over the last ${RECENT_SCORE_WINDOW_DAYS} days, not total Fidel level, so every cohort can compete.`;
+    }
+
     const [weekly, monthly] = await Promise.all([
         computeTeamRecentScoreStandings(7),
         computeTeamRecentScoreStandings(30)
