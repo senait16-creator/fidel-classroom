@@ -58,6 +58,10 @@ let activeBaseFidel = null;
 let activeFamilyArrayData = [];
 let activeSubscriptsData = [];
 let selectedAvatarSymbol = "🦁";
+// Set while the profile setup/edit screen has a freshly-uploaded photo
+// staged (before Save is pressed) — null means "use the emoji picker
+// value instead," same as an existing profile with no photo on file.
+let selectedAvatarPhotoUrl = null;
 let isSignUpMode = true;
 let isEditingProfile = false;
 
@@ -191,6 +195,26 @@ window.addEventListener('DOMContentLoaded', async () => {
     // user straight on mode-select, or shows the login gate if there's no
     // session. Nothing to do here.
 });
+
+// ---------------------------------------------------------------------------
+// Avatar rendering — a profile is either a picked emoji (the `avatar`
+// column, always set) or an uploaded photo (`avatar_photo_url`, null until
+// someone uploads one). Every render site across the app should go
+// through this instead of interpolating `profile.avatar` directly, so a
+// photo shows up everywhere the emoji used to — feed, rosters,
+// leaderboards, team hub, profile header — with one place to change it.
+// `avatar_photo_url` not selected by a query simply reads as undefined,
+// same as it not being set, so this degrades safely wherever a caller
+// hasn't been updated to fetch it yet.
+// ---------------------------------------------------------------------------
+
+function renderAvatar(profile, sizePx = 32) {
+    const photoUrl = profile?.avatar_photo_url;
+    if (photoUrl) {
+        return `<img src="${photoUrl}" alt="" class="avatar-photo-img" style="width:${sizePx}px; height:${sizePx}px;">`;
+    }
+    return profile?.avatar || '🦁';
+}
 
 // ---------------------------------------------------------------------------
 // Toast notifications
@@ -705,7 +729,7 @@ function renderUIProgressUpdates() {
 async function renderLiveLeaderboard(targetId = "liveLeaderboardContent") {
     const { data: profiles } = await _supabase
         .from('public_profiles')
-        .select('id, nickname, avatar');
+        .select('id, nickname, avatar, avatar_photo_url');
     const { data: progressRecords } = await _supabase
         .from('user_progress')
         .select('user_id, mastered_letters');
@@ -719,6 +743,7 @@ async function renderLiveLeaderboard(targetId = "liveLeaderboardContent") {
         id: p.id,
         name: p.nickname,
         avatar: p.avatar || '🦁',
+        avatar_photo_url: p.avatar_photo_url,
         percentage: Math.round(((progressMap[p.id] || []).length / 34) * 100)
     })).sort((a, b) => b.percentage - a.percentage);
 
@@ -742,7 +767,7 @@ async function renderLiveLeaderboard(targetId = "liveLeaderboardContent") {
             <div class="${rowClasses.join(' ')}">
                 <div class="player-info">
                     <span class="leaderboard-rank">#${idx + 1}</span>
-                    <span>${player.avatar}</span>
+                    <span>${renderAvatar(player, 24)}</span>
                     <span>${player.name} ${isSelf ? '(You)' : ''}</span>
                 </div>
                 <span class="player-score-badge">${player.percentage}%</span>

@@ -301,7 +301,7 @@ async function creditApprovedWritingToProgress(studentId, baseLetter) {
 async function fetchTeamStudentDetail(teamId) {
     const { data: members } = await _supabase
         .from('profiles')
-        .select('id, nickname, avatar, current_level')
+        .select('id, nickname, avatar, avatar_photo_url, current_level')
         .eq('team_id', teamId)
         .eq('is_captain', false);
 
@@ -595,7 +595,7 @@ async function toggleRaceTeamDetail(mountId, teamId, rowId) {
 
         return `
             <div class="race-student-row">
-                <span class="race-student-avatar">${m.avatar || '🦁'}</span>
+                <span class="race-student-avatar">${renderAvatar(m, 18)}</span>
                 <span class="race-student-name">${m.nickname}</span>
                 <span class="race-student-level-badge">Lvl ${m.level}</span>
                 <span class="race-student-line">${line}</span>
@@ -811,7 +811,7 @@ async function loadTeacherLevelCompletionQueue(mountId) {
         .from('level_completion_requests')
         .select(`
             id, level_number, submitted_at, student_id, team_id, status,
-            profiles!level_completion_requests_student_id_fkey(nickname, avatar),
+            profiles!level_completion_requests_student_id_fkey(nickname, avatar, avatar_photo_url),
             teams!level_completion_requests_team_id_fkey(name)
         `)
         .eq('status', 'pending')
@@ -836,7 +836,7 @@ async function loadTeacherLevelCompletionQueue(mountId) {
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                 <div>
                     <strong style="font-size:14px;">
-                        ${req.profiles?.avatar || '🦁'} ${req.profiles?.nickname || 'Student'}
+                        ${renderAvatar(req.profiles, 18)} ${req.profiles?.nickname || 'Student'}
                     </strong>
                     <span style="font-size:12px; color:#64748b; display:block; margin-top:2px;">
                         ${req.teams?.name || 'Team'} • Level ${req.level_number} completion

@@ -159,7 +159,7 @@ async function proceedFlowMap(user) {
 
     const { data: profile, error: profileError } = await _supabase
         .from('profiles')
-        .select('id, email, nickname, avatar, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode, access_status, current_level')
+        .select('id, email, nickname, avatar, avatar_photo_url, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode, access_status, current_level')
         .eq('id', user.id)
         .maybeSingle();
 
@@ -240,7 +240,7 @@ async function recheckAccessStatus() {
 
     const { data: profile } = await _supabase
         .from('profiles')
-        .select('id, email, nickname, avatar, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode, access_status, current_level')
+        .select('id, email, nickname, avatar, avatar_photo_url, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode, access_status, current_level')
         .eq('id', currentUser.id)
         .maybeSingle();
 
@@ -279,7 +279,7 @@ async function fetchTeamName(teamId) {
 
 async function applyProfileToHeader(profile) {
     document.getElementById("displayUserHeader").innerText  = profile.nickname;
-    document.getElementById("displayAvatarHeader").innerText = profile.avatar || "🦁";
+    document.getElementById("displayAvatarHeader").innerHTML = renderAvatar(profile, 48);
 
     const teamDisplay = document.getElementById("sidebarPodBadge");
     const teamName    = await fetchTeamName(profile.team_id);
@@ -344,9 +344,11 @@ function prefillProfileSetupScreen(profile) {
 
     const defaultAvatar = profile?.avatar || "🦁";
     selectedAvatarSymbol = defaultAvatar;
+    selectedAvatarPhotoUrl = profile?.avatar_photo_url || null;
     document.querySelectorAll('.avatar-option').forEach(opt => {
         opt.classList.toggle('selected', opt.innerText.trim() === defaultAvatar);
     });
+    updateAvatarPhotoPreview();
 
     // Team-vs-solo choice only shown at first signup — not during profile edits
     const teamChoiceSection = document.getElementById("teamChoiceSection");
@@ -362,6 +364,64 @@ function selectAvatar(symbol, element) {
     document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
     element.classList.add('selected');
     selectedAvatarSymbol = symbol;
+    // Picking an emoji while a photo is staged switches back to the emoji
+    // — only one or the other shows at a time, same as the grid itself
+    // only ever having one "selected" option.
+    selectedAvatarPhotoUrl = null;
+    updateAvatarPhotoPreview();
+}
+
+// Reflects selectedAvatarPhotoUrl/selectedAvatarSymbol into the preview
+// circle and the Remove-photo link, both on prefill and after a new
+// upload — the single place that keeps those two in sync with the state.
+function updateAvatarPhotoPreview() {
+    const preview = document.getElementById('avatarPhotoPreview');
+    const removeLink = document.getElementById('avatarPhotoRemoveLink');
+    if (!preview) return;
+
+    if (selectedAvatarPhotoUrl) {
+        preview.innerHTML = `<img src="${selectedAvatarPhotoUrl}" alt="">`;
+        if (removeLink) removeLink.style.display = 'inline';
+    } else {
+        preview.innerText = selectedAvatarSymbol;
+        if (removeLink) removeLink.style.display = 'none';
+    }
+}
+
+async function handleAvatarPhotoChosen(file) {
+    if (!file) return;
+    if (!file.type?.startsWith('image/')) return showNotificationToast("Please choose an image file.");
+    if (file.size > 25 * 1024 * 1024) return showNotificationToast("Photo is too large. Please use one under 25MB.");
+
+    showNotificationToast("Uploading photo...");
+
+    const compressed = typeof compressImage === 'function' ? await compressImage(file, 500, 0.8) : file;
+    const { data: { user } } = await _supabase.auth.getUser();
+    const filename = `avatar_${user.id}_${Date.now()}.jpg`;
+
+    const { error: uploadError } = await _supabase.storage
+        .from('avatar_photos')
+        .upload(filename, compressed, { contentType: 'image/jpeg' });
+
+    if (uploadError) {
+        console.error("Avatar upload failed:", uploadError);
+        return showNotificationToast("Upload failed: " + uploadError.message);
+    }
+
+    const { data: urlData } = _supabase.storage.from('avatar_photos').getPublicUrl(filename);
+    selectedAvatarPhotoUrl = urlData.publicUrl;
+    updateAvatarPhotoPreview();
+    showNotificationToast("Photo added — don't forget to save!");
+
+    // Let the user pick a different file next time without the browser
+    // silently no-op'ing a re-selection of the same filename.
+    const input = document.getElementById('avatarPhotoInput');
+    if (input) input.value = '';
+}
+
+function removeAvatarPhoto() {
+    selectedAvatarPhotoUrl = null;
+    updateAvatarPhotoPreview();
 }
 
 function openProfileEdit() {
@@ -387,10 +447,11 @@ async function saveProfileData(event) {
     const { data: { user } } = await _supabase.auth.getUser();
 
     const payload = {
-        id:       user.id,
-        email:    user.email,
-        nickname: nameInput,
-        avatar:   selectedAvatarSymbol
+        id:               user.id,
+        email:            user.email,
+        nickname:         nameInput,
+        avatar:           selectedAvatarSymbol,
+        avatar_photo_url: selectedAvatarPhotoUrl
     };
 
     // Only assign a team at first profile creation, never during edits — a
@@ -425,7 +486,7 @@ async function saveProfileData(event) {
     // Refresh local cache
     const { data: refreshedProfile } = await _supabase
         .from('profiles')
-        .select('id, email, nickname, avatar, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode, access_status, current_level')
+        .select('id, email, nickname, avatar, avatar_photo_url, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode, access_status, current_level')
         .eq('id', user.id)
         .maybeSingle();
     currentProfile = await resolveCaptainStatus(refreshedProfile || currentProfile);
@@ -633,6 +694,8 @@ window.switchAuthFlow                 = switchAuthFlow;
 window.handleAuth                     = handleAuth;
 window.logout                         = logout;
 window.selectAvatar                   = selectAvatar;
+window.handleAvatarPhotoChosen        = handleAvatarPhotoChosen;
+window.removeAvatarPhoto              = removeAvatarPhoto;
 window.openProfileEdit                = openProfileEdit;
 window.saveProfileData                = saveProfileData;
 window.switchAdminPanelsFromDashboard = switchAdminPanelsFromDashboard;

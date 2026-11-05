@@ -550,7 +550,7 @@ async function renderStudentShellProfile() {
     const avatarEl = document.getElementById('stushellProfileAvatar');
     const nameEl = document.getElementById('stushellProfileName');
     const teamEl = document.getElementById('stushellProfileTeam');
-    if (avatarEl) avatarEl.innerText = currentProfile?.avatar || '🦁';
+    if (avatarEl) avatarEl.innerHTML = renderAvatar(currentProfile, 54);
     if (nameEl) nameEl.innerHTML = `${currentProfile?.nickname || 'Student'} ${icon('pencil')}`;
 
     const team = await (typeof getTeamBoardInfo === 'function' ? getTeamBoardInfo() : Promise.resolve(null));

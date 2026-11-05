@@ -56,7 +56,7 @@ async function renderCommunityFeed() {
         .from('team_practice_posts')
         .select(`
             id, base_letter, image_url, created_at, post_type, uploader_id, team_id,
-            profiles!uploader_id(nickname, avatar)
+            profiles!uploader_id(nickname, avatar, avatar_photo_url)
         `)
         .order('created_at', { ascending: false })
         .limit(40);
@@ -107,7 +107,7 @@ async function renderCommunityFeed() {
             <div class="practice-post-meta">
                 <div class="practice-post-header">
                     <span class="practice-post-author">
-                        ${post.profiles?.avatar || '🦁'} ${post.profiles?.nickname || 'Student'}
+                        ${renderAvatar(post.profiles, 22)} ${post.profiles?.nickname || 'Student'}
                     </span>
                     <div style="display:flex; align-items:center; gap:8px;">
                         ${isApprovedWork
@@ -183,7 +183,7 @@ async function renderFeaturedWriting(mountId) {
 
     const { data: featured, error } = await _supabase
         .from('featured_writing')
-        .select('id, student_id, image_url, base_letter, note, profiles!featured_writing_student_id_fkey(nickname, avatar)')
+        .select('id, student_id, image_url, base_letter, note, profiles!featured_writing_student_id_fkey(nickname, avatar, avatar_photo_url)')
         .eq('week_start', weekStart)
         .maybeSingle();
 
@@ -211,7 +211,7 @@ async function renderFeaturedWriting(mountId) {
                      onclick="window.open('${featured.image_url}', '_blank')">
                 <div>
                     <div class="featured-writing-name">
-                        ${featured.profiles?.avatar || '🦁'} ${featured.profiles?.nickname || 'Student'}'s
+                        ${renderAvatar(featured.profiles, 20)} ${featured.profiles?.nickname || 'Student'}'s
                         <span style="font-family:'Abyssinica SIL',serif;">${featured.base_letter}</span> family
                     </div>
                     ${featured.note ? `<div class="featured-writing-note">"${featured.note}"</div>` : ''}
@@ -230,7 +230,7 @@ async function openFeaturedWritingPicker(weekStart) {
         .from('writing_submissions')
         .select(`
             id, student_id, base_letter, image_url, reviewed_at,
-            profiles!writing_submissions_student_id_fkey(nickname, avatar)
+            profiles!writing_submissions_student_id_fkey(nickname, avatar, avatar_photo_url)
         `)
         .eq('status', 'approved')
         .order('reviewed_at', { ascending: false })
@@ -258,7 +258,7 @@ async function openFeaturedWritingPicker(weekStart) {
                             data-letter="${sub.base_letter}" data-image="${sub.image_url}"
                             data-name="${(sub.profiles?.nickname || 'Student').replace(/"/g, '&quot;')}">
                         <img src="${sub.image_url}" alt="writing sample">
-                        <span>${sub.profiles?.avatar || '🦁'} ${sub.profiles?.nickname || 'Student'}: ${sub.base_letter}</span>
+                        <span>${renderAvatar(sub.profiles, 18)} ${sub.profiles?.nickname || 'Student'}: ${sub.base_letter}</span>
                     </button>
                 `).join('')}
             </div>
