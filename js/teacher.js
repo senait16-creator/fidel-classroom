@@ -947,7 +947,8 @@ async function loadTeacherClassroomOverview() {
     await Promise.all([
         renderTeacherHealthAndTasks(),
         loadTeacherLeaderboard(),
-        loadTeacherCaptainOverview()
+        loadTeacherCaptainOverview(),
+        loadClassroomSettings()
     ]);
 }
 
@@ -1021,7 +1022,7 @@ async function loadTeacherLeaderboard() {
     if (!mount) return;
     mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
 
-    const { data: teams } = await _supabase.from('teams').select('id, name, current_level').order('name');
+    const { data: teams } = await _supabase.from('teams').select('id, name, current_level, lesson_level_delivered').order('name');
     if (!teams || teams.length === 0) {
         mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No teams yet.</p>`;
         return;
@@ -1083,6 +1084,13 @@ async function loadTeacherLeaderboard() {
         const progress = advanceProgress[team.id] || { approved: 0, required: 0 };
         const captainName = captainByTeam[team.id];
 
+        // Live-lesson step tracking: lesson_level_delivered is how far this
+        // team's live lessons have progressed. If it's already caught up to
+        // (or past) the team's current level, there's nothing to mark yet.
+        const lessonDelivered = team.lesson_level_delivered || 0;
+        const nextLessonLevel = lessonDelivered + 1;
+        const lessonUpToDate = lessonDelivered >= (team.current_level || 1);
+
         return `
             <div class="snapshot-card">
                 <div class="snapshot-head">
@@ -1093,11 +1101,55 @@ async function loadTeacherLeaderboard() {
                 <div class="snapshot-stats">
                     <div class="snapshot-stat-row"><span class="k">Pending reviews</span><span class="v ${pending === 0 ? 'zero' : ''}">${pending}</span></div>
                     <div class="snapshot-stat-row"><span class="k">Ready to advance</span><span class="v ${progress.approved === 0 ? 'zero' : ''}">${progress.approved} / ${progress.required}</span></div>
+                    <div class="snapshot-stat-row"><span class="k">Lessons delivered</span><span class="v">through Level ${lessonDelivered}</span></div>
                 </div>
                 <div class="snapshot-foot">${captainName ? `👑 Captain: ${captainName}` : 'No captain assigned'}</div>
+                ${!lessonUpToDate ? `<button class="btn-secondary" style="width:100%; margin-top:8px; padding:8px; font-size:12px;"
+                        onclick="markTeamLessonDelivered('${team.id}', ${nextLessonLevel}, '${team.name.replace(/'/g, "\\'")}')">
+                    Mark Level ${nextLessonLevel} Lesson Delivered
+                </button>` : ''}
             </div>`;
     }).join('');
 }
+
+// One tap after teaching a level's live lesson to a team -- the student
+// Home card's step (Book Lesson -> Practice) is derived straight from this.
+async function markTeamLessonDelivered(teamId, levelNumber, teamName) {
+    showNotificationToast(`Marking Level ${levelNumber} lesson delivered for ${teamName}...`);
+    const { error } = await _supabase.from('teams').update({ lesson_level_delivered: levelNumber }).eq('id', teamId);
+    if (error) return showNotificationToast("Couldn't update: " + error.message);
+    showGobezToast(`${teamName} can now practice Level ${levelNumber}! ${icon('confetti')}`);
+    await loadTeacherLeaderboard();
+}
+window.markTeamLessonDelivered = markTeamLessonDelivered;
+
+// ---------------------------------------------------------------------------
+// Classroom settings — the single "current intake cohort" label stamped
+// onto every newly-approved student (see saveProfileData() in auth.js).
+// Purely metadata; never touches an existing student's own cohort.
+// ---------------------------------------------------------------------------
+
+async function loadClassroomSettings() {
+    const input = document.getElementById('currentCohortInput');
+    if (!input) return;
+    const { data: settings } = await _supabase.from('app_settings').select('current_cohort').eq('singleton', true).maybeSingle();
+    input.value = settings?.current_cohort || '';
+}
+window.loadClassroomSettings = loadClassroomSettings;
+
+async function saveCurrentCohort() {
+    const input = document.getElementById('currentCohortInput');
+    const note = document.getElementById('currentCohortSavedNote');
+    const value = input?.value.trim();
+    if (!value) return showNotificationToast("Enter a cohort label first.");
+
+    const { error } = await _supabase.from('app_settings').upsert({ singleton: true, current_cohort: value });
+    if (error) return showNotificationToast("Couldn't save: " + error.message);
+
+    showGobezToast(`New students will now join as "${value}". ${icon('star')}`);
+    if (note) note.innerText = `Saved. New approvals will be stamped "${value}".`;
+}
+window.saveCurrentCohort = saveCurrentCohort;
 
 async function loadTeacherCaptainOverview() {
     const mount = document.getElementById('teacherCaptainOverviewMount');

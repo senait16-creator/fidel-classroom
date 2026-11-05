@@ -159,7 +159,7 @@ async function proceedFlowMap(user) {
 
     const { data: profile, error: profileError } = await _supabase
         .from('profiles')
-        .select('id, email, nickname, avatar, avatar_photo_url, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode, access_status, current_level')
+        .select('id, email, nickname, avatar, avatar_photo_url, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode, access_status, current_level, cohort')
         .eq('id', user.id)
         .maybeSingle();
 
@@ -240,7 +240,7 @@ async function recheckAccessStatus() {
 
     const { data: profile } = await _supabase
         .from('profiles')
-        .select('id, email, nickname, avatar, avatar_photo_url, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode, access_status, current_level')
+        .select('id, email, nickname, avatar, avatar_photo_url, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode, access_status, current_level, cohort')
         .eq('id', currentUser.id)
         .maybeSingle();
 
@@ -470,6 +470,13 @@ async function saveProfileData(event) {
     if (!existingProfile) {
         const wantsTeam = document.querySelector('input[name="teamChoice"]:checked')?.value !== 'solo';
         payload.team_id = wantsTeam ? await assignNextTeam() : null;
+
+        // Stamp the cohort active at signup time (e.g. "Founding Cohort",
+        // "Winter 2027") -- purely a label, set once and never changed by
+        // later progress. Falls back silently if app_settings isn't there
+        // yet (e.g. migration not run), so signup never breaks on this.
+        const { data: settings } = await _supabase.from('app_settings').select('current_cohort').eq('singleton', true).maybeSingle();
+        if (settings?.current_cohort) payload.cohort = settings.current_cohort;
     }
 
     const { error } = await _supabase.from('profiles').upsert(payload);
@@ -486,7 +493,7 @@ async function saveProfileData(event) {
     // Refresh local cache
     const { data: refreshedProfile } = await _supabase
         .from('profiles')
-        .select('id, email, nickname, avatar, avatar_photo_url, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode, access_status, current_level')
+        .select('id, email, nickname, avatar, avatar_photo_url, team_id, is_admin, is_captain, is_suspended, can_read_fidel, amharic_path_mode, access_status, current_level, cohort')
         .eq('id', user.id)
         .maybeSingle();
     currentProfile = await resolveCaptainStatus(refreshedProfile || currentProfile);

@@ -62,12 +62,13 @@ async function enterStudentShellHomeTab() {
         captainNote.style.display = currentProfile?.is_captain ? '' : 'none';
     }
 
-    if (typeof renderChallengeDashboardMap === 'function') await renderChallengeDashboardMap(levels, myLevel);
+    if (typeof renderChallengeDashboardMap === 'function') await renderChallengeDashboardMap(levels, myLevel, team);
     if (typeof renderLevelCompletionBanner === 'function') await renderLevelCompletionBanner('levelCompletionMount');
     if (typeof renderStudentShellHomeNote === 'function') await renderStudentShellHomeNote();
     if (typeof renderCaptainTasksCard === 'function') await renderCaptainTasksCard();
 
     renderTeamTeaser(team);
+    if (typeof renderHomeCompetitionCard === 'function') await renderHomeCompetitionCard();
     // Captain's pending-review count now lives on the Captain tasks card
     // above (renderCaptainTasksCard()) instead of this badge on the team
     // teaser, so it isn't shown twice.
@@ -573,6 +574,19 @@ async function renderStudentShellProfile() {
     // Individual progress exists independent of team assignment now, so
     // this always shows a real value rather than "–" for teamless students.
     const myLevel = await (typeof getMyCurrentLevel === 'function' ? getMyCurrentLevel() : Promise.resolve(1));
+
+    // Combined identity line, e.g. "Founding Cohort · Yellow Team · Fidel
+    // Level 6" -- cohort/team segments are omitted when not set instead of
+    // showing a placeholder, so this reads fine for solo students too.
+    const identityEl = document.getElementById('stushellIdentityLine');
+    if (identityEl) {
+        const parts = [];
+        if (currentProfile?.cohort) parts.push(currentProfile.cohort);
+        if (getEffectiveTeamId()) parts.push(team.name);
+        parts.push(`Fidel Level ${myLevel}`);
+        identityEl.innerText = parts.join(' · ');
+        identityEl.style.display = 'block';
+    }
 
     if (typeof updatePushMenuButton === 'function') updatePushMenuButton();
 

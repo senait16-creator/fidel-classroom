@@ -125,6 +125,143 @@ async function computeTeamRaceStandings() {
     return standings;
 }
 
+// ---------------------------------------------------------------------------
+// Recent-activity score — the Classroom Competition ranking. Deliberately
+// NOT level-based: a later cohort's team starts at Level 1 and would never
+// be able to out-rank the Founding Cohort on computeTeamRaceStandings()'s
+// floor/avg ranking. Scored purely from things that happened recently
+// (approved writing, level-ups, cleared streaks), all read from columns
+// that already exist -- no new schema. Captains are excluded, same as the
+// level race, since their own progress never counts toward their team.
+// ---------------------------------------------------------------------------
+
+const RECENT_SCORE_WINDOW_DAYS = 14;
+const RECENT_SCORE_POINTS = { writingApproved: 3, levelApproved: 10, streakCleared: 1 };
+
+async function computeTeamRecentScoreStandings(windowDays = RECENT_SCORE_WINDOW_DAYS) {
+    const { data: teams } = await _supabase
+        .from('teams')
+        .select('id, name')
+        .eq('is_test', false)
+        .eq('is_active', true);
+
+    if (!teams || teams.length === 0) return [];
+
+    const teamIds = teams.map(t => t.id);
+    const sinceIso = new Date(Date.now() - windowDays * 24 * 60 * 60 * 1000).toISOString();
+
+    const { data: members } = await _supabase
+        .from('profiles').select('id, team_id').in('team_id', teamIds).eq('is_captain', false);
+    const teamByStudent = {};
+    (members || []).forEach(m => { teamByStudent[m.id] = m.team_id; });
+    const memberIds = Object.keys(teamByStudent);
+
+    const [{ data: writings }, { data: levelUps }, { data: streaks }] = memberIds.length > 0
+        ? await Promise.all([
+            _supabase.from('writing_submissions').select('student_id, reviewed_at').eq('status', 'approved').gte('reviewed_at', sinceIso).in('student_id', memberIds),
+            _supabase.from('level_completion_requests').select('student_id, reviewed_at').eq('status', 'approved').gte('reviewed_at', sinceIso).in('student_id', memberIds),
+            _supabase.from('student_family_progress').select('student_id, completed_at').eq('streak_passed', true).gte('completed_at', sinceIso).in('student_id', memberIds)
+        ])
+        : [{ data: [] }, { data: [] }, { data: [] }];
+
+    const scoreByTeam = {};
+    const memberCountByTeam = {};
+    teams.forEach(t => { scoreByTeam[t.id] = 0; memberCountByTeam[t.id] = 0; });
+    (members || []).forEach(m => { memberCountByTeam[m.team_id] = (memberCountByTeam[m.team_id] || 0) + 1; });
+
+    const bump = (studentId, points) => {
+        const teamId = teamByStudent[studentId];
+        if (teamId != null) scoreByTeam[teamId] = (scoreByTeam[teamId] || 0) + points;
+    };
+    (writings || []).forEach(w => bump(w.student_id, RECENT_SCORE_POINTS.writingApproved));
+    (levelUps || []).forEach(l => bump(l.student_id, RECENT_SCORE_POINTS.levelApproved));
+    (streaks || []).forEach(s => bump(s.student_id, RECENT_SCORE_POINTS.streakCleared));
+
+    const standings = teams.map(t => ({
+        id: t.id,
+        name: t.name,
+        score: scoreByTeam[t.id] || 0,
+        memberCount: memberCountByTeam[t.id] || 0
+    }));
+
+    standings.sort((a, b) => (b.score - a.score) || a.name.localeCompare(b.name));
+    return standings;
+}
+
+// Compact Home card — top 3 by recent score, plus your own team's row if
+// it's outside the top 3, same "stay personally relevant" pattern as
+// renderTop3RaceStandings. Tapping the card opens the full Team page.
+async function renderHomeCompetitionCard() {
+    const card = document.getElementById('homeCompetitionCard');
+    const mount = document.getElementById('homeCompetitionMount');
+    if (!card || !mount) return;
+
+    const standings = await computeTeamRecentScoreStandings();
+    if (!standings || standings.length === 0) {
+        card.style.display = 'none';
+        return;
+    }
+    card.style.display = 'block';
+
+    const yourTeamId = getEffectiveTeamId();
+    const yourIdx = standings.findIndex(t => t.id === yourTeamId);
+    const top3 = standings.slice(0, 3);
+    const yourTeamOutsideTop3 = yourIdx >= 3 ? standings[yourIdx] : null;
+
+    const rowHtml = (team, idx) => {
+        const isYou = team.id === yourTeamId;
+        const color = getRaceTeamColor(team.name);
+        return `
+            <div class="home-competition-row${isYou ? ' home-competition-you' : ''}">
+                <span class="home-competition-rank">${idx + 1}</span>
+                <span class="home-competition-dot" style="background:${color};">${getRaceTeamInitial(team.name)}</span>
+                <span class="home-competition-name">${team.name}${isYou ? ' <span class="race-you-tag">You</span>' : ''}</span>
+                <span class="home-competition-score">${team.score} pts</span>
+            </div>`;
+    };
+
+    mount.innerHTML = top3.map((t, i) => rowHtml(t, i)).join('')
+        + (yourTeamOutsideTop3 ? rowHtml(yourTeamOutsideTop3, yourIdx) : '');
+}
+window.renderHomeCompetitionCard = renderHomeCompetitionCard;
+
+// Team page's "Recent Points" card — same recency score, shown as a
+// weekly + monthly breakdown so a team can see both short-term momentum
+// and the fuller picture.
+async function renderChallengeTeamPoints() {
+    const card = document.getElementById('challengeTeamPointsCard');
+    const mount = document.getElementById('challengeTeamPointsMount');
+    if (!card || !mount) return;
+
+    const [weekly, monthly] = await Promise.all([
+        computeTeamRecentScoreStandings(7),
+        computeTeamRecentScoreStandings(30)
+    ]);
+
+    if (!weekly || weekly.length === 0) {
+        card.style.display = 'none';
+        return;
+    }
+    card.style.display = 'block';
+
+    const monthlyScoreByTeam = {};
+    monthly.forEach(t => { monthlyScoreByTeam[t.id] = t.score; });
+
+    const yourTeamId = getEffectiveTeamId();
+    mount.innerHTML = weekly.map((t, idx) => {
+        const isYou = t.id === yourTeamId;
+        const color = getRaceTeamColor(t.name);
+        return `
+            <div class="team-points-row${isYou ? ' team-points-you' : ''}">
+                <span class="team-points-rank">${idx + 1}</span>
+                <span class="team-points-dot" style="background:${color};">${getRaceTeamInitial(t.name)}</span>
+                <span class="team-points-name">${t.name}${isYou ? ' <span class="race-you-tag">You</span>' : ''}</span>
+                <span class="team-points-stats">${t.score} pts this week · ${monthlyScoreByTeam[t.id] || 0} this month</span>
+            </div>`;
+    }).join('');
+}
+window.renderChallengeTeamPoints = renderChallengeTeamPoints;
+
 // A student can only drill into their OWN team's student-by-student
 // detail; teachers/admins can drill into any team. Other teams stay at
 // the aggregate level computed above — individual names, who asked for
@@ -614,17 +751,22 @@ const _raceDetailCache = {};
 // Shows when a student has cleared all 3 families in the current level.
 // ---------------------------------------------------------------------------
 
-// Live-test scheduling — one shared Calendly event, prefilled with the
-// student's name/email so they don't have to retype it.
-const LIVE_TEST_SCHEDULING_URL = 'https://calendly.com/senaitrichmond16/fidel-test';
+// Lesson/live-test scheduling — one shared Calendly event, prefilled with
+// the student's name/email so they don't have to retype it. Covers both
+// the Level X live lesson ("Book Level X Lesson") and, optionally, a
+// mastery-check meetup -- no separate in-app booking/payment flow by
+// design (see guided-track plan: external link only, for now).
+const LESSON_SCHEDULING_URL = 'https://calendly.com/senaitrichmond16/fidel-test';
 
-function buildLiveTestSchedulingLink() {
+function buildLessonBookingLink(levelNumber) {
     const params = new URLSearchParams();
     if (currentProfile?.nickname) params.set('name', currentProfile.nickname);
     if (currentProfile?.email) params.set('email', currentProfile.email);
     const query = params.toString();
-    return query ? `${LIVE_TEST_SCHEDULING_URL}?${query}` : LIVE_TEST_SCHEDULING_URL;
+    return query ? `${LESSON_SCHEDULING_URL}?${query}` : LESSON_SCHEDULING_URL;
 }
+// Back-compat alias -- same link, old name, in case anything still calls it.
+function buildLiveTestSchedulingLink() { return buildLessonBookingLink(); }
 
 async function checkLevelCompletionStatus() {
 
@@ -718,21 +860,25 @@ async function renderLevelCompletionBanner(mountId) {
             };
         }
     } else if (status.existingRequest?.status === 'pending') {
+        // No separate test-booking step required here -- the mastery check
+        // (read a letter aloud, write a few from memory) happens at the
+        // start of the student's next live lesson, folded into Level N+1's
+        // "Book Lesson" step instead of a standalone appointment.
         mount.innerHTML = `
             <div style="background:#fffbeb; border:2px solid #ca8a04; border-radius:16px;
                         padding:20px; text-align:center; margin-bottom:16px;">
                 <div style="font-size:36px; margin-bottom:8px;">⏳</div>
                 <p style="font-size:15px; font-weight:700; color:#92400e; margin-bottom:4px;">
-                    Your Teacher Has Been Notified
+                    Awaiting Your Mastery Check
                 </p>
-                <p style="font-size:13px; color:#b45309; margin-bottom:16px;">
-                    You've cleared all 3 families in Level ${status.level}! Book your live
-                    test now: read a letter aloud, then write a few from memory.
+                <p style="font-size:13px; color:#b45309; margin-bottom:12px;">
+                    You've cleared all 3 families in Level ${status.level}! Your teacher will
+                    check it at the start of your next live lesson: read a letter aloud,
+                    then write a few from memory.
                 </p>
-                <a href="${buildLiveTestSchedulingLink()}" target="_blank" rel="noopener"
-                   class="btn-primary"
-                   style="max-width:280px; margin:0 auto; display:block; text-decoration:none;">
-                    ${icon('calendar')} Schedule Your Live Test
+                <a href="${buildLessonBookingLink(status.level + 1)}" target="_blank" rel="noopener"
+                   style="font-size:12px; color:#92400e; text-decoration:underline;">
+                    Want to meet sooner? Book a time →
                 </a>
                 <p style="font-size:12px; color:#92400e; margin-top:12px;">
                     While you wait for your teammates, keep practicing.
@@ -906,6 +1052,8 @@ async function rejectTeacherLevelCompletion(requestId, mountId) {
 window.saveStreakProgress = saveStreakProgress;
 window.fetchTeamAdvanceProgress = fetchTeamAdvanceProgress;
 window.computeLevelPacing = computeLevelPacing;
+window.computeTeamRecentScoreStandings = computeTeamRecentScoreStandings;
+window.buildLessonBookingLink = buildLessonBookingLink;
 window.creditApprovedWritingToProgress = creditApprovedWritingToProgress;
 window.renderTeamRaceView = renderTeamRaceView;
 // Back-compat alias in case any other code still calls the old name directly.
