@@ -191,7 +191,7 @@ window.selfReportCalendlyConfirmed = selfReportCalendlyConfirmed;
 
 // Home's compact version of the same card -- booked state reuses
 // renderUpcomingLessonHtml's compact mode so the two can't disagree;
-// unbooked state is just the title + a "Book a Live Lesson" CTA.
+// unbooked state is just the booking button ("Book your lesson →").
 async function renderHomeUpcomingLessonCard() {
     const card = document.getElementById('homeLessonCard');
     const eyebrow = document.getElementById('homeLessonEyebrow');
@@ -199,6 +199,7 @@ async function renderHomeUpcomingLessonCard() {
     if (!card || !mount) return;
 
     card.style.display = 'block';
+    if (eyebrow) eyebrow.style.display = 'block';
 
     const booking = await fetchMyUpcomingBooking();
     if (booking) {
@@ -211,7 +212,10 @@ async function renderHomeUpcomingLessonCard() {
     card.classList.add('home-lesson-unbooked');
     if (eyebrow) eyebrow.innerText = 'Ready for your next lesson?';
     mount.innerHTML = `
-        <div class="home-lesson-link">Book a Live Lesson →</div>
+        <div class="home-lesson-cta">
+            <span>Book your lesson</span>
+            <span class="home-lesson-cta-arrow">→</span>
+        </div>
     `;
 }
 window.renderHomeUpcomingLessonCard = renderHomeUpcomingLessonCard;
