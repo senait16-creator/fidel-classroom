@@ -263,9 +263,10 @@ async function renderBookNextLessonCard(recommendedLevel) {
     card.style.display = 'block';
     mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading available times...</p>`;
 
-    const priceCents = await fetchLessonPriceCents();
-
-    const { data, error } = await _supabase.functions.invoke('calendly-available-times', { body: { days: 14 } });
+    const [priceCents, { data, error }] = await Promise.all([
+        fetchLessonPriceCents(),
+        _supabase.functions.invoke('calendly-available-times', { body: { days: 14 } }),
+    ]);
     if (error || data?.error) {
         const msg = (data && data.error) || await readEdgeFunctionErrorMessage(error) || "Couldn't load available times right now — try again shortly.";
         mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">${msg}</p>`;
@@ -465,14 +466,18 @@ async function renderScheduleTab() {
 
     await renderUpcomingLessonCard(booking);
 
+    // Book-next-lesson (Calendly availability) and lesson history don't
+    // depend on each other -- run them concurrently instead of making
+    // history wait behind the slower Calendly round trip.
     const bookCard = document.getElementById('scheduleBookCard');
+    let bookCardPromise = Promise.resolve();
     if (booking) {
         if (bookCard) bookCard.style.display = 'none';
     } else {
-        await renderBookNextLessonCard(myLevel);
+        bookCardPromise = renderBookNextLessonCard(myLevel);
     }
 
-    await renderLessonHistoryCard();
+    await Promise.all([bookCardPromise, renderLessonHistoryCard()]);
 }
 window.renderScheduleTab = renderScheduleTab;
 
