@@ -191,7 +191,7 @@ window.selfReportCalendlyConfirmed = selfReportCalendlyConfirmed;
 
 // Home's compact version of the same card -- booked state reuses
 // renderUpcomingLessonHtml's compact mode so the two can't disagree;
-// unbooked state shows the recommended level + price + "Book lesson" CTA.
+// unbooked state is just the title + a "Book a Live Lesson" CTA.
 async function renderHomeUpcomingLessonCard() {
     const card = document.getElementById('homeLessonCard');
     const eyebrow = document.getElementById('homeLessonEyebrow');
@@ -209,13 +209,9 @@ async function renderHomeUpcomingLessonCard() {
     }
 
     card.classList.add('home-lesson-unbooked');
-    const myLevel = typeof getMyCurrentLevel === 'function' ? await getMyCurrentLevel() : 1;
-    const priceCents = await fetchLessonPriceCents();
-    const priceLabel = `$${(priceCents / 100).toFixed(2)}`;
     if (eyebrow) eyebrow.innerText = 'Ready for your next lesson?';
     mount.innerHTML = `
-        <div class="home-lesson-level">Level ${myLevel} · ${priceLabel}</div>
-        <div class="home-lesson-link">Book lesson →</div>
+        <div class="home-lesson-link">Book a Live Lesson →</div>
     `;
 }
 window.renderHomeUpcomingLessonCard = renderHomeUpcomingLessonCard;
