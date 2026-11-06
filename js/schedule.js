@@ -372,9 +372,27 @@ window.bookCalendlyTime = bookCalendlyTime;
 async function cancelLessonBooking(bookingId) {
     if (!confirm('Cancel this lesson booking?')) return;
     showNotificationToast('Canceling...');
+
+    // If this booking was already confirmed on Calendly, cancel the real
+    // event there too -- not a hard dependency, the app-side cancel below
+    // still proceeds even if this fails (e.g. it was never confirmed on
+    // Calendly in the first place, which comes back as a clean no-op).
+    let calendlyResult = null;
+    try {
+        const { data } = await _supabase.functions.invoke('calendly-cancel-event', { body: { bookingId } });
+        calendlyResult = data;
+    } catch (err) {
+        console.error('calendly-cancel-event call failed:', err);
+    }
+
     const { error } = await _supabase.from('lesson_bookings').update({ status: 'canceled' }).eq('id', bookingId);
     if (error) return showNotificationToast("Couldn't cancel: " + error.message);
-    showNotificationToast('Booking canceled.');
+
+    if (calendlyResult?.error) {
+        showNotificationToast("Canceled in Fidel, but couldn't remove it from Calendly automatically — let your teacher know.");
+    } else {
+        showNotificationToast('Booking canceled.');
+    }
     if (typeof renderScheduleTab === 'function') await renderScheduleTab();
     if (typeof renderHomeUpcomingLessonCard === 'function') await renderHomeUpcomingLessonCard();
 }
