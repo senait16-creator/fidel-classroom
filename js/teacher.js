@@ -1112,6 +1112,103 @@ async function loadTeacherLeaderboard() {
     }).join('');
 }
 
+// ---------------------------------------------------------------------------
+// Calendly Connection — teacher picks which Calendly event type students
+// book, and tries to enable automatic (webhook) confirmation. Replaces the
+// old manual Lesson Schedule slot-posting UI now that availability comes
+// straight from Calendly instead of teacher-entered rows in this app.
+// ---------------------------------------------------------------------------
+
+async function loadCalendlyConnectionStatus() {
+    const mount = document.getElementById('calendlyEventTypeMount');
+    if (!mount) return;
+
+    const { data: settings } = await _supabase
+        .from('app_settings')
+        .select('calendly_event_type_uri, calendly_scheduling_url, calendly_webhooks_enabled')
+        .eq('singleton', true)
+        .maybeSingle();
+
+    if (settings?.calendly_event_type_uri) {
+        mount.innerHTML = `
+            <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:12px; padding:12px;">
+                <strong style="font-size:13px; color:#166534;">Connected</strong>
+                <p style="font-size:12.5px; color:#15803d; margin:4px 0 0;">${settings.calendly_scheduling_url || settings.calendly_event_type_uri}</p>
+            </div>`;
+    } else {
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Not connected yet — fetch your event types below.</p>`;
+    }
+
+    const webhookStatus = document.getElementById('calendlyWebhookStatus');
+    if (webhookStatus) {
+        webhookStatus.innerText = settings?.calendly_webhooks_enabled
+            ? '✓ Automatic confirmation is on.'
+            : 'Automatic confirmation is off — students will see a manual "I\'ve confirmed this on Calendly" button instead.';
+    }
+}
+window.loadCalendlyConnectionStatus = loadCalendlyConnectionStatus;
+
+async function fetchCalendlyEventTypes() {
+    const listMount = document.getElementById('calendlyEventTypeList');
+    if (!listMount) return;
+    showNotificationToast('Fetching your Calendly event types...');
+
+    const { data, error } = await _supabase.functions.invoke('calendly-list-event-types', { body: {} });
+    if (error || data?.error) {
+        listMount.style.display = 'block';
+        listMount.innerHTML = `<p style="color:#ef4444; font-size:13px;">${(data && data.error) || error?.message || 'Something went wrong.'}</p>`;
+        return;
+    }
+
+    const types = data?.eventTypes || [];
+    if (types.length === 0) {
+        listMount.style.display = 'block';
+        listMount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No active event types found on your Calendly account.</p>`;
+        return;
+    }
+
+    listMount.style.display = 'block';
+    listMount.innerHTML = types.map(t => `
+        <button type="button" style="width:100%; text-align:left; border:1px solid #e2e8f0; border-radius:10px; margin-bottom:6px; padding:10px; cursor:pointer; background:#fff; display:block;"
+                onclick='selectCalendlyEventType(${JSON.stringify(t.uri)}, ${JSON.stringify(t.scheduling_url)})'>
+            <strong style="font-size:13px;">${t.name}</strong>
+            <div style="font-size:12px; color:#64748b;">${t.duration} min · ${t.scheduling_url}</div>
+        </button>
+    `).join('');
+}
+window.fetchCalendlyEventTypes = fetchCalendlyEventTypes;
+
+async function selectCalendlyEventType(uri, schedulingUrl) {
+    showNotificationToast('Saving...');
+    const { error } = await _supabase.from('app_settings').update({
+        calendly_event_type_uri: uri,
+        calendly_scheduling_url: schedulingUrl
+    }).eq('singleton', true);
+    if (error) return showNotificationToast("Couldn't save: " + error.message);
+    showGobezToast(`Connected! ${icon('calendar')}`);
+    const listMount = document.getElementById('calendlyEventTypeList');
+    if (listMount) listMount.style.display = 'none';
+    await loadCalendlyConnectionStatus();
+}
+window.selectCalendlyEventType = selectCalendlyEventType;
+
+async function enableCalendlyWebhook() {
+    const statusEl = document.getElementById('calendlyWebhookStatus');
+    if (statusEl) statusEl.innerText = 'Trying...';
+    const { data, error } = await _supabase.functions.invoke('calendly-register-webhook', { body: {} });
+    if (error) {
+        if (statusEl) statusEl.innerText = "Couldn't reach the function: " + error.message;
+        return;
+    }
+    if (data?.enabled) {
+        showGobezToast(`Automatic confirmation is on! ${icon('check-circle')}`);
+    } else {
+        showNotificationToast("Your Calendly plan doesn't support this — students will use the manual confirm button instead.");
+    }
+    await loadCalendlyConnectionStatus();
+}
+window.enableCalendlyWebhook = enableCalendlyWebhook;
+
 // One tap after teaching a level's live lesson to a team -- the student
 // Home card's step (Book Lesson -> Practice) is derived straight from this.
 async function markTeamLessonDelivered(teamId, levelNumber, teamName) {
