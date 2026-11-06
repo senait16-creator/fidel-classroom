@@ -126,16 +126,23 @@ async function togglePushNotifications() {
     }
 }
 
-// Keeps the hamburger menu's notification row AND the mode-select shortcut
-// button in sync with actual permission/subscription state — call after
-// opening the menu, on boot, and after any enable/disable action.
+// Keeps the hamburger menu's notification row, the mode-select shortcut
+// button, and the Teacher Hub's own notification button all in sync with
+// actual permission/subscription state — call after opening the menu, on
+// boot, after any enable/disable action, and whenever the Teacher Hub loads.
 async function updatePushMenuButton() {
     const row = document.getElementById('pushNotifRow');
     const label = document.getElementById('pushNotifLabel');
     const jumpBtn = document.getElementById('modeNotifBtn');
     const shellLabel = document.getElementById('stushellNotifLabel');
+    const teacherBtn = document.getElementById('teacherPushNotifBtn');
 
     const state = getPushPermissionState();
+    let subscription = null;
+    if (state !== 'unsupported' && state !== 'needs-install' && state !== 'denied') {
+        const registration = await navigator.serviceWorker.getRegistration();
+        subscription = registration ? await registration.pushManager.getSubscription() : null;
+    }
 
     if (shellLabel) {
         if (!isPushSupported()) {
@@ -145,8 +152,6 @@ async function updatePushMenuButton() {
         } else if (state === 'denied') {
             shellLabel.innerText = 'Blocked';
         } else {
-            const registration = await navigator.serviceWorker.getRegistration();
-            const subscription = registration ? await registration.pushManager.getSubscription() : null;
             shellLabel.innerText = subscription ? 'On →' : 'Off →';
         }
     }
@@ -159,9 +164,23 @@ async function updatePushMenuButton() {
         if (state === 'unsupported' || state === 'needs-install') {
             jumpBtn.style.display = 'none';
         } else {
-            const registration = await navigator.serviceWorker.getRegistration();
-            const subscription = registration ? await registration.pushManager.getSubscription() : null;
             jumpBtn.style.display = subscription ? 'none' : '';
+        }
+    }
+
+    if (teacherBtn) {
+        if (!isPushSupported()) {
+            teacherBtn.style.display = 'none';
+        } else {
+            teacherBtn.style.display = '';
+            teacherBtn.disabled = state === 'denied';
+            if (state === 'needs-install') {
+                teacherBtn.innerText = 'Add to Home Screen first';
+            } else if (state === 'denied') {
+                teacherBtn.innerText = 'Blocked in iPhone Settings';
+            } else {
+                teacherBtn.innerText = subscription ? 'Notifications On ✓' : 'Enable Notifications';
+            }
         }
     }
 
@@ -179,8 +198,6 @@ async function updatePushMenuButton() {
         return;
     }
 
-    const registration = await navigator.serviceWorker.getRegistration();
-    const subscription = registration ? await registration.pushManager.getSubscription() : null;
     label.innerText = subscription ? 'On' : 'Off';
 }
 

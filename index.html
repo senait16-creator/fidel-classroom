@@ -382,6 +382,12 @@
             <button class="btn-primary" style="width:auto; padding:8px 16px; font-size:13px;" onclick="switchAdminPanelsFromDashboard('student')">Switch to Student View →</button>
         </div>
 
+        <div class="teacher-overview-card">
+            <div class="teacher-overview-title"><span data-icon="bell"></span> Notifications</div>
+            <p style="font-size:13px; color:#64748b; margin:4px 0 10px;">Get a push notification on your phone the moment a new student signs up.</p>
+            <button class="btn-secondary" id="teacherPushNotifBtn" style="width:auto; padding:8px 18px; font-size:13px;" onclick="togglePushNotifications()">Enable Notifications</button>
+        </div>
+
         <div class="teacher-panel" style="margin-bottom:20px;">
             <div class="teacher-panel-header" onclick="toggleTeacherPanel('classroomSettingsPanelBody', this)">
                 <h2 style="font-size:18px; color:var(--neutral-dark);">Classroom Settings</h2>
@@ -2351,7 +2357,7 @@
 
 <script src="js/icons.js?v=5" defer></script>
 <script src="js/navigation.js?v=17" defer></script>
-<script src="js/app.js?v=34" defer></script>
+<script src="js/app.js?v=35" defer></script>
 <script src="js/auth.js?v=24" defer></script>
 <script src="js/guide.js?v=10" defer></script>
 <script src="js/utils/compress.js?v=9" defer></script>
@@ -2377,7 +2383,7 @@
 <script src="js/schedule.js?v=9" defer></script>
 <script src="js/calendar.js?v=7" defer></script>
 <script src="js/menu.js?v=12" defer></script>
-<script src="js/push.js?v=8" defer></script>
+<script src="js/push.js?v=9" defer></script>
 <script src="js/studentshell.js?v=26" defer></script>
 <script src="js/preview.js?v=1" defer></script>
 
