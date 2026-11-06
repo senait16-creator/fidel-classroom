@@ -425,14 +425,23 @@ async function teacherResetStudentLevel(studentId, nickname) {
     if (typeof loadTeacherClassroomOverview === "function") await loadTeacherClassroomOverview();
 }
 
-// Erases a student's footprint from everything this app shows: their name,
-// email, progress, submissions, and team membership, then deletes their
-// actual Supabase Auth login (email/password) via the teacher-delete-student
-// Edge Function -- that part needs the service-role key, which can never
-// be used safely from browser JS, so it has to happen server-side. Once
-// this fully succeeds there is nothing left anywhere referencing them,
-// and the email is free for a brand-new signup (unless also blocked --
-// see teacherBlockStudent).
+// Erases a student's footprint from everything this app shows: their
+// progress, submissions, and team membership (client-side, same as
+// before), then their profiles row AND their actual Supabase Auth login
+// together via the teacher-delete-student Edge Function. Those last two
+// have to happen server-side, in that order, from one privileged call --
+// not as two separate client-side steps -- because (a) deleting the
+// Auth login needs the service-role key, which can never be used safely
+// from browser JS, and (b) Postgres won't let the Auth login be deleted
+// while a profiles row still references it, so the profiles row must go
+// first. An earlier version only scrubbed the profiles row instead of
+// deleting it, which silently left that FK blocker in place -- the Auth
+// login never actually got deleted, and the leftover row caused Supabase
+// to hand back the OLD account on a later signup attempt with the same
+// email instead of creating a new one. Once this fully succeeds there is
+// nothing left anywhere referencing them, and the email is genuinely
+// free for a brand-new signup (unless also blocked -- see
+// teacherBlockStudent).
 async function teacherForgetStudent(studentId, nickname) {
     const typed = prompt(
         `This permanently erases ${nickname}'s name, email, progress, submissions, and their actual login. ` +
@@ -460,19 +469,6 @@ async function teacherForgetStudent(studentId, nickname) {
         return showNotificationToast('Failed: ' + deleteError.message);
     }
 
-    const { error: profileError } = await _supabase.from('profiles').update({
-        nickname: 'Removed Student',
-        email: `forgotten-${studentId}@deleted.local`,
-        avatar: null,
-        team_id: null,
-        is_captain: false
-    }).eq('id', studentId);
-
-    if (profileError) {
-        console.error('Failed to forget student (profile scrub):', profileError);
-        return showNotificationToast('Failed: ' + profileError.message);
-    }
-
     const { data: deleteLoginData, error: deleteLoginError } = await _supabase.functions.invoke('teacher-delete-student', { body: { studentId } });
     const loginDeleted = !deleteLoginError && deleteLoginData?.deleted;
 
@@ -480,8 +476,8 @@ async function teacherForgetStudent(studentId, nickname) {
         showGobezToast(`${nickname} has been completely erased.`);
     } else {
         const msg = (deleteLoginData && deleteLoginData.error) || await readEdgeFunctionErrorMessage(deleteLoginError) || 'Unknown error';
-        console.error('Failed to delete student login:', msg);
-        showNotificationToast(`${nickname}'s data was erased, but their login couldn't be deleted (${msg}). Remove it yourself in Supabase Dashboard > Authentication if needed.`);
+        console.error('Failed to delete student profile/login:', msg);
+        showNotificationToast(`${nickname}'s progress was erased, but their profile/login couldn't be fully deleted (${msg}). Remove them yourself in Supabase Dashboard if needed.`);
     }
 
     await loadTeacherRosterData();
