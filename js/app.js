@@ -499,6 +499,7 @@ if (viewMode === "teacher") {
     loadCurrentCaptains();
     if (typeof loadTeacherClassroomOverview === 'function') loadTeacherClassroomOverview();
     if (typeof loadCalendlyConnectionStatus === 'function') loadCalendlyConnectionStatus();
+    if (typeof checkNewSignupNotifications === 'function') checkNewSignupNotifications();
     } else {
         // "Practice Mode" (studentDashboard) is retired — the student shell's
         // Home tab is the one landing point now, same as enterModeSelect().

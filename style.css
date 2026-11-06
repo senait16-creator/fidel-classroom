@@ -1949,6 +1949,30 @@ header {
     color: inherit;
 }
 
+/* New-student-signup banner — same gradient as the Home greeting card
+   (.stushell-home-banner), slides down from the top, stacks if more than
+   one is pending, tap or auto-dismiss after a few seconds. */
+#adminSignupBannerContainer {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 9995;
+    display: flex; flex-direction: column; gap: 8px; padding: 12px;
+    pointer-events: none;
+}
+.admin-signup-banner {
+    background: linear-gradient(135deg, #14532d, #166534, #ca8a04);
+    color: #ffffff; border-radius: 16px; padding: 16px 18px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    display: flex; align-items: center; gap: 12px;
+    max-width: 480px; margin: 0 auto; width: 100%;
+    pointer-events: auto; cursor: pointer;
+    animation: adminSignupBannerSlideIn 0.25s ease forwards;
+}
+.admin-signup-banner-text { flex: 1; font-size: 14px; font-weight: 700; }
+.admin-signup-banner-close { font-size: 18px; opacity: 0.85; flex-shrink: 0; }
+@keyframes adminSignupBannerSlideIn {
+    from { transform: translateY(-24px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
 #confettiCanvas {
     position: fixed;
     top: 0;
