@@ -282,6 +282,7 @@ async function loadTeacherRosterData() {
                         <div class="roster-student-actions" id="rosterActions-${s.id}" style="display:none;">
                             <button class="btn-secondary" style="font-size:11px; padding:6px 10px; color:#ef4444; border:1px solid #fecaca;" onclick="removeStudentFromTeam('${s.id}', '${s.nickname.replace(/'/g, "\\'")}')">Remove from Team</button>
                             <button class="btn-secondary" style="font-size:11px; padding:6px 10px; color:#b45309; border:1px solid #fed7aa;" onclick="teacherResetStudentLevel('${s.id}', '${s.nickname.replace(/'/g, "\\'")}')">${icon('refresh')} Reset a Level</button>
+                            <button class="btn-secondary" style="font-size:11px; padding:6px 10px; color:#991b1b; border:1px solid #fecaca;" onclick="teacherBlockStudent('${s.id}', '${s.nickname.replace(/'/g, "\\'")}', '${(s.email || '').replace(/'/g, "\\'")}')">${icon('shield')} Block</button>
                             <button class="btn-secondary" style="font-size:11px; padding:6px 10px; color:#991b1b; border:1px solid #fecaca; font-weight:800;" onclick="teacherForgetStudent('${s.id}', '${s.nickname.replace(/'/g, "\\'")}')">${icon('trash')} Forget Student</button>
                         </div>`;
                 }).join('');
@@ -319,6 +320,7 @@ async function loadTeacherRosterData() {
                         <button class="roster-student-menu-btn" onclick="toggleRosterActions('solo-${s.id}')" aria-label="Actions">⋯</button>
                         <div class="roster-student-actions roster-solo-actions" id="rosterActions-solo-${s.id}" style="display:none;">
                             <button class="btn-secondary" style="font-size:11px; padding:6px 10px; color:#b45309; border:1px solid #fed7aa;" onclick="teacherResetStudentLevel('${s.id}', '${s.nickname.replace(/'/g, "\\'")}')">🔄 Reset a Level</button>
+                            <button class="btn-secondary" style="font-size:11px; padding:6px 10px; color:#991b1b; border:1px solid #fecaca;" onclick="teacherBlockStudent('${s.id}', '${s.nickname.replace(/'/g, "\\'")}', '${(s.email || '').replace(/'/g, "\\'")}')">🛡️ Block</button>
                             <button class="btn-secondary" style="font-size:11px; padding:6px 10px; color:#991b1b; border:1px solid #fecaca; font-weight:800;" onclick="teacherForgetStudent('${s.id}', '${s.nickname.replace(/'/g, "\\'")}')">🗑️ Forget Student</button>
                         </div>
                     </div>`;
@@ -424,18 +426,18 @@ async function teacherResetStudentLevel(studentId, nickname) {
 }
 
 // Erases a student's footprint from everything this app shows: their name,
-// email, progress, submissions, and team membership. This does NOT delete
-// their actual Supabase Auth login (email/password) — that requires a
-// service-role key, which can never be used safely from browser JS (it
-// would be exposed to anyone who opens dev tools). After this runs, the
-// login still technically exists but is fully disconnected from any
-// classroom data. To remove the login itself, delete it directly from the
-// Supabase dashboard's Authentication tab.
+// email, progress, submissions, and team membership, then deletes their
+// actual Supabase Auth login (email/password) via the teacher-delete-student
+// Edge Function -- that part needs the service-role key, which can never
+// be used safely from browser JS, so it has to happen server-side. Once
+// this fully succeeds there is nothing left anywhere referencing them,
+// and the email is free for a brand-new signup (unless also blocked --
+// see teacherBlockStudent).
 async function teacherForgetStudent(studentId, nickname) {
     const typed = prompt(
-        `This permanently erases ${nickname}'s name, email, progress, and submissions from this app, ` +
-        `and removes them from their team. It cannot be undone from here. Their login will still exist in ` +
-        `Supabase Auth but disconnected from all data. Delete it there yourself if you want it fully gone.\n\n` +
+        `This permanently erases ${nickname}'s name, email, progress, submissions, and their actual login. ` +
+        `It cannot be undone. If you want to stop this email from ever signing up again, use "Block" first -- ` +
+        `once forgotten, their real email is no longer on file to block.\n\n` +
         'Type REMOVE to confirm:'
     );
     if (typed !== 'REMOVE') {
@@ -471,11 +473,49 @@ async function teacherForgetStudent(studentId, nickname) {
         return showNotificationToast('Failed: ' + profileError.message);
     }
 
-    showGobezToast(`${nickname} has been removed and forgotten.`);
+    const { data: deleteLoginData, error: deleteLoginError } = await _supabase.functions.invoke('teacher-delete-student', { body: { studentId } });
+    const loginDeleted = !deleteLoginError && deleteLoginData?.deleted;
+
+    if (loginDeleted) {
+        showGobezToast(`${nickname} has been completely erased.`);
+    } else {
+        const msg = (deleteLoginData && deleteLoginData.error) || await readEdgeFunctionErrorMessage(deleteLoginError) || 'Unknown error';
+        console.error('Failed to delete student login:', msg);
+        showNotificationToast(`${nickname}'s data was erased, but their login couldn't be deleted (${msg}). Remove it yourself in Supabase Dashboard > Authentication if needed.`);
+    }
+
     await loadTeacherRosterData();
     await teacherRefreshConfigurationDropdowns();
     if (typeof loadTeacherClassroomOverview === 'function') await loadTeacherClassroomOverview();
 }
+
+// Blocks an email from ever signing up again (enforced by a database
+// trigger on auth.users, not just this app, so it can't be bypassed by a
+// tampered client). Independent of Forget Student -- doesn't touch any
+// existing account or data. Capture the email BEFORE forgetting a student:
+// once forgotten, their profiles.email is a scrubbed placeholder, not
+// their real address, so there's nothing left to block.
+async function teacherBlockStudent(studentId, nickname, email) {
+    if (!email || email.endsWith('@deleted.local')) {
+        return showNotificationToast("This student's real email isn't on file anymore (already forgotten) -- nothing to block.");
+    }
+    const typed = prompt(
+        `This permanently blocks ${email} from ever signing up for Fidel Classroom again, even after being ` +
+        `forgotten or deleted. It does not touch ${nickname}'s existing account or data -- use Forget Student for that.\n\n` +
+        'Type BLOCK to confirm:'
+    );
+    if (typed !== 'BLOCK') {
+        showNotificationToast('Cancelled. Nothing was changed.');
+        return;
+    }
+
+    showNotificationToast(`Blocking ${email}...`);
+    const { error } = await _supabase.from('blocked_emails').insert({ email, blocked_by: currentUser.id });
+    if (error) return showNotificationToast("Couldn't block: " + error.message);
+
+    showGobezToast(`${email} is now blocked from signing up.`);
+}
+window.teacherBlockStudent = teacherBlockStudent;
 
 async function teacherRefreshConfigurationDropdowns() {
     const { data: students } = await _supabase.from('profiles').select('id, nickname');
