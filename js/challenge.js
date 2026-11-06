@@ -1209,10 +1209,17 @@ function launchChallengeStreakGame(fidelObj, levelNumber) {
             await recordStreakProgress(fidelObj.base, levelNumber, finalStreak, true);
             showGobezToast(`${icon('fire')} Streak of ${STREAK_THRESHOLD} complete! "${fidelObj.base}" passed!`);
             executeVictoryConfettiCelebration();
-            setTimeout(() => {
+            setTimeout(async () => {
                 document.getElementById('gameWorkspace').style.display = "none";
                 activeChallengeContext = null;
-                showPostStreakWritingPrompt(fidelObj, levelNumber, 'challenge');
+                // Back to the family detail page so the student sees the
+                // Submit Writing card flip from locked (gray) to unlocked
+                // (orange) right away -- was calling a function
+                // (showPostStreakWritingPrompt) that didn't exist anywhere
+                // in the codebase, which silently threw and stranded the
+                // student on a blank screen after winning.
+                document.getElementById('challengeFamilyDetailScreen').style.display = "block";
+                await refreshChallengeDetailWritingGate(fidelObj, levelNumber);
             }, 1800);
         }
     };
