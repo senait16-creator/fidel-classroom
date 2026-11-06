@@ -887,7 +887,7 @@ async function renderLevelCompletionBanner(mountId) {
                     check it at the start of your next live lesson: read a letter aloud,
                     then write a few from memory.
                 </p>
-                <a href="${buildLessonBookingLink(status.level + 1)}" target="_blank" rel="noopener"
+                <a href="javascript:void(0)" onclick="switchStudentShellTab('schedule')"
                    style="font-size:12px; color:#92400e; text-decoration:underline;">
                     Want to meet sooner? Book a time →
                 </a>

@@ -597,18 +597,23 @@ async function renderChallengeDashboardMap(levels, myLevel, team) {
         return;
     }
 
-    // Step 1 of the level cycle: live lesson first, then practice. Lessons
-    // are taught to the whole team at once (see teams.lesson_level_delivered),
-    // so solo/no-team students have nothing to wait on here.
-    const lessonDelivered = !team?.id || (team.lesson_level_delivered || 0) >= currentLevelNumber;
+    // Step 1 of the level cycle: live lesson first, then practice. Real
+    // booking history (see schedule.js) is the primary signal now; the
+    // team-wide teams.lesson_level_delivered flag still works as a manual
+    // fallback for anyone who didn't book through the app. Solo/no-team
+    // students default to "delivered" if the booking check can't run,
+    // same as before -- nothing to wait on either way.
+    const lessonDelivered = typeof hasHadLessonForLevel === 'function'
+        ? await hasHadLessonForLevel(currentLevelNumber, team)
+        : (!team?.id || (team.lesson_level_delivered || 0) >= currentLevelNumber);
 
     if (!lessonDelivered) {
         mount.innerHTML = `
             <p class="challenge-continue-label">Level ${currentLevelNumber} starts with a live lesson</p>
             <p style="font-size:13px; color:#64748b; margin:2px 0 12px;">Your teacher introduces this level's Fidel families live — recognition, pronunciation, speaking, and handwriting — then you practice in the app.</p>
-            <a href="${buildLessonBookingLink(currentLevelNumber)}" target="_blank" rel="noopener" class="challenge-continue-btn" style="text-decoration:none; display:block; text-align:center; box-sizing:border-box;">
+            <button type="button" class="challenge-continue-btn" onclick="switchStudentShellTab('schedule')">
                 ${icon('calendar')} Book Level ${currentLevelNumber} Lesson
-            </a>`;
+            </button>`;
         return;
     }
 

@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=95">
+    <link rel="stylesheet" href="style.css?v=96">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -294,6 +294,27 @@
          progress, and the Competition Timeline.
          ============================================================ -->
     <div class="teacher-tab-panel" data-tab="competition" id="teacherTabCompetition">
+        <div class="teacher-panel" style="margin-bottom:20px;">
+            <div class="teacher-panel-header" onclick="toggleTeacherPanel('lessonSchedulePanelBody', this)">
+                <h2 style="font-size:18px; color:var(--neutral-dark);"><span data-icon="calendar"></span> Lesson Schedule</h2>
+                <button class="teacher-panel-toggle">▼</button>
+            </div>
+            <div class="teacher-panel-body" id="lessonSchedulePanelBody">
+                <p style="font-size:13px; color:#64748b; margin-bottom:12px;">
+                    Post available times for each Fidel level's live lesson. Students pick a time and pay
+                    through the app; Lesson N's first portion is the mastery check for Level N-1.
+                </p>
+                <div class="teacher-slot-form">
+                    <input type="date" id="newSlotDate" aria-label="Date">
+                    <input type="time" id="newSlotTime" aria-label="Time">
+                    <input type="number" id="newSlotLevel" min="1" max="11" placeholder="Level" aria-label="Fidel level">
+                    <input type="number" id="newSlotCapacity" min="1" value="1" placeholder="Capacity" aria-label="Capacity">
+                    <button class="btn-primary" style="width:auto; padding:8px 16px; font-size:13px;" onclick="createLessonSlot()">+ Add Time</button>
+                </div>
+                <div id="teacherLessonSlotsMount" style="margin-top:14px;"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
+            </div>
+        </div>
+
         <div class="teacher-panel" style="margin-bottom:20px;">
             <div class="teacher-panel-header" onclick="toggleTeacherPanel('levelCompletionPanelBody', this)">
                 <h2 style="font-size:18px; color:var(--neutral-dark);"><span data-icon="star"></span> Level Completion Requests</h2>
@@ -638,6 +659,7 @@
             <button type="button" class="app-sidebar-link" data-tab="competition" onclick="chooseModeChallenge()"><span>ሀ</span> Fidel Mastery</button>
             <button type="button" class="app-sidebar-link" onclick="enterWordBuilderHome()"><span>ቃ</span> Word Builder</button>
             <button type="button" class="app-sidebar-link" onclick="enterModeIfUnlocked('amharicPath', enterAmharicPath)"><span>ጉ</span> Amharic Path</button>
+            <button type="button" class="app-sidebar-link" data-tab="schedule" onclick="switchStudentShellTab('schedule')"><span data-icon="calendar"></span> Schedule</button>
             <div class="app-sidebar-divider"></div>
             <button type="button" class="app-sidebar-link" onclick="chooseModeCommunity()"><span data-icon="confetti"></span> Community</button>
             <button type="button" class="app-sidebar-link" data-tab="profile" onclick="switchStudentShellTab('profile')"><span data-icon="user"></span> Profile</button>
@@ -664,6 +686,14 @@
         </div>
 
         <div class="stushell-home-note" id="stushellHomeNoteMount" style="display:none;"></div>
+
+        <!-- Upcoming lesson -- booked state (level, time, mastery-check
+             note) or the "book your next one" prompt. Links into the
+             Schedule tab either way. -->
+        <div class="home-lesson-card" id="homeLessonCard" style="display:none;" onclick="switchStudentShellTab('schedule')">
+            <span class="home-lesson-eyebrow" id="homeLessonEyebrow">Next Lesson</span>
+            <div id="homeLessonMount"></div>
+        </div>
 
         <!-- Captain tasks — leadership to-dos, separate from the captain's
              own (Solo) learning below. Collapses to one line when there's
@@ -1034,6 +1064,38 @@
 
         </div>
     </div>
+
+    <!-- Schedule — live-lesson booking and history. Lesson N's mastery
+         check covers Level N-1 (folded into the start of the next lesson,
+         not a separate appointment); this screen never gates practice,
+         it only informs and handles the booking/payment mechanics. -->
+    <div class="stushell-tab-panel" data-tab="schedule">
+        <div class="nextsteps-header">
+            <h2>📅 Schedule</h2>
+            <span class="nextsteps-subhead">Live lessons & mastery checks</span>
+        </div>
+
+        <div class="challenge-dash-card" id="scheduleUpcomingCard">
+            <div class="challenge-card-title">Upcoming Lesson</div>
+            <div id="scheduleUpcomingMount">
+                <p style="color:#94a3b8; font-size:13px;">Loading...</p>
+            </div>
+        </div>
+
+        <div class="challenge-dash-card" id="scheduleBookCard" style="display:none;">
+            <div class="challenge-card-title" id="scheduleBookTitle">Book Next Lesson</div>
+            <div id="scheduleBookMount">
+                <p style="color:#94a3b8; font-size:13px;">Loading...</p>
+            </div>
+        </div>
+
+        <div class="challenge-dash-card" id="scheduleHistoryCard">
+            <div class="challenge-card-title">🗓️ Lesson History</div>
+            <div id="scheduleHistoryMount">
+                <p style="color:#94a3b8; font-size:13px;">Loading...</p>
+            </div>
+        </div>
+    </div>
     </div>
 
     <nav class="stushell-bottomnav" id="stushellBottomNav">
@@ -1054,6 +1116,13 @@
             </button>
             <button class="stushell-nav-upload-btn" aria-label="Upload a photo" onclick="openUploadSheet()">
                 <span data-icon="plus"></span>
+            </button>
+            <button class="stushell-nav-tab" data-tab="schedule" onclick="switchStudentShellTab('schedule')">
+                <span class="stushell-nav-icon-wrap">
+                    <span class="stushell-nav-icon-off" data-icon="calendar"></span>
+                    <span class="stushell-nav-icon-on" data-icon="calendar"></span>
+                </span>
+                <span class="stushell-nav-tab-label">Schedule</span>
             </button>
             <button class="stushell-nav-tab" data-tab="profile" onclick="switchStudentShellTab('profile')">
                 <span class="stushell-nav-icon-wrap">
@@ -2265,18 +2334,18 @@
 
 <script src="js/icons.js?v=5" defer></script>
 <script src="js/navigation.js?v=17" defer></script>
-<script src="js/app.js?v=31" defer></script>
-<script src="js/auth.js?v=23" defer></script>
+<script src="js/app.js?v=32" defer></script>
+<script src="js/auth.js?v=24" defer></script>
 <script src="js/guide.js?v=10" defer></script>
 <script src="js/utils/compress.js?v=9" defer></script>
 <script src="js/game.js?v=11" defer></script>
 <script src="js/submissions.js?v=18" defer></script>
-<script src="js/teacher.js?v=36" defer></script>
+<script src="js/teacher.js?v=37" defer></script>
 <script src="js/reading.js?v=34" defer></script>
 <script src="js/guidedpath.js?v=1" defer></script>
 <script src="js/wordbuilder.js?v=21" defer></script>
     <script src="js/letterboard.js?v=19" defer></script>
-<script src="js/team/progress.js?v=36" defer></script>
+<script src="js/team/progress.js?v=37" defer></script>
 <script src="js/team/levels.js?v=14" defer></script>
 <script src="js/team/map.js?v=10" defer></script>
 <script src="js/team/hub.js?v=28" defer></script>
@@ -2287,11 +2356,12 @@
         <script src="js/starboard.js?v=3" defer></script>
 <script src="js/wordle.js?v=9" defer></script>
 <script src="intro.js?v=1" defer></script>
-<script src="js/challenge.js?v=47" defer></script>
+<script src="js/challenge.js?v=48" defer></script>
+<script src="js/schedule.js?v=1" defer></script>
 <script src="js/calendar.js?v=7" defer></script>
 <script src="js/menu.js?v=12" defer></script>
 <script src="js/push.js?v=8" defer></script>
-<script src="js/studentshell.js?v=25" defer></script>
+<script src="js/studentshell.js?v=26" defer></script>
 <script src="js/preview.js?v=1" defer></script>
 
 <script>

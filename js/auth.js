@@ -201,6 +201,7 @@ async function proceedFlowMap(user) {
 
         if (typeof enterStudentShellHomeTab === 'function') {
             enterStudentShellHomeTab();
+            if (typeof handleScheduleReturnIfNeeded === 'function') handleScheduleReturnIfNeeded();
         } else if (typeof showCharacterGuide === 'function') {
             showCharacterGuide();
         } else {

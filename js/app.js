@@ -498,6 +498,7 @@ if (viewMode === "teacher") {
     populateCaptainTeamDropdown();
     loadCurrentCaptains();
     if (typeof loadTeacherClassroomOverview === 'function') loadTeacherClassroomOverview();
+    if (typeof loadTeacherLessonSlots === 'function') loadTeacherLessonSlots();
     } else {
         // "Practice Mode" (studentDashboard) is retired — the student shell's
         // Home tab is the one landing point now, same as enterModeSelect().
