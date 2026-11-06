@@ -233,18 +233,19 @@ function clearWritingSketchpad() {
 }
 
 // ---------------------------------------------------------------------------
-// Practice sketchpad (id="sketchpad") — with undo
-// Embedded in the student dashboard letter family view.
+// Reusable sketchpad-with-undo -- history lives on the canvas element
+// itself (canvas._history), not a shared module-level array, so two
+// different canvases using this same helper (id="sketchpad" and
+// id="challengePracticeCanvas") each get their own independent undo
+// stack instead of corrupting each other's.
 // ---------------------------------------------------------------------------
-
-let _sketchpadHistory   = [];
-let _sketchpadInitted   = false;
 
 function initSketchpadWithUndo(canvasId) {
     canvasId = canvasId || 'sketchpad';
     const canvas = document.getElementById(canvasId);
     if (!canvas || canvas._sketchInitted) return;
     canvas._sketchInitted = true;
+    canvas._history = [];
 
     const ctx = canvas.getContext("2d");
     const rect = canvas.getBoundingClientRect();
@@ -267,8 +268,8 @@ function initSketchpadWithUndo(canvasId) {
     }
 
     function pushSnap() {
-        if (_sketchpadHistory.length >= 30) _sketchpadHistory.shift();
-        _sketchpadHistory.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+        if (canvas._history.length >= 30) canvas._history.shift();
+        canvas._history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
     }
 
     canvas.addEventListener("mousedown", e => { isDown = true; pushSnap(); const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
@@ -280,18 +281,20 @@ function initSketchpadWithUndo(canvasId) {
     canvas.addEventListener("touchend",   () => { isDown = false; });
 }
 
-function undoSketchpadCanvas() {
-    const canvas = document.getElementById('sketchpad');
-    if (!canvas || _sketchpadHistory.length === 0) return;
-    const ctx = canvas.getContext('2d');
-    ctx.putImageData(_sketchpadHistory.pop(), 0, 0);
+function undoSketchpadCanvas(canvasId) {
+    canvasId = canvasId || 'sketchpad';
+    const canvas = document.getElementById(canvasId);
+    if (!canvas || !canvas._history || canvas._history.length === 0) return;
+    const ctx = canvas._ctx || canvas.getContext('2d');
+    ctx.putImageData(canvas._history.pop(), 0, 0);
 }
 
-function clearSketchpadCanvas() {
-    _sketchpadHistory = [];
-    const canvas = document.getElementById('sketchpad');
+function clearSketchpadCanvas(canvasId) {
+    canvasId = canvasId || 'sketchpad';
+    const canvas = document.getElementById(canvasId);
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    if (canvas._history) canvas._history = [];
+    const ctx = canvas._ctx || canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
@@ -299,7 +302,7 @@ function clearSketchpadCanvas() {
 // Fidel Competition practice pad — warm-up drawing only, never submitted.
 // The real writing submission for a Competition family is photo-only (see
 // openWritingSubmitScreen's photoOnly option), so this canvas has no
-// "submit" action at all, just Clear.
+// "submit" action at all, just Clear and Undo.
 // ---------------------------------------------------------------------------
 
 function initChallengePracticePad() {
@@ -308,10 +311,11 @@ function initChallengePracticePad() {
 }
 
 function clearChallengePracticePad() {
-    const canvas = document.getElementById('challengePracticeCanvas');
-    if (!canvas) return;
-    const ctx = canvas._ctx || canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    clearSketchpadCanvas('challengePracticeCanvas');
+}
+
+function undoChallengePracticePad() {
+    undoSketchpadCanvas('challengePracticeCanvas');
 }
 
 // ---------------------------------------------------------------------------
@@ -656,3 +660,4 @@ window.updateModeSelectCaptainButton  = updateModeSelectCaptainButton;
 window.bindSketchpadButtons           = bindSketchpadButtons;
 window.initChallengePracticePad       = initChallengePracticePad;
 window.clearChallengePracticePad      = clearChallengePracticePad;
+window.undoChallengePracticePad       = undoChallengePracticePad;

@@ -7259,7 +7259,8 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     border-radius: 4px;
 }
 
-/* Family detail: practice pad (finger-drawing, warm-up only — never submitted) */
+/* Family detail: practice pad (finger-drawing, warm-up only — never
+   submitted) — always visible now, no accordion toggle. */
 
 .practice-pad-card {
     background: #f8fafc;
@@ -7269,54 +7270,24 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     margin-bottom: 18px;
 }
 
-.practice-pad-title {
-    font-size: 13.5px;
-    font-weight: 700;
-    color: var(--neutral-dark);
-    margin-bottom: 2px;
-}
-
 .practice-pad-sub {
     font-size: 11.5px;
     color: #64748b;
     margin-bottom: 10px;
 }
 
-.practice-pad-toggle {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: #f8fafc;
-    border: 1px dashed #cbd5e1;
-    border-radius: 14px;
-    padding: 13px 15px;
-    margin-bottom: 18px;
-    font-size: 13.5px;
-    font-weight: 700;
-    color: var(--neutral-dark);
-    cursor: pointer;
-    text-align: left;
-}
-
-.practice-pad-toggle-label {
-    flex: 1;
-}
-
-.practice-pad-toggle-arrow {
-    color: #94a3b8;
-}
-
+/* De-emphasized on purpose -- this used to be its own prominent amber
+   section; now it's a small expandable note next to the submit card. */
 .challenge-why-photo-details {
-    margin-top: 10px;
+    margin-top: 8px;
 }
 
 .challenge-why-photo-details summary {
     list-style: none;
     cursor: pointer;
-    font-size: 12px;
-    font-weight: 700;
-    color: #92400e;
+    font-size: 11px;
+    font-weight: 600;
+    color: #94a3b8;
 }
 
 .challenge-why-photo-details summary::-webkit-details-marker {
@@ -7324,42 +7295,70 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 
 .challenge-why-photo-details p {
-    background: #fffbeb;
-    border: 1px dashed #fde68a;
-    border-radius: 12px;
-    padding: 11px 13px;
-    font-size: 11.5px;
+    font-size: 11px;
     color: #92400e;
     line-height: 1.5;
-    margin: 8px 0 0;
+    margin: 6px 0 0;
+    padding: 0;
+    background: none;
+    border: none;
 }
 
-/* Family detail: locked writing submission card */
+/* Family detail: compact submit-handwriting card (locked + unlocked share
+   this layout -- small icon, title, one or two lines of sub-text -- no
+   more large empty locked box). */
 
-.submit-card-locked {
+.submit-compact {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    text-align: left;
+}
+
+.submit-compact-locked {
     background: #f1f5f9;
-    border: 1px solid var(--border-color);
-    border-radius: 16px;
-    padding: 20px;
-    text-align: center;
     color: #94a3b8;
-    margin-bottom: 16px;
 }
 
-.submit-card-locked .lock-icon {
-    font-size: 26px;
-    margin-bottom: 6px;
+.submit-compact-unlocked {
+    background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(124, 58, 237, 0.28);
 }
 
-.submit-card-locked .lock-title {
+.submit-compact-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    line-height: 1.3;
+}
+
+.submit-compact-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.submit-compact-title {
     font-size: 13.5px;
-    font-weight: 700;
-    color: #64748b;
-    margin-bottom: 4px;
+    font-weight: 800;
 }
 
-.submit-card-locked .lock-sub {
-    font-size: 12px;
+.submit-compact-sub {
+    font-size: 11.5px;
+    opacity: 0.85;
+}
+
+.submit-compact-action {
+    font-size: 11.5px;
+    font-weight: 700;
+    margin-top: 3px;
+    opacity: 0.95;
 }
 
 /* Team status content â€” hidden until toggled on Competition page */
