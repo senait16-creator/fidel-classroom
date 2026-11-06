@@ -220,7 +220,7 @@ async function renderUpcomingLessonCard(booking) {
     const mount = document.getElementById('scheduleUpcomingMount');
     if (!mount) return;
     if (!booking) {
-        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No lesson booked yet — see below to book your next one.</p>`;
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No lessons booked yet</p>`;
         return;
     }
     mount.innerHTML = renderUpcomingLessonHtml(booking);
