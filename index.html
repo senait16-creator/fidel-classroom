@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=98">
+    <link rel="stylesheet" href="style.css?v=99">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -700,37 +700,53 @@
              nothing to do. Captains/no-team students never see this. -->
         <div class="captain-tasks-card" id="captainTasksCard" style="display:none;"></div>
 
-        <div class="nextsteps-grid">
-            <!-- Fidel card reuses the existing Continue-Level renderer
-                 (renderChallengeDashboardMap → #challengeDashMapMount) --
-                 same data, just relocated into the next-steps grid. -->
-            <div class="nextstep-card nextstep-fidel" id="challengeCurrentLevelCard">
-                <div class="nextstep-eyebrow-row">
-                    <span class="nextstep-eyebrow nextstep-eyebrow-fidel" id="challengeCurrentLevelEyebrow">Fidel</span>
-                    <span class="nextstep-recommended" id="nextstepRecommendedBadge" style="display:none;">Recommended</span>
-                </div>
-                <div class="nextstep-fidel-progress-row" id="nextstepFidelProgressRow">
-                    <span class="nextstep-fidel-level-text" id="nextstepFidelLevelText">Level 1 of 11</span>
-                    <div class="nextstep-fidel-progress-track"><div class="nextstep-fidel-progress-fill" id="nextstepFidelProgressFill" style="width:0%;"></div></div>
-                </div>
-                <div id="challengeDashMapMount">
-                    <p style="color:#94a3b8; font-size:13px;">Loading current level...</p>
-                </div>
-                <p class="nextstep-captain-note" id="challengeCurrentLevelCaptainNote" style="display:none;">— doesn't count toward the team.</p>
+        <!-- Fidel card reuses the existing Continue-Level renderer
+             (renderChallengeDashboardMap → #challengeDashMapMount) --
+             same data. Its own curriculum carousel (Fidel Mastery) sits
+             directly below it instead of down with the others, so each
+             subject reads as one block: practice card, then its levels. -->
+        <div class="nextstep-card nextstep-fidel" id="challengeCurrentLevelCard">
+            <div class="nextstep-eyebrow-row">
+                <span class="nextstep-eyebrow nextstep-eyebrow-fidel" id="challengeCurrentLevelEyebrow">Fidel</span>
+                <span class="nextstep-recommended" id="nextstepRecommendedBadge" style="display:none;">Recommended</span>
             </div>
-
-            <div class="nextstep-card nextstep-wordbuilder" id="nextstepWordBuilderCard">
-                <span class="nextstep-eyebrow nextstep-eyebrow-wb">Word Builder</span>
-                <div id="nextstepWordBuilderMount">
-                    <p style="color:#94a3b8; font-size:13px;">Loading...</p>
-                </div>
+            <div class="nextstep-fidel-progress-row" id="nextstepFidelProgressRow">
+                <span class="nextstep-fidel-level-text" id="nextstepFidelLevelText">Level 1 of 11</span>
+                <div class="nextstep-fidel-progress-track"><div class="nextstep-fidel-progress-fill" id="nextstepFidelProgressFill" style="width:0%;"></div></div>
             </div>
+            <div id="challengeDashMapMount">
+                <p style="color:#94a3b8; font-size:13px;">Loading current level...</p>
+            </div>
+            <p class="nextstep-captain-note" id="challengeCurrentLevelCaptainNote" style="display:none;">— doesn't count toward the team.</p>
+        </div>
 
-            <div class="nextstep-card nextstep-amharicpath" id="nextstepAmharicPathCard">
-                <span class="nextstep-eyebrow nextstep-eyebrow-ap">Amharic Path</span>
-                <div id="nextstepAmharicPathMount">
-                    <p style="color:#94a3b8; font-size:13px;">Loading...</p>
-                </div>
+        <div class="curriculum-section">
+            <div class="curriculum-section-top">
+                <span class="curriculum-section-title curriculum-title-fidel">Fidel Mastery</span>
+                <a href="javascript:void(0)" onclick="enterModeIfUnlocked('practice', enterPracticeHome)">All 11 →</a>
+            </div>
+            <div class="curriculum-row" id="curriculumFidelRow"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
+        </div>
+
+        <div class="nextstep-card nextstep-wordbuilder" id="nextstepWordBuilderCard">
+            <span class="nextstep-eyebrow nextstep-eyebrow-wb">Word Builder</span>
+            <div id="nextstepWordBuilderMount">
+                <p style="color:#94a3b8; font-size:13px;">Loading...</p>
+            </div>
+        </div>
+
+        <div class="curriculum-section">
+            <div class="curriculum-section-top">
+                <span class="curriculum-section-title curriculum-title-wb">Word Builder</span>
+                <a href="javascript:void(0)" onclick="enterWordBuilderHome()">All levels →</a>
+            </div>
+            <div class="curriculum-row" id="curriculumWordBuilderRow"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
+        </div>
+
+        <div class="nextstep-card nextstep-amharicpath" id="nextstepAmharicPathCard">
+            <span class="nextstep-eyebrow nextstep-eyebrow-ap">Amharic Path</span>
+            <div id="nextstepAmharicPathMount">
+                <p style="color:#94a3b8; font-size:13px;">Loading...</p>
             </div>
         </div>
 
@@ -773,22 +789,6 @@
         </div>
 
         <div class="curriculum-header"><h2>My curriculum</h2></div>
-
-        <div class="curriculum-section">
-            <div class="curriculum-section-top">
-                <span class="curriculum-section-title curriculum-title-fidel">Fidel Mastery</span>
-                <a href="javascript:void(0)" onclick="enterModeIfUnlocked('practice', enterPracticeHome)">All 11 →</a>
-            </div>
-            <div class="curriculum-row" id="curriculumFidelRow"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
-        </div>
-
-        <div class="curriculum-section">
-            <div class="curriculum-section-top">
-                <span class="curriculum-section-title curriculum-title-wb">Word Builder</span>
-                <a href="javascript:void(0)" onclick="enterWordBuilderHome()">All levels →</a>
-            </div>
-            <div class="curriculum-row" id="curriculumWordBuilderRow"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
-        </div>
 
         <div class="curriculum-section">
             <div class="curriculum-section-top">
