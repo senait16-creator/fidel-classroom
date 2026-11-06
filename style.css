@@ -8649,9 +8649,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 .nextsteps-header h2 { margin: 0; font-size: 17px; font-weight: 800; color: #1c1b17; }
 .nextsteps-subhead { font-size: 12px; color: #94a3b8; }
 
-.nextsteps-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 14px; }
-
-.nextstep-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px; }
+.nextstep-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 10px; }
 .nextstep-fidel { border-width: 2px; border-color: var(--brand-primary, #166534); }
 
 .nextstep-eyebrow-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
@@ -8854,7 +8852,6 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 .curriculum-list-row-current .curriculum-list-title { font-weight: 700; }
 
 @media (min-width: 900px) {
-    .nextsteps-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .curriculum-row { flex-wrap: wrap; overflow: visible; }
     .curriculum-card { flex: 1; min-width: 130px; }
 }
