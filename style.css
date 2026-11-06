@@ -9016,7 +9016,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 /* Flush with the screen edge (no gap -- a gap let page content show through
    underneath while scrolling), but with extra bottom padding so the
    buttons themselves sit higher within the bar instead of right at its edge. */
-.stushell-bottomnav-inner { display: flex; align-items: center; width: 100%; max-width: 480px; padding: 6px 8px 14px; }
+.stushell-bottomnav-inner { display: flex; align-items: center; width: 100%; max-width: 480px; padding: 6px 8px 22px; }
 
 .stushell-nav-upload-btn {
     flex-shrink: 0; width: 52px; height: 52px; margin: -22px 14px 0; border-radius: 26px;
