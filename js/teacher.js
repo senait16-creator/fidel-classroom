@@ -1119,6 +1119,42 @@ async function loadTeacherLeaderboard() {
 // straight from Calendly instead of teacher-entered rows in this app.
 // ---------------------------------------------------------------------------
 
+// New-student-signup banner -- reads unseen admin_notifications rows
+// (populated by a DB trigger on profiles insert, not client code, so it
+// can't be spoofed or missed) and shows one gradient banner per student,
+// marking them seen as soon as they're shown. Safe to call even before
+// the admin_notifications table exists (migration not run yet) -- just
+// returns quietly instead of erroring.
+async function checkNewSignupNotifications() {
+    if (!currentProfile?.is_admin) return;
+    const container = document.getElementById('adminSignupBannerContainer');
+    if (!container) return;
+
+    const { data, error } = await _supabase
+        .from('admin_notifications')
+        .select('id, message')
+        .eq('type', 'new_signup')
+        .is('seen_at', null)
+        .order('created_at', { ascending: true });
+    if (error || !data || data.length === 0) return;
+
+    data.forEach(n => {
+        const el = document.createElement('div');
+        el.className = 'admin-signup-banner';
+        el.innerHTML = `
+            <span>${icon('sparkle')}</span>
+            <span class="admin-signup-banner-text">${n.message}</span>
+            <span class="admin-signup-banner-close">✕</span>
+        `;
+        el.onclick = () => el.remove();
+        container.appendChild(el);
+        setTimeout(() => el.remove(), 7000);
+    });
+
+    await _supabase.from('admin_notifications').update({ seen_at: new Date().toISOString() }).in('id', data.map(n => n.id));
+}
+window.checkNewSignupNotifications = checkNewSignupNotifications;
+
 // supabase-js puts a non-2xx Edge Function response's JSON body behind
 // error.context (a Response), not in `data` -- without this, callers only
 // ever see a generic "non-2xx status code" message instead of the real
