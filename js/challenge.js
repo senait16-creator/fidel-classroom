@@ -1000,14 +1000,12 @@ async function openChallengeFamilyDetail(fidelObj, levelNumber, returnTo = 'pick
     renderWritingStatusForFamily(fidelObj.base);
     renderChallengeInlineFlashcard(fidelObj);
 
-    const practiceTitle = document.getElementById("challengePracticeTitle");
-    if (practiceTitle) practiceTitle.innerText = `Try writing "${fidelObj.base}" with your finger`;
-    // Practice pad is collapsed by default (js/submissions.js's sketchpad
-    // init sizes the canvas from its own rendered rect, so it can't run
-    // while hidden anyway) — collapse it again here in case a previous
-    // family's page left it open, and lazy-init on first expand instead.
-    const practicePadBody = document.getElementById("challengePracticePadBody");
-    if (practicePadBody) practicePadBody.style.display = "none";
+    // Practice pad is always visible now (no accordion) -- init/clear it
+    // for this family. Safe to call every time: initChallengePracticePad
+    // only wires up the canvas listeners once (guarded on the canvas
+    // element itself) and always clears the drawing either way, so a
+    // previous family's doodle never bleeds into the next one.
+    if (typeof initChallengePracticePad === "function") initChallengePracticePad();
 
     document.getElementById("challengeDetailPlayBtn").onclick = () => launchChallengeStreakGame(fidelObj, levelNumber);
 
@@ -1021,7 +1019,6 @@ async function refreshChallengeDetailWritingGate(fidelObj, levelNumber) {
     const writeBtn = document.getElementById("challengeDetailWritingBtn");
     const lockCard = document.getElementById("challengeWritingLockCard");
     if (!writeBtn) return;
-    const writeSub = document.getElementById("challengeDetailWritingSub");
 
     const { data: progress } = await _supabase
         .from('student_family_progress')
@@ -1040,19 +1037,18 @@ async function refreshChallengeDetailWritingGate(fidelObj, levelNumber) {
     // flashcards, and matching game stays open, but submitting a photo
     // here would let progress get out of order.
     if (!activeChallengeLevelIsCurrent) {
-        if (lockCard) lockCard.style.display = "block";
+        if (lockCard) lockCard.style.display = "flex";
         if (lockTitle) lockTitle.innerText = "Not your current level";
         if (lockSub) lockSub.innerText = "Handwriting opens when you reach this level.";
         writeBtn.style.display = "none";
         writeBtn.onclick = null;
         return;
     }
-    if (lockTitle) lockTitle.innerText = "Locked";
-    if (lockSub) lockSub.innerText = `Pass the matching game (streak of ${STREAK_THRESHOLD}) to unlock`;
+    if (lockTitle) lockTitle.innerText = "Submit handwriting";
+    if (lockSub) lockSub.innerText = `Complete your ${STREAK_THRESHOLD}-streak to unlock.`;
 
-    if (lockCard) lockCard.style.display = streakDone ? "none" : "block";
+    if (lockCard) lockCard.style.display = streakDone ? "none" : "flex";
     writeBtn.style.display = streakDone ? "flex" : "none";
-    if (writeSub) writeSub.innerText = (currentProfile?.team_id && !currentProfile?.is_captain) ? "Submit for captain review" : "Submit for teacher review";
 
     writeBtn.onclick = streakDone
         ? () => {
@@ -1072,18 +1068,6 @@ function exitChallengeFamilyDetail() {
         document.getElementById("challengeFamilyScreen").style.display = "block";
     }
 }
-
-// Practice pad stays collapsed until tapped — its canvas can't size itself
-// while hidden, so the sketchpad only gets initialized on first expand
-// (initSketchpadWithUndo guards against re-running on later taps).
-function toggleChallengePracticePad() {
-    const body = document.getElementById("challengePracticePadBody");
-    if (!body) return;
-    const isOpen = body.style.display === "block";
-    body.style.display = isOpen ? "none" : "block";
-    if (!isOpen && typeof initChallengePracticePad === "function") initChallengePracticePad();
-}
-window.toggleChallengePracticePad = toggleChallengePracticePad;
 
 // ---------------------------------------------------------------------------
 // Inline flashcards — same deck data as the standalone Flashcard screen
