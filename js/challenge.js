@@ -632,31 +632,41 @@ async function renderChallengeDashboardMap(levels, myLevel, team) {
     const tilesHtml = families.map(fam =>
         `<div class="challenge-continue-tile${fam === targetFamily ? ' active' : ''}">${fam}</div>`
     ).join('');
+    // No "family" suffix and no "Continue Level X" heading above it --
+    // Level X of 11, the progress bar, and the letters themselves already
+    // say where the student is; the letter alone reads clearly on the button.
     const btnLabel = targetFamily
-        ? `Practice ${targetFamily} family`
+        ? `Practice ${targetFamily}`
         : `Review Level ${currentLevel.level_number}`;
 
     mount.innerHTML = `
-        <p class="challenge-continue-label">Continue Level ${currentLevel.level_number}</p>
         <div class="challenge-continue-tiles">${tilesHtml}</div>
         <button class="challenge-continue-btn" id="challengeGoalBtn">${btnLabel}</button>
     `;
 
+    // Jump straight to the current family — the Level Overview (family
+    // picker) is no longer a required stop along the way. It's still
+    // reachable as an optional browse screen via the family detail page's
+    // "View All Families" link. Shared by the button and the active
+    // (green) tile, which is clickable the same way; the gray upcoming
+    // tiles stay inert -- their availability is just a progress preview.
+    const goToCurrentFamily = () => {
+        activeChallengeLevel = currentLevel;
+        const fidelObj = targetFamily ? alphabetData.find(f => f.base === targetFamily) : null;
+        if (fidelObj) {
+            openChallengeFamilyDetail(fidelObj, currentLevel.level_number, 'dashboard');
+        } else {
+            openChallengeFamilyPicker(currentLevel);
+        }
+    };
+
     const goalBtn = document.getElementById("challengeGoalBtn");
-    if (goalBtn) {
-        goalBtn.onclick = () => {
-            // Jump straight to the current family — the Level Overview
-            // (family picker) is no longer a required stop along the way.
-            // It's still reachable as an optional browse screen via the
-            // family detail page's "View All Families" link.
-            activeChallengeLevel = currentLevel;
-            const fidelObj = targetFamily ? alphabetData.find(f => f.base === targetFamily) : null;
-            if (fidelObj) {
-                openChallengeFamilyDetail(fidelObj, currentLevel.level_number, 'dashboard');
-            } else {
-                openChallengeFamilyPicker(currentLevel);
-            }
-        };
+    if (goalBtn) goalBtn.onclick = goToCurrentFamily;
+
+    const activeTile = mount.querySelector('.challenge-continue-tile.active');
+    if (activeTile) {
+        activeTile.style.cursor = 'pointer';
+        activeTile.onclick = goToCurrentFamily;
     }
 }
 
