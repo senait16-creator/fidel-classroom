@@ -7338,7 +7338,7 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 
 .submit-compact {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 10px;
     width: 100%;
     border: none;
@@ -7351,6 +7351,11 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 .submit-compact-locked {
     background: #f1f5f9;
     color: #94a3b8;
+}
+
+.submit-compact-locked .step-icon-circle {
+    background: #e2e8f0;
+    border-color: #cbd5e1;
 }
 
 /* Same orange as the bottom nav's "+" upload button (#b45309). */

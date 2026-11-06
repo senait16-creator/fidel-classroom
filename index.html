@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=107">
+    <link rel="stylesheet" href="style.css?v=108">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -1401,7 +1401,20 @@
             </button>
         </div>
 
-        <div class="challenge-inline-section-label"><span data-icon="pencil"></span> Practice Writing</div>
+        <div id="challengeWritingLockCard" class="submit-compact submit-compact-locked" style="display:none;">
+            <span class="submit-compact-icon step-icon-circle"><span data-icon="lock"></span></span>
+            <span class="submit-compact-title" id="challengeWritingLockTitle">Submit your writing</span>
+        </div>
+        <button id="challengeDetailWritingBtn" class="submit-compact submit-compact-unlocked" style="display:none;">
+            <span class="submit-compact-icon step-icon-circle"><span data-icon="camera"></span></span>
+            <span class="submit-compact-title">Submit your writing (10 rows)</span>
+        </button>
+        <details class="challenge-why-photo-details">
+            <summary>ⓘ Why a photo?</summary>
+            <p>Write it on real paper, then upload a photo. No digital drawing is accepted here, since the point is proving you can write it with a pen.</p>
+        </details>
+
+        <div class="challenge-inline-section-label" style="margin-top:16px;"><span data-icon="pencil"></span> Practice Writing</div>
         <div class="practice-pad-card" id="challengePracticePadBody">
             <p class="practice-pad-sub">Draw here for practice</p>
             <canvas id="challengePracticeCanvas" class="sketch-canvas-element"></canvas>
@@ -1410,23 +1423,6 @@
                 <button class="btn-secondary" style="padding:6px 12px; font-size:12px;" onclick="undoChallengePracticePad()">↩ Undo</button>
             </div>
         </div>
-
-        <div class="challenge-inline-section-label"><span data-icon="pencil"></span> Submit Handwriting</div>
-        <div id="challengeWritingLockCard" class="submit-compact submit-compact-locked" style="display:none;">
-            <span class="submit-compact-icon"><span data-icon="lock"></span></span>
-            <span class="submit-compact-text">
-                <span class="submit-compact-title" id="challengeWritingLockTitle">Submit handwriting</span>
-                <span class="submit-compact-sub" id="challengeWritingLockSub">Complete your 20-streak to unlock.</span>
-            </span>
-        </div>
-        <button id="challengeDetailWritingBtn" class="submit-compact submit-compact-unlocked" style="display:none;">
-            <span class="submit-compact-icon"><span data-icon="camera"></span></span>
-            <span class="submit-compact-title">Submit your writing (10 rows)</span>
-        </button>
-        <details class="challenge-why-photo-details">
-            <summary>ⓘ Why a photo?</summary>
-            <p>Write it on real paper, then upload a photo. No digital drawing is accepted here, since the point is proving you can write it with a pen.</p>
-        </details>
     </div>
 
     <!-- Sibling of challengeFamilyPracticeBody (not nested inside it) — the
@@ -2404,7 +2400,7 @@
         <script src="js/starboard.js?v=3" defer></script>
 <script src="js/wordle.js?v=9" defer></script>
 <script src="intro.js?v=1" defer></script>
-<script src="js/challenge.js?v=54" defer></script>
+<script src="js/challenge.js?v=55" defer></script>
 <script src="js/schedule.js?v=9" defer></script>
 <script src="js/calendar.js?v=7" defer></script>
 <script src="js/menu.js?v=12" defer></script>

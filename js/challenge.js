@@ -1030,7 +1030,6 @@ async function refreshChallengeDetailWritingGate(fidelObj, levelNumber) {
 
     const streakDone = !!progress?.streak_passed;
     const lockTitle = document.getElementById("challengeWritingLockTitle");
-    const lockSub = document.getElementById("challengeWritingLockSub");
 
     // Handwriting and level approval only ever apply to the student's own
     // current level -- browsing a Done or Upcoming level's letters,
@@ -1039,13 +1038,14 @@ async function refreshChallengeDetailWritingGate(fidelObj, levelNumber) {
     if (!activeChallengeLevelIsCurrent) {
         if (lockCard) lockCard.style.display = "flex";
         if (lockTitle) lockTitle.innerText = "Not your current level";
-        if (lockSub) lockSub.innerText = "Handwriting opens when you reach this level.";
         writeBtn.style.display = "none";
         writeBtn.onclick = null;
         return;
     }
-    if (lockTitle) lockTitle.innerText = "Submit handwriting";
-    if (lockSub) lockSub.innerText = `Complete your ${STREAK_THRESHOLD}-streak to unlock.`;
+    // Sits right under the Matching Game button now, which already says
+    // "Complete a 20-streak" -- no need to repeat the streak requirement
+    // here too, just the compact "locked" state itself.
+    if (lockTitle) lockTitle.innerText = "Submit your writing";
 
     if (lockCard) lockCard.style.display = streakDone ? "none" : "flex";
     writeBtn.style.display = streakDone ? "flex" : "none";
