@@ -1052,7 +1052,7 @@ async function refreshChallengeDetailWritingGate(fidelObj, levelNumber) {
 
     writeBtn.onclick = streakDone
         ? () => {
-            openWritingSubmitScreen(fidelObj.base, 'challengeDetail', levelNumber, { photoOnly: true });
+            openWritingSubmitScreen(fidelObj.base, 'challengeDetail', levelNumber, { photoOnly: true, autoOpenPicker: true });
             document.getElementById("challengeFamilyDetailScreen").style.display = "none";
         }
         : null;

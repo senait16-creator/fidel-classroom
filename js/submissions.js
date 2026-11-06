@@ -31,6 +31,12 @@ function openWritingSubmitScreen(baseLetter, returnToOrOnClose, levelNumber, opt
     }
 
     const photoOnly = !!(opts && opts.photoOnly);
+    // Skips straight to the native camera/library picker instead of making
+    // the student tap "Upload a Photo" first -- only safe for callers that
+    // reach this function synchronously from the original click (no await
+    // in between), since browsers only let a synthetic file-input .click()
+    // through while that user-activation window is still open.
+    const autoOpenPicker = !!(opts && opts.autoOpenPicker);
 
     writingSubmitContext = { baseLetter, levelNumber: levelNumber || null, returnTo, legacyOnClose };
 
@@ -103,6 +109,8 @@ function openWritingSubmitScreen(baseLetter, returnToOrOnClose, levelNumber, opt
 
     // Show screen as its own focused page
     showScreen("writingSubmitScreen", "flex");
+
+    if (autoOpenPicker) photoInput.click();
 }
 
 function closeWritingSubmitScreen() {
