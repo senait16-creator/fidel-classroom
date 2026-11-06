@@ -128,14 +128,18 @@ function renderUpcomingLessonHtml(booking, { compact = false } = {}) {
         `;
     }
 
-    // Still mid-checkout -- nothing to confirm on Calendly yet, payment
-    // hasn't gone through (or failed) so there's no point sending them
-    // there until it has.
+    // Payment hasn't gone through yet -- either still mid-checkout, or the
+    // student left Stripe Checkout without finishing or canceling (no
+    // redirect ever fires back to us in that case, so the row is stuck
+    // in pending_payment until they act here). Give them a way to finish
+    // or give up the slot instead of a dead end.
     if (booking.status !== 'confirmed') {
         return `
             <div class="schedule-upcoming-level">Level ${booking.level_number} Fidel Lesson</div>
             <div class="schedule-upcoming-time">${dt}</div>
-            <div class="schedule-mastery-note">Finishing payment...</div>
+            <div class="schedule-mastery-note">Payment wasn't completed</div>
+            <button type="button" class="btn-primary" style="margin-top:8px; margin-bottom:8px;" onclick="resumeLessonPayment('${booking.id}')">Finish Payment →</button>
+            <button type="button" class="schedule-self-report-link" onclick="cancelLessonBooking('${booking.id}')">Cancel booking</button>
         `;
     }
 
@@ -383,6 +387,30 @@ async function bookCalendlyTime(startTimeIso) {
     }
 }
 window.bookCalendlyTime = bookCalendlyTime;
+
+// Re-creates a Stripe Checkout session for a booking that's still
+// pending_payment -- covers both "still finishing checkout" and "left
+// Stripe without using its cancel link, so the row never got cleaned up."
+async function resumeLessonPayment(bookingId) {
+    if (typeof blockIfPreviewing === 'function' && blockIfPreviewing()) return;
+    showNotificationToast('Redirecting to payment...');
+
+    const basePath = window.location.origin + window.location.pathname;
+    const successUrl = `${basePath}?booking_id=${bookingId}&checkout=success`;
+    const cancelUrl = `${basePath}?booking_id=${bookingId}&checkout=canceled`;
+
+    try {
+        const { data: sessionData, error } = await _supabase.functions.invoke('create-checkout-session', {
+            body: { bookingId, successUrl, cancelUrl }
+        });
+        if (error || !sessionData?.url) throw error || new Error('No checkout URL returned');
+        window.location.href = sessionData.url;
+    } catch (err) {
+        console.error('Failed to resume checkout:', err);
+        showNotificationToast("Couldn't start payment. Please try again.");
+    }
+}
+window.resumeLessonPayment = resumeLessonPayment;
 
 async function cancelLessonBooking(bookingId) {
     if (!confirm('Cancel this lesson booking?')) return;
