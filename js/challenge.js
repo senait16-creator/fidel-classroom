@@ -11,9 +11,11 @@ let activeChallengeFamilyLevel = null;
 // matching game) stays open on any level, but handwriting submission and
 // level approval only ever apply to this one, so progress stays in order.
 let activeChallengeLevelIsCurrent = true;
-// Where the family detail screen's "Back" button should go: 'dashboard' when
-// reached via the Continue button's direct jump, 'picker' when reached via
-// the Level Overview (family picker) grid or its own "View All Families" link.
+// Where the family detail screen's "Back" button should go: 'home' when
+// reached via Home's Fidel card, 'dashboard' when reached via Fidel
+// Mastery's own Continue button or "You're here" card, 'picker' when
+// reached via the Level Overview (family picker) grid or its own "View
+// All Families" link.
 let challengeFamilyDetailReturnTo = 'picker';
 
 const TEAM_COLORS = {
@@ -654,7 +656,7 @@ async function renderChallengeDashboardMap(levels, myLevel, team) {
         activeChallengeLevel = currentLevel;
         const fidelObj = targetFamily ? alphabetData.find(f => f.base === targetFamily) : null;
         if (fidelObj) {
-            openChallengeFamilyDetail(fidelObj, currentLevel.level_number, 'dashboard');
+            openChallengeFamilyDetail(fidelObj, currentLevel.level_number, 'home');
         } else {
             openChallengeFamilyPicker(currentLevel);
         }
@@ -1053,7 +1055,9 @@ async function refreshChallengeDetailWritingGate(fidelObj, levelNumber) {
 
 function exitChallengeFamilyDetail() {
     document.getElementById("challengeFamilyDetailScreen").style.display = "none";
-    if (challengeFamilyDetailReturnTo === 'dashboard') {
+    if (challengeFamilyDetailReturnTo === 'home') {
+        if (typeof enterStudentShellHomeTab === 'function') enterStudentShellHomeTab();
+    } else if (challengeFamilyDetailReturnTo === 'dashboard') {
         exitChallengeBackToDashboard();
     } else {
         document.getElementById("challengeFamilyScreen").style.display = "block";
