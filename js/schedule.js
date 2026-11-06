@@ -32,12 +32,12 @@ async function hasHadLessonForLevel(levelNumber, team) {
     const nowIso = new Date().toISOString();
     const { data } = await _supabase
         .from('lesson_bookings')
-        .select('level_number, status, lesson_slots(starts_at)')
+        .select('level_number, status, starts_at')
         .eq('student_id', currentUser.id)
         .eq('level_number', levelNumber)
         .eq('status', 'confirmed');
 
-    return (data || []).some(b => b.lesson_slots?.starts_at && b.lesson_slots.starts_at <= nowIso);
+    return (data || []).some(b => b.starts_at && b.starts_at <= nowIso);
 }
 window.hasHadLessonForLevel = hasHadLessonForLevel;
 
@@ -61,13 +61,13 @@ async function fetchMyUpcomingBooking() {
     const nowIso = new Date().toISOString();
     const { data } = await _supabase
         .from('lesson_bookings')
-        .select('id, level_number, status, price_cents, slot_id, lesson_slots(starts_at)')
+        .select('id, level_number, status, price_cents, starts_at, calendly_event_uri, calendly_confirmed_at, calendly_self_reported')
         .eq('student_id', currentUser.id)
         .in('status', ['pending_payment', 'confirmed']);
 
     const upcoming = (data || [])
-        .filter(b => b.lesson_slots?.starts_at && b.lesson_slots.starts_at > nowIso)
-        .sort((a, b) => new Date(a.lesson_slots.starts_at) - new Date(b.lesson_slots.starts_at));
+        .filter(b => b.starts_at && b.starts_at > nowIso)
+        .sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at));
     return upcoming[0] || null;
 }
 window.fetchMyUpcomingBooking = fetchMyUpcomingBooking;
@@ -80,13 +80,13 @@ async function fetchLessonHistory() {
     const nowIso = new Date().toISOString();
     const { data } = await _supabase
         .from('lesson_bookings')
-        .select('id, level_number, status, lesson_slots(starts_at)')
+        .select('id, level_number, status, starts_at')
         .eq('student_id', currentUser.id)
         .eq('status', 'confirmed');
 
     return (data || [])
-        .filter(b => b.lesson_slots?.starts_at && b.lesson_slots.starts_at <= nowIso)
-        .sort((a, b) => new Date(b.lesson_slots.starts_at) - new Date(a.lesson_slots.starts_at));
+        .filter(b => b.starts_at && b.starts_at <= nowIso)
+        .sort((a, b) => new Date(b.starts_at) - new Date(a.starts_at));
 }
 
 // ---------------------------------------------------------------------------
@@ -95,20 +95,62 @@ async function fetchLessonHistory() {
 // disagree about what "your next lesson" looks like.
 // ---------------------------------------------------------------------------
 
+async function fetchCalendlySchedulingUrl() {
+    const { data } = await _supabase.from('app_settings').select('calendly_scheduling_url').eq('singleton', true).maybeSingle();
+    return data?.calendly_scheduling_url || null;
+}
+
+function buildCalendlyPrefillUrl(schedulingUrl) {
+    const params = new URLSearchParams();
+    if (currentProfile?.nickname) params.set('name', currentProfile.nickname);
+    if (currentProfile?.email) params.set('email', currentProfile.email);
+    const query = params.toString();
+    return query ? `${schedulingUrl}?${query}` : schedulingUrl;
+}
+
 function renderUpcomingLessonHtml(booking, { compact = false } = {}) {
-    const dt = formatLessonDateTime(booking.lesson_slots.starts_at);
+    const dt = formatLessonDateTime(booking.starts_at);
     const priorLevel = booking.level_number - 1;
     const masteryNote = priorLevel >= 1
         ? `<p class="schedule-mastery-note">Includes Level ${priorLevel} mastery check</p>`
         : '';
 
     if (compact) {
+        const calendlyNote = booking.status === 'confirmed' && !booking.calendly_confirmed_at && !booking.calendly_self_reported
+            ? `<div class="home-lesson-mastery" style="color:#b45309;">⚠ Finish booking this on Calendly</div>`
+            : '';
         return `
             <div class="home-lesson-level">Level ${booking.level_number} Fidel</div>
             <div class="home-lesson-time">${dt}</div>
             ${priorLevel >= 1 ? `<div class="home-lesson-mastery">Includes Level ${priorLevel} mastery check</div>` : ''}
+            ${calendlyNote}
             <div class="home-lesson-link">View lesson →</div>
         `;
+    }
+
+    // Still mid-checkout -- nothing to confirm on Calendly yet, payment
+    // hasn't gone through (or failed) so there's no point sending them
+    // there until it has.
+    if (booking.status !== 'confirmed') {
+        return `
+            <div class="schedule-upcoming-level">Level ${booking.level_number} Fidel Lesson</div>
+            <div class="schedule-upcoming-time">${dt}</div>
+            <div class="schedule-mastery-note">Finishing payment...</div>
+        `;
+    }
+
+    let calendlyStateHtml;
+    if (booking.calendly_confirmed_at) {
+        calendlyStateHtml = `<div class="schedule-upcoming-paid schedule-upcoming-calendly-confirmed">${icon('check-circle')} Confirmed on calendar</div>`;
+    } else if (booking.calendly_self_reported) {
+        calendlyStateHtml = `<div class="schedule-calendly-note">You said you've confirmed this on Calendly — thanks! We'll double-check it lands.</div>`;
+    } else {
+        calendlyStateHtml = `
+            <div class="schedule-calendly-pending">
+                <p class="schedule-calendly-pending-text">One more step: confirm ${dt} on your teacher's calendar.</p>
+                <button type="button" class="btn-primary" style="margin-bottom:8px;" onclick="openCalendlyToFinish('${dt.replace(/'/g, "\\'")}')">Open Calendly →</button>
+                <button type="button" class="schedule-self-report-link" onclick="selfReportCalendlyConfirmed('${booking.id}')">I've confirmed this on Calendly</button>
+            </div>`;
     }
 
     return `
@@ -116,11 +158,36 @@ function renderUpcomingLessonHtml(booking, { compact = false } = {}) {
         <div class="schedule-upcoming-time">${dt}</div>
         <div class="schedule-upcoming-paid">${icon('check-circle')} Payment confirmed</div>
         ${masteryNote}
+        ${calendlyStateHtml}
         <div class="schedule-upcoming-actions">
             <button type="button" class="btn-secondary" onclick="cancelLessonBooking('${booking.id}')">Cancel / Reschedule</button>
         </div>
     `;
 }
+
+async function openCalendlyToFinish(dtLabel) {
+    const schedulingUrl = await fetchCalendlySchedulingUrl();
+    if (!schedulingUrl) {
+        return showNotificationToast("Calendly isn't connected yet -- ask your teacher.");
+    }
+    showNotificationToast(`On Calendly, pick ${dtLabel} to match what you paid for.`);
+    window.open(buildCalendlyPrefillUrl(schedulingUrl), '_blank', 'noopener');
+}
+window.openCalendlyToFinish = openCalendlyToFinish;
+
+// Courtesy signal only -- never treated as proof anywhere in the app. The
+// trustworthy signal (calendly_confirmed_at) is set only by the
+// calendly-webhook Edge Function, independently, when Calendly itself
+// reports the booking.
+async function selfReportCalendlyConfirmed(bookingId) {
+    showNotificationToast('Got it, noting that...');
+    const { error } = await _supabase.from('lesson_bookings').update({ calendly_self_reported: true }).eq('id', bookingId);
+    if (error) return showNotificationToast("Couldn't save: " + error.message);
+    showGobezToast(`Thanks! ${icon('check-circle')}`);
+    if (typeof renderScheduleTab === 'function') await renderScheduleTab();
+    if (typeof renderHomeUpcomingLessonCard === 'function') await renderHomeUpcomingLessonCard();
+}
+window.selfReportCalendlyConfirmed = selfReportCalendlyConfirmed;
 
 // Home's compact version of the same card -- booked state reuses
 // renderUpcomingLessonHtml's compact mode so the two can't disagree;
@@ -167,63 +234,112 @@ async function renderUpcomingLessonCard(booking) {
 // Book next lesson
 // ---------------------------------------------------------------------------
 
+// Cache for the currently-displayed Calendly availability, keyed by local
+// date string -- lets the date pills and time buttons re-render from the
+// same fetch without hitting the Edge Function again on every tap.
+let _calendlyTimesCache = null;
+let _calendlySelectedDateKey = null;
+
 async function renderBookNextLessonCard(recommendedLevel) {
     const card = document.getElementById('scheduleBookCard');
     const mount = document.getElementById('scheduleBookMount');
     const titleEl = document.getElementById('scheduleBookTitle');
     if (!card || !mount) return;
 
-    const priceCents = await fetchLessonPriceCents();
-    const priceLabel = `$${(priceCents / 100).toFixed(2)}`;
-    if (titleEl) titleEl.innerText = `Book Level ${recommendedLevel} Lesson · ${priceLabel}`;
-
-    const nowIso = new Date().toISOString();
-    const { data: slots } = await _supabase
-        .from('lesson_slots')
-        .select('id, starts_at, capacity')
-        .eq('target_level', recommendedLevel)
-        .eq('is_canceled', false)
-        .gte('starts_at', nowIso)
-        .order('starts_at', { ascending: true });
-
+    if (titleEl) titleEl.innerText = 'Book Next Lesson';
     card.style.display = 'block';
+    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading available times...</p>`;
 
-    if (!slots || slots.length === 0) {
-        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No times posted yet for Level ${recommendedLevel} — check back soon or ask your teacher.</p>`;
+    const priceCents = await fetchLessonPriceCents();
+
+    const { data, error } = await _supabase.functions.invoke('calendly-available-times', { body: { days: 14 } });
+    if (error || data?.error) {
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">${(data && data.error) || "Couldn't load available times right now — try again shortly."}</p>`;
         return;
     }
 
-    const slotIds = slots.map(s => s.id);
-    const { data: bookedRows } = await _supabase
-        .from('lesson_bookings')
-        .select('slot_id')
-        .in('slot_id', slotIds)
-        .in('status', ['pending_payment', 'confirmed']);
-
-    const bookedCountBySlot = {};
-    (bookedRows || []).forEach(b => { bookedCountBySlot[b.slot_id] = (bookedCountBySlot[b.slot_id] || 0) + 1; });
-
-    const openSlots = slots.filter(s => (bookedCountBySlot[s.id] || 0) < s.capacity);
-
-    if (openSlots.length === 0) {
-        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">All posted Level ${recommendedLevel} times are full — check back soon.</p>`;
+    const times = data?.times || [];
+    if (times.length === 0) {
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No open times in the next two weeks — check back soon.</p>`;
         return;
     }
 
-    mount.innerHTML = openSlots.map(s => `
-        <button type="button" class="schedule-slot-btn" onclick="bookLessonSlot('${s.id}', ${recommendedLevel}, ${priceCents})">
-            ${formatLessonDateTime(s.starts_at)}
-        </button>
-    `).join('');
+    const byDate = {};
+    const dateOrder = [];
+    times.forEach(t => {
+        const dateKey = new Date(t.start_time).toDateString();
+        if (!byDate[dateKey]) { byDate[dateKey] = []; dateOrder.push(dateKey); }
+        byDate[dateKey].push(t.start_time);
+    });
+
+    _calendlyTimesCache = { byDate, dateOrder, levelNumber: recommendedLevel, priceCents };
+    _calendlySelectedDateKey = dateOrder[0];
+
+    const priceLabel = `$${(priceCents / 100).toFixed(2)}`;
+    const priorLevel = recommendedLevel - 1;
+    const masteryNote = priorLevel >= 1
+        ? `<p class="schedule-lesson-summary-sub">Includes Level ${priorLevel} mastery check</p>`
+        : '';
+
+    mount.innerHTML = `
+        <div class="schedule-lesson-summary">
+            <div class="schedule-lesson-summary-title">Level ${recommendedLevel} Fidel Lesson</div>
+            ${masteryNote}
+            <div class="schedule-lesson-summary-price">${priceLabel}</div>
+        </div>
+        <div class="schedule-date-row" id="scheduleDateRow"></div>
+        <div class="schedule-time-row" id="scheduleTimeRow"></div>
+    `;
+
+    renderCalendlyDateRow();
+    renderCalendlyTimeRow();
 }
 
-async function bookLessonSlot(slotId, levelNumber, priceCents) {
+// Preply-style horizontal date selector -- one pill per date that has at
+// least one open time, weekday + day number, selected one highlighted.
+function renderCalendlyDateRow() {
+    const row = document.getElementById('scheduleDateRow');
+    if (!row || !_calendlyTimesCache) return;
+    row.innerHTML = _calendlyTimesCache.dateOrder.map(dateKey => {
+        const d = new Date(dateKey);
+        const weekday = d.toLocaleDateString(undefined, { weekday: 'short' });
+        const day = d.toLocaleDateString(undefined, { day: 'numeric' });
+        const isSelected = dateKey === _calendlySelectedDateKey;
+        return `
+            <button type="button" class="schedule-date-pill${isSelected ? ' active' : ''}" onclick='selectCalendlyDate(${JSON.stringify(dateKey)})'>
+                <span class="schedule-date-pill-weekday">${weekday}</span>
+                <span class="schedule-date-pill-day">${day}</span>
+            </button>`;
+    }).join('');
+}
+
+function selectCalendlyDate(dateKey) {
+    _calendlySelectedDateKey = dateKey;
+    renderCalendlyDateRow();
+    renderCalendlyTimeRow();
+}
+window.selectCalendlyDate = selectCalendlyDate;
+
+function renderCalendlyTimeRow() {
+    const row = document.getElementById('scheduleTimeRow');
+    if (!row || !_calendlyTimesCache) return;
+    const times = _calendlyTimesCache.byDate[_calendlySelectedDateKey] || [];
+    row.innerHTML = times.map(iso => {
+        const label = new Date(iso).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+        return `<button type="button" class="schedule-time-btn" onclick='bookCalendlyTime(${JSON.stringify(iso)})'>${label}</button>`;
+    }).join('');
+}
+
+async function bookCalendlyTime(startTimeIso) {
     if (typeof blockIfPreviewing === 'function' && blockIfPreviewing()) return;
+    if (!_calendlyTimesCache) return;
+    const { levelNumber, priceCents } = _calendlyTimesCache;
+
     showNotificationToast('Reserving your spot...');
 
     const { data: booking, error } = await _supabase
         .from('lesson_bookings')
-        .insert({ slot_id: slotId, student_id: currentUser.id, level_number: levelNumber, price_cents: priceCents })
+        .insert({ starts_at: startTimeIso, student_id: currentUser.id, level_number: levelNumber, price_cents: priceCents })
         .select('id')
         .single();
 
@@ -251,7 +367,7 @@ async function bookLessonSlot(slotId, levelNumber, priceCents) {
         await _supabase.from('lesson_bookings').delete().eq('id', booking.id);
     }
 }
-window.bookLessonSlot = bookLessonSlot;
+window.bookCalendlyTime = bookCalendlyTime;
 
 async function cancelLessonBooking(bookingId) {
     if (!confirm('Cancel this lesson booking?')) return;
@@ -286,7 +402,7 @@ async function renderLessonHistoryCard() {
     (completions || []).forEach(c => { statusByLevel[c.level_number] = c.status; });
 
     mount.innerHTML = history.map(b => {
-        const dt = new Date(b.lesson_slots.starts_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        const dt = new Date(b.starts_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
         const priorLevel = b.level_number - 1;
         let masteryLine = '';
         if (priorLevel >= 1) {

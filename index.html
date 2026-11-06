@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,600;0,700;1,600&family=Abyssinica+SIL&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css?v=100">
+    <link rel="stylesheet" href="style.css?v=101">
     <link rel="icon" href="IMG_2514.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#166534">
@@ -295,23 +295,36 @@
          ============================================================ -->
     <div class="teacher-tab-panel" data-tab="competition" id="teacherTabCompetition">
         <div class="teacher-panel" style="margin-bottom:20px;">
-            <div class="teacher-panel-header" onclick="toggleTeacherPanel('lessonSchedulePanelBody', this)">
-                <h2 style="font-size:18px; color:var(--neutral-dark);"><span data-icon="calendar"></span> Lesson Schedule</h2>
+            <div class="teacher-panel-header" onclick="toggleTeacherPanel('calendlyConnectionPanelBody', this)">
+                <h2 style="font-size:18px; color:var(--neutral-dark);"><span data-icon="calendar"></span> Calendly Connection</h2>
                 <button class="teacher-panel-toggle">▼</button>
             </div>
-            <div class="teacher-panel-body" id="lessonSchedulePanelBody">
+            <div class="teacher-panel-body" id="calendlyConnectionPanelBody">
                 <p style="font-size:13px; color:#64748b; margin-bottom:12px;">
-                    Post available times for each Fidel level's live lesson. Students pick a time and pay
-                    through the app; Lesson N's first portion is the mastery check for Level N-1.
+                    Your Calendly calendar is the one place you manage availability. Pick which Calendly
+                    event type students book here -- Fidel pulls your real open times from it automatically.
                 </p>
-                <div class="teacher-slot-form">
-                    <input type="date" id="newSlotDate" aria-label="Date">
-                    <input type="time" id="newSlotTime" aria-label="Time">
-                    <input type="number" id="newSlotLevel" min="1" max="11" placeholder="Level" aria-label="Fidel level">
-                    <input type="number" id="newSlotCapacity" min="1" value="1" placeholder="Capacity" aria-label="Capacity">
-                    <button class="btn-primary" style="width:auto; padding:8px 16px; font-size:13px;" onclick="createLessonSlot()">+ Add Time</button>
+
+                <div id="calendlyEventTypeMount">
+                    <p style="color:#94a3b8; font-size:13px;">Loading connection status...</p>
                 </div>
-                <div id="teacherLessonSlotsMount" style="margin-top:14px;"><p style="color:#94a3b8; font-size:13px;">Loading...</p></div>
+
+                <button class="btn-secondary" style="width:auto; padding:8px 16px; font-size:13px; margin-top:10px;" onclick="fetchCalendlyEventTypes()">
+                    <span data-icon="refresh"></span> Fetch my event types
+                </button>
+
+                <div id="calendlyEventTypeList" style="margin-top:12px; display:none;"></div>
+
+                <div style="margin-top:18px; padding-top:14px; border-top:1px solid #f1ede0;">
+                    <p style="font-size:13px; color:#64748b; margin-bottom:10px;">
+                        Automatic confirmation needs a Calendly webhook, which not every plan supports.
+                        This tries it and tells you honestly whether it worked.
+                    </p>
+                    <button class="btn-secondary" style="width:auto; padding:8px 16px; font-size:13px;" onclick="enableCalendlyWebhook()">
+                        Enable automatic confirmation
+                    </button>
+                    <div id="calendlyWebhookStatus" style="margin-top:8px; font-size:12.5px;"></div>
+                </div>
             </div>
         </div>
 
@@ -2331,13 +2344,13 @@
 
 <script src="js/icons.js?v=5" defer></script>
 <script src="js/navigation.js?v=17" defer></script>
-<script src="js/app.js?v=32" defer></script>
+<script src="js/app.js?v=33" defer></script>
 <script src="js/auth.js?v=24" defer></script>
 <script src="js/guide.js?v=10" defer></script>
 <script src="js/utils/compress.js?v=9" defer></script>
 <script src="js/game.js?v=11" defer></script>
 <script src="js/submissions.js?v=18" defer></script>
-<script src="js/teacher.js?v=37" defer></script>
+<script src="js/teacher.js?v=38" defer></script>
 <script src="js/reading.js?v=34" defer></script>
 <script src="js/guidedpath.js?v=1" defer></script>
 <script src="js/wordbuilder.js?v=21" defer></script>
@@ -2354,7 +2367,7 @@
 <script src="js/wordle.js?v=9" defer></script>
 <script src="intro.js?v=1" defer></script>
 <script src="js/challenge.js?v=51" defer></script>
-<script src="js/schedule.js?v=1" defer></script>
+<script src="js/schedule.js?v=2" defer></script>
 <script src="js/calendar.js?v=7" defer></script>
 <script src="js/menu.js?v=12" defer></script>
 <script src="js/push.js?v=8" defer></script>

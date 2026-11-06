@@ -8753,6 +8753,47 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 .schedule-slot-btn:last-child { margin-bottom: 0; }
 .schedule-slot-btn:active { background: #eef2f7; }
 
+/* Book Next Lesson -- lesson summary + Preply-style date/time picker */
+.schedule-lesson-summary { margin-bottom: 16px; }
+.schedule-lesson-summary-title { font-size: 16px; font-weight: 800; color: #1c1b17; }
+.schedule-lesson-summary-sub { font-size: 12.5px; color: #92722a; margin-top: 2px; }
+.schedule-lesson-summary-price { font-size: 14px; font-weight: 700; color: var(--brand-primary, #166534); margin-top: 4px; }
+
+.schedule-date-row {
+    display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 12px;
+    -webkit-overflow-scrolling: touch;
+}
+.schedule-date-pill {
+    flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 2px;
+    width: 52px; padding: 8px 4px; border-radius: 13px; border: 1px solid #e2e8f0; background: #ffffff;
+    cursor: pointer;
+}
+.schedule-date-pill-weekday { font-size: 10.5px; font-weight: 700; color: #94a3b8; text-transform: uppercase; }
+.schedule-date-pill-day { font-size: 16px; font-weight: 800; color: #1c1b17; }
+.schedule-date-pill.active { background: var(--brand-primary, #166534); border-color: var(--brand-primary, #166534); }
+.schedule-date-pill.active .schedule-date-pill-weekday,
+.schedule-date-pill.active .schedule-date-pill-day { color: #ffffff; }
+
+.schedule-time-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.schedule-time-btn {
+    flex: 1 1 calc(33.333% - 6px); min-width: 84px; text-align: center; background: #f8fafc;
+    border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 6px; font-size: 13px; font-weight: 700;
+    color: #1c1b17; cursor: pointer;
+}
+.schedule-time-btn:active { background: #eef2f7; }
+
+/* Post-payment Calendly confirmation states */
+.schedule-upcoming-calendly-confirmed { background: #f0fdf4; border-color: #86efac; color: #166534; }
+.schedule-calendly-note { font-size: 12.5px; color: #64748b; margin-top: 10px; line-height: 1.5; }
+.schedule-calendly-pending {
+    background: #fdf6ec; border: 1px solid #f3e3c6; border-radius: 13px; padding: 12px 14px; margin-top: 10px;
+}
+.schedule-calendly-pending-text { font-size: 13px; color: #92722a; margin: 0 0 10px; }
+.schedule-self-report-link {
+    display: block; width: 100%; text-align: center; background: none; border: none;
+    font-size: 12.5px; font-weight: 600; color: #92722a; text-decoration: underline; cursor: pointer; padding: 4px;
+}
+
 .schedule-history-row { padding: 10px 0; border-bottom: 1px solid #f1ede0; }
 .schedule-history-row:last-child { border-bottom: none; }
 .schedule-history-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 13.5px; }
