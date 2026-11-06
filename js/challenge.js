@@ -1042,10 +1042,7 @@ async function refreshChallengeDetailWritingGate(fidelObj, levelNumber) {
         writeBtn.onclick = null;
         return;
     }
-    // Sits right under the Matching Game button now, which already says
-    // "Complete a 20-streak" -- no need to repeat the streak requirement
-    // here too, just the compact "locked" state itself.
-    if (lockTitle) lockTitle.innerText = "Submit your writing";
+    if (lockTitle) lockTitle.innerText = "Submit your writing, 10 rows per letter";
 
     if (lockCard) lockCard.style.display = streakDone ? "none" : "flex";
     writeBtn.style.display = streakDone ? "flex" : "none";
