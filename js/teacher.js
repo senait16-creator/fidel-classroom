@@ -1119,6 +1119,19 @@ async function loadTeacherLeaderboard() {
 // straight from Calendly instead of teacher-entered rows in this app.
 // ---------------------------------------------------------------------------
 
+// supabase-js puts a non-2xx Edge Function response's JSON body behind
+// error.context (a Response), not in `data` -- without this, callers only
+// ever see a generic "non-2xx status code" message instead of the real
+// reason the function sent back.
+async function readEdgeFunctionErrorMessage(error) {
+    try {
+        const body = await error?.context?.json?.();
+        return body?.error || null;
+    } catch {
+        return null;
+    }
+}
+
 async function loadCalendlyConnectionStatus() {
     const mount = document.getElementById('calendlyEventTypeMount');
     if (!mount) return;
@@ -1155,8 +1168,9 @@ async function fetchCalendlyEventTypes() {
 
     const { data, error } = await _supabase.functions.invoke('calendly-list-event-types', { body: {} });
     if (error || data?.error) {
+        const msg = (data && data.error) || await readEdgeFunctionErrorMessage(error) || error?.message || 'Something went wrong.';
         listMount.style.display = 'block';
-        listMount.innerHTML = `<p style="color:#ef4444; font-size:13px;">${(data && data.error) || error?.message || 'Something went wrong.'}</p>`;
+        listMount.innerHTML = `<p style="color:#ef4444; font-size:13px;">${msg}</p>`;
         return;
     }
 
@@ -1197,7 +1211,8 @@ async function enableCalendlyWebhook() {
     if (statusEl) statusEl.innerText = 'Trying...';
     const { data, error } = await _supabase.functions.invoke('calendly-register-webhook', { body: {} });
     if (error) {
-        if (statusEl) statusEl.innerText = "Couldn't reach the function: " + error.message;
+        const msg = await readEdgeFunctionErrorMessage(error) || error.message;
+        if (statusEl) statusEl.innerText = "Couldn't reach the function: " + msg;
         return;
     }
     if (data?.enabled) {
