@@ -632,7 +632,7 @@ async function renderChallengeDashboardMap(levels, myLevel, team) {
     }
 
     const tilesHtml = families.map(fam =>
-        `<div class="challenge-continue-tile${fam === targetFamily ? ' active' : ''}">${fam}</div>`
+        `<div class="challenge-continue-tile${fam === targetFamily ? ' active' : ''}" data-family="${fam}">${fam}</div>`
     ).join('');
     // No "family" suffix and no "Continue Level X" heading above it --
     // Level X of 11, the progress bar, and the letters themselves already
@@ -650,8 +650,7 @@ async function renderChallengeDashboardMap(levels, myLevel, team) {
     // picker) is no longer a required stop along the way. It's still
     // reachable as an optional browse screen via the family detail page's
     // "View All Families" link. Shared by the button and the active
-    // (green) tile, which is clickable the same way; the gray upcoming
-    // tiles stay inert -- their availability is just a progress preview.
+    // (green) tile.
     const goToCurrentFamily = () => {
         activeChallengeLevel = currentLevel;
         const fidelObj = targetFamily ? alphabetData.find(f => f.base === targetFamily) : null;
@@ -665,11 +664,21 @@ async function renderChallengeDashboardMap(levels, myLevel, team) {
     const goalBtn = document.getElementById("challengeGoalBtn");
     if (goalBtn) goalBtn.onclick = goToCurrentFamily;
 
-    const activeTile = mount.querySelector('.challenge-continue-tile.active');
-    if (activeTile) {
-        activeTile.style.cursor = 'pointer';
-        activeTile.onclick = goToCurrentFamily;
-    }
+    // Every tile is clickable (students can jump ahead and practice any
+    // letter early, not just the current one) -- but only the true
+    // "current" family gets the green .active styling, same as before.
+    // Clicking an upcoming one doesn't change that; it just opens
+    // practice for that specific letter.
+    mount.querySelectorAll('.challenge-continue-tile').forEach(tile => {
+        const fam = tile.dataset.family;
+        tile.style.cursor = 'pointer';
+        tile.onclick = () => {
+            if (fam === targetFamily) { goToCurrentFamily(); return; }
+            activeChallengeLevel = currentLevel;
+            const fidelObj = alphabetData.find(f => f.base === fam);
+            if (fidelObj) openChallengeFamilyDetail(fidelObj, currentLevel.level_number, 'home');
+        };
+    });
 }
 
 // Still used by the Challenge Map overlay (js/team/map.js) to jump
