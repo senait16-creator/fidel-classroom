@@ -8762,6 +8762,60 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
 }
 .challenge-dash-card-major .challenge-card-title { font-size: 16.5px; }
 
+/* Schedule tab */
+.schedule-upcoming-level { font-size: 17px; font-weight: 900; color: #1c1b17; }
+.schedule-upcoming-time { font-size: 14px; color: #475569; margin-top: 2px; }
+.schedule-upcoming-paid {
+    display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700;
+    color: #166534; background: #f0fdf4; border: 1px solid #86efac; border-radius: 999px;
+    padding: 4px 10px; margin-top: 10px;
+}
+.schedule-upcoming-paid .picon { width: 13px; height: 13px; }
+.schedule-mastery-note { font-size: 12.5px; color: #92722a; background: #fdf6ec; border-radius: 10px; padding: 7px 10px; margin-top: 10px; }
+.schedule-upcoming-actions { margin-top: 14px; }
+
+.schedule-slot-btn {
+    display: block; width: 100%; text-align: left; background: #f8fafc; border: 1px solid #e2e8f0;
+    border-radius: 13px; padding: 12px 14px; font-size: 14px; font-weight: 700; color: #1c1b17;
+    cursor: pointer; margin-bottom: 8px;
+}
+.schedule-slot-btn:last-child { margin-bottom: 0; }
+.schedule-slot-btn:active { background: #eef2f7; }
+
+.schedule-history-row { padding: 10px 0; border-bottom: 1px solid #f1ede0; }
+.schedule-history-row:last-child { border-bottom: none; }
+.schedule-history-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 13.5px; }
+.schedule-history-status { font-size: 11px; font-weight: 700; color: #166534; flex-shrink: 0; }
+.schedule-history-mastery { font-size: 12px; color: #64748b; margin-top: 2px; }
+
+/* Home — compact upcoming-lesson card */
+.home-lesson-card {
+    background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px 16px;
+    margin-bottom: 18px; cursor: pointer;
+}
+.home-lesson-card.home-lesson-unbooked { background: linear-gradient(135deg, #f0fdf4, #fffbeb); border-color: #bbf7d0; }
+.home-lesson-eyebrow { font-size: 11px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: #94a3b8; display: block; margin-bottom: 4px; }
+.home-lesson-level { font-size: 16px; font-weight: 800; color: #1c1b17; }
+.home-lesson-time { font-size: 13px; color: #475569; margin-top: 1px; }
+.home-lesson-mastery { font-size: 11.5px; color: #92722a; margin-top: 4px; }
+.home-lesson-link { font-size: 12.5px; font-weight: 700; color: var(--brand-primary, #166534); margin-top: 8px; }
+.home-lesson-price { font-size: 13px; color: #475569; margin-top: 1px; }
+
+/* Teacher — Lesson Schedule panel */
+.teacher-slot-form { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.teacher-slot-form input {
+    padding: 9px 10px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 13px;
+}
+.teacher-slot-form input[type="date"] { flex: 1 1 140px; }
+.teacher-slot-form input[type="time"] { flex: 1 1 110px; }
+.teacher-slot-form input[type="number"] { width: 80px; }
+
+.teacher-slot-row {
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    padding: 10px 0; border-bottom: 1px solid #f1ede0; font-size: 13.5px;
+}
+.teacher-slot-row:last-child { border-bottom: none; }
+
 .curriculum-header { margin: 6px 0 12px; }
 .curriculum-header h2 { margin: 0; font-size: 17px; font-weight: 800; color: #1c1b17; }
 

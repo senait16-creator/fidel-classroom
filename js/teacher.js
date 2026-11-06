@@ -1354,3 +1354,95 @@ async function resetEverythingForDayOne() {
     await loadCurrentCaptains();
 }
 window.resetEverythingForDayOne = resetEverythingForDayOne;
+
+// ---------------------------------------------------------------------------
+// Lesson Schedule — teacher-posted live-lesson times. Capacity exists on
+// every slot from day one (default 1) so group lessons later don't need
+// a schema change, only a higher number when a teacher wants one.
+// ---------------------------------------------------------------------------
+
+async function createLessonSlot() {
+    const dateVal = document.getElementById('newSlotDate')?.value;
+    const timeVal = document.getElementById('newSlotTime')?.value;
+    const levelVal = parseInt(document.getElementById('newSlotLevel')?.value, 10);
+    const capacityVal = parseInt(document.getElementById('newSlotCapacity')?.value, 10) || 1;
+
+    if (!dateVal || !timeVal || !levelVal) {
+        return showNotificationToast('Pick a date, time, and level first.');
+    }
+
+    const startsAt = new Date(`${dateVal}T${timeVal}`).toISOString();
+
+    const { error } = await _supabase.from('lesson_slots').insert({
+        starts_at: startsAt,
+        target_level: levelVal,
+        capacity: capacityVal,
+        created_by: currentUser.id
+    });
+
+    if (error) return showNotificationToast("Couldn't add that time: " + error.message);
+
+    showGobezToast(`Level ${levelVal} lesson time added! ${icon('calendar')}`);
+    ['newSlotDate', 'newSlotTime', 'newSlotLevel'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    const capEl = document.getElementById('newSlotCapacity');
+    if (capEl) capEl.value = '1';
+
+    await loadTeacherLessonSlots();
+}
+window.createLessonSlot = createLessonSlot;
+
+async function loadTeacherLessonSlots() {
+    const mount = document.getElementById('teacherLessonSlotsMount');
+    if (!mount) return;
+    mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">Loading...</p>`;
+
+    const nowIso = new Date().toISOString();
+    const { data: slots, error } = await _supabase
+        .from('lesson_slots')
+        .select('id, starts_at, target_level, capacity')
+        .eq('is_canceled', false)
+        .gte('starts_at', nowIso)
+        .order('starts_at', { ascending: true });
+
+    if (error) {
+        mount.innerHTML = `<p style="color:#ef4444; font-size:13px;">Error: ${error.message}</p>`;
+        return;
+    }
+    if (!slots || slots.length === 0) {
+        mount.innerHTML = `<p style="color:#94a3b8; font-size:13px;">No upcoming lesson times posted yet.</p>`;
+        return;
+    }
+
+    const slotIds = slots.map(s => s.id);
+    const { data: bookings } = await _supabase
+        .from('lesson_bookings')
+        .select('slot_id')
+        .in('slot_id', slotIds)
+        .in('status', ['pending_payment', 'confirmed']);
+
+    const bookedCountBySlot = {};
+    (bookings || []).forEach(b => { bookedCountBySlot[b.slot_id] = (bookedCountBySlot[b.slot_id] || 0) + 1; });
+
+    mount.innerHTML = slots.map(s => {
+        const booked = bookedCountBySlot[s.id] || 0;
+        const dt = new Date(s.starts_at).toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+        return `
+            <div class="teacher-slot-row">
+                <div>
+                    <strong>Level ${s.target_level}</strong> · ${dt}
+                    <div style="font-size:12px; color:#64748b;">${booked} / ${s.capacity} booked</div>
+                </div>
+                <button class="btn-secondary" style="font-size:11px; padding:6px 10px;" onclick="cancelLessonSlot('${s.id}')">Cancel</button>
+            </div>`;
+    }).join('');
+}
+window.loadTeacherLessonSlots = loadTeacherLessonSlots;
+
+async function cancelLessonSlot(slotId) {
+    if (!confirm('Cancel this lesson time? Any students already booked into it will need to be contacted directly.')) return;
+    const { error } = await _supabase.from('lesson_slots').update({ is_canceled: true }).eq('id', slotId);
+    if (error) return showNotificationToast("Couldn't cancel: " + error.message);
+    showNotificationToast('Lesson time canceled.');
+    await loadTeacherLessonSlots();
+}
+window.cancelLessonSlot = cancelLessonSlot;

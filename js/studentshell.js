@@ -31,6 +31,9 @@ function switchStudentShellTab(tabName) {
     if (tabName === 'team' && typeof renderCompetitionTab === 'function') {
         renderCompetitionTab();
     }
+    if (tabName === 'schedule' && typeof renderScheduleTab === 'function') {
+        renderScheduleTab();
+    }
 }
 window.switchStudentShellTab = switchStudentShellTab;
 
@@ -72,6 +75,7 @@ async function enterStudentShellHomeTab() {
 
     renderTeamTeaser(team);
     if (typeof renderHomeCompetitionCard === 'function') await renderHomeCompetitionCard();
+    if (typeof renderHomeUpcomingLessonCard === 'function') await renderHomeUpcomingLessonCard();
     // Captain's pending-review count now lives on the Captain tasks card
     // above (renderCaptainTasksCard()) instead of this badge on the team
     // teaser, so it isn't shown twice.
