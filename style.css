@@ -8768,9 +8768,75 @@ button:active, .cup-card:active, .workspace-action-btn:active, .fidel-card:activ
     padding: 12px 14px; font-size: 13px; color: #92722a; margin-bottom: 16px; line-height: 1.5;
 }
 
+/* Fidel World — the Competition tab's "Your Journey" card: level,
+   progress bar, what's left in the current level, and where you stand. */
+.fidel-world-journey-level { font-size: 18px; font-weight: 900; color: #1c1b17; margin-bottom: 10px; }
+.fidel-world-journey-track {
+    width: 100%; height: 10px; background: #e2e8f0;
+    border-radius: 999px; overflow: hidden; margin-bottom: 10px;
+}
+.fidel-world-journey-fill {
+    height: 100%; border-radius: 999px;
+    background: linear-gradient(90deg, var(--brand-primary), var(--brand-secondary));
+    transition: width 0.4s ease;
+}
+.fidel-world-journey-next { font-size: 13.5px; color: #475569; margin-bottom: 6px; }
+.fidel-world-journey-rank { font-size: 13px; font-weight: 700; color: var(--brand-primary); }
+
+/* CTA shown to 'explore'-status browsers instead of the journey card --
+   they can still see the map, just not their own place on it yet. */
+.fidel-world-cta {
+    background: linear-gradient(135deg, #14532d, #166534 60%, #15803d);
+    color: white; border-radius: 18px; padding: 18px; margin-bottom: 16px; text-align: center;
+    box-shadow: 0 14px 30px rgba(20,83,45,0.22);
+}
+.fidel-world-cta-title { font-size: 15px; font-weight: 800; margin-bottom: 12px; }
+.fidel-world-cta-btn {
+    border: none; border-radius: 13px; padding: 12px 18px;
+    background: white; color: #14532d; font-size: 14px; font-weight: 800; cursor: pointer;
+}
+
+/* The shared map -- one row per level, finish line on top. A row with
+   nobody on it yet just shows its number, so the whole path to Level 11
+   is visible even before anyone's close to it. */
+.fidel-world-map { display: flex; flex-direction: column; gap: 3px; }
+
+.fidel-world-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 6px;
+    border-left: 3px solid #e2e8f0;
+    border-radius: 10px;
+}
+.fidel-world-row-you { background: var(--accent-gold-bg); }
+.fidel-world-row-finish { border-left-color: #ca8a04; margin-bottom: 4px; }
+
+.fidel-world-row-badge {
+    flex-shrink: 0;
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12.5px; font-weight: 800;
+    background: #f1f5f9; color: #64748b;
+}
+.fidel-world-row-has-people .fidel-world-row-badge { background: var(--brand-primary); color: white; }
+.fidel-world-row-finish .fidel-world-row-badge { background: linear-gradient(135deg, #ca8a04, #fbbf24); color: white; font-size: 14px; }
+
+.fidel-world-chips { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; min-height: 28px; align-items: center; }
+
+.fidel-world-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: white; border: 1px solid #e2e8f0; border-radius: 999px;
+    padding: 3px 10px 3px 4px; font-size: 12.5px; font-weight: 600; color: #475569;
+}
+.fidel-world-chip-you { border-color: var(--brand-primary); background: #ecfdf5; color: var(--brand-primary); font-weight: 800; }
+.fidel-world-chip-finisher { border-color: #ca8a04; background: #fffbeb; color: #92400e; }
+
+.fidel-world-row-empty { font-size: 12px; color: #cbd5e1; }
+
 /* Competition tab — team hero. Strong, colorful team identity up top
    (team-colored gradient, set via JS from getTeamHex) instead of a plain
-   text row, echoing the old Fidel Competition page's energy. */
+   text row, echoing the old Fidel Competition page's energy. Left in
+   place, unused by the new Fidel World design, same as its render
+   functions in challenge.js/team/hub.js. */
 .competition-hero {
     display: none; flex-direction: column; gap: 16px; padding: 22px 18px;
     border-radius: 22px; color: #ffffff; margin-bottom: 16px;

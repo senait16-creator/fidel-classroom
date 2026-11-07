@@ -233,43 +233,155 @@ async function enterTeamPage() {
 window.enterTeamPage = enterTeamPage;
 
 // The Competition tab's content, called by switchStudentShellTab() on
-// switching to data-tab="team". Same render functions #teamPageScreen
-// always used -- they target the same mount ids, just moved into the
-// tab-panel system, so none of them needed to change.
+// switching to data-tab="team" -- "Fidel World": everyone's own race to
+// the last letter, plotted on one shared map. profiles.current_level is
+// already each student's real progress, so this needs no new backend.
+// Only access_status = 'approved' students are plotted; an 'explore'
+// browser sees fidelWorldJoinCta instead until they book their first
+// lesson. The old team-race functions this used to call (getTeamBoardInfo,
+// renderCompetitionHero, renderCaptainTeamCard, renderTeamUrgencyCard,
+// renderChallengeTeamStatus, loadStudentMeetingDisplay,
+// renderChallengeDashboardRace, renderChallengeTeamPoints,
+// renderTimelinePreview) are left defined but no longer called here.
 async function renderCompetitionTab() {
-    const team = await getTeamBoardInfo();
-    const hasTeam = !!getEffectiveTeamId();
+    const [levels, myLevel, roster] = await Promise.all([
+        fetchChallengeLevels(),
+        getMyCurrentLevel(),
+        fetchFidelWorldRoster()
+    ]);
+    const totalLevels = levels.length || 11;
+    const isApproved = currentProfile?.access_status === 'approved' || currentProfile?.is_admin === true;
 
-    const soloNote = document.getElementById("soloCompetitionNote");
-    if (soloNote) soloNote.style.display = hasTeam ? "none" : "block";
+    const journeyCard = document.getElementById("fidelWorldJourneyCard");
+    const joinCta = document.getElementById("fidelWorldJoinCta");
 
-    await renderCompetitionHero(team, hasTeam);
-
-    if (typeof renderCaptainTeamCard === "function") await renderCaptainTeamCard();
-
-    const statusMount = document.getElementById("challengeTeamStatusMount");
-    if (statusMount) statusMount.style.display = hasTeam ? "" : "none";
-
-    if (hasTeam) {
-        await renderTeamUrgencyCard(team);
-        await renderChallengeTeamStatus(team);
-        // Team members used to need a tap to reveal, but nothing wires
-        // that toggle anymore -- shown by default now instead, since
-        // "who's on my team" is one of the things this screen exists to answer.
-        const statusContent = document.getElementById("challengeTeamStatusContent");
-        if (statusContent) statusContent.style.display = "block";
+    if (isApproved) {
+        if (joinCta) joinCta.style.display = "none";
+        if (journeyCard) journeyCard.style.display = "block";
+        await renderFidelWorldJourneyCard(levels, myLevel, totalLevels, roster);
+    } else {
+        if (journeyCard) journeyCard.style.display = "none";
+        if (joinCta) joinCta.style.display = "block";
     }
 
-    if (typeof loadStudentMeetingDisplay === "function") await loadStudentMeetingDisplay();
-    await renderChallengeDashboardRace();
-    if (typeof renderChallengeTeamPoints === "function") await renderChallengeTeamPoints();
-    // Classroom-wide (every team, not just yours) so Competition feels
-    // like the whole room is moving, not just a static leaderboard. Reuses
-    // Community's existing renderRecentAchievements() as-is.
+    renderFidelWorldMap(roster, totalLevels, isApproved);
+
+    // Classroom-wide (every learner, not just a team) so Competition feels
+    // like the whole room is moving. Reuses Community's existing
+    // renderRecentAchievements() as-is.
     if (typeof renderRecentAchievements === "function") await renderRecentAchievements("competitionActivityMount");
-    if (typeof renderTimelinePreview === "function") await renderTimelinePreview();
 }
 window.renderCompetitionTab = renderCompetitionTab;
+
+// Every currently-active racer: approved, non-admin students. Explore-
+// status browsers aren't plotted -- they see fidelWorldJoinCta instead --
+// until a teacher approves them (today, via booking their first lesson).
+//
+// Reads profiles app-wide, not team-scoped -- same pattern community.js
+// already relies on for its class-wide feed. If other students don't show
+// up here, the Supabase RLS SELECT policy on profiles needs the same
+// class-wide-read loosening community.js's header comment describes for
+// team_practice_posts.
+async function fetchFidelWorldRoster() {
+    const { data, error } = await _supabase
+        .from('profiles')
+        .select('id, nickname, avatar, avatar_photo_url, current_level')
+        .eq('access_status', 'approved')
+        .eq('is_admin', false);
+    if (error) { console.error("Failed to load Fidel World roster:", error); return []; }
+    return data || [];
+}
+
+// "Your Journey" -- level, progress bar, which families are still left in
+// the current level, and where you stand among everyone else racing. Ties
+// (same level) don't get a separate rank from each other, per design.
+async function renderFidelWorldJourneyCard(levels, myLevel, totalLevels, roster) {
+    const levelEl = document.getElementById("fidelWorldJourneyLevel");
+    const fillEl = document.getElementById("fidelWorldJourneyFill");
+    const nextEl = document.getElementById("fidelWorldJourneyNext");
+    const rankEl = document.getElementById("fidelWorldJourneyRank");
+
+    const finished = myLevel > totalLevels;
+    const clampedLevel = Math.min(myLevel, totalLevels);
+
+    if (levelEl) levelEl.innerText = finished ? `Finished all ${totalLevels} levels! 🏆` : `Level ${myLevel} of ${totalLevels}`;
+    if (fillEl) fillEl.style.width = `${finished ? 100 : Math.min(100, Math.max(0, Math.round(((myLevel - 1) / totalLevels) * 100)))}%`;
+
+    if (nextEl) {
+        if (finished) {
+            nextEl.innerText = "You've reached the last letter 🎉";
+        } else {
+            const currentLevelObj = levels.find(l => l.level_number === clampedLevel);
+            let pendingFamilies = [];
+            if (currentLevelObj && (currentLevelObj.letter_families || []).length) {
+                const { data: progressRows } = await _supabase
+                    .from('student_family_progress')
+                    .select('base_letter, streak_passed, writing_passed')
+                    .eq('student_id', currentUser.id)
+                    .eq('level_number', currentLevelObj.level_number);
+                pendingFamilies = currentLevelObj.letter_families.filter(fam => {
+                    const row = (progressRows || []).find(r => r.base_letter === fam);
+                    return !(row?.streak_passed && row?.writing_passed);
+                });
+            }
+            nextEl.innerText = pendingFamilies.length
+                ? `Next: complete ${pendingFamilies.join(' · ')}`
+                : `Review Level ${clampedLevel} →`;
+        }
+    }
+
+    if (rankEl) {
+        const ahead = roster.filter(s => s.id !== currentUser.id && (s.current_level || 1) > myLevel).length;
+        rankEl.innerText = `You're #${ahead + 1} of ${roster.length} learner${roster.length === 1 ? '' : 's'}`;
+    }
+}
+
+// The shared map itself -- one row per level (11 down to 1, finish line on
+// top), every active racer's avatar grouped into their own level's row.
+// Finishers (current_level beyond the last level) stay visible at the
+// finish line instead of a separate Hall of Fame.
+function renderFidelWorldMap(roster, totalLevels, isApproved) {
+    const mount = document.getElementById("fidelWorldMapMount");
+    if (!mount) return;
+
+    const buckets = {};
+    for (let n = 1; n <= totalLevels; n++) buckets[n] = [];
+    const finishers = [];
+    roster.forEach(s => {
+        const lvl = s.current_level || 1;
+        if (lvl > totalLevels) finishers.push(s);
+        else if (buckets[lvl]) buckets[lvl].push(s);
+    });
+
+    const chipHtml = (student, isFinisher) => {
+        const isYou = isApproved && student.id === currentUser.id;
+        return `<span class="fidel-world-chip ${isYou ? 'fidel-world-chip-you' : ''} ${isFinisher ? 'fidel-world-chip-finisher' : ''}">`
+            + renderAvatar(student, 20)
+            + `<span>${isYou ? 'You' : escapeHtml(student.nickname || 'Student')}</span></span>`;
+    };
+
+    let html = `
+        <div class="fidel-world-row fidel-world-row-finish ${finishers.length ? 'fidel-world-row-has-people' : ''}">
+            <div class="fidel-world-row-badge">🏁</div>
+            <div class="fidel-world-chips">
+                ${finishers.length ? finishers.map(s => chipHtml(s, true)).join('') : '<span class="fidel-world-row-empty">Finish line</span>'}
+            </div>
+        </div>`;
+
+    for (let n = totalLevels; n >= 1; n--) {
+        const people = buckets[n] || [];
+        const isYouRow = isApproved && people.some(s => s.id === currentUser.id);
+        html += `
+        <div class="fidel-world-row ${people.length ? 'fidel-world-row-has-people' : ''} ${isYouRow ? 'fidel-world-row-you' : ''}">
+            <div class="fidel-world-row-badge">${n}</div>
+            <div class="fidel-world-chips">
+                ${people.length ? people.map(s => chipHtml(s, false)).join('') : '<span class="fidel-world-row-empty">—</span>'}
+            </div>
+        </div>`;
+    }
+
+    mount.innerHTML = html;
+}
 
 // Strong team identity at the top of Competition -- the "energy" piece
 // from the old Fidel Competition page, modernized with a team-colored
