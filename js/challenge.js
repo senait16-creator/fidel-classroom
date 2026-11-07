@@ -986,7 +986,7 @@ async function openChallengeFamilyDetail(fidelObj, levelNumber, returnTo = 'pick
     document.getElementById("challengeFamilyScreen").style.display = "none";
     document.getElementById("studentShellScreen").style.display = "none";
     document.getElementById("challengeFamilyDetailScreen").style.display = "block";
-    document.getElementById("challengeFamilyDetailTitle").innerText = `Family: "${fidelObj.base}"`;
+    document.getElementById("challengeFamilyDetailTitle").innerText = fidelObj.base;
     renderChallengeFamilyDetailGiantRow(fidelObj);
 
     const body = document.getElementById("challengeFamilyPracticeBody");
